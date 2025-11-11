@@ -111,7 +111,7 @@ const ChallengesIndexes = [
   {
     key: { timestamp: 1 },
     name: 'timestamp_idx',
-    expireAfterSeconds: 300, // Auto-delete after 5 minutes (MongoDB TTL)
+    expireAfterSeconds: 120, // Auto-delete after 2 minutes (MongoDB TTL, matches expiresIn)
   },
 ];
 
@@ -140,7 +140,7 @@ export const COLLECTIONS = {
 export async function initializeCollections(db: Db): Promise<void> {
   console.log('🗄️  Initializing MongoDB collections...');
 
-  for (const [key, definition] of Object.entries(COLLECTIONS)) {
+  for (const definition of Object.values(COLLECTIONS)) {
     const { name, schema, indexes } = definition;
 
     try {
@@ -169,8 +169,8 @@ export async function initializeCollections(db: Db): Promise<void> {
         console.log(`  📇 Ensuring index: ${name}.${index.name}`);
         await collection.createIndex(index.key, {
           name: index.name,
-          unique: index.unique,
-          expireAfterSeconds: index.expireAfterSeconds,
+          ...(index.unique !== undefined ? { unique: index.unique } : {}),
+          ...(index.expireAfterSeconds !== undefined ? { expireAfterSeconds: index.expireAfterSeconds } : {}),
         });
       }
 
@@ -191,7 +191,7 @@ export async function initializeCollections(db: Db): Promise<void> {
 export async function dropAllCollections(db: Db): Promise<void> {
   console.warn('⚠️  Dropping all collections...');
 
-  for (const [key, definition] of Object.entries(COLLECTIONS)) {
+  for (const definition of Object.values(COLLECTIONS)) {
     try {
       await db.collection(definition.name).drop();
       console.log(`  🗑️  Dropped: ${definition.name}`);
@@ -212,7 +212,7 @@ export async function dropAllCollections(db: Db): Promise<void> {
 export async function getCollectionStats(db: Db): Promise<Record<string, any>> {
   const stats: Record<string, any> = {};
 
-  for (const [key, definition] of Object.entries(COLLECTIONS)) {
+  for (const definition of Object.values(COLLECTIONS)) {
     try {
       const collection = db.collection(definition.name);
       const count = await collection.countDocuments();

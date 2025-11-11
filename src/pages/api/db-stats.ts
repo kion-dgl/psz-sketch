@@ -13,6 +13,21 @@ import { connectToDatabase } from '../../mod/mongodb';
 import { getCollectionStats } from '../../mod/collections';
 
 export const GET: APIRoute = async () => {
+  // Block access in production for security
+  if (import.meta.env.PROD) {
+    return new Response(
+      JSON.stringify({
+        error: 'Access to /api/db-stats is forbidden in production.',
+      }),
+      {
+        status: 403,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+  }
+
   try {
     const db = await connectToDatabase();
     const stats = await getCollectionStats(db);

@@ -44,8 +44,9 @@ export async function connectToDatabase(): Promise<Db> {
       collectionsInitialized = true;
     } catch (error) {
       console.error('❌ Failed to initialize collections:', error);
-      // Don't throw - allow app to start even if initialization fails
-      // Collections will be created on demand
+      // Throw error to prevent app startup with broken database connection
+      // This ensures we fail fast rather than having operations fail later
+      throw error;
     }
   }
 
