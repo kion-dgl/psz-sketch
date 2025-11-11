@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig, envField } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import react from '@astrojs/react';
 import vercel from '@astrojs/vercel';
@@ -8,10 +8,19 @@ import vercel from '@astrojs/vercel';
 export default defineConfig({
 	output: 'server',
 	adapter: vercel(),
+	env: {
+		schema: {
+			MONGODB_URI: envField.string({ context: 'server', access: 'secret' }),
+			MONGODB_DB_NAME: envField.string({ context: 'server', access: 'public', default: 'psz-sketch' }),
+			REDIS_URL: envField.string({ context: 'server', access: 'secret' }),
+			JWT_SECRET: envField.string({ context: 'server', access: 'secret' }),
+		}
+	},
 	session: {
-		// Redis for session storage (configured via environment variables)
-		// Falls back to in-memory storage in development if REDIS_URL not set
 		driver: 'redis',
+		options: {
+			url: process.env.REDIS_URL,
+		},
 	},
 	integrations: [
 		react(),
