@@ -1,5 +1,6 @@
 ---
 import AuthenticatedLayout from '../layouts/AuthenticatedLayout.astro';
+import CharacterPreview from '../components/character/CharacterPreview';
 
 export const prerender = false;
 ---
@@ -9,76 +10,86 @@ export const prerender = false;
     <h1>Create New Character</h1>
     <p class="subtitle">Choose your character's appearance and class</p>
 
-    <div class="form-container">
-      <form id="character-form">
-        <input type="hidden" id="slot" name="slot" />
+    <div class="content-container">
+      <!-- Form Column -->
+      <div class="form-column">
+        <form id="character-form">
+          <input type="hidden" id="slot" name="slot" />
 
-        <div class="form-group">
-          <label for="character-name">Character Name</label>
-          <input
-            type="text"
-            id="character-name"
-            name="character-name"
-            maxlength="50"
-            required
-            placeholder="Enter character name"
-          />
+          <div class="form-group">
+            <label for="character-name">Character Name</label>
+            <input
+              type="text"
+              id="character-name"
+              name="character-name"
+              maxlength="50"
+              required
+              placeholder="Enter character name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="class-id">Class</label>
+            <select id="class-id" name="class-id" required>
+              <option value="">Select a class</option>
+              <optgroup label="Hunter">
+                <option value="HUmar">HUmar</option>
+                <option value="HUmarl">HUmarl</option>
+                <option value="HUcast">HUcast</option>
+                <option value="HUcaseal">HUcaseal</option>
+                <option value="HUnewm">HUnewm</option>
+                <option value="HUnewearl">HUnewearl</option>
+              </optgroup>
+              <optgroup label="Ranger">
+                <option value="RAmar">RAmar</option>
+                <option value="RAmarl">RAmarl</option>
+                <option value="RAcast">RAcast</option>
+                <option value="RAcaseal">RAcaseal</option>
+              </optgroup>
+              <optgroup label="Force">
+                <option value="FOmar">FOmar</option>
+                <option value="FOmarl">FOmarl</option>
+                <option value="FOnewm">FOnewm</option>
+                <option value="FOnewearl">FOnewearl</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="texture-id">Appearance</label>
+            <select id="texture-id" name="texture-id" required>
+              <option value="">Select appearance</option>
+              <option value="tex_01">Texture 1</option>
+              <option value="tex_02">Texture 2</option>
+              <option value="tex_03">Texture 3</option>
+              <option value="tex_04">Texture 4</option>
+              <option value="tex_05">Texture 5</option>
+              <option value="tex_06">Texture 6</option>
+              <option value="tex_07">Texture 7</option>
+              <option value="tex_08">Texture 8</option>
+              <option value="tex_09">Texture 9</option>
+              <option value="tex_10">Texture 10</option>
+            </select>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="button button-primary" id="submit-button">
+              <span id="submit-text">Create Character</span>
+              <span id="submit-spinner" class="spinner hidden"></span>
+            </button>
+            <a href="/character-select" class="button button-secondary">Cancel</a>
+          </div>
+
+          <div id="error-message" class="error-message hidden"></div>
+        </form>
+      </div>
+
+      <!-- Preview Column -->
+      <div class="preview-column">
+        <div id="character-preview-container">
+          <CharacterPreview client:load classId={null} textureId="tex_01" />
         </div>
-
-        <div class="form-group">
-          <label for="class-id">Class</label>
-          <select id="class-id" name="class-id" required>
-            <option value="">Select a class</option>
-            <optgroup label="Hunter">
-              <option value="HUmar">HUmar</option>
-              <option value="HUmarl">HUmarl</option>
-              <option value="HUcast">HUcast</option>
-              <option value="HUcaseal">HUcaseal</option>
-              <option value="HUnewm">HUnewm</option>
-              <option value="HUnewearl">HUnewearl</option>
-            </optgroup>
-            <optgroup label="Ranger">
-              <option value="RAmar">RAmar</option>
-              <option value="RAmarl">RAmarl</option>
-              <option value="RAcast">RAcast</option>
-              <option value="RAcaseal">RAcaseal</option>
-            </optgroup>
-            <optgroup label="Force">
-              <option value="FOmar">FOmar</option>
-              <option value="FOmarl">FOmarl</option>
-              <option value="FOnewm">FOnewm</option>
-              <option value="FOnewearl">FOnewearl</option>
-            </optgroup>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="texture-id">Appearance</label>
-          <select id="texture-id" name="texture-id" required>
-            <option value="">Select appearance</option>
-            <option value="tex_01">Texture 1</option>
-            <option value="tex_02">Texture 2</option>
-            <option value="tex_03">Texture 3</option>
-            <option value="tex_04">Texture 4</option>
-            <option value="tex_05">Texture 5</option>
-            <option value="tex_06">Texture 6</option>
-            <option value="tex_07">Texture 7</option>
-            <option value="tex_08">Texture 8</option>
-            <option value="tex_09">Texture 9</option>
-            <option value="tex_10">Texture 10</option>
-          </select>
-        </div>
-
-        <div class="form-actions">
-          <button type="submit" class="button button-primary" id="submit-button">
-            <span id="submit-text">Create Character</span>
-            <span id="submit-spinner" class="spinner hidden"></span>
-          </button>
-          <a href="/character-select" class="button button-secondary">Cancel</a>
-        </div>
-
-        <div id="error-message" class="error-message hidden"></div>
-      </form>
+      </div>
     </div>
   </div>
 </AuthenticatedLayout>
@@ -89,10 +100,9 @@ export const prerender = false;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    padding: 2rem;
     background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
     color: white;
-    padding: 2rem;
   }
 
   h1 {
@@ -108,13 +118,31 @@ export const prerender = false;
     text-align: center;
   }
 
-  .form-container {
+  .content-container {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 2rem;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .form-column {
     background: rgba(255, 255, 255, 0.1);
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 12px;
     padding: 2rem;
-    max-width: 500px;
+  }
+
+  .preview-column {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #character-preview-container {
     width: 100%;
+    height: 600px;
   }
 
   .form-group {
@@ -238,6 +266,16 @@ export const prerender = false;
     100% { transform: rotate(360deg); }
   }
 
+  @media (max-width: 1024px) {
+    .content-container {
+      grid-template-columns: 1fr;
+    }
+
+    #character-preview-container {
+      height: 400px;
+    }
+  }
+
   @media (max-width: 768px) {
     .form-actions {
       flex-direction: column;
@@ -246,6 +284,8 @@ export const prerender = false;
 </style>
 
 <script>
+  import CharacterPreview from '../components/character/CharacterPreview';
+
   // Get slot from URL query parameter
   const urlParams = new URLSearchParams(window.location.search);
   const slot = urlParams.get('slot');
@@ -260,6 +300,32 @@ export const prerender = false;
     if (slotInput) {
       slotInput.value = slot;
     }
+  }
+
+  // Handle class selection change to update preview
+  const classSelect = document.getElementById('class-id') as HTMLSelectElement;
+  const textureSelect = document.getElementById('texture-id') as HTMLSelectElement;
+
+  if (classSelect && textureSelect) {
+    const updatePreview = () => {
+      const container = document.getElementById('character-preview-container');
+      if (!container) return;
+
+      const classId = classSelect.value || null;
+      const textureId = textureSelect.value || 'tex_01';
+
+      // Re-render the preview component with new props
+      import('../components/character/CharacterPreview').then((module) => {
+        const Preview = module.default;
+        // This will trigger a re-render in React
+        if ((window as any).updateCharacterPreview) {
+          (window as any).updateCharacterPreview(classId, textureId);
+        }
+      });
+    };
+
+    classSelect.addEventListener('change', updatePreview);
+    textureSelect.addEventListener('change', updatePreview);
   }
 
   // Form submission handler
