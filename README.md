@@ -28,16 +28,44 @@ Built with Astro Starlight for comprehensive game documentation:
 
 ## 🚀 Quick Start
 
+### With Docker (Recommended)
+
 ```bash
+# Clone the repository
+git clone https://github.com/kion-dgl/psz-sketch.git
+cd psz-sketch
+
 # Install dependencies
 npm install
+
+# Start MongoDB and Redis (uses .env.local - already configured!)
+docker-compose up -d
 
 # Start development server
 npm run dev
 
-# Visit the title screen
-# Open http://localhost:4321/title
+# Visit the application
+# Open http://localhost:4321
 ```
+
+**No environment setup needed!** The `.env.local` file is pre-configured and committed to the repo.
+
+Astro automatically loads `.env.local` via Vite. To verify it's working:
+```bash
+npm run check-env
+```
+
+### Without Docker
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server (uses in-memory storage)
+npm run dev
+```
+
+See [docs/LOCAL_DEVELOPMENT.md](docs/LOCAL_DEVELOPMENT.md) for detailed local development setup including database management UIs.
 
 ## 🏗️ Project Structure
 
@@ -143,6 +171,30 @@ Visit the documentation site for:
 - [Title Screen](src/content/docs/screens/title-screen.md)
 - [System Architecture](docs/architecture/system-architecture.mmd)
 - [Data Flow](docs/architecture/data-flow.mmd)
+- [MongoDB Collections](docs/COLLECTIONS.md) - Schema definitions and management
+- [Local Development](docs/LOCAL_DEVELOPMENT.md) - Docker setup and workflow
+
+## 🚢 Deployment
+
+The application is configured for deployment to Vercel with:
+
+- **Redis (Upstash)**: Serverless Redis for session management (shared across staging + production)
+- **MongoDB Atlas**: Persistent storage for users and challenges (separate staging + production databases)
+- **CI/CD**: Automatic deployments on push to `main`, preview deployments for PRs
+
+### Environment Strategy
+
+- **Shared**: `JWT_SECRET` and `REDIS_URL` work across staging + production
+- **Separate**: `MONGODB_URI` uses different databases for safe testing
+
+Quick reference: [ENVIRONMENTS.md](ENVIRONMENTS.md)
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for complete deployment guide including:
+- MongoDB Atlas setup (staging + production)
+- Upstash Redis configuration
+- Environment variable configuration
+- CI/CD workflows
+- Troubleshooting
 
 ## 🧪 Testing
 
@@ -153,9 +205,13 @@ Test results: [docs/test-results.md](docs/test-results.md)
 - **Framework**: [Astro](https://astro.build) v5.15.2
 - **Documentation**: [Starlight](https://starlight.astro.build)
 - **Authentication**: Web Crypto API (ECDSA P-256)
-- **Storage**: IndexedDB (client), In-memory (server demo)
-- **Sessions**: JWT with jsonwebtoken
-- **Adapter**: @astrojs/node (SSR)
+- **Database**: MongoDB with automatic schema initialization
+  - Production: MongoDB Atlas
+  - Development: Docker (local)
+- **Sessions**: Redis via Upstash (production), Docker (development)
+- **JWT**: jsonwebtoken for API authentication
+- **Adapter**: @astrojs/vercel (SSR)
+- **Schema Management**: Code-first with automatic collection initialization
 
 ## 🛡️ Security
 

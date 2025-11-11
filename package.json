@@ -7,20 +7,25 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check-env": "node scripts/check-env.js"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.0",
     "@astrojs/react": "^4.4.1",
     "@astrojs/starlight": "^0.36.1",
+    "@astrojs/vercel": "^9.0.0",
     "@react-three/drei": "^10.7.6",
     "@react-three/fiber": "^9.4.0",
     "@types/jsonwebtoken": "^9.0.10",
+    "@vercel/kv": "^1.0.1",
     "astro": "^5.6.1",
     "jsonwebtoken": "^9.0.2",
     "mermaid": "^11.12.1",
+    "mongodb": "^7.0.0",
     "sharp": "^0.34.2",
-    "three": "^0.181.1"
+    "three": "^0.181.1",
+    "unstorage": "^1.17.2"
   },
   "devDependencies": {
     "@types/node": "^24.10.0"

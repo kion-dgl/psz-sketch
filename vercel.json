@@ -1,0 +1,17 @@
+{
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "astro",
+  "outputDirectory": "dist",
+  "regions": ["iad1"],
+  "env": {
+    "$comment": "Environment Variables Strategy:",
+    "$shared": "JWT_SECRET and REDIS_URL are shared across staging + production",
+    "$separate": "MONGODB_URI is different for staging vs production",
+    "MONGODB_URI": "@mongodb_uri",
+    "MONGODB_DB_NAME": "@mongodb_db_name",
+    "JWT_SECRET": "@jwt_secret",
+    "REDIS_URL": "@redis_url"
+  }
+}

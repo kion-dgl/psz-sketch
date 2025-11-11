@@ -22,7 +22,7 @@ export const POST: APIRoute = async ({ request, session }) => {
     }
 
     // Get the user
-    const user = users.get(fingerprint);
+    const user = await users.get(fingerprint);
     if (!user) {
       return new Response(
         JSON.stringify({ error: 'User not found' }),
@@ -31,7 +31,7 @@ export const POST: APIRoute = async ({ request, session }) => {
     }
 
     // Get the challenge
-    const challengeData = challenges.get(fingerprint);
+    const challengeData = await challenges.get(fingerprint);
     if (!challengeData) {
       return new Response(
         JSON.stringify({ error: 'No challenge found' }),
@@ -42,7 +42,7 @@ export const POST: APIRoute = async ({ request, session }) => {
     // Check if challenge has expired
     const now = Date.now();
     if (now - challengeData.timestamp > challengeData.expiresIn) {
-      challenges.delete(fingerprint);
+      await challenges.delete(fingerprint);
       return new Response(
         JSON.stringify({ error: 'Challenge expired' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
@@ -51,7 +51,7 @@ export const POST: APIRoute = async ({ request, session }) => {
 
     // Delete the challenge immediately (prevent replay attacks)
     const challenge = challengeData.challenge;
-    challenges.delete(fingerprint);
+    await challenges.delete(fingerprint);
 
     // Verify the signature
     const isValid = await verifySignature(

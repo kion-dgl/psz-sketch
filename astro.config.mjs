@@ -2,17 +2,16 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import react from '@astrojs/react';
-import node from '@astrojs/node';
+import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
 	output: 'server',
-	adapter: node({
-		mode: 'standalone'
-	}),
+	adapter: vercel(),
 	session: {
-		// Node adapter includes a default session driver
-		// Using in-memory storage for development (use Redis in production)
+		// Redis for session storage (configured via environment variables)
+		// Falls back to in-memory storage in development if REDIS_URL not set
+		driver: 'redis',
 	},
 	integrations: [
 		react(),

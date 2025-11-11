@@ -32,7 +32,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Check if user exists
-    let user = users.get(fingerprint);
+    let user = await users.get(fingerprint);
 
     // If user doesn't exist, create them (implicit registration)
     if (!user) {
@@ -41,7 +41,7 @@ export const POST: APIRoute = async ({ request }) => {
         publicKey: fullPublicKey,
         createdAt: new Date().toISOString(),
       };
-      users.set(fingerprint, user);
+      await users.set(fingerprint, user);
     }
 
     // Generate a random challenge (32 bytes, base64-encoded)
@@ -49,7 +49,8 @@ export const POST: APIRoute = async ({ request }) => {
     const challenge = challengeBytes.toString('base64');
 
     // Store the challenge with a timestamp (for expiry check)
-    challenges.set(fingerprint, {
+    await challenges.set(fingerprint, {
+      fingerprint,
       challenge,
       timestamp: Date.now(),
       expiresIn: 120000, // 2 minutes
