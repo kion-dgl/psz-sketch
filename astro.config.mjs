@@ -19,10 +19,11 @@ export default defineConfig({
 			JWT_SECRET: envField.string({ context: 'server', access: 'secret' }),
 		}
 	},
-	// Session configuration - using cookie driver (default)
-	// Cookies are encrypted and stored client-side, no Redis needed
 	session: {
-		driver: 'cookie',
+		driver: "redis",
+		options: {
+			url: process.env.REDIS_URL
+		},
 	},
 	integrations: [
 		react(),
