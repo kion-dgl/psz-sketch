@@ -63,6 +63,102 @@ const UsersIndexes = [
 ];
 
 /**
+ * Character Collection
+ * Stores player characters with their stats and slot assignment
+ */
+export interface CharacterDocument {
+  _id?: string;               // MongoDB ObjectId (auto-generated)
+  userId: string;             // Foreign key - user's fingerprint (40 chars)
+  name: string;               // Character name
+  slot: number;               // 0-3 (slot position)
+  classId: string;            // Class name (HUmar, RAcast, etc.)
+  textureId: string;          // Texture/skin ID
+  level: number;              // Character level (default: 1)
+  experience: number;         // Experience points (default: 0)
+  createdAt: string;          // ISO 8601 timestamp
+  deletedAt: string | null;   // ISO 8601 timestamp or null (soft delete)
+}
+
+const CharactersCollectionSchema = {
+  validator: {
+    $jsonSchema: {
+      bsonType: 'object',
+      required: ['userId', 'name', 'slot', 'classId', 'textureId', 'level', 'experience', 'createdAt'],
+      properties: {
+        userId: {
+          bsonType: 'string',
+          description: 'User fingerprint (40 characters)',
+          minLength: 40,
+          maxLength: 40,
+        },
+        name: {
+          bsonType: 'string',
+          description: 'Character name',
+          minLength: 1,
+          maxLength: 50,
+        },
+        slot: {
+          bsonType: 'int',
+          description: 'Character slot (0-3)',
+          minimum: 0,
+          maximum: 3,
+        },
+        classId: {
+          bsonType: 'string',
+          description: 'Character class',
+          enum: [
+            'HUcaseal', 'HUcast', 'HUmar', 'HUmarl', 'HUnewm', 'HUnewearl',
+            'RAcast', 'RAcaseal', 'RAmar', 'RAmarl',
+            'FOmar', 'FOmarl', 'FOnewm', 'FOnewearl'
+          ],
+        },
+        textureId: {
+          bsonType: 'string',
+          description: 'Character texture/skin ID',
+        },
+        level: {
+          bsonType: 'int',
+          description: 'Character level',
+          minimum: 1,
+        },
+        experience: {
+          bsonType: 'int',
+          description: 'Experience points',
+          minimum: 0,
+        },
+        createdAt: {
+          bsonType: 'string',
+          description: 'ISO 8601 timestamp of character creation',
+        },
+        deletedAt: {
+          bsonType: ['string', 'null'],
+          description: 'ISO 8601 timestamp of deletion (null if active)',
+        },
+      },
+    },
+  },
+  validationAction: 'error',
+  validationLevel: 'moderate',
+};
+
+const CharactersIndexes = [
+  {
+    key: { userId: 1, slot: 1 },
+    unique: true,
+    name: 'user_slot_unique',
+    partialFilterExpression: { deletedAt: null }, // Only enforce uniqueness for active characters
+  },
+  {
+    key: { userId: 1, deletedAt: 1 },
+    name: 'user_active_idx',
+  },
+  {
+    key: { createdAt: 1 },
+    name: 'created_at_idx',
+  },
+];
+
+/**
  * Collection Definitions
  * Add new collections here as the application grows
  *
@@ -74,6 +170,11 @@ export const COLLECTIONS = {
     name: 'users',
     schema: UsersCollectionSchema,
     indexes: UsersIndexes,
+  },
+  characters: {
+    name: 'characters',
+    schema: CharactersCollectionSchema,
+    indexes: CharactersIndexes,
   },
 } as const;
 
