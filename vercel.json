@@ -4,11 +4,5 @@
   "installCommand": "npm install",
   "framework": "astro",
   "outputDirectory": "dist",
-  "regions": ["iad1"],
-  "env": {
-    "MONGODB_URI": "@mongodb_uri",
-    "MONGODB_DB_NAME": "@mongodb_db_name",
-    "JWT_SECRET": "@jwt_secret",
-    "REDIS_URL": "@redis_url"
-  }
+  "regions": ["iad1"]
 }
