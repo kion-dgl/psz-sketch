@@ -1,18 +1,29 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig, envField } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import react from '@astrojs/react';
-import node from '@astrojs/node';
+import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
+	// Set to your production URL when deployed
+	// Update this to your custom domain or Vercel URL
+	site: process.env.SITE_URL || 'https://psz-sketch.vercel.app',
 	output: 'server',
-	adapter: node({
-		mode: 'standalone'
-	}),
+	adapter: vercel(),
+	env: {
+		schema: {
+			MONGODB_URI: envField.string({ context: 'server', access: 'secret' }),
+			MONGODB_DB_NAME: envField.string({ context: 'server', access: 'public', default: 'psz-sketch' }),
+			REDIS_URL: envField.string({ context: 'server', access: 'secret' }),
+			JWT_SECRET: envField.string({ context: 'server', access: 'secret' }),
+		}
+	},
 	session: {
-		// Node adapter includes a default session driver
-		// Using in-memory storage for development (use Redis in production)
+		driver: "redis",
+		options: {
+			url: process.env.REDIS_URL
+		},
 	},
 	integrations: [
 		react(),

@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # MongoDB for user and challenge storage
+  mongodb:
+    image: mongo:7
+    container_name: psz-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: psz_user
+      MONGO_INITDB_ROOT_PASSWORD: psz_password
+      MONGO_INITDB_DATABASE: psz-sketch
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - psz-network
+
+  # Redis for session storage
+  redis:
+    image: redis:7-alpine
+    container_name: psz-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - psz-network
+
+  # Optional: Redis Commander (Web UI for Redis)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: psz-redis-commander
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    depends_on:
+      - redis
+    networks:
+      - psz-network
+
+  # Optional: Mongo Express (Web UI for MongoDB)
+  mongo-express:
+    image: mongo-express:latest
+    container_name: psz-mongo-express
+    restart: unless-stopped
+    ports:
+      - "8082:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: psz_user
+      ME_CONFIG_MONGODB_ADMINPASSWORD: psz_password
+      ME_CONFIG_MONGODB_URL: mongodb://psz_user:psz_password@mongodb:27017/
+      ME_CONFIG_BASICAUTH: false
+    depends_on:
+      - mongodb
+    networks:
+      - psz-network
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  psz-network:
+    driver: bridge
