@@ -11,7 +11,7 @@
  * - Can evolve to proper migrations later when stable
  */
 
-import { Db } from 'mongodb';
+import type { Db } from 'mongodb';
 
 /**
  * User Collection

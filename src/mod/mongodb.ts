@@ -4,7 +4,7 @@
  * Automatically initializes collections on first connection
  */
 
-import { MongoClient, Db } from 'mongodb';
+import { MongoClient, type Db } from 'mongodb';
 import { initializeCollections } from './collections';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
