@@ -1,0 +1,246 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SpaceScene from '../components/title/SpaceScene';
+import logoImage from '../assets/img/logo.png';
+
+export const prerender = false;
+---
+
+<Layout title="Density Dwarf - Title Screen">
+  <div class="title-screen">
+    <div class="logo-container">
+      <img src={logoImage.src} alt="Density Dwarf Logo" class="logo" />
+    </div>
+
+    <div class="space-scene-container">
+      <SpaceScene client:load />
+    </div>
+
+    <div class="auth-status">
+      <div id="auth-loading" class="status-message">
+        <div class="spinner"></div>
+        <p>Authenticating...</p>
+      </div>
+      <div id="auth-success" class="status-message hidden">
+        <p>✓ Authentication successful!</p>
+        <p class="fingerprint">ID: <span id="user-fingerprint"></span></p>
+      </div>
+      <div id="auth-error" class="status-message hidden">
+        <p>✗ Authentication failed</p>
+        <p class="error-detail" id="error-message"></p>
+        <button id="retry-button">Retry</button>
+      </div>
+    </div>
+
+    <div class="start-section hidden" id="start-section">
+      <button id="start-button" class="start-button">Start Game</button>
+      <p class="hint">Press Enter to start</p>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .title-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    padding: 2rem;
+  }
+
+  .logo-container {
+    margin-bottom: 2rem;
+  }
+
+  .logo {
+    max-width: 300px;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+  }
+
+  .space-scene-container {
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 2rem;
+  }
+
+  .auth-status {
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .status-message {
+    text-align: center;
+  }
+
+  .status-message.hidden {
+    display: none;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .fingerprint {
+    font-family: monospace;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    opacity: 0.8;
+    word-break: break-all;
+  }
+
+  .error-detail {
+    color: #ffcccc;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  #retry-button {
+    margin-top: 1rem;
+    padding: 0.75rem 2rem;
+    background: white;
+    color: #1e3c72;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  #retry-button:hover {
+    transform: scale(1.05);
+  }
+
+  .start-section {
+    margin-top: 2rem;
+    text-align: center;
+  }
+
+  .start-section.hidden {
+    display: none;
+  }
+
+  .start-button {
+    display: inline-block;
+    padding: 1rem 3rem;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+  }
+
+  .start-button:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+  }
+
+  .start-button:active {
+    transform: translateY(0);
+  }
+
+  .hint {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    opacity: 0.7;
+  }
+</style>
+
+<script>
+  import { authenticate, setJwt } from '../lib/authService';
+  import { getPublicKeyDetails, getOrCreateKey } from '../lib/keyManager';
+
+  async function performAuth() {
+    const loadingEl = document.getElementById('auth-loading');
+    const successEl = document.getElementById('auth-success');
+    const errorEl = document.getElementById('auth-error');
+    const startEl = document.getElementById('start-section');
+    const errorMessageEl = document.getElementById('error-message');
+    const fingerprintEl = document.getElementById('user-fingerprint');
+
+    try {
+      // Show loading state
+      loadingEl?.classList.remove('hidden');
+      successEl?.classList.add('hidden');
+      errorEl?.classList.add('hidden');
+      startEl?.classList.add('hidden');
+
+      // Perform authentication
+      const jwt = await authenticate();
+
+      // Store the JWT
+      setJwt(jwt);
+
+      // Get fingerprint for display
+      const keyPair = await getOrCreateKey();
+      const { fingerprint } = await getPublicKeyDetails(keyPair.publicKey);
+
+      // Show success state
+      loadingEl?.classList.add('hidden');
+      successEl?.classList.remove('hidden');
+      startEl?.classList.remove('hidden');
+
+      if (fingerprintEl) {
+        fingerprintEl.textContent = fingerprint;
+      }
+
+    } catch (error) {
+      console.error('Authentication error:', error);
+
+      // Show error state
+      loadingEl?.classList.add('hidden');
+      errorEl?.classList.remove('hidden');
+
+      if (errorMessageEl) {
+        errorMessageEl.textContent = error instanceof Error ? error.message : 'Unknown error';
+      }
+    }
+  }
+
+  function startGame() {
+    window.location.href = '/sync';
+  }
+
+  // Start authentication on page load
+  performAuth();
+
+  // Retry button handler
+  document.getElementById('retry-button')?.addEventListener('click', () => {
+    performAuth();
+  });
+
+  // Start button handler
+  document.getElementById('start-button')?.addEventListener('click', startGame);
+
+  // Enter key handler
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      const startSection = document.getElementById('start-section');
+      if (startSection && !startSection.classList.contains('hidden')) {
+        startGame();
+      }
+    }
+  });
+</script>

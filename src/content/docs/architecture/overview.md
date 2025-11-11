@@ -77,7 +77,7 @@ All character state changes are recorded as immutable events in `character_event
 Assets are pre-cached using localForage (IndexedDB) during the sync phase, enabling fast loading and offline gameplay.
 
 ### 3. Cryptographic Authentication
-ED25519 key pairs provide passwordless authentication. Private keys never leave the client.
+ECDSA P-256 key pairs provide passwordless authentication. Private keys are stored as non-extractable CryptoKeyPair objects in IndexedDB and can never leave the browser.
 
 ### 4. API-First Design
 Clear separation between frontend and backend with well-defined JSON API contracts.

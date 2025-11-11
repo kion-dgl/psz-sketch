@@ -12,24 +12,37 @@ sequenceDiagram
     Note over Browser,CDN: Authentication Flow
 
     Browser->>TitleScreen: Navigate to /
-    TitleScreen->>Browser: Check localStorage for private key
+    TitleScreen->>Browser: Check IndexedDB for CryptoKeyPair
 
-    alt No private key
-        Browser->>Browser: Generate ED25519 key pair
-        Browser->>Browser: Store private key in localStorage
+    alt No key pair
+        Browser->>Browser: Generate ECDSA P-256 key pair (non-extractable)
+        Browser->>Browser: Store CryptoKeyPair in IndexedDB
     end
 
-    TitleScreen->>API: POST /api/auth/challenge<br/>{publicKey}
-    API->>API: Generate nonce
-    API->>TitleScreen: {nonce}
+    TitleScreen->>Browser: Export public key to SPKI format
+    Browser->>Browser: Hash SPKI with SHA-256, take first 30 bytes
+    Browser->>Browser: Base64-encode to get 40-char fingerprint
+    
+    TitleScreen->>API: POST /api/challenge<br/>{fingerprint, fullPublicKey}
+    API->>API: Verify fingerprint matches fullPublicKey
+    
+    alt User not found (Implicit Registration)
+        API->>DB: INSERT user (fingerprint, public_key)
+    end
+    
+    API->>API: Generate random challenge (nonce)
+    API->>API: Store challenge temporarily
+    API->>TitleScreen: {challenge}
 
-    TitleScreen->>Browser: Sign nonce with private key
+    TitleScreen->>Browser: Sign challenge with non-extractable private key
     Browser->>TitleScreen: {signature}
 
-    TitleScreen->>API: POST /api/auth/verify<br/>{publicKey, signature}
-    API->>API: Verify signature with publicKey
-    API->>DB: CREATE session
-    API->>TitleScreen: {sessionToken}
+    TitleScreen->>API: POST /api/authenticate<br/>{fingerprint, signature}
+    API->>DB: SELECT user by fingerprint
+    API->>API: Retrieve & delete stored challenge
+    API->>API: Verify signature using stored public_key
+    API->>API: Generate JWT (sub: fingerprint, exp: 1h)
+    API->>TitleScreen: {jwt}
 
     Note over Browser,CDN: Asset Synchronization
 

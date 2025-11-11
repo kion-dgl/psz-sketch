@@ -2,10 +2,10 @@ graph TB
     subgraph "Client (Browser)"
         UI[Astro Pages]
         Assets[LocalForage Cache]
-        PrivKey[ED25519 Private Key<br/>localStorage]
+        KeyStore[ECDSA P-256 CryptoKeyPair<br/>IndexedDB (non-extractable)]
 
         UI --> Assets
-        UI --> PrivKey
+        UI --> KeyStore
     end
 
     subgraph "API Server (Node.js)"
@@ -53,7 +53,7 @@ graph TB
 
     %% Client to Server
     UI -->|HTTP/JSON| Routes
-    Auth -->|Verify signature| PrivKey
+    Auth -->|Verify signature| KeyStore
 
     %% Client to Assets
     UI -->|Fetch assets| Models
@@ -72,7 +72,7 @@ graph TB
 
     style UI fill:#e3f2fd
     style Assets fill:#fff9c4
-    style PrivKey fill:#ffccbc
+    style KeyStore fill:#ffccbc
     style Routes fill:#c8e6c9
     style Sessions fill:#f8bbd0
     style CharEvents fill:#f8bbd0

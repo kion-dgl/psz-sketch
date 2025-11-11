@@ -2,13 +2,22 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import react from '@astrojs/react';
+import node from '@astrojs/node';
 
 // https://astro.build/config
 export default defineConfig({
+	output: 'server',
+	adapter: node({
+		mode: 'standalone'
+	}),
+	session: {
+		// Node adapter includes a default session driver
+		// Using in-memory storage for development (use Redis in production)
+	},
 	integrations: [
 		react(),
 		starlight({
-			title: 'Density Dwarf',
+			title: 'psz-sketch',
 			head: [
 				{
 					tag: 'script',
