@@ -1,0 +1,31 @@
+---
+import AuthenticatedLayout from '../../layouts/AuthenticatedLayout.astro';
+import CharacterSelectedView from '../../components/character/CharacterSelectedView';
+
+export const prerender = false;
+
+// Get character_id from URL parameter
+const { character_id } = Astro.params;
+
+// Validate character_id
+if (!character_id) {
+  return Astro.redirect('/character-select');
+}
+---
+
+<AuthenticatedLayout title="Character Selected - Density Dwarf">
+  <div class="character-selected-screen">
+    <CharacterSelectedView client:load characterId={character_id} />
+  </div>
+</AuthenticatedLayout>
+
+<style>
+  .character-selected-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    padding: 2rem;
+  }
+</style>

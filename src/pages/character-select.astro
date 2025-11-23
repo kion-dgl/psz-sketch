@@ -1,0 +1,42 @@
+---
+import AuthenticatedLayout from '../layouts/AuthenticatedLayout.astro';
+import CharacterSelectGrid from '../components/character/CharacterSelectGrid';
+
+export const prerender = false;
+---
+
+<AuthenticatedLayout title="Character Select - Density Dwarf">
+  <div class="character-select-screen">
+    <h1>Character Select</h1>
+    <p class="subtitle">Choose your character or create a new one</p>
+
+    <CharacterSelectGrid client:load />
+  </div>
+</AuthenticatedLayout>
+
+<style>
+  .character-select-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    padding: 2rem;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+
+  .subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+</style>
+</AuthenticatedLayout>
