@@ -1,6 +1,8 @@
 /**
- * DELETE /api/characters/:id
+ * GET /api/characters/:id
+ * Returns a single character by ID (must belong to authenticated user)
  *
+ * DELETE /api/characters/:id
  * Soft-deletes a character by setting deletedAt timestamp
  */
 
@@ -9,6 +11,73 @@ import { ObjectId } from 'mongodb';
 import { getCollection } from '../../../mod/mongodb';
 import { getUserSession } from '../../../mod/sessionManager';
 import type { CharacterDocument } from '../../../mod/collections';
+
+export const GET: APIRoute = async ({ params, session }) => {
+  try {
+    // Check if user is authenticated
+    const userSession = await getUserSession(session);
+    if (!userSession) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const characterId = params.id;
+    if (!characterId) {
+      return new Response(
+        JSON.stringify({ error: 'Character ID is required' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate ObjectId format
+    if (!ObjectId.isValid(characterId)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid character ID' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Get characters collection
+    const charactersCollection = await getCollection<CharacterDocument>('characters');
+
+    // Verify the character belongs to this user and is not deleted
+    const character = await charactersCollection.findOne({
+      _id: new ObjectId(characterId),
+      userId: userSession.fingerprint,
+      deletedAt: null,
+    });
+
+    if (!character) {
+      return new Response(
+        JSON.stringify({ error: 'Character not found' }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Return character data
+    return new Response(
+      JSON.stringify({
+        character_id: character._id?.toString(),
+        character_name: character.name,
+        level: character.level,
+        experience: character.experience,
+        slot: character.slot,
+        class_id: character.classId,
+        texture_id: character.textureId,
+        created_at: character.createdAt,
+      }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Error in GET /api/characters/:id:', error);
+    return new Response(
+      JSON.stringify({ error: 'Internal server error' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+};
 
 export const DELETE: APIRoute = async ({ params, session }) => {
   try {

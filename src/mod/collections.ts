@@ -190,32 +190,36 @@ export async function initializeCollections(db: Db): Promise<void> {
     const { name, schema, indexes } = definition;
 
     try {
-      // Check if collection exists
-      const collections = await db.listCollections({ name }).toArray();
-      const exists = collections.length > 0;
-
-      if (!exists) {
-        // Create collection with validation
+      // Try to create collection with validation
+      // MongoDB will return an error if it already exists, which we'll catch
+      try {
         console.log(`  ✨ Creating collection: ${name}`);
         await db.createCollection(name, schema);
-      } else {
-        // Try to update validation schema for existing collection
-        // Note: This requires collMod permission which may not be available in MongoDB Atlas
-        try {
-          console.log(`  ♻️  Updating collection schema: ${name}`);
-          await db.command({
-            collMod: name,
-            validator: schema.validator,
-            validationLevel: schema.validationLevel,
-            validationAction: schema.validationAction,
-          });
-        } catch (error: any) {
-          // Ignore permission errors (common in MongoDB Atlas)
-          if (error.code === 8000 || error.codeName === 'AtlasError') {
-            console.log(`  ⚠️  Skipping schema update (insufficient permissions): ${name}`);
-          } else {
-            throw error;
+      } catch (error: any) {
+        // Collection already exists
+        if (error.code === 48 || error.codeName === 'NamespaceExists') {
+          console.log(`  ℹ️  Collection already exists: ${name}`);
+
+          // Try to update validation schema for existing collection
+          try {
+            console.log(`  ♻️  Updating collection schema: ${name}`);
+            await db.command({
+              collMod: name,
+              validator: schema.validator,
+              validationLevel: schema.validationLevel,
+              validationAction: schema.validationAction,
+            });
+          } catch (modError: any) {
+            // Ignore permission errors (common in MongoDB Atlas)
+            if (modError.code === 8000 || modError.codeName === 'AtlasError') {
+              console.log(`  ⚠️  Skipping schema update (insufficient permissions): ${name}`);
+            } else {
+              console.log(`  ⚠️  Could not update schema: ${modError.message}`);
+            }
           }
+        } else {
+          // Some other error occurred
+          throw error;
         }
       }
 

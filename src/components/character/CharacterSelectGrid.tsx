@@ -207,7 +207,11 @@ export default function CharacterSelectGrid() {
                       textAlign: 'center',
                       cursor: 'pointer',
                       width: '100%',
-                      color: 'white'
+                      color: 'white',
+                      flex: 1,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center'
                     }}
                   >
                     <div style={{

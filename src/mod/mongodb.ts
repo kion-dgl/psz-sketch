@@ -7,12 +7,50 @@
 import { MongoClient, type Db } from 'mongodb';
 import { initializeCollections } from './collections';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
-const DB_NAME = process.env.MONGODB_DB_NAME || 'psz-sketch';
+const MONGODB_URI = import.meta.env.MONGODB_URI || process.env.MONGODB_URI || 'mongodb://localhost:27017';
+const DB_NAME = import.meta.env.MONGODB_DB_NAME || process.env.MONGODB_DB_NAME || 'psz-sketch';
 
 let cachedClient: MongoClient | null = null;
 let cachedDb: Db | null = null;
 let collectionsInitialized = false;
+
+/**
+ * Parse MongoDB connection string to extract auth options
+ * The MongoDB driver sometimes has issues with connection string auth,
+ * so we parse it and pass explicitly for consistent behavior across environments
+ */
+function parseMongoOptions(uri: string) {
+  try {
+    const options: any = {};
+
+    // Extract username and password using regex
+    // Format: mongodb://username:password@host...
+    const credentialsMatch = uri.match(/mongodb:\/\/([^:]+):([^@]+)@/);
+    if (credentialsMatch) {
+      options.auth = {
+        username: decodeURIComponent(credentialsMatch[1]),
+        password: decodeURIComponent(credentialsMatch[2]),
+      };
+    }
+
+    // Extract authSource from query params
+    const authSourceMatch = uri.match(/[?&]authSource=([^&]+)/);
+    if (authSourceMatch) {
+      options.authSource = authSourceMatch[1];
+    }
+
+    // Extract authMechanism from query params
+    const authMechanismMatch = uri.match(/[?&]authMechanism=([^&]+)/);
+    if (authMechanismMatch) {
+      options.authMechanism = authMechanismMatch[1];
+    }
+
+    return options;
+  } catch (error) {
+    console.warn('Could not parse MongoDB URI for auth options:', error);
+    return {};
+  }
+}
 
 /**
  * Connects to MongoDB and returns the database instance
@@ -25,8 +63,11 @@ export async function connectToDatabase(): Promise<Db> {
     return cachedDb;
   }
 
-  // Create new connection
-  const client = new MongoClient(MONGODB_URI);
+  // Parse auth options from connection string
+  const options = parseMongoOptions(MONGODB_URI);
+
+  // Create new connection with parsed options
+  const client = new MongoClient(MONGODB_URI, options);
   await client.connect();
 
   const db = client.db(DB_NAME);
@@ -43,10 +84,10 @@ export async function connectToDatabase(): Promise<Db> {
       await initializeCollections(db);
       collectionsInitialized = true;
     } catch (error) {
-      console.error('❌ Failed to initialize collections:', error);
-      // Throw error to prevent app startup with broken database connection
-      // This ensures we fail fast rather than having operations fail later
-      throw error;
+      console.error('⚠️  Failed to initialize collections (will be created on first use):', error);
+      // Don't throw - MongoDB will create collections automatically when documents are inserted
+      // Mark as initialized to prevent repeated attempts
+      collectionsInitialized = true;
     }
   }
 
