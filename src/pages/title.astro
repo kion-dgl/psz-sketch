@@ -139,8 +139,6 @@ export const prerender = false;
   }
 
   .status-block.compact {
-    display: flex;
-    align-items: center;
     gap: 0.5rem;
   }
 
@@ -239,7 +237,7 @@ export const prerender = false;
   const errorMessageEl = document.getElementById('error-message');
   const startButton = document.getElementById('start-button');
 
-  function showState(state: 'loading' | 'ready' | 'error') {
+  function showState(state) {
     loadingEl?.classList.toggle('hidden', state !== 'loading');
     readyEl?.classList.toggle('hidden', state !== 'ready');
     errorEl?.classList.toggle('hidden', state !== 'error');

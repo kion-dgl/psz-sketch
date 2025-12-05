@@ -95,6 +95,7 @@ function createMoonTexture(): THREE.Texture {
 
 function Moon() {
   const moonRef = useRef<THREE.Mesh>(null);
+  const moonTexture = useMemo(() => createMoonTexture(), []);
 
   useFrame(({ clock }) => {
     if (moonRef.current) {
@@ -115,7 +116,7 @@ function Moon() {
         color="#c9c9c9"
         roughness={0.85}
         metalness={0}
-        map={createMoonTexture()}
+        map={moonTexture}
       />
     </mesh>
   );
@@ -123,6 +124,7 @@ function Moon() {
 
 function Earth() {
   const earthRef = useRef<THREE.Mesh>(null);
+  const earthTexture = useMemo(() => createEarthTexture(), []);
 
   useFrame(({ clock }) => {
     if (earthRef.current) {
@@ -137,7 +139,7 @@ function Earth() {
         color="#ffffff"
         roughness={0.6}
         metalness={0.05}
-        map={createEarthTexture()}
+        map={earthTexture}
       />
     </mesh>
   );
@@ -192,7 +194,7 @@ export default function SpaceScene() {
     <div className="space-scene-full">
       <Canvas camera={{ position: [0, 1.6, 6], fov: 55 }}>
         <color attach="background" args={[0x030712]} />
-        <fog attach="fog" args={[new THREE.Fog('#040817', 12, 28)]} />
+        <fog attach="fog" args={['#040817', 12, 28]} />
         <ambientLight intensity={0.3} />
         <Sun />
         <Stars />
