@@ -99,54 +99,71 @@ export default function CharacterSelectGrid() {
 
   return (
     <>
-      <div className="flex flex-col gap-4 max-w-5xl w-full">
+      <div className="flex flex-col gap-4 max-w-6xl w-full">
         {[0, 1, 2, 3].map((slotNum) => {
           const character = characters[slotNum];
 
           return (
             <div
               key={slotNum}
-              className="relative bg-gradient-to-b from-blue-50 to-blue-100 border-4 border-blue-900 rounded-lg shadow-lg hover:border-blue-700 transition-all overflow-hidden min-h-[200px]"
+              className="relative bg-white border-4 border-gray-800 rounded-2xl shadow-lg hover:border-gray-600 transition-all overflow-hidden"
+              style={{ minHeight: '160px' }}
             >
               {character ? (
                 <>
                   <button
                     onClick={() => handleDeleteClick(character)}
-                    className="absolute top-4 right-4 z-10 bg-red-500 text-white border-2 border-red-800 rounded px-4 py-2 font-bold text-sm hover:bg-red-600 transition-all"
+                    className="absolute top-3 right-3 z-10 bg-red-500 text-white border-2 border-red-800 rounded px-3 py-1 font-bold text-xs hover:bg-red-600 transition-all"
                   >
                     Delete
                   </button>
 
                   <div
                     onClick={() => window.location.href = `/character-selected/${character.character_id}`}
-                    className="flex items-stretch h-full cursor-pointer p-6"
+                    className="flex items-center h-full cursor-pointer p-6 gap-6"
                   >
-                    {/* LEFT: Character Info */}
-                    <div className="flex-1 flex flex-col justify-center text-black font-mono pr-6">
-                      <div className="text-4xl font-bold tracking-wide mb-2">{character.character_name}</div>
-                      <div className="text-3xl font-bold tracking-wider mb-6">{character.class_id}</div>
+                    {/* LEFT: Name + Class */}
+                    <div className="flex flex-col justify-center text-black font-mono min-w-[200px]">
+                      <div className="text-4xl font-bold tracking-tight leading-tight">{character.character_name}</div>
+                      <div className="text-4xl font-bold tracking-tight leading-tight">{character.class_id}</div>
+                    </div>
+
+                    {/* CENTER-LEFT: Dotted divider */}
+                    <div className="flex flex-col justify-around h-24 text-gray-400 text-3xl font-bold">
+                      <div>:</div>
+                      <div>:</div>
+                      <div>:</div>
+                    </div>
+
+                    {/* CENTER: Level + Metadata */}
+                    <div className="flex-1 flex flex-col justify-center text-black font-mono">
+                      <div className="text-5xl font-bold mb-4 tracking-wider">LV{character.level}</div>
                       
-                      <div className="text-2xl font-bold mb-2">LV{character.level}</div>
-                      
-                      <div className="text-base space-y-1 opacity-90">
-                        <div>Last save</div>
-                        <div className="font-bold">{formatDate(character.last_played || character.created_at)}</div>
-                        <div className="font-bold">{formatTime(character.last_played || character.created_at)}</div>
-                        
-                        <div className="mt-3">Play time</div>
-                        <div className="font-bold">{formatPlayTime(character.play_time)}</div>
+                      <div className="text-sm space-y-0.5">
+                        <div className="flex gap-8">
+                          <div>
+                            <div className="text-xs opacity-70">Last save</div>
+                            <div className="font-bold">{formatDate(character.last_played || character.created_at)}</div>
+                            <div className="font-bold">{formatTime(character.last_played || character.created_at)}</div>
+                          </div>
+                          
+                          <div>
+                            <div className="text-xs opacity-70">Play time</div>
+                            <div className="font-bold">{formatPlayTime(character.play_time)}</div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    {/* MIDDLE: Dotted divider */}
-                    <div className="flex flex-col justify-around py-4 px-2 text-blue-400 text-2xl font-bold">
+                    {/* CENTER-RIGHT: Dotted divider */}
+                    <div className="flex flex-col justify-around h-24 text-gray-400 text-3xl font-bold">
                       <div>:</div>
                       <div>:</div>
                       <div>:</div>
                     </div>
 
                     {/* RIGHT: 3D Character Preview */}
-                    <div className="w-80 h-full flex items-center justify-center bg-black border-4 border-blue-900 rounded">
+                    <div className="w-72 h-40 flex items-center justify-center bg-gradient-to-b from-blue-100 to-blue-200 rounded-lg overflow-hidden">
                       <CharacterPreview 
                         classId={character.class_id} 
                         textureId={character.texture_id}
@@ -157,11 +174,21 @@ export default function CharacterSelectGrid() {
               ) : (
                 <a
                   href={`/character-create?slot=${slotNum}`}
-                  className="flex items-center justify-center h-full min-h-[200px] group"
+                  className="flex items-center h-full min-h-[160px] group px-6"
                 >
-                  <span className="text-5xl font-mono font-bold text-yellow-600 tracking-widest drop-shadow-lg group-hover:text-yellow-500 group-hover:scale-105 transition-all">
-                    New Game
-                  </span>
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-5xl font-mono font-bold text-black tracking-wider">New Game</span>
+                    <div className="flex gap-6 text-gray-400 text-3xl font-bold">
+                      <div className="flex flex-col justify-around h-24">
+                        <div>:</div>
+                        <div>:</div>
+                        <div>:</div>
+                      </div>
+                      <div className="w-72 h-40 bg-gradient-to-b from-yellow-400 to-yellow-500 rounded-lg flex items-center justify-center">
+                        <span className="text-3xl font-bold text-white">+</span>
+                      </div>
+                    </div>
+                  </div>
                 </a>
               )}
             </div>
@@ -179,7 +206,7 @@ export default function CharacterSelectGrid() {
             }
           }}
         >
-          <div className="bg-gradient-to-b from-blue-50 to-blue-100 border-4 border-blue-900 rounded-xl p-8 max-w-md text-center text-black">
+          <div className="bg-white border-4 border-gray-800 rounded-xl p-8 max-w-md text-center text-black">
             <h2 className="text-3xl font-mono font-bold mb-4">Delete Character?</h2>
             <p className="font-mono mb-2">
               Are you sure you want to delete <strong>{characterToDelete?.character_name}</strong>?
@@ -196,7 +223,7 @@ export default function CharacterSelectGrid() {
               </button>
               <button
                 onClick={handleCancelDelete}
-                className="px-8 py-3 bg-white text-black border-2 border-blue-900 rounded font-mono font-bold hover:bg-gray-100 transition-all"
+                className="px-8 py-3 bg-gray-200 text-black border-2 border-gray-800 rounded font-mono font-bold hover:bg-gray-300 transition-all"
               >
                 Cancel
               </button>
