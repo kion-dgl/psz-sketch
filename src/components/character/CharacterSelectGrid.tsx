@@ -1,55 +1,42 @@
 import { useState, useEffect } from 'react';
-
-interface Character {
-  character_id: string;
-  character_name: string;
-  level: number;
-  slot: number;
-  class_id: string;
-  texture_id: string;
-}
+import { getAllCharacters, deleteCharacter, type CharacterData } from '../../lib/characterStorage';
+import CharacterPreview from './CharacterPreview';
 
 export default function CharacterSelectGrid() {
-  const [characters, setCharacters] = useState<Character[]>([]);
+  const [characters, setCharacters] = useState<(CharacterData | null)[]>([]);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [characterToDelete, setCharacterToDelete] = useState<Character | null>(null);
+  const [characterToDelete, setCharacterToDelete] = useState<CharacterData | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadCharacters();
   }, []);
 
   const loadCharacters = async () => {
-    // Load characters from localStorage (client-side only)
     try {
-      const stored = localStorage.getItem('characters');
-      if (stored) {
-        const chars = JSON.parse(stored);
-        setCharacters(chars.filter((c: Character) => c !== null));
-      }
+      setLoading(true);
+      const chars = await getAllCharacters();
+      setCharacters(chars);
     } catch (err) {
       console.error('Error loading characters:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDeleteClick = (character: Character) => {
+  const handleDeleteClick = (character: CharacterData) => {
     setCharacterToDelete(character);
     setDeleteModalOpen(true);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!characterToDelete) return;
 
     try {
-      const stored = localStorage.getItem('characters') || '[]';
-      const chars = JSON.parse(stored);
-      const updated = chars.map((c: Character | null, idx: number) => 
-        idx === characterToDelete.slot ? null : c
-      );
-      localStorage.setItem('characters', JSON.stringify(updated));
-      
+      await deleteCharacter(characterToDelete.slot);
       setDeleteModalOpen(false);
       setCharacterToDelete(null);
-      loadCharacters();
+      await loadCharacters();
     } catch (err) {
       console.error('Error deleting character:', err);
       alert('Failed to delete character. Please try again.');
@@ -61,7 +48,40 @@ export default function CharacterSelectGrid() {
     setCharacterToDelete(null);
   };
 
-  if (characters.length === 0) {
+  const formatDate = (isoString?: string) => {
+    if (!isoString) return '--/--/----';
+    const date = new Date(isoString);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${month}/${day}/${year}\n${hours}:${minutes}`;
+  };
+
+  const formatPlayTime = (seconds?: number) => {
+    if (!seconds) return '0:00';
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return `${hours}:${String(minutes).padStart(2, '0')}`;
+  };
+
+  if (loading) {
+    return (
+      <div style={{
+        textAlign: 'center',
+        margin: '2rem 0',
+        color: 'white',
+        fontSize: '1.2rem'
+      }}>
+        Loading characters...
+      </div>
+    );
+  }
+
+  const hasAnyCharacter = characters.some(c => c !== null);
+
+  if (!hasAnyCharacter) {
     return (
       <div style={{
         textAlign: 'center',
@@ -73,17 +93,7 @@ export default function CharacterSelectGrid() {
         </p>
         <a
           href="/character-create?slot=0"
-          style={{
-            padding: '0.75rem 2rem',
-            background: '#4CAF50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            fontSize: '1rem',
-            cursor: 'pointer',
-            textDecoration: 'none',
-            display: 'inline-block'
-          }}
+          className="psz-button"
         >
           Create Your First Character
         </a>
@@ -93,148 +103,66 @@ export default function CharacterSelectGrid() {
 
   return (
     <>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '2rem',
-        maxWidth: '900px',
-        width: '100%'
-      }}>
+      <div className="character-select-container">
         {[0, 1, 2, 3].map((slotNum) => {
-          const character = characters.find(c => c.slot === slotNum);
+          const character = characters[slotNum];
 
           return (
             <div
               key={slotNum}
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: '2px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '12px',
-                padding: '2rem',
-                minHeight: '200px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.3s',
-                position: 'relative'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-              }}
+              className="character-slot"
             >
-              <div style={{
-                position: 'absolute',
-                top: '1rem',
-                left: '1rem',
-                fontSize: '0.9rem',
-                opacity: 0.6,
-                color: 'white'
-              }}>
-                Slot {slotNum + 1}
-              </div>
-
               {character ? (
                 <>
                   <button
                     onClick={() => handleDeleteClick(character)}
-                    style={{
-                      position: 'absolute',
-                      top: '1rem',
-                      right: '1rem',
-                      background: '#f44336',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      padding: '0.5rem 1rem',
-                      cursor: 'pointer',
-                      fontSize: '0.9rem',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#d32f2f';
-                      e.currentTarget.style.transform = 'scale(1.05)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#f44336';
-                      e.currentTarget.style.transform = 'scale(1)';
-                    }}
+                    className="delete-button"
                   >
                     Delete
                   </button>
 
                   <div
                     onClick={() => window.location.href = `/character-selected/${character.character_id}`}
-                    style={{
-                      textAlign: 'center',
-                      cursor: 'pointer',
-                      width: '100%',
-                      color: 'white',
-                      flex: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center'
-                    }}
+                    className="character-info"
                   >
-                    <div style={{
-                      fontSize: '1.5rem',
-                      fontWeight: 'bold',
-                      marginBottom: '0.5rem'
-                    }}>
-                      {character.character_name}
+                    <div className="character-preview-container">
+                      <CharacterPreview 
+                        classId={character.class_id} 
+                        textureId={character.texture_id}
+                      />
                     </div>
-                    <div style={{
-                      fontSize: '0.9rem',
-                      opacity: 0.8,
-                      marginBottom: '1rem'
-                    }}>
-                      Level {character.level} {character.class_id}
+                    
+                    <div className="character-details">
+                      <div className="character-name-row">
+                        <span className="character-name">{character.character_name}</span>
+                        <span className="character-class">{character.class_id}</span>
+                      </div>
+                      
+                      <div className="character-level">
+                        LV {character.level}
+                      </div>
+                      
+                      <div className="character-meta">
+                        <div className="meta-item">
+                          <span className="meta-label">Last save</span>
+                          <span className="meta-value">{formatDate(character.last_played || character.created_at)}</span>
+                        </div>
+                        
+                        <div className="meta-item">
+                          <span className="meta-label">Play time</span>
+                          <span className="meta-value">{formatPlayTime(character.play_time)}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </>
               ) : (
-                <div style={{
-                  textAlign: 'center',
-                  color: 'white'
-                }}>
-                  <p style={{
-                    fontSize: '1.1rem',
-                    opacity: 0.6,
-                    marginBottom: '1rem'
-                  }}>
-                    Empty Slot
-                  </p>
-                  <a
-                    href={`/character-create?slot=${slotNum}`}
-                    style={{
-                      display: 'inline-block',
-                      padding: '1rem 2rem',
-                      background: '#4CAF50',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '1.1rem',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s',
-                      textDecoration: 'none'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#45a049';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#4CAF50';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                    }}
-                  >
-                    Create Character
-                  </a>
-                </div>
+                <a
+                  href={`/character-create?slot=${slotNum}`}
+                  className="new-game-slot"
+                >
+                  <span className="new-game-text">New Game</span>
+                </a>
               )}
             </div>
           );
@@ -243,92 +171,24 @@ export default function CharacterSelectGrid() {
 
       {/* Delete Confirmation Modal */}
       {deleteModalOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            background: 'rgba(0, 0, 0, 0.7)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              handleCancelDelete();
-            }
-          }}
-        >
-          <div style={{
-            background: '#1e3c72',
-            border: '2px solid rgba(255, 255, 255, 0.3)',
-            borderRadius: '12px',
-            padding: '2rem',
-            maxWidth: '400px',
-            textAlign: 'center',
-            color: 'white'
-          }}>
-            <h2 style={{ marginBottom: '1rem', fontSize: '1.8rem' }}>
-              Delete Character?
-            </h2>
-            <p style={{ marginBottom: '1rem' }}>
+        <div className="modal-overlay" onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            handleCancelDelete();
+          }
+        }}>
+          <div className="modal-content">
+            <h2 className="modal-title">Delete Character?</h2>
+            <p className="modal-message">
               Are you sure you want to delete <strong>{characterToDelete?.character_name}</strong>?
             </p>
-            <p style={{
-              color: '#ffcccc',
-              fontSize: '0.9rem',
-              marginBottom: '2rem'
-            }}>
+            <p className="modal-warning">
               This action cannot be undone.
             </p>
-            <div style={{
-              display: 'flex',
-              gap: '1rem',
-              justifyContent: 'center'
-            }}>
-              <button
-                onClick={handleConfirmDelete}
-                style={{
-                  padding: '0.75rem 2rem',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  background: '#f44336',
-                  color: 'white'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#d32f2f';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#f44336';
-                }}
-              >
+            <div className="modal-buttons">
+              <button onClick={handleConfirmDelete} className="modal-button delete-confirm">
                 Delete
               </button>
-              <button
-                onClick={handleCancelDelete}
-                style={{
-                  padding: '0.75rem 2rem',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  color: 'white'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-                }}
-              >
+              <button onClick={handleCancelDelete} className="modal-button cancel">
                 Cancel
               </button>
             </div>
@@ -337,14 +197,262 @@ export default function CharacterSelectGrid() {
       )}
 
       <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+        .character-select-container {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          max-width: 900px;
+          width: 100%;
+        }
+
+        .character-slot {
+          background: linear-gradient(to bottom, #e8f4ff 0%, #d0e8ff 100%);
+          border: 3px solid #4a6f9e;
+          border-radius: 8px;
+          padding: 1.5rem;
+          min-height: 180px;
+          display: flex;
+          position: relative;
+          transition: all 0.2s;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .character-slot:hover {
+          border-color: #5d8bc7;
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .delete-button {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          background: #f44336;
+          color: white;
+          border: 2px solid #c62828;
+          border-radius: 4px;
+          padding: 0.5rem 1rem;
+          cursor: pointer;
+          font-size: 0.9rem;
+          font-weight: bold;
+          transition: all 0.2s;
+          z-index: 2;
+        }
+
+        .delete-button:hover {
+          background: #d32f2f;
+          transform: scale(1.05);
+        }
+
+        .character-info {
+          display: flex;
+          gap: 1.5rem;
+          cursor: pointer;
+          width: 100%;
+          align-items: center;
+        }
+
+        .character-preview-container {
+          width: 200px;
+          height: 150px;
+          flex-shrink: 0;
+          background: #1a1a1a;
+          border-radius: 6px;
+          border: 2px solid #4a6f9e;
+          overflow: hidden;
+        }
+
+        .character-details {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          color: #1a1a1a;
+        }
+
+        .character-name-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          gap: 1rem;
+        }
+
+        .character-name {
+          font-size: 1.8rem;
+          font-weight: bold;
+          font-family: monospace;
+          letter-spacing: 0.05em;
+        }
+
+        .character-class {
+          font-size: 1.2rem;
+          font-family: monospace;
+          opacity: 0.8;
+        }
+
+        .character-level {
+          font-size: 1.5rem;
+          font-family: monospace;
+          font-weight: bold;
+          letter-spacing: 0.1em;
+        }
+
+        .character-meta {
+          display: flex;
+          gap: 2rem;
+          margin-top: 0.5rem;
+        }
+
+        .meta-item {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+        }
+
+        .meta-label {
+          font-size: 0.85rem;
+          font-family: monospace;
+          opacity: 0.7;
+        }
+
+        .meta-value {
+          font-size: 0.95rem;
+          font-family: monospace;
+          font-weight: bold;
+          white-space: pre-line;
+        }
+
+        .new-game-slot {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          text-decoration: none;
+          transition: all 0.2s;
+        }
+
+        .new-game-text {
+          font-size: 1.8rem;
+          font-family: monospace;
+          font-weight: bold;
+          color: #f4a900;
+          letter-spacing: 0.1em;
+          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .new-game-slot:hover .new-game-text {
+          transform: scale(1.05);
+          color: #ffb700;
+        }
+
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.7);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        }
+
+        .modal-content {
+          background: linear-gradient(to bottom, #e8f4ff 0%, #d0e8ff 100%);
+          border: 3px solid #4a6f9e;
+          border-radius: 12px;
+          padding: 2rem;
+          max-width: 400px;
+          text-align: center;
+          color: #1a1a1a;
+        }
+
+        .modal-title {
+          margin-bottom: 1rem;
+          font-size: 1.8rem;
+          font-family: monospace;
+          font-weight: bold;
+        }
+
+        .modal-message {
+          margin-bottom: 1rem;
+          font-family: monospace;
+        }
+
+        .modal-warning {
+          color: #d32f2f;
+          font-size: 0.9rem;
+          margin-bottom: 2rem;
+          font-family: monospace;
+        }
+
+        .modal-buttons {
+          display: flex;
+          gap: 1rem;
+          justify-content: center;
+        }
+
+        .modal-button {
+          padding: 0.75rem 2rem;
+          border: 2px solid #4a6f9e;
+          border-radius: 8px;
+          font-size: 1rem;
+          font-family: monospace;
+          font-weight: bold;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .modal-button.delete-confirm {
+          background: #f44336;
+          color: white;
+          border-color: #c62828;
+        }
+
+        .modal-button.delete-confirm:hover {
+          background: #d32f2f;
+        }
+
+        .modal-button.cancel {
+          background: white;
+          color: #1a1a1a;
+        }
+
+        .modal-button.cancel:hover {
+          background: #f0f0f0;
+        }
+
+        .psz-button {
+          padding: 0.75rem 2rem;
+          background: linear-gradient(to bottom, #f4a900 0%, #e09600 100%);
+          color: white;
+          border: 2px solid #b87900;
+          border-radius: 4px;
+          font-size: 1rem;
+          font-family: monospace;
+          font-weight: bold;
+          cursor: pointer;
+          text-decoration: none;
+          display: inline-block;
+          transition: all 0.2s;
+        }
+
+        .psz-button:hover {
+          background: linear-gradient(to bottom, #ffb700 0%, #f4a900 100%);
         }
 
         @media (max-width: 768px) {
-          .character-slots {
-            grid-template-columns: 1fr;
+          .character-info {
+            flex-direction: column;
+          }
+
+          .character-preview-container {
+            width: 100%;
+          }
+
+          .character-meta {
+            flex-direction: column;
+            gap: 0.5rem;
           }
         }
       `}</style>

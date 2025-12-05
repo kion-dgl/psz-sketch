@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import CharacterPreview from './CharacterPreview';
+import { saveCharacter, isSlotOccupied } from '../../lib/characterStorage';
 
 interface CharacterCreationFormProps {
   slot: number;
@@ -32,13 +33,12 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
     setSubmitting(true);
 
     try {
-      // Save character to localStorage
-      const stored = localStorage.getItem('characters') || '[]';
-      const chars = JSON.parse(stored);
-      
-      // Ensure array has 4 slots
-      while (chars.length < 4) {
-        chars.push(null);
+      // Check if slot is already occupied
+      const occupied = await isSlotOccupied(slot);
+      if (occupied) {
+        setError('Slot already occupied');
+        setSubmitting(false);
+        return;
       }
 
       // Create new character
@@ -51,17 +51,11 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
         texture_id: textureId,
         experience: 0,
         created_at: new Date().toISOString(),
+        play_time: 0,
       };
 
-      // Check if slot is already occupied
-      if (chars[slot] !== null) {
-        setError('Slot already occupied');
-        setSubmitting(false);
-        return;
-      }
-
-      chars[slot] = newCharacter;
-      localStorage.setItem('characters', JSON.stringify(chars));
+      // Save to IndexedDB
+      await saveCharacter(newCharacter);
 
       window.location.href = `/character-selected/${newCharacter.character_id}`;
     } catch (err) {
