@@ -6,55 +6,11 @@ export const prerender = false;
 ---
 
 <Layout title="Character Select - Density Dwarf">
-  <div class="character-select-screen">
-    <div class="select-file-header">
-      <h1>Select File</h1>
+  <div class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600 text-white px-8 py-12">
+    <div class="bg-gradient-to-b from-blue-900 to-blue-800 border-4 border-gray-700 rounded-t-xl px-12 py-6 shadow-lg -mb-2 z-10">
+      <h1 class="text-5xl font-mono font-bold tracking-widest drop-shadow-lg">Select File</h1>
     </div>
 
     <CharacterSelectGrid client:load />
   </div>
 </Layout>
-
-<style>
-  .character-select-screen {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(to bottom, #7da9d9 0%, #5d8bc7 50%, #4a6f9e 100%);
-    color: white;
-    padding: 2rem;
-  }
-
-  .select-file-header {
-    background: linear-gradient(to bottom, #4a6f9e 0%, #3d5a7e 100%);
-    border: 3px solid #2a3f5f;
-    border-radius: 12px 12px 0 0;
-    padding: 1.5rem 3rem;
-    margin-bottom: -0.5rem;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    position: relative;
-    z-index: 1;
-  }
-
-  h1 {
-    font-size: 2.5rem;
-    margin: 0;
-    text-align: center;
-    font-family: monospace;
-    font-weight: bold;
-    letter-spacing: 0.1em;
-    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
-  }
-
-  @media (max-width: 768px) {
-    h1 {
-      font-size: 2rem;
-    }
-
-    .select-file-header {
-      padding: 1rem 2rem;
-    }
-  }
-</style>

@@ -3,6 +3,7 @@ import { defineConfig, envField } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import react from '@astrojs/react';
 import vercel from '@astrojs/vercel';
+import tailwind from '@astrojs/tailwind';
 
 // https://astro.build/config
 export default defineConfig({
@@ -26,6 +27,7 @@ export default defineConfig({
 		},
 	},
 	integrations: [
+		tailwind({ applyBaseStyles: false }),
 		react(),
 		starlight({
 			title: 'psz-sketch',
