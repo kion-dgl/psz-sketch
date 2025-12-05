@@ -23,18 +23,19 @@ export default function CharacterSelectedView({ characterId }: CharacterSelected
     loadCharacter();
   }, [characterId]);
 
-  const loadCharacter = async () => {
-    setLoading(true);
-    setError('');
-
+  const loadCharacter = () => {
     try {
-      const response = await fetch(`/api/characters/${characterId}`);
-      if (!response.ok) {
-        throw new Error(`Failed to load character: ${response.statusText}`);
+      const stored = localStorage.getItem('characters') || '[]';
+      const chars = JSON.parse(stored);
+      const found = chars.find((c: Character | null) => c?.character_id === characterId);
+      
+      if (!found) {
+        setError('Character not found');
+        setLoading(false);
+        return;
       }
 
-      const data = await response.json();
-      setCharacter(data);
+      setCharacter(found);
       setLoading(false);
     } catch (err) {
       console.error('Error loading character:', err);

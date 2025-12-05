@@ -32,26 +32,38 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
     setSubmitting(true);
 
     try {
-      const response = await fetch('/api/characters', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          slot,
-          name: characterName.trim(),
-          class_id: classId,
-          texture_id: textureId,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create character');
+      // Save character to localStorage
+      const stored = localStorage.getItem('characters') || '[]';
+      const chars = JSON.parse(stored);
+      
+      // Ensure array has 4 slots
+      while (chars.length < 4) {
+        chars.push(null);
       }
 
-      const character = await response.json();
-      window.location.href = `/character-selected/${character.character_id}`;
+      // Create new character
+      const newCharacter = {
+        character_id: `char_${Date.now()}`,
+        character_name: characterName.trim(),
+        level: 1,
+        slot,
+        class_id: classId,
+        texture_id: textureId,
+        experience: 0,
+        created_at: new Date().toISOString(),
+      };
+
+      // Check if slot is already occupied
+      if (chars[slot] !== null) {
+        setError('Slot already occupied');
+        setSubmitting(false);
+        return;
+      }
+
+      chars[slot] = newCharacter;
+      localStorage.setItem('characters', JSON.stringify(chars));
+
+      window.location.href = `/character-selected/${newCharacter.character_id}`;
     } catch (err) {
       console.error('Error creating character:', err);
       setError(err instanceof Error ? err.message : 'Failed to create character');
