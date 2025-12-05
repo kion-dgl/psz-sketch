@@ -34,12 +34,13 @@ export default function CharacterSelectGrid() {
 
     try {
       await deleteCharacter(characterToDelete.slot);
-      setDeleteModalOpen(false);
-      setCharacterToDelete(null);
       await loadCharacters();
     } catch (err) {
       console.error('Error deleting character:', err);
       alert('Failed to delete character. Please try again.');
+    } finally {
+      setDeleteModalOpen(false);
+      setCharacterToDelete(null);
     }
   };
 
