@@ -1,5 +1,5 @@
 ---
-import AuthenticatedLayout from '../layouts/AuthenticatedLayout.astro';
+import Layout from '../layouts/Layout.astro';
 import CharacterCreationForm from '../components/character/CharacterCreationForm';
 
 export const prerender = false;
@@ -15,14 +15,14 @@ if (isNaN(slot) || slot < 0 || slot > 3) {
 }
 ---
 
-<AuthenticatedLayout title="Create Character - Density Dwarf">
+<Layout title="Create Character - Density Dwarf">
   <div class="character-create-screen">
     <h1>Create New Character</h1>
     <p class="subtitle">Choose your character's appearance and class</p>
 
     <CharacterCreationForm client:load slot={slot} />
   </div>
-</AuthenticatedLayout>
+</Layout>
 
 <style>
   .character-create-screen {

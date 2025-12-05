@@ -1,10 +1,10 @@
 ---
-import AuthenticatedLayout from '../../layouts/AuthenticatedLayout.astro';
+import Layout from '../../layouts/Layout.astro';
 
 export const prerender = false;
 ---
 
-<AuthenticatedLayout title="City - Density Dwarf">
+<Layout title="City - Density Dwarf">
   <div class="city-stage">
     <h1>City Stage</h1>
     <p>Welcome to the city! This is where the game will start.</p>
@@ -14,7 +14,7 @@ export const prerender = false;
       <a href="/character-select" class="back-button">← Back to Character Select</a>
     </div>
   </div>
-</AuthenticatedLayout>
+</Layout>
 
 <style>
   .city-stage {

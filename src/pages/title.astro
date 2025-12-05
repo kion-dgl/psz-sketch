@@ -7,90 +7,203 @@ export const prerender = false;
 ---
 
 <Layout title="Density Dwarf - Title Screen">
-  <div class="title-screen">
-    <div class="logo-container">
-      <img src={logoImage.src} alt="Density Dwarf Logo" class="logo" />
-    </div>
-
-    <div class="space-scene-container">
+  <div class="title-shell">
+    <div class="space-layer">
       <SpaceScene client:load />
     </div>
 
-    <div class="auth-status">
-      <div id="auth-loading" class="status-message">
-        <div class="spinner"></div>
-        <p>Authenticating...</p>
-      </div>
-      <div id="auth-success" class="status-message hidden">
-        <p>✓ Authentication successful!</p>
-        <p class="fingerprint">ID: <span id="user-fingerprint"></span></p>
-      </div>
-      <div id="auth-error" class="status-message hidden">
-        <p>✗ Authentication failed</p>
-        <p class="error-detail" id="error-message"></p>
-        <button id="retry-button">Retry</button>
-      </div>
-    </div>
+    <div class="gradient-mask"></div>
 
-    <div class="start-section hidden" id="start-section">
-      <button id="start-button" class="start-button">Start Game</button>
-      <p class="hint">Press Enter to start</p>
+    <div class="ui-layer">
+      <div class="logo-row">
+        <img src={logoImage.src} alt="Density Dwarf Logo" class="logo" />
+      </div>
+
+      <div class="status-card">
+        <div id="identity-loading" class="status-block compact">
+          <div class="spinner-mini"></div>
+          <p class="status-micro">Preparing identity...</p>
+        </div>
+
+        <div id="identity-ready" class="status-block compact hidden">
+          <p class="status-micro">Fingerprint: <span id="user-fingerprint"></span></p>
+        </div>
+
+        <div id="identity-error" class="status-block compact hidden">
+          <p class="status-micro error" id="error-message"></p>
+        </div>
+      </div>
+
+      <div class="cta">
+        <button id="start-button" class="start-button" disabled>Start Game</button>
+        <p class="hint">Press Enter once ready</p>
+      </div>
     </div>
   </div>
 </Layout>
 
 <style>
-  .title-screen {
-    min-height: 100vh;
+  :global(html), :global(body) {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: #040712;
+  }
+
+  .title-shell {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    color: #e8f0ff;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  .space-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  :global(.space-scene-full) {
+    width: 100%;
+    height: 100%;
+  }
+
+  :global(.space-scene-full canvas) {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .gradient-mask {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 30%, rgba(33, 76, 255, 0.18), transparent 35%),
+      radial-gradient(circle at 70% 60%, rgba(122, 255, 209, 0.12), transparent 40%),
+      linear-gradient(180deg, rgba(4, 7, 18, 0) 0%, rgba(4, 7, 18, 0.65) 80%, #040712 100%);
+    pointer-events: none;
+  }
+
+  .ui-layer {
+    position: relative;
+    z-index: 2;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    color: white;
-    padding: 2rem;
-  }
-
-  .logo-container {
-    margin-bottom: 2rem;
-  }
-
-  .logo {
-    max-width: 300px;
-    width: 100%;
-    height: auto;
-    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
-  }
-
-  .space-scene-container {
-    width: 100%;
-    max-width: 600px;
-    margin-bottom: 2rem;
-  }
-
-  .auth-status {
-    min-height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .status-message {
+    gap: 1.75rem;
+    padding: 2.5rem;
     text-align: center;
   }
 
-  .status-message.hidden {
+  .logo-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .logo {
+    width: min(480px, 85vw);
+    height: auto;
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.35));
+  }
+
+  .tagline {
+    margin: 0;
+    color: #b8c9ff;
+    letter-spacing: 0.02em;
+    font-size: 0.95rem;
+  }
+
+  .status-card {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    width: auto;
+    background: rgba(13, 19, 35, 0.7);
+    border: 1px solid rgba(99, 139, 255, 0.25);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    max-width: 90vw;
+  }
+
+  .status-block {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  .status-block.compact {
+    gap: 0.5rem;
+  }
+
+  .status-block.hidden {
     display: none;
   }
 
-  .spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid white;
+  .status-micro {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #c5d2ff;
+    word-break: break-all;
+  }
+
+  .status-micro.error {
+    color: #ff9b9b;
+  }
+
+  .spinner-mini {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-top: 2px solid #8fb3ff;
     border-radius: 50%;
     animation: spin 1s linear infinite;
-    margin: 0 auto 1rem;
+    flex-shrink: 0;
+  }
+
+  .cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .start-button {
+    padding: 1rem 3.5rem;
+    border-radius: 999px;
+    border: 1px solid rgba(132, 196, 255, 0.45);
+    background: linear-gradient(135deg, #4cc3ff 0%, #6b8dff 45%, #8affc7 100%);
+    color: #051023;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    box-shadow: 0 18px 40px rgba(76, 195, 255, 0.35);
+  }
+
+  .start-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: translateY(0);
+  }
+
+  .start-button:not(:disabled):hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 24px 60px rgba(138, 255, 199, 0.35);
+  }
+
+  .hint {
+    margin: 0;
+    color: #9ab1ff;
+    font-size: 0.9rem;
   }
 
   @keyframes spin {
@@ -98,123 +211,58 @@ export const prerender = false;
     100% { transform: rotate(360deg); }
   }
 
-  .fingerprint {
-    font-family: monospace;
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
-    opacity: 0.8;
-    word-break: break-all;
-  }
+  @media (max-width: 640px) {
+    .ui-layer {
+      padding: 1.5rem;
+      gap: 1.25rem;
+    }
 
-  .error-detail {
-    color: #ffcccc;
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
-  }
+    .status-card {
+      padding: 1rem 1.1rem;
+    }
 
-  #retry-button {
-    margin-top: 1rem;
-    padding: 0.75rem 2rem;
-    background: white;
-    color: #1e3c72;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-
-  #retry-button:hover {
-    transform: scale(1.05);
-  }
-
-  .start-section {
-    margin-top: 2rem;
-    text-align: center;
-  }
-
-  .start-section.hidden {
-    display: none;
-  }
-
-  .start-button {
-    display: inline-block;
-    padding: 1rem 3rem;
-    background: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-  }
-
-  .start-button:hover {
-    background: #45a049;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-  }
-
-  .start-button:active {
-    transform: translateY(0);
-  }
-
-  .hint {
-    margin-top: 0.5rem;
-    font-size: 0.9rem;
-    opacity: 0.7;
+    .start-button {
+      width: 100%;
+    }
   }
 </style>
 
 <script>
-  import { authenticate, setJwt } from '../lib/authService';
   import { getPublicKeyDetails, getOrCreateKey } from '../lib/keyManager';
 
-  async function performAuth() {
-    const loadingEl = document.getElementById('auth-loading');
-    const successEl = document.getElementById('auth-success');
-    const errorEl = document.getElementById('auth-error');
-    const startEl = document.getElementById('start-section');
-    const errorMessageEl = document.getElementById('error-message');
-    const fingerprintEl = document.getElementById('user-fingerprint');
+  const loadingEl = document.getElementById('identity-loading');
+  const readyEl = document.getElementById('identity-ready');
+  const errorEl = document.getElementById('identity-error');
+  const fingerprintEl = document.getElementById('user-fingerprint');
+  const errorMessageEl = document.getElementById('error-message');
+  const startButton = document.getElementById('start-button');
 
+  function showState(state) {
+    loadingEl?.classList.toggle('hidden', state !== 'loading');
+    readyEl?.classList.toggle('hidden', state !== 'ready');
+    errorEl?.classList.toggle('hidden', state !== 'error');
+  }
+
+  async function prepareClientIdentity() {
     try {
-      // Show loading state
-      loadingEl?.classList.remove('hidden');
-      successEl?.classList.add('hidden');
-      errorEl?.classList.add('hidden');
-      startEl?.classList.add('hidden');
+      showState('loading');
+      startButton?.setAttribute('disabled', 'true');
 
-      // Perform authentication
-      const jwt = await authenticate();
-
-      // Store the JWT
-      setJwt(jwt);
-
-      // Get fingerprint for display
       const keyPair = await getOrCreateKey();
       const { fingerprint } = await getPublicKeyDetails(keyPair.publicKey);
-
-      // Show success state
-      loadingEl?.classList.add('hidden');
-      successEl?.classList.remove('hidden');
-      startEl?.classList.remove('hidden');
 
       if (fingerprintEl) {
         fingerprintEl.textContent = fingerprint;
       }
 
+      showState('ready');
+      startButton?.removeAttribute('disabled');
     } catch (error) {
-      console.error('Authentication error:', error);
-
-      // Show error state
-      loadingEl?.classList.add('hidden');
-      errorEl?.classList.remove('hidden');
-
+      console.error('Client identity error:', error);
+      showState('error');
       if (errorMessageEl) {
-        errorMessageEl.textContent = error instanceof Error ? error.message : 'Unknown error';
+        const fallback = 'Browser security APIs unavailable (IndexedDB & Web Crypto required).';
+        errorMessageEl.textContent = error instanceof Error ? error.message : fallback;
       }
     }
   }
@@ -223,24 +271,17 @@ export const prerender = false;
     window.location.href = '/character-select';
   }
 
-  // Start authentication on page load
-  performAuth();
+  prepareClientIdentity();
 
-  // Retry button handler
-  document.getElementById('retry-button')?.addEventListener('click', () => {
-    performAuth();
+  startButton?.addEventListener('click', () => {
+    if (!startButton.hasAttribute('disabled')) {
+      startGame();
+    }
   });
 
-  // Start button handler
-  document.getElementById('start-button')?.addEventListener('click', startGame);
-
-  // Enter key handler
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-      const startSection = document.getElementById('start-section');
-      if (startSection && !startSection.classList.contains('hidden')) {
-        startGame();
-      }
+    if (event.key === 'Enter' && !startButton?.hasAttribute('disabled')) {
+      startGame();
     }
   });
 </script>

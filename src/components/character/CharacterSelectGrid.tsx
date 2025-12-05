@@ -11,8 +11,6 @@ interface Character {
 
 export default function CharacterSelectGrid() {
   const [characters, setCharacters] = useState<Character[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [characterToDelete, setCharacterToDelete] = useState<Character | null>(null);
 
@@ -21,22 +19,15 @@ export default function CharacterSelectGrid() {
   }, []);
 
   const loadCharacters = async () => {
-    setLoading(true);
-    setError('');
-
+    // Load characters from localStorage (client-side only)
     try {
-      const response = await fetch('/api/characters');
-      if (!response.ok) {
-        throw new Error(`Failed to load characters: ${response.statusText}`);
+      const stored = localStorage.getItem('characters');
+      if (stored) {
+        const chars = JSON.parse(stored);
+        setCharacters(chars.filter((c: Character) => c !== null));
       }
-
-      const data = await response.json();
-      setCharacters(data);
-      setLoading(false);
     } catch (err) {
       console.error('Error loading characters:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error');
-      setLoading(false);
     }
   };
 
@@ -45,21 +36,20 @@ export default function CharacterSelectGrid() {
     setDeleteModalOpen(true);
   };
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = () => {
     if (!characterToDelete) return;
 
     try {
-      const response = await fetch(`/api/characters/${characterToDelete.character_id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete character');
-      }
-
+      const stored = localStorage.getItem('characters') || '[]';
+      const chars = JSON.parse(stored);
+      const updated = chars.map((c: Character | null, idx: number) => 
+        idx === characterToDelete.slot ? null : c
+      );
+      localStorage.setItem('characters', JSON.stringify(updated));
+      
       setDeleteModalOpen(false);
       setCharacterToDelete(null);
-      await loadCharacters();
+      loadCharacters();
     } catch (err) {
       console.error('Error deleting character:', err);
       alert('Failed to delete character. Please try again.');
@@ -71,55 +61,32 @@ export default function CharacterSelectGrid() {
     setCharacterToDelete(null);
   };
 
-  if (loading) {
+  if (characters.length === 0) {
     return (
       <div style={{
         textAlign: 'center',
         margin: '2rem 0',
         color: 'white'
       }}>
-        <div style={{
-          width: '40px',
-          height: '40px',
-          border: '4px solid rgba(255, 255, 255, 0.3)',
-          borderTop: '4px solid white',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite',
-          margin: '0 auto 1rem'
-        }} />
-        <p>Loading characters...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div style={{
-        textAlign: 'center',
-        margin: '2rem 0',
-        color: 'white'
-      }}>
-        <p style={{ color: '#ffcccc', fontSize: '1.2rem', marginBottom: '0.5rem' }}>
-          Failed to load characters
+        <p style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>
+          No characters created yet
         </p>
-        <p style={{ color: '#ffcccc', fontSize: '0.9rem', marginBottom: '1rem' }}>
-          {error}
-        </p>
-        <button
-          onClick={loadCharacters}
+        <a
+          href="/character-create?slot=0"
           style={{
             padding: '0.75rem 2rem',
-            background: 'white',
-            color: '#1e3c72',
+            background: '#4CAF50',
+            color: 'white',
             border: 'none',
             borderRadius: '4px',
             fontSize: '1rem',
             cursor: 'pointer',
-            transition: 'transform 0.2s'
+            textDecoration: 'none',
+            display: 'inline-block'
           }}
         >
-          Retry
-        </button>
+          Create Your First Character
+        </a>
       </div>
     );
   }

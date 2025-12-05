@@ -1,18 +1,18 @@
 ---
-import AuthenticatedLayout from '../layouts/AuthenticatedLayout.astro';
+import Layout from '../layouts/Layout.astro';
 import CharacterSelectGrid from '../components/character/CharacterSelectGrid';
 
 export const prerender = false;
 ---
 
-<AuthenticatedLayout title="Character Select - Density Dwarf">
+<Layout title="Character Select - Density Dwarf">
   <div class="character-select-screen">
     <h1>Character Select</h1>
     <p class="subtitle">Choose your character or create a new one</p>
 
     <CharacterSelectGrid client:load />
   </div>
-</AuthenticatedLayout>
+</Layout>
 
 <style>
   .character-select-screen {
@@ -39,4 +39,3 @@ export const prerender = false;
     text-align: center;
   }
 </style>
-</AuthenticatedLayout>
