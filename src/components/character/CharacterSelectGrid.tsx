@@ -106,8 +106,7 @@ export default function CharacterSelectGrid() {
           return (
             <div
               key={slotNum}
-              className="relative bg-gradient-to-b from-blue-50 to-blue-100 border-4 border-blue-900 rounded-lg shadow-lg hover:border-blue-700 transition-all overflow-hidden"
-              style={{ minHeight: '200px' }}
+              className="relative bg-gradient-to-b from-blue-50 to-blue-100 border-4 border-blue-900 rounded-lg shadow-lg hover:border-blue-700 transition-all overflow-hidden min-h-[200px]"
             >
               {character ? (
                 <>
