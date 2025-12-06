@@ -124,17 +124,19 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
 
   // Step 2: Character Customization
   return (
-    <>
-      {/* Back to Class Selection Button */}
-      <button
-        type="button"
-        onClick={() => setStep(1)}
-        className="btn btn-ghost text-white absolute top-8 left-8"
-      >
-        ← Back to Class Selection
-      </button>
+    <div className="w-full max-w-7xl h-full flex flex-col gap-4">
+      {/* Back Button */}
+      <div>
+        <button
+          type="button"
+          onClick={() => setStep(1)}
+          className="btn btn-ghost text-white"
+        >
+          ← Back to Class Selection
+        </button>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-8 w-full max-w-7xl h-full">
+      <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-8 flex-1">
         {/* Form Column */}
         <div className="bg-white/10 border-[5px] border-[#a6c9ff] rounded-lg p-8 flex flex-col justify-between">
           <div className="space-y-6 flex-1 flex flex-col">
@@ -207,22 +209,24 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
         </div>
       </div>
 
-      {/* Create Character Button - Bottom Right */}
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={submitting}
-        className={`btn btn-primary btn-lg absolute bottom-8 right-8 ${submitting ? 'opacity-60 cursor-not-allowed' : ''}`}
-      >
-        {submitting ? (
-          <>
-            <span className="loading loading-spinner loading-sm"></span>
-            Creating...
-          </>
-        ) : (
-          'Create Character'
-        )}
-      </button>
-    </>
+      {/* Create Character Button */}
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={submitting}
+          className={`btn btn-primary btn-lg ${submitting ? 'opacity-60 cursor-not-allowed' : ''}`}
+        >
+          {submitting ? (
+            <>
+              <span className="loading loading-spinner loading-sm"></span>
+              Creating...
+            </>
+          ) : (
+            'Create Character'
+          )}
+        </button>
+      </div>
+    </div>
   );
 }
