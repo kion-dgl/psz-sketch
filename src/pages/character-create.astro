@@ -16,36 +16,7 @@ if (isNaN(slot) || slot < 0 || slot > 3) {
 ---
 
 <Layout title="Create Character - Density Dwarf">
-  <div class="character-create-screen">
-    <h1>Create New Character</h1>
-    <p class="subtitle">Choose your character's appearance and class</p>
-
+  <div class="h-screen bg-gradient-to-b from-[#1e3a8a] to-[#3b82f6] p-8 flex items-center justify-center relative overflow-hidden">
     <CharacterCreationForm client:load slot={slot} />
   </div>
 </Layout>
-
-<style>
-  .character-create-screen {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem;
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    color: white;
-  }
-
-  h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    text-align: center;
-  }
-
-  .subtitle {
-    font-size: 1.1rem;
-    opacity: 0.9;
-    margin-bottom: 2rem;
-    text-align: center;
-  }
-</style>
-</AuthenticatedLayout>
