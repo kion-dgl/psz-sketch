@@ -8,7 +8,10 @@ import { loadGLB, loadTexture } from '../../utils/assetCache';
 
 interface CharacterPreviewProps {
   classId: string | null;
-  textureId: string;
+  variationIndex: number;
+  bodyColorIndex: number;
+  hairColorIndex: number;
+  skinToneIndex: number;
 }
 
 interface ModelProps {
@@ -55,7 +58,7 @@ function CharacterModel({ url, textureUrl }: ModelProps) {
   return <primitive ref={group} object={gltf.scene} />;
 }
 
-export default function CharacterPreview({ classId, textureId }: CharacterPreviewProps) {
+export default function CharacterPreview({ classId, variationIndex, bodyColorIndex, hairColorIndex, skinToneIndex }: CharacterPreviewProps) {
   const [modelUrl, setModelUrl] = useState<string | null>(null);
   const [textureUrl, setTextureUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -78,14 +81,12 @@ export default function CharacterPreview({ classId, textureId }: CharacterPrevie
           throw new Error('Character class not found');
         }
 
-        // Use first variation by default
-        const variation = characterClass.variations[0];
+        // Get the selected variation
+        const variation = characterClass.variations[variationIndex];
 
-        // Parse texture ID to extract color and skin tone
-        // textureId format: tex_XX where XX is 01-10 (we'll map this to color/skin)
-        // For now, default to color 0 and skin tone 0
-        const colorIndex = 0;
-        const skinTone = 0;
+        // Calculate the actual skin tone from hair color and skin tone indices
+        // skinTone is: hairColorIndex * 3 + skinToneIndex (0-8)
+        const actualSkinTone = hairColorIndex * 3 + skinToneIndex;
 
         // Load model
         const modelPath = getModelPath(variation);
@@ -93,7 +94,7 @@ export default function CharacterPreview({ classId, textureId }: CharacterPrevie
         setModelUrl(cachedModelUrl);
 
         // Load texture
-        const textureName = getTextureName(variation, colorIndex, skinTone);
+        const textureName = getTextureName(variation, bodyColorIndex, actualSkinTone);
         const texturePath = getTexturePath(variation, textureName);
         const cachedTextureUrl = await loadTexture(texturePath);
         setTextureUrl(cachedTextureUrl);
@@ -107,7 +108,7 @@ export default function CharacterPreview({ classId, textureId }: CharacterPrevie
     };
 
     loadCharacter();
-  }, [classId, textureId]);
+  }, [classId, variationIndex, bodyColorIndex, hairColorIndex, skinToneIndex]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '400px', borderRadius: '12px', overflow: 'hidden' }}>

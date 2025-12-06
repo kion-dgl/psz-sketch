@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import CharacterPreview from './CharacterPreview';
+import { findCharacterClass } from '../../config/characterConfig';
 
 interface CharacterCreationFormProps {
   slot: number;
@@ -11,11 +12,17 @@ const classGroups = {
   Newman: ['HUnewm', 'HUnewearl', 'FOnewm', 'FOnewearl'],
 };
 
+const hairColorNames = ['Blonde', 'Brown', 'Black'];
+const skinToneNames = ['Light', 'Medium', 'Dark'];
+
 export default function CharacterCreationForm({ slot }: CharacterCreationFormProps) {
   const [step, setStep] = useState(1); // 1 = class selection, 2 = customization
   const [characterName, setCharacterName] = useState('');
   const [classId, setClassId] = useState('');
-  const [textureId, setTextureId] = useState('tex_01');
+  const [variationIndex, setVariationIndex] = useState(0);
+  const [bodyColorIndex, setBodyColorIndex] = useState(0);
+  const [hairColorIndex, setHairColorIndex] = useState(0);
+  const [skinToneIndex, setSkinToneIndex] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -29,6 +36,10 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
 
   const handleClassSelect = (selectedClassId: string) => {
     setClassId(selectedClassId);
+    setVariationIndex(0);
+    setBodyColorIndex(0);
+    setHairColorIndex(0);
+    setSkinToneIndex(0);
     setStep(2);
   };
 
@@ -36,10 +47,15 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
     if (e) e.preventDefault();
     setError('');
 
-    if (!characterName.trim() || !classId || !textureId) {
+    if (!characterName.trim() || !classId) {
       setError('Please fill in all fields');
       return;
     }
+
+    // Calculate the texture ID from the selections
+    // skinTone is: hairColorIndex * 3 + skinToneIndex (0-8)
+    const actualSkinTone = hairColorIndex * 3 + skinToneIndex;
+    const textureId = `${actualSkinTone}_${bodyColorIndex}`;
 
     setSubmitting(true);
 
@@ -53,6 +69,12 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
         chars.push(null);
       }
 
+      // Get the character class to access the variation
+      const characterClass = findCharacterClass(classId);
+      if (!characterClass) {
+        throw new Error('Character class not found');
+      }
+
       // Create new character
       const newCharacter = {
         character_id: `char_${Date.now()}`,
@@ -60,6 +82,7 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
         level: 1,
         slot,
         class_id: classId,
+        variation_index: variationIndex,
         texture_id: textureId,
         experience: 0,
         created_at: new Date().toISOString(),
@@ -123,6 +146,8 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
   }
 
   // Step 2: Character Customization
+  const characterClass = classId ? findCharacterClass(classId) : null;
+
   return (
     <div className="w-full max-w-7xl h-full flex flex-col gap-4">
       {/* Back Button */}
@@ -151,28 +176,80 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
               </div>
             </div>
 
+            {/* Head Variation */}
+            {characterClass && (
+              <div>
+                <label className="block mb-2 font-bold text-lg text-white">
+                  Head Type
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {characterClass.variations.map((_, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => setVariationIndex(index)}
+                      className={`btn ${variationIndex === index ? 'btn-primary' : 'btn-ghost'} text-white`}
+                    >
+                      Type {index + 1}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Body Color */}
+            {characterClass && (
+              <div>
+                <label className="block mb-2 font-bold text-lg text-white">
+                  Body Color
+                </label>
+                <select
+                  value={bodyColorIndex}
+                  onChange={(e) => setBodyColorIndex(parseInt(e.target.value))}
+                  className="select w-full bg-white/20 border-2 border-white/30 text-white"
+                >
+                  {characterClass.colors.map((color, index) => (
+                    <option key={index} value={index}>
+                      {color.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Hair Color */}
             <div>
-              <label htmlFor="texture-id" className="block mb-2 font-bold text-lg text-white">
-                Appearance
+              <label className="block mb-2 font-bold text-lg text-white">
+                Hair Color
               </label>
               <select
-                id="texture-id"
-                value={textureId}
-                onChange={(e) => setTextureId(e.target.value)}
-                required
+                value={hairColorIndex}
+                onChange={(e) => setHairColorIndex(parseInt(e.target.value))}
                 className="select w-full bg-white/20 border-2 border-white/30 text-white"
               >
-                <option value="">Select appearance</option>
-                <option value="tex_01">Texture 1</option>
-                <option value="tex_02">Texture 2</option>
-                <option value="tex_03">Texture 3</option>
-                <option value="tex_04">Texture 4</option>
-                <option value="tex_05">Texture 5</option>
-                <option value="tex_06">Texture 6</option>
-                <option value="tex_07">Texture 7</option>
-                <option value="tex_08">Texture 8</option>
-                <option value="tex_09">Texture 9</option>
-                <option value="tex_10">Texture 10</option>
+                {hairColorNames.map((name, index) => (
+                  <option key={index} value={index}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Skin Tone */}
+            <div>
+              <label className="block mb-2 font-bold text-lg text-white">
+                Skin Tone
+              </label>
+              <select
+                value={skinToneIndex}
+                onChange={(e) => setSkinToneIndex(parseInt(e.target.value))}
+                className="select w-full bg-white/20 border-2 border-white/30 text-white"
+              >
+                {skinToneNames.map((name, index) => (
+                  <option key={index} value={index}>
+                    {name}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -204,7 +281,13 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
         {/* Preview Column */}
         <div className="flex items-center justify-center bg-white/10 border-[5px] border-[#a6c9ff] rounded-lg p-8">
           <div className="w-full h-full">
-            <CharacterPreview classId={classId || null} textureId={textureId} />
+            <CharacterPreview
+              classId={classId || null}
+              variationIndex={variationIndex}
+              bodyColorIndex={bodyColorIndex}
+              hairColorIndex={hairColorIndex}
+              skinToneIndex={skinToneIndex}
+            />
           </div>
         </div>
       </div>
