@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface Character {
   character_id: string;
@@ -13,10 +13,19 @@ export default function CharacterSelectGrid() {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [characterToDelete, setCharacterToDelete] = useState<Character | null>(null);
+  const modalRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     loadCharacters();
   }, []);
+
+  useEffect(() => {
+    if (deleteModalOpen && modalRef.current) {
+      modalRef.current.showModal();
+    } else if (modalRef.current) {
+      modalRef.current.close();
+    }
+  }, [deleteModalOpen]);
 
   const loadCharacters = async () => {
     // Load characters from localStorage (client-side only)
@@ -31,7 +40,8 @@ export default function CharacterSelectGrid() {
     }
   };
 
-  const handleDeleteClick = (character: Character) => {
+  const handleDeleteClick = (character: Character, e: React.MouseEvent) => {
+    e.stopPropagation();
     setCharacterToDelete(character);
     setDeleteModalOpen(true);
   };
@@ -42,11 +52,11 @@ export default function CharacterSelectGrid() {
     try {
       const stored = localStorage.getItem('characters') || '[]';
       const chars = JSON.parse(stored);
-      const updated = chars.map((c: Character | null, idx: number) => 
+      const updated = chars.map((c: Character | null, idx: number) =>
         idx === characterToDelete.slot ? null : c
       );
       localStorage.setItem('characters', JSON.stringify(updated));
-      
+
       setDeleteModalOpen(false);
       setCharacterToDelete(null);
       loadCharacters();
@@ -61,293 +71,120 @@ export default function CharacterSelectGrid() {
     setCharacterToDelete(null);
   };
 
-  if (characters.length === 0) {
-    return (
-      <div style={{
-        textAlign: 'center',
-        margin: '2rem 0',
-        color: 'white'
-      }}>
-        <p style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>
-          No characters created yet
-        </p>
-        <a
-          href="/character-create?slot=0"
-          style={{
-            padding: '0.75rem 2rem',
-            background: '#4CAF50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            fontSize: '1rem',
-            cursor: 'pointer',
-            textDecoration: 'none',
-            display: 'inline-block'
-          }}
-        >
-          Create Your First Character
-        </a>
-      </div>
-    );
-  }
-
   return (
     <>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '2rem',
-        maxWidth: '900px',
-        width: '100%'
-      }}>
+      <div className="grid grid-cols-2 gap-4 md:gap-6 flex-1 items-center content-center">
         {[0, 1, 2, 3].map((slotNum) => {
           const character = characters.find(c => c.slot === slotNum);
 
           return (
             <div
               key={slotNum}
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: '2px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '12px',
-                padding: '2rem',
-                minHeight: '200px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.3s',
-                position: 'relative'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-              }}
+              className="card bg-white border-[5px] border-[#a6c9ff] shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer"
+              onClick={() => character && (window.location.href = `/character-selected/${character.character_id}`)}
             >
-              <div style={{
-                position: 'absolute',
-                top: '1rem',
-                left: '1rem',
-                fontSize: '0.9rem',
-                opacity: 0.6,
-                color: 'white'
-              }}>
-                Slot {slotNum + 1}
-              </div>
+              <div className="card-body p-4">
+                {character ? (
+                  <>
+                    <button
+                      onClick={(e) => handleDeleteClick(character, e)}
+                      className="btn btn-error btn-xs absolute top-2 right-2 z-10"
+                    >
+                      Delete
+                    </button>
 
-              {character ? (
-                <>
-                  <button
-                    onClick={() => handleDeleteClick(character)}
-                    style={{
-                      position: 'absolute',
-                      top: '1rem',
-                      right: '1rem',
-                      background: '#f44336',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      padding: '0.5rem 1rem',
-                      cursor: 'pointer',
-                      fontSize: '0.9rem',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#d32f2f';
-                      e.currentTarget.style.transform = 'scale(1.05)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#f44336';
-                      e.currentTarget.style.transform = 'scale(1)';
-                    }}
-                  >
-                    Delete
-                  </button>
+                    <div className="flex gap-3 h-full">
+                      {/* Character Image - 1/3 width */}
+                      <div className="w-1/3 flex items-center justify-center bg-gray-100 rounded">
+                        <div className="avatar placeholder">
+                          <div className="bg-blue-500 text-white w-16 rounded-full">
+                            <span className="text-xl uppercase" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '0.75rem' }}>
+                              {character.character_name.substring(0, 2)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
 
-                  <div
-                    onClick={() => window.location.href = `/character-selected/${character.character_id}`}
-                    style={{
-                      textAlign: 'center',
-                      cursor: 'pointer',
-                      width: '100%',
-                      color: 'white',
-                      flex: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <div style={{
-                      fontSize: '1.5rem',
-                      fontWeight: 'bold',
-                      marginBottom: '0.5rem'
-                    }}>
-                      {character.character_name}
+                      {/* Character Details - 2/3 width */}
+                      <div className="w-2/3 flex flex-col justify-center">
+                        {/* Top Line: Name and Level */}
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="text-lg font-bold text-gray-800 uppercase leading-tight" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '0.7rem' }}>
+                            {character.character_name}
+                          </h3>
+                          <span className="text-xl font-bold text-blue-600 ml-2" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '0.9rem' }}>
+                            LV{character.level}
+                          </span>
+                        </div>
+
+                        {/* Middle: Class */}
+                        <p className="text-sm text-gray-600 mb-1" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '0.5rem' }}>
+                          {character.class_id}
+                        </p>
+
+                        {/* Bottom: Details */}
+                        <div className="text-xs text-gray-500 mt-auto" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '0.4rem' }}>
+                          <p>Play Time: 00:00</p>
+                          <p>Progress: 0%</p>
+                        </div>
+                      </div>
                     </div>
-                    <div style={{
-                      fontSize: '0.9rem',
-                      opacity: 0.8,
-                      marginBottom: '1rem'
-                    }}>
-                      Level {character.level} {character.class_id}
-                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full min-h-[200px]">
+                    <h3 className="card-title justify-center text-gray-700 mb-2 uppercase" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '1rem' }}>
+                      New Game
+                    </h3>
+                    <p className="text-sm text-gray-500 mb-4" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '0.5rem' }}>
+                      Create a new Hunter
+                    </p>
+                    <a
+                      href={`/character-create?slot=${slotNum}`}
+                      className="btn btn-primary btn-sm"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Start
+                    </a>
                   </div>
-                </>
-              ) : (
-                <div style={{
-                  textAlign: 'center',
-                  color: 'white'
-                }}>
-                  <p style={{
-                    fontSize: '1.1rem',
-                    opacity: 0.6,
-                    marginBottom: '1rem'
-                  }}>
-                    Empty Slot
-                  </p>
-                  <a
-                    href={`/character-create?slot=${slotNum}`}
-                    style={{
-                      display: 'inline-block',
-                      padding: '1rem 2rem',
-                      background: '#4CAF50',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '1.1rem',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s',
-                      textDecoration: 'none'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#45a049';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#4CAF50';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                    }}
-                  >
-                    Create Character
-                  </a>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           );
         })}
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {deleteModalOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            background: 'rgba(0, 0, 0, 0.7)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              handleCancelDelete();
-            }
-          }}
-        >
-          <div style={{
-            background: '#1e3c72',
-            border: '2px solid rgba(255, 255, 255, 0.3)',
-            borderRadius: '12px',
-            padding: '2rem',
-            maxWidth: '400px',
-            textAlign: 'center',
-            color: 'white'
-          }}>
-            <h2 style={{ marginBottom: '1rem', fontSize: '1.8rem' }}>
-              Delete Character?
-            </h2>
-            <p style={{ marginBottom: '1rem' }}>
-              Are you sure you want to delete <strong>{characterToDelete?.character_name}</strong>?
-            </p>
-            <p style={{
-              color: '#ffcccc',
-              fontSize: '0.9rem',
-              marginBottom: '2rem'
-            }}>
-              This action cannot be undone.
-            </p>
-            <div style={{
-              display: 'flex',
-              gap: '1rem',
-              justifyContent: 'center'
-            }}>
-              <button
-                onClick={handleConfirmDelete}
-                style={{
-                  padding: '0.75rem 2rem',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  background: '#f44336',
-                  color: 'white'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#d32f2f';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#f44336';
-                }}
-              >
-                Delete
-              </button>
-              <button
-                onClick={handleCancelDelete}
-                style={{
-                  padding: '0.75rem 2rem',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  color: 'white'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-                }}
-              >
-                Cancel
-              </button>
-            </div>
+      {/* daisyUI Modal for Delete Confirmation */}
+      <dialog ref={modalRef} className="modal">
+        <div className="modal-box bg-gradient-to-b from-[#1e3a8a] to-[#3b82f6] border-4 border-[#3b82f6]">
+          <h3 className="font-bold text-2xl text-white mb-4 text-center uppercase" style={{ fontFamily: "'Press Start 2P', monospace", textShadow: '2px 2px 0px rgba(0,0,0,0.8)' }}>
+            Delete Character?
+          </h3>
+          <p className="text-white mb-2 text-center" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '0.7rem' }}>
+            Delete{' '}
+            <strong className="text-yellow-300">{characterToDelete?.character_name}</strong>?
+          </p>
+          <p className="text-red-300 text-sm mb-6 text-center" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '0.5rem' }}>
+            This action cannot be undone.
+          </p>
+          <div className="modal-action justify-center">
+            <button
+              onClick={handleConfirmDelete}
+              className="btn btn-error"
+            >
+              Delete
+            </button>
+            <button
+              onClick={handleCancelDelete}
+              className="btn"
+            >
+              Cancel
+            </button>
           </div>
         </div>
-      )}
-
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 768px) {
-          .character-slots {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
+        <form method="dialog" className="modal-backdrop">
+          <button onClick={handleCancelDelete}>close</button>
+        </form>
+      </dialog>
     </>
   );
 }

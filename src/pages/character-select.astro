@@ -6,36 +6,19 @@ export const prerender = false;
 ---
 
 <Layout title="Character Select - Density Dwarf">
-  <div class="character-select-screen">
-    <h1>Character Select</h1>
-    <p class="subtitle">Choose your character or create a new one</p>
+  <div class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#e0f2ff] to-[#b3d9ff] relative overflow-hidden">
+    <!-- Retro diagonal texture background -->
+    <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, white 10px, white 20px);"></div>
 
-    <CharacterSelectGrid client:load />
+    <!-- Main UI Frame -->
+    <div id="main-ui" class="relative w-[90vw] h-[90vh] max-w-[1400px] bg-gradient-to-b from-[#1e3a8a] to-[#3b82f6] rounded-[20px] border-[8px] border-[#3b82f6] shadow-2xl p-8 flex flex-col">
+      <!-- Title -->
+      <h1 class="text-3xl md:text-5xl text-center text-[#dbeafe] mb-8 mt-8 uppercase tracking-wider" style="font-family: 'Press Start 2P', monospace; text-shadow: 4px 4px 0px rgba(0,0,0,0.8);">
+        Select File
+      </h1>
+
+      <!-- Character Grid -->
+      <CharacterSelectGrid client:load />
+    </div>
   </div>
 </Layout>
-
-<style>
-  .character-select-screen {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    color: white;
-    padding: 2rem;
-  }
-
-  h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    text-align: center;
-  }
-
-  .subtitle {
-    font-size: 1.1rem;
-    opacity: 0.9;
-    margin-bottom: 2rem;
-    text-align: center;
-  }
-</style>

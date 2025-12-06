@@ -3,6 +3,7 @@ import { defineConfig, envField } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import react from '@astrojs/react';
 import vercel from '@astrojs/vercel';
+import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
@@ -11,6 +12,9 @@ export default defineConfig({
 	site: process.env.SITE_URL || 'https://psz-sketch.vercel.app',
 	output: 'server',
 	adapter: vercel(),
+	vite: {
+		plugins: [tailwindcss()],
+	},
 	env: {
 		schema: {
 			MONGODB_URI: envField.string({ context: 'server', access: 'secret' }),
