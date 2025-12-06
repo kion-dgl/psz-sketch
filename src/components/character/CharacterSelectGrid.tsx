@@ -83,6 +83,14 @@ export default function CharacterSelectGrid() {
               key={slotNum}
               className="card bg-white border-[5px] border-[#a6c9ff] shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer"
               onClick={() => character && (window.location.href = `/character-selected/${character.character_id}`)}
+              onKeyDown={(e) => {
+                if (character && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault();
+                  window.location.href = `/character-selected/${character.character_id}`;
+                }
+              }}
+              role="button"
+              tabIndex={character ? 0 : -1}
             >
               <div className="card-body p-8 flex items-center justify-center">
                 {character ? (
@@ -183,7 +191,7 @@ export default function CharacterSelectGrid() {
           </div>
         </div>
         <form method="dialog" className="modal-backdrop">
-          <button onClick={handleCancelDelete}>close</button>
+          <button onClick={handleCancelDelete} aria-label="Close">close</button>
         </form>
       </dialog>
     </>
