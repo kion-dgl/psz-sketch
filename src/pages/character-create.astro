@@ -16,7 +16,9 @@ if (isNaN(slot) || slot < 0 || slot > 3) {
 ---
 
 <Layout title="Create Character - Density Dwarf">
-  <div class="h-screen bg-gradient-to-b from-[#1e3a8a] to-[#3b82f6] p-8 flex items-center justify-center relative overflow-hidden">
-    <CharacterCreationForm client:load slot={slot} />
+  <div class="h-screen bg-gradient-to-b from-[#1e3a8a] to-[#3b82f6] p-6 flex items-center justify-center relative overflow-hidden">
+    <div class="w-full max-w-[1400px] h-full max-h-[900px] flex items-center justify-center">
+      <CharacterCreationForm client:load slot={slot} />
+    </div>
   </div>
 </Layout>

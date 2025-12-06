@@ -149,137 +149,109 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
   const characterClass = classId ? findCharacterClass(classId) : null;
 
   return (
-    <div className="w-full max-w-7xl h-full flex flex-col gap-4">
-      {/* Back Button */}
-      <div>
+    <div className="w-full h-full flex flex-col gap-3">
+      {/* Header with Back Button and Class Name */}
+      <div className="flex items-center justify-between">
         <button
           type="button"
           onClick={() => setStep(1)}
           className="btn btn-ghost text-white"
         >
-          ← Back to Class Selection
+          ← Back
         </button>
+        <h2 className="text-white text-xl" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '0.9rem' }}>
+          {classId}
+        </h2>
+        <div className="w-24"></div> {/* Spacer for centering */}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-8 flex-1">
-        {/* Form Column */}
-        <div className="bg-white/10 border-[5px] border-[#a6c9ff] rounded-lg p-8 flex flex-col justify-between">
-          <div className="space-y-6 flex-1 flex flex-col">
-          <div className="space-y-6 flex-1">
-            {/* Selected Class Display */}
+      {/* Main Content - Fixed height to fit viewport */}
+      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 flex-1 min-h-0">
+        {/* Form Column - Scrollable if needed */}
+        <div className="bg-white/10 border-[5px] border-[#a6c9ff] rounded-lg p-6 flex flex-col gap-4 overflow-y-auto">
+          {/* Head Variation */}
+          {characterClass && (
             <div>
-              <label className="block mb-2 font-bold text-lg text-white">
-                Class
+              <label className="block mb-2 font-bold text-sm text-white">
+                Head Type
               </label>
-              <div className="p-3 bg-white/20 border-2 border-white/30 rounded-lg text-white">
-                {classId}
+              <div className="grid grid-cols-2 gap-2">
+                {characterClass.variations.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setVariationIndex(index)}
+                    className={`btn btn-sm ${variationIndex === index ? 'btn-primary' : 'btn-ghost'} text-white`}
+                  >
+                    Type {index + 1}
+                  </button>
+                ))}
               </div>
             </div>
+          )}
 
-            {/* Head Variation */}
-            {characterClass && (
-              <div>
-                <label className="block mb-2 font-bold text-lg text-white">
-                  Head Type
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {characterClass.variations.map((_, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => setVariationIndex(index)}
-                      className={`btn ${variationIndex === index ? 'btn-primary' : 'btn-ghost'} text-white`}
-                    >
-                      Type {index + 1}
-                    </button>
-                  ))}
-                </div>
+          {/* Body Color */}
+          {characterClass && (
+            <div>
+              <label className="block mb-2 font-bold text-sm text-white">
+                Body Color
+              </label>
+              <div className="grid grid-cols-1 gap-2">
+                {characterClass.colors.map((color, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setBodyColorIndex(index)}
+                    className={`btn btn-sm ${bodyColorIndex === index ? 'btn-primary' : 'btn-ghost'} text-white text-xs`}
+                  >
+                    {color.name}
+                  </button>
+                ))}
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Body Color */}
-            {characterClass && (
-              <div>
-                <label className="block mb-2 font-bold text-lg text-white">
-                  Body Color
-                </label>
-                <select
-                  value={bodyColorIndex}
-                  onChange={(e) => setBodyColorIndex(parseInt(e.target.value))}
-                  className="select w-full bg-white/20 border-2 border-white/30 text-white"
+          {/* Hair Color */}
+          <div>
+            <label className="block mb-2 font-bold text-sm text-white">
+              Hair Color
+            </label>
+            <div className="grid grid-cols-1 gap-2">
+              {hairColorNames.map((name, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => setHairColorIndex(index)}
+                  className={`btn btn-sm ${hairColorIndex === index ? 'btn-primary' : 'btn-ghost'} text-white`}
                 >
-                  {characterClass.colors.map((color, index) => (
-                    <option key={index} value={index}>
-                      {color.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* Hair Color */}
-            <div>
-              <label className="block mb-2 font-bold text-lg text-white">
-                Hair Color
-              </label>
-              <select
-                value={hairColorIndex}
-                onChange={(e) => setHairColorIndex(parseInt(e.target.value))}
-                className="select w-full bg-white/20 border-2 border-white/30 text-white"
-              >
-                {hairColorNames.map((name, index) => (
-                  <option key={index} value={index}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Skin Tone */}
-            <div>
-              <label className="block mb-2 font-bold text-lg text-white">
-                Skin Tone
-              </label>
-              <select
-                value={skinToneIndex}
-                onChange={(e) => setSkinToneIndex(parseInt(e.target.value))}
-                className="select w-full bg-white/20 border-2 border-white/30 text-white"
-              >
-                {skinToneNames.map((name, index) => (
-                  <option key={index} value={index}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="character-name" className="block mb-2 font-bold text-lg text-white">
-                Character Name
-              </label>
-              <input
-                type="text"
-                id="character-name"
-                value={characterName}
-                onChange={(e) => setCharacterName(e.target.value)}
-                maxLength={50}
-                required
-                placeholder="Enter character name"
-                className="input w-full bg-white/20 border-2 border-white/30 text-white placeholder:text-white/50"
-              />
+                  {name}
+                </button>
+              ))}
             </div>
           </div>
 
-          {error && (
-            <div className="alert alert-error">
-              {error}
+          {/* Skin Tone */}
+          <div>
+            <label className="block mb-2 font-bold text-sm text-white">
+              Skin Tone
+            </label>
+            <div className="grid grid-cols-1 gap-2">
+              {skinToneNames.map((name, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => setSkinToneIndex(index)}
+                  className={`btn btn-sm ${skinToneIndex === index ? 'btn-primary' : 'btn-ghost'} text-white`}
+                >
+                  {name}
+                </button>
+              ))}
             </div>
-          )}
           </div>
         </div>
 
         {/* Preview Column */}
-        <div className="flex items-center justify-center bg-white/10 border-[5px] border-[#a6c9ff] rounded-lg p-8">
+        <div className="flex items-center justify-center bg-white/10 border-[5px] border-[#a6c9ff] rounded-lg p-6 min-h-0">
           <div className="w-full h-full">
             <CharacterPreview
               classId={classId || null}
@@ -292,8 +264,28 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
         </div>
       </div>
 
-      {/* Create Character Button */}
-      <div className="flex justify-end">
+      {/* Bottom Row - Character Name and Create Button */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 items-end">
+        <div>
+          <label htmlFor="character-name" className="block mb-2 font-bold text-sm text-white">
+            Character Name
+          </label>
+          <input
+            type="text"
+            id="character-name"
+            value={characterName}
+            onChange={(e) => setCharacterName(e.target.value)}
+            maxLength={50}
+            required
+            placeholder="Enter character name"
+            className="input w-full bg-white/20 border-2 border-white/30 text-white placeholder:text-white/50"
+          />
+          {error && (
+            <div className="text-red-400 text-sm mt-2">
+              {error}
+            </div>
+          )}
+        </div>
         <button
           type="button"
           onClick={handleSubmit}
