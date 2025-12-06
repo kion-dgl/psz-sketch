@@ -110,7 +110,7 @@ export default function CharacterPreview({ classId, textureId }: CharacterPrevie
   }, [classId, textureId]);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '400px', background: '#0a0a0a', borderRadius: '12px', overflow: 'hidden' }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '400px', borderRadius: '12px', overflow: 'hidden' }}>
       {!classId && (
         <div style={{
           position: 'absolute',
@@ -118,8 +118,10 @@ export default function CharacterPreview({ classId, textureId }: CharacterPrevie
           left: '50%',
           transform: 'translate(-50%, -50%)',
           textAlign: 'center',
-          color: '#667eea',
-          fontSize: '1.1rem'
+          color: '#dbeafe',
+          fontSize: '1.1rem',
+          fontFamily: "'Press Start 2P', monospace",
+          fontSize: '0.7rem'
         }}>
           Select a class to preview character
         </div>
@@ -132,8 +134,10 @@ export default function CharacterPreview({ classId, textureId }: CharacterPrevie
           left: '50%',
           transform: 'translate(-50%, -50%)',
           textAlign: 'center',
-          color: '#667eea',
-          fontSize: '1.1rem'
+          color: '#dbeafe',
+          fontSize: '1.1rem',
+          fontFamily: "'Press Start 2P', monospace",
+          fontSize: '0.7rem'
         }}>
           Loading character model...
         </div>
@@ -147,14 +151,16 @@ export default function CharacterPreview({ classId, textureId }: CharacterPrevie
           transform: 'translate(-50%, -50%)',
           textAlign: 'center',
           color: '#f44336',
-          fontSize: '1.1rem'
+          fontSize: '1.1rem',
+          fontFamily: "'Press Start 2P', monospace",
+          fontSize: '0.7rem'
         }}>
           {error}
         </div>
       )}
 
       {modelUrl && textureUrl && !loading && (
-        <Canvas>
+        <Canvas gl={{ alpha: true }} style={{ background: 'transparent' }}>
           <PerspectiveCamera makeDefault position={[0, 1, 3]} />
           <OrbitControls
             enableDamping
