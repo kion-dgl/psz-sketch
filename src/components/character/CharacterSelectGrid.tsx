@@ -6,6 +6,7 @@ interface Character {
   level: number;
   slot: number;
   class_id: string;
+  variation_index?: number; // Optional for backwards compatibility
   texture_id: string;
 }
 
