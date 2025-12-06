@@ -1,14 +1,28 @@
 import { useState, useEffect } from 'react';
 import CharacterPreview from './CharacterPreview';
+import { findCharacterClass } from '../../config/characterConfig';
 
 interface CharacterCreationFormProps {
   slot: number;
 }
 
+const classGroups = {
+  Human: ['HUmar', 'HUmarl', 'RAmar', 'RAmarl', 'FOmar', 'FOmarl'],
+  Cast: ['HUcast', 'HUcaseal', 'RAcast', 'RAcaseal'],
+  Newman: ['HUnewm', 'HUnewearl', 'FOnewm', 'FOnewearl'],
+};
+
+const hairColorNames = ['Blonde', 'Brown', 'Black'];
+const skinToneNames = ['Light', 'Medium', 'Dark'];
+
 export default function CharacterCreationForm({ slot }: CharacterCreationFormProps) {
+  const [step, setStep] = useState(1); // 1 = class selection, 2 = customization
   const [characterName, setCharacterName] = useState('');
   const [classId, setClassId] = useState('');
-  const [textureId, setTextureId] = useState('tex_01');
+  const [variationIndex, setVariationIndex] = useState(0);
+  const [bodyColorIndex, setBodyColorIndex] = useState(0);
+  const [hairColorIndex, setHairColorIndex] = useState(0);
+  const [skinToneIndex, setSkinToneIndex] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -20,14 +34,28 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
     }
   }, [slot]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleClassSelect = (selectedClassId: string) => {
+    setClassId(selectedClassId);
+    setVariationIndex(0);
+    setBodyColorIndex(0);
+    setHairColorIndex(0);
+    setSkinToneIndex(0);
+    setStep(2);
+  };
+
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setError('');
 
-    if (!characterName.trim() || !classId || !textureId) {
+    if (!characterName.trim() || !classId) {
       setError('Please fill in all fields');
       return;
     }
+
+    // Calculate the texture ID from the selections
+    // skinTone is: hairColorIndex * 3 + skinToneIndex (0-8)
+    const actualSkinTone = hairColorIndex * 3 + skinToneIndex;
+    const textureId = `${actualSkinTone}_${bodyColorIndex}`;
 
     setSubmitting(true);
 
@@ -41,6 +69,12 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
         chars.push(null);
       }
 
+      // Get the character class to access the variation
+      const characterClass = findCharacterClass(classId);
+      if (!characterClass) {
+        throw new Error('Character class not found');
+      }
+
       // Create new character
       const newCharacter = {
         character_id: `char_${Date.now()}`,
@@ -48,6 +82,7 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
         level: 1,
         slot,
         class_id: classId,
+        variation_index: variationIndex,
         texture_id: textureId,
         experience: 0,
         created_at: new Date().toISOString(),
@@ -71,237 +106,205 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
     }
   };
 
+  // Step 1: Class Selection
+  if (step === 1) {
+    return (
+      <>
+        {/* Back to Character Select Button */}
+        <a
+          href="/character-select"
+          className="btn btn-ghost text-white absolute top-8 left-8"
+        >
+          ← Back
+        </a>
+
+        <div className="w-full max-w-4xl">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {Object.entries(classGroups).map(([race, classes]) => (
+              <div key={race} className="bg-white/10 border-[5px] border-[#a6c9ff] rounded-lg p-6">
+                <h3 className="text-xl text-white mb-4 text-center uppercase" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '0.8rem' }}>
+                  {race}
+                </h3>
+                <div className="space-y-2">
+                  {classes.map((className) => (
+                    <button
+                      key={className}
+                      onClick={() => handleClassSelect(className)}
+                      className="btn btn-primary w-full text-xs"
+                      style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '0.6rem' }}
+                    >
+                      {className}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Step 2: Character Customization
+  const characterClass = classId ? findCharacterClass(classId) : null;
+
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: '400px 1fr',
-      gap: '2rem',
-      width: '100%',
-      maxWidth: '1200px',
-      margin: '0 auto'
-    }}>
-      {/* Form Column */}
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.1)',
-        border: '2px solid rgba(255, 255, 255, 0.3)',
-        borderRadius: '12px',
-        padding: '2rem'
-      }}>
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label htmlFor="character-name" style={{
-              display: 'block',
-              marginBottom: '0.5rem',
-              fontWeight: 'bold',
-              fontSize: '1.1rem',
-              color: 'white'
-            }}>
-              Character Name
+    <div className="w-full h-full flex flex-col gap-3">
+      {/* Header with Back Button and Class Name */}
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => setStep(1)}
+          className="btn btn-ghost text-white"
+        >
+          ← Back
+        </button>
+        <h2 className="text-white text-xl" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '0.9rem' }}>
+          {classId}
+        </h2>
+        <div className="w-24"></div> {/* Spacer for centering */}
+      </div>
+
+      {/* Main Content - Fixed height to fit viewport */}
+      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 flex-1 min-h-0">
+        {/* Form Column - Extends to bottom */}
+        <div className="bg-white/10 border-[5px] border-[#a6c9ff] rounded-lg p-6 flex flex-col gap-4 overflow-y-auto">
+          {/* Head Variation */}
+          {characterClass && (
+            <div>
+              <label className="block mb-2 font-bold text-sm text-white">
+                Head Type
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {characterClass.variations.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setVariationIndex(index)}
+                    className={`btn btn-sm ${variationIndex === index ? 'btn-primary' : 'btn-ghost'} text-white`}
+                  >
+                    Type {index + 1}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Body Color */}
+          {characterClass && (
+            <div>
+              <label className="block mb-2 font-bold text-sm text-white">
+                Body Color
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {characterClass.colors.map((color, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setBodyColorIndex(index)}
+                    className={`btn btn-sm ${bodyColorIndex === index ? 'btn-primary' : 'btn-ghost'} text-white text-xs`}
+                  >
+                    {color.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Hair Color */}
+          <div>
+            <label className="block mb-2 font-bold text-sm text-white">
+              Hair Color
             </label>
-            <input
-              type="text"
-              id="character-name"
-              value={characterName}
-              onChange={(e) => setCharacterName(e.target.value)}
-              maxLength={50}
-              required
-              placeholder="Enter character name"
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                fontSize: '1rem',
-                border: '2px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '8px',
-                background: 'rgba(255, 255, 255, 0.2)',
-                color: 'white',
-                transition: 'all 0.3s'
-              }}
-            />
+            <div className="grid grid-cols-2 gap-2">
+              {hairColorNames.map((name, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => setHairColorIndex(index)}
+                  className={`btn btn-sm ${hairColorIndex === index ? 'btn-primary' : 'btn-ghost'} text-white`}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label htmlFor="class-id" style={{
-              display: 'block',
-              marginBottom: '0.5rem',
-              fontWeight: 'bold',
-              fontSize: '1.1rem',
-              color: 'white'
-            }}>
-              Class
+          {/* Skin Tone */}
+          <div>
+            <label className="block mb-2 font-bold text-sm text-white">
+              Skin Tone
             </label>
-            <select
-              id="class-id"
-              value={classId}
-              onChange={(e) => setClassId(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                fontSize: '1rem',
-                border: '2px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '8px',
-                background: 'rgba(255, 255, 255, 0.2)',
-                color: 'white',
-                transition: 'all 0.3s'
-              }}
-            >
-              <option value="">Select a class</option>
-              <optgroup label="Hunter">
-                <option value="HUmar">HUmar</option>
-                <option value="HUmarl">HUmarl</option>
-                <option value="HUcast">HUcast</option>
-                <option value="HUcaseal">HUcaseal</option>
-                <option value="HUnewm">HUnewm</option>
-                <option value="HUnewearl">HUnewearl</option>
-              </optgroup>
-              <optgroup label="Ranger">
-                <option value="RAmar">RAmar</option>
-                <option value="RAmarl">RAmarl</option>
-                <option value="RAcast">RAcast</option>
-                <option value="RAcaseal">RAcaseal</option>
-              </optgroup>
-              <optgroup label="Force">
-                <option value="FOmar">FOmar</option>
-                <option value="FOmarl">FOmarl</option>
-                <option value="FOnewm">FOnewm</option>
-                <option value="FOnewearl">FOnewearl</option>
-              </optgroup>
-            </select>
+            <div className="grid grid-cols-2 gap-2">
+              {skinToneNames.map((name, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => setSkinToneIndex(index)}
+                  className={`btn btn-sm ${skinToneIndex === index ? 'btn-primary' : 'btn-ghost'} text-white`}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column - Preview + Name/Create Button */}
+        <div className="flex flex-col gap-3 min-h-0">
+          {/* Preview */}
+          <div className="flex items-center justify-center bg-white/10 border-[5px] border-[#a6c9ff] rounded-lg p-6 flex-1 min-h-0">
+            <div className="w-full h-full">
+              <CharacterPreview
+                classId={classId || null}
+                variationIndex={variationIndex}
+                bodyColorIndex={bodyColorIndex}
+                hairColorIndex={hairColorIndex}
+                skinToneIndex={skinToneIndex}
+              />
+            </div>
           </div>
 
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label htmlFor="texture-id" style={{
-              display: 'block',
-              marginBottom: '0.5rem',
-              fontWeight: 'bold',
-              fontSize: '1.1rem',
-              color: 'white'
-            }}>
-              Appearance
-            </label>
-            <select
-              id="texture-id"
-              value={textureId}
-              onChange={(e) => setTextureId(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                fontSize: '1rem',
-                border: '2px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '8px',
-                background: 'rgba(255, 255, 255, 0.2)',
-                color: 'white',
-                transition: 'all 0.3s'
-              }}
-            >
-              <option value="">Select appearance</option>
-              <option value="tex_01">Texture 1</option>
-              <option value="tex_02">Texture 2</option>
-              <option value="tex_03">Texture 3</option>
-              <option value="tex_04">Texture 4</option>
-              <option value="tex_05">Texture 5</option>
-              <option value="tex_06">Texture 6</option>
-              <option value="tex_07">Texture 7</option>
-              <option value="tex_08">Texture 8</option>
-              <option value="tex_09">Texture 9</option>
-              <option value="tex_10">Texture 10</option>
-            </select>
-          </div>
-
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+          {/* Bottom Row - Character Name and Create Button */}
+          <div className="grid grid-cols-[1fr_auto] gap-4 items-end">
+            <div>
+              <label htmlFor="character-name" className="block mb-2 font-bold text-sm text-white">
+                Character Name
+              </label>
+              <input
+                type="text"
+                id="character-name"
+                value={characterName}
+                onChange={(e) => setCharacterName(e.target.value)}
+                maxLength={50}
+                required
+                placeholder="Enter character name"
+                className="input w-full bg-white/20 border-2 border-white/30 text-white placeholder:text-white/50"
+              />
+              {error && (
+                <div className="text-red-400 text-sm mt-2">
+                  {error}
+                </div>
+              )}
+            </div>
             <button
-              type="submit"
+              type="button"
+              onClick={handleSubmit}
               disabled={submitting}
-              style={{
-                flex: 1,
-                padding: '1rem 2rem',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '1.1rem',
-                cursor: submitting ? 'not-allowed' : 'pointer',
-                background: '#4CAF50',
-                color: 'white',
-                opacity: submitting ? 0.6 : 1,
-                transition: 'all 0.3s',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem'
-              }}
+              className={`btn btn-primary btn-lg ${submitting ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
               {submitting ? (
                 <>
-                  <div style={{
-                    width: '20px',
-                    height: '20px',
-                    border: '3px solid rgba(255, 255, 255, 0.3)',
-                    borderTop: '3px solid white',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite'
-                  }} />
+                  <span className="loading loading-spinner loading-sm"></span>
                   Creating...
                 </>
               ) : (
                 'Create Character'
               )}
             </button>
-            <a
-              href="/character-select"
-              style={{
-                flex: 1,
-                padding: '1rem 2rem',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '1.1rem',
-                cursor: 'pointer',
-                background: 'rgba(255, 255, 255, 0.2)',
-                color: 'white',
-                textDecoration: 'none',
-                textAlign: 'center',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.3s'
-              }}
-            >
-              Cancel
-            </a>
           </div>
-
-          {error && (
-            <div style={{
-              marginTop: '1rem',
-              padding: '1rem',
-              background: 'rgba(244, 67, 54, 0.2)',
-              border: '1px solid #f44336',
-              borderRadius: '8px',
-              color: '#ffcccc',
-              textAlign: 'center'
-            }}>
-              {error}
-            </div>
-          )}
-        </form>
-      </div>
-
-      {/* Preview Column */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <div style={{ width: '100%', height: '600px' }}>
-          <CharacterPreview classId={classId || null} textureId={textureId} />
         </div>
       </div>
-
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }
