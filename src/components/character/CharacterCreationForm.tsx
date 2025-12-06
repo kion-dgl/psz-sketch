@@ -167,7 +167,7 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
 
       {/* Main Content - Fixed height to fit viewport */}
       <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 flex-1 min-h-0">
-        {/* Form Column - Scrollable if needed */}
+        {/* Form Column - Extends to bottom */}
         <div className="bg-white/10 border-[5px] border-[#a6c9ff] rounded-lg p-6 flex flex-col gap-4 overflow-y-auto">
           {/* Head Variation */}
           {characterClass && (
@@ -196,7 +196,7 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
               <label className="block mb-2 font-bold text-sm text-white">
                 Body Color
               </label>
-              <div className="grid grid-cols-1 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {characterClass.colors.map((color, index) => (
                   <button
                     key={index}
@@ -216,7 +216,7 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
             <label className="block mb-2 font-bold text-sm text-white">
               Hair Color
             </label>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {hairColorNames.map((name, index) => (
                 <button
                   key={index}
@@ -235,7 +235,7 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
             <label className="block mb-2 font-bold text-sm text-white">
               Skin Tone
             </label>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {skinToneNames.map((name, index) => (
                 <button
                   key={index}
@@ -250,57 +250,60 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
           </div>
         </div>
 
-        {/* Preview Column */}
-        <div className="flex items-center justify-center bg-white/10 border-[5px] border-[#a6c9ff] rounded-lg p-6 min-h-0">
-          <div className="w-full h-full">
-            <CharacterPreview
-              classId={classId || null}
-              variationIndex={variationIndex}
-              bodyColorIndex={bodyColorIndex}
-              hairColorIndex={hairColorIndex}
-              skinToneIndex={skinToneIndex}
-            />
+        {/* Right Column - Preview + Name/Create Button */}
+        <div className="flex flex-col gap-3 min-h-0">
+          {/* Preview */}
+          <div className="flex items-center justify-center bg-white/10 border-[5px] border-[#a6c9ff] rounded-lg p-6 flex-1 min-h-0">
+            <div className="w-full h-full">
+              <CharacterPreview
+                classId={classId || null}
+                variationIndex={variationIndex}
+                bodyColorIndex={bodyColorIndex}
+                hairColorIndex={hairColorIndex}
+                skinToneIndex={skinToneIndex}
+              />
+            </div>
+          </div>
+
+          {/* Bottom Row - Character Name and Create Button */}
+          <div className="grid grid-cols-[1fr_auto] gap-4 items-end">
+            <div>
+              <label htmlFor="character-name" className="block mb-2 font-bold text-sm text-white">
+                Character Name
+              </label>
+              <input
+                type="text"
+                id="character-name"
+                value={characterName}
+                onChange={(e) => setCharacterName(e.target.value)}
+                maxLength={50}
+                required
+                placeholder="Enter character name"
+                className="input w-full bg-white/20 border-2 border-white/30 text-white placeholder:text-white/50"
+              />
+              {error && (
+                <div className="text-red-400 text-sm mt-2">
+                  {error}
+                </div>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={submitting}
+              className={`btn btn-primary btn-lg ${submitting ? 'opacity-60 cursor-not-allowed' : ''}`}
+            >
+              {submitting ? (
+                <>
+                  <span className="loading loading-spinner loading-sm"></span>
+                  Creating...
+                </>
+              ) : (
+                'Create Character'
+              )}
+            </button>
           </div>
         </div>
-      </div>
-
-      {/* Bottom Row - Character Name and Create Button */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 items-end">
-        <div>
-          <label htmlFor="character-name" className="block mb-2 font-bold text-sm text-white">
-            Character Name
-          </label>
-          <input
-            type="text"
-            id="character-name"
-            value={characterName}
-            onChange={(e) => setCharacterName(e.target.value)}
-            maxLength={50}
-            required
-            placeholder="Enter character name"
-            className="input w-full bg-white/20 border-2 border-white/30 text-white placeholder:text-white/50"
-          />
-          {error && (
-            <div className="text-red-400 text-sm mt-2">
-              {error}
-            </div>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={submitting}
-          className={`btn btn-primary btn-lg ${submitting ? 'opacity-60 cursor-not-allowed' : ''}`}
-        >
-          {submitting ? (
-            <>
-              <span className="loading loading-spinner loading-sm"></span>
-              Creating...
-            </>
-          ) : (
-            'Create Character'
-          )}
-        </button>
       </div>
     </div>
   );
