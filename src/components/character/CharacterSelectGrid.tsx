@@ -73,7 +73,7 @@ export default function CharacterSelectGrid() {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-4 md:gap-6 flex-1 items-center content-center">
+      <div className="grid grid-cols-2 gap-8 md:gap-12 flex-1 items-center content-center">
         {[0, 1, 2, 3].map((slotNum) => {
           const character = characters.find(c => c.slot === slotNum);
 
@@ -83,7 +83,7 @@ export default function CharacterSelectGrid() {
               className="card bg-white border-[5px] border-[#a6c9ff] shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer"
               onClick={() => character && (window.location.href = `/character-selected/${character.character_id}`)}
             >
-              <div className="card-body p-4">
+              <div className="card-body p-8 flex items-center justify-center">
                 {character ? (
                   <>
                     <button
@@ -93,7 +93,7 @@ export default function CharacterSelectGrid() {
                       Delete
                     </button>
 
-                    <div className="flex gap-3 h-full">
+                    <div className="flex gap-3 h-full w-full">
                       {/* Character Image - 1/3 width */}
                       <div className="w-1/3 flex items-center justify-center bg-gray-100 rounded">
                         <div className="avatar placeholder">
@@ -131,16 +131,16 @@ export default function CharacterSelectGrid() {
                     </div>
                   </>
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-full min-h-[200px]">
-                    <h3 className="card-title justify-center text-gray-700 mb-2 uppercase" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '1rem' }}>
+                  <div className="flex flex-col items-center justify-center gap-4">
+                    <h3 className="card-title justify-center text-gray-700 uppercase" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '1rem' }}>
                       New Game
                     </h3>
-                    <p className="text-sm text-gray-500 mb-4" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '0.5rem' }}>
+                    <p className="text-sm text-gray-500" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '0.5rem' }}>
                       Create a new Hunter
                     </p>
                     <a
                       href={`/character-create?slot=${slotNum}`}
-                      className="btn btn-primary btn-sm"
+                      className="btn btn-primary btn-sm px-8"
                       onClick={(e) => e.stopPropagation()}
                     >
                       Start
