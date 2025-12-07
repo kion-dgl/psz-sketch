@@ -17,10 +17,11 @@ export default function CounterEnvironment() {
 
   return (
     <>
-      {/* Invisible ground plane with collision at Y=0 */}
+      {/* Transparent ground plane with collision at Y=0 */}
       <RigidBody type="fixed">
-        <mesh position={[0, -0.5, 0]} receiveShadow visible={false}>
+        <mesh position={[0, -0.5, 0]} receiveShadow>
           <boxGeometry args={[500, 1, 500]} />
+          <meshStandardMaterial transparent opacity={0} />
         </mesh>
       </RigidBody>
 
