@@ -180,12 +180,12 @@ export default function CounterArea() {
         />
 
         <Suspense fallback={null}>
-          <Physics gravity={[0, -9.81, 0]} debug>
+          <Physics gravity={[0, -9.81, 0]}>
             {/* Counter Environment */}
             <CounterEnvironment />
 
             {/* Counter Walls */}
-            <CounterWalls visible={true} />
+            <CounterWalls visible={false} />
 
             {/* Area Triggers */}
             <CounterTriggers visible={false} />
