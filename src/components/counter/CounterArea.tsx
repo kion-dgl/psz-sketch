@@ -6,6 +6,7 @@ import type { Character } from '../../stores/characterStore';
 import CounterEnvironment from './CounterEnvironment';
 import PlayerCharacter from '../city/PlayerCharacter';
 import CounterNPCs from './CounterNPCs';
+import CounterWalls from './CounterWalls';
 
 function CameraController({ target }: { target: { x: number; y: number; z: number } }) {
   const { camera } = useThree();
@@ -181,6 +182,9 @@ export default function CounterArea() {
           <Physics gravity={[0, -9.81, 0]} debug>
             {/* Counter Environment */}
             <CounterEnvironment />
+
+            {/* Counter Walls */}
+            <CounterWalls visible={true} />
 
             {/* Counter NPCs */}
             <CounterNPCs />
