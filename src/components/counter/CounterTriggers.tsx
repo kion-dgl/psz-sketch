@@ -1,0 +1,71 @@
+import { RigidBody, CuboidCollider } from '@react-three/rapier';
+import { useState } from 'react';
+
+// Define trigger zones for area transitions
+interface AreaTrigger {
+  position: [number, number, number];
+  size: [number, number, number];
+  targetArea: string;
+  name: string;
+}
+
+const TRIGGERS: AreaTrigger[] = [
+  // Exit trigger to Market: (-2.56, 72.20) → (2.72, 72.20)
+  {
+    position: [0.08, 1, 72.20],
+    size: [5.28, 3, 1],
+    targetArea: '/stage/city',
+    name: 'Exit to Market'
+  }
+];
+
+interface CounterTriggersProps {
+  visible?: boolean;
+}
+
+export default function CounterTriggers({ visible = true }: CounterTriggersProps) {
+  const [triggeredAreas, setTriggeredAreas] = useState<Set<string>>(new Set());
+
+  const handleTriggerEnter = (trigger: AreaTrigger) => {
+    if (triggeredAreas.has(trigger.name)) return;
+
+    console.log(`Entering trigger: ${trigger.name}`);
+    console.log(`Navigating to: ${trigger.targetArea}`);
+
+    // Mark as triggered to prevent repeated triggers
+    setTriggeredAreas(prev => new Set(prev).add(trigger.name));
+
+    // Navigate to the target area
+    window.location.href = trigger.targetArea;
+  };
+
+  return (
+    <>
+      {TRIGGERS.map((trigger, index) => (
+        <RigidBody
+          key={index}
+          type="fixed"
+          position={trigger.position}
+          sensor
+          onIntersectionEnter={() => handleTriggerEnter(trigger)}
+        >
+          {/* Explicit collider for sensor detection */}
+          <CuboidCollider args={[trigger.size[0] / 2, trigger.size[1] / 2, trigger.size[2] / 2]} />
+
+          {/* Visual mesh (only visible when visible prop is true) */}
+          {visible && (
+            <mesh>
+              <boxGeometry args={trigger.size} />
+              <meshStandardMaterial
+                color="cyan"
+                transparent
+                opacity={0.5}
+                wireframe
+              />
+            </mesh>
+          )}
+        </RigidBody>
+      ))}
+    </>
+  );
+}

@@ -7,6 +7,7 @@ import CounterEnvironment from './CounterEnvironment';
 import PlayerCharacter from '../city/PlayerCharacter';
 import CounterNPCs from './CounterNPCs';
 import CounterWalls from './CounterWalls';
+import CounterTriggers from './CounterTriggers';
 
 function CameraController({ target }: { target: { x: number; y: number; z: number } }) {
   const { camera } = useThree();
@@ -185,6 +186,9 @@ export default function CounterArea() {
 
             {/* Counter Walls */}
             <CounterWalls visible={true} />
+
+            {/* Area Triggers */}
+            <CounterTriggers visible={false} />
 
             {/* Counter NPCs */}
             <CounterNPCs />
