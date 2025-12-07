@@ -13,8 +13,7 @@ interface PlayerCharacterProps {
 
 export default function PlayerCharacter({ character, onPositionChange, spawnPosition = [0.98, 10, 62.79], onInteraction }: PlayerCharacterProps) {
   const rigidBodyRef = useRef<RapierRigidBody>(null);
-  const [facingDirection, setFacingDirection] = useState({ x: 0, y: 0, z: -1 });
-  const lastMovement = useRef({ x: 0, y: 0, z: -1 });
+  const [rotation, setRotation] = useState(0); // Tank control rotation
 
   // Keyboard state
   const keys = useRef({
@@ -57,31 +56,34 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
   }, []);
 
   // Character movement and interaction
-  useFrame(() => {
+  useFrame((state, delta) => {
     if (!rigidBodyRef.current) return;
 
-    const velocity = { x: 0, y: 0, z: 0 };
     const speed = 5;
+    const rotationSpeed = 2; // radians per second
 
     // Get current velocity
     const currentVel = rigidBodyRef.current.linvel();
 
-    // Calculate desired horizontal velocity
-    if (keys.current.forward) velocity.z -= speed;
-    if (keys.current.backward) velocity.z += speed;
-    if (keys.current.left) velocity.x -= speed;
-    if (keys.current.right) velocity.x += speed;
+    // Tank controls: A/D rotate, W/S move forward/backward
+    let newRotation = rotation;
+    if (keys.current.left) {
+      newRotation -= rotationSpeed * delta;
+    }
+    if (keys.current.right) {
+      newRotation += rotationSpeed * delta;
+    }
+    setRotation(newRotation);
 
-    // Update facing direction based on movement
-    if (velocity.x !== 0 || velocity.z !== 0) {
-      const length = Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
-      const newDirection = {
-        x: velocity.x / length,
-        y: 0,
-        z: velocity.z / length
-      };
-      lastMovement.current = newDirection;
-      setFacingDirection(newDirection);
+    // Calculate movement based on rotation
+    const velocity = { x: 0, y: 0, z: 0 };
+    if (keys.current.forward) {
+      velocity.x = Math.sin(newRotation) * speed;
+      velocity.z = Math.cos(newRotation) * speed;
+    }
+    if (keys.current.backward) {
+      velocity.x = -Math.sin(newRotation) * speed;
+      velocity.z = -Math.cos(newRotation) * speed;
     }
 
     // Set velocity (preserve Y for gravity)
@@ -124,8 +126,8 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
         enabledRotations={[false, false, false]}
         lockRotations
       >
-        {/* Simple cube for debugging */}
-        <mesh castShadow>
+        {/* Simple cube for debugging - rotates to show facing direction */}
+        <mesh castShadow rotation={[0, rotation, 0]}>
           <boxGeometry args={[1, 2, 1]} />
           <meshStandardMaterial color="blue" />
         </mesh>
@@ -135,14 +137,14 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
       {rigidBodyRef.current && rigidBodyRef.current.translation() && (
         <mesh
           position={[
-            rigidBodyRef.current.translation().x + facingDirection.x * 1.5,
+            rigidBodyRef.current.translation().x + Math.sin(rotation) * 1.5,
             rigidBodyRef.current.translation().y + 1,
-            rigidBodyRef.current.translation().z + facingDirection.z * 1.5
+            rigidBodyRef.current.translation().z + Math.cos(rotation) * 1.5
           ]}
           rotation={[
+            Math.PI / 2, // Rotate 90 degrees to make cylinder horizontal
             0,
-            Math.atan2(facingDirection.x, facingDirection.z),
-            0
+            rotation // Rotate around vertical axis to match player facing
           ]}
         >
           <cylinderGeometry args={[0.05, 0.05, 3, 8]} />
