@@ -3,11 +3,8 @@ import { Physics } from '@react-three/rapier';
 import { Suspense, useState, useEffect, useRef } from 'react';
 import { PerspectiveCamera } from '@react-three/drei';
 import type { Character } from '../../stores/characterStore';
-import MarketEnvironment from './MarketEnvironment';
-import PlayerCharacter from './PlayerCharacter';
-import NPCs from './NPCs';
-import InvisibleWalls from './InvisibleWalls';
-import AreaTriggers from './AreaTriggers';
+import CounterEnvironment from './CounterEnvironment';
+import PlayerCharacter from '../city/PlayerCharacter';
 
 function CameraController({ target }: { target: { x: number; y: number; z: number } }) {
   const { camera } = useThree();
@@ -30,7 +27,7 @@ function CameraController({ target }: { target: { x: number; y: number; z: numbe
   useFrame(() => {
     // Position camera behind and above the player with rotation
     const distance = 12;
-    const height = 4; // Reduced from 8 for a lower, more horizontal angle
+    const height = 4;
 
     const offsetX = Math.sin(rotationRef.current) * distance;
     const offsetZ = Math.cos(rotationRef.current) * distance;
@@ -46,7 +43,7 @@ function CameraController({ target }: { target: { x: number; y: number; z: numbe
   return null;
 }
 
-export default function CityMarket() {
+export default function CounterArea() {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [loading, setLoading] = useState(true);
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0 });
@@ -167,7 +164,7 @@ export default function CityMarket() {
 
       {/* 3D Scene */}
       <Canvas shadows>
-        <PerspectiveCamera makeDefault position={[0, 8, 12]} />
+        <PerspectiveCamera makeDefault position={[0, 4, 12]} />
         <CameraController target={playerPosition} />
 
         <ambientLight intensity={0.6} />
@@ -180,24 +177,15 @@ export default function CityMarket() {
         />
 
         <Suspense fallback={null}>
-          <Physics gravity={[0, -9.81, 0]}>
-            {/* Market Environment */}
-            <MarketEnvironment />
-
-            {/* Invisible Walls */}
-            <InvisibleWalls visible={false} />
-
-            {/* Area Triggers */}
-            <AreaTriggers visible={false} />
+          <Physics gravity={[0, -9.81, 0]} debug>
+            {/* Counter Environment */}
+            <CounterEnvironment />
 
             {/* Player Character */}
             <PlayerCharacter
               character={selectedCharacter}
               onPositionChange={setPlayerPosition}
             />
-
-            {/* NPC Placeholders */}
-            <NPCs />
           </Physics>
         </Suspense>
       </Canvas>

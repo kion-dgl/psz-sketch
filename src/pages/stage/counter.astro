@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CounterArea from '../../components/counter/CounterArea';
+
+export const prerender = false;
+---
+
+<Layout title="Counter - Density Dwarf">
+  <CounterArea client:load />
+</Layout>

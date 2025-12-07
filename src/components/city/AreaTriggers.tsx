@@ -10,12 +10,12 @@ interface AreaTrigger {
 }
 
 const TRIGGERS: AreaTrigger[] = [
-  // Exit trigger: (-3.33, 14.43) → (4.09, 14.43)
+  // Exit trigger to Counter: (-3.33, 14.43) → (4.09, 14.43)
   {
     position: [0.38, 1, 14.43],
     size: [7.42, 3, 1],
-    targetArea: '/stage/next-area', // Change this to the actual next area route
-    name: 'Exit to Next Area'
+    targetArea: '/stage/counter',
+    name: 'Exit to Counter'
   }
 ];
 
@@ -30,15 +30,13 @@ export default function AreaTriggers({ visible = true }: AreaTriggersProps) {
     if (triggeredAreas.has(trigger.name)) return;
 
     console.log(`Entering trigger: ${trigger.name}`);
-    console.log(`Would navigate to: ${trigger.targetArea}`);
+    console.log(`Navigating to: ${trigger.targetArea}`);
 
     // Mark as triggered to prevent repeated triggers
     setTriggeredAreas(prev => new Set(prev).add(trigger.name));
 
-    // TODO: Implement actual area transition
-    // For now, just log. Later, you can:
-    // window.location.href = trigger.targetArea;
-    // or use a transition animation first
+    // Navigate to the target area
+    window.location.href = trigger.targetArea;
   };
 
   return (
