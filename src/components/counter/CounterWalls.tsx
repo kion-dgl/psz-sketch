@@ -24,6 +24,8 @@ const WALLS = [
   { position: [-8.39, 2.5, -7.76] as [number, number, number], length: 9.31, rotation: 2.356 },
   // Wall 9: (-5.13, -11.08) → (-2.57, -12.15)
   { position: [-3.85, 2.5, -11.615] as [number, number, number], length: 2.78, rotation: 1.964 },
+  // Wall 10: (-5.54, 12.20) → (-10.17, 8.58)
+  { position: [-7.855, 2.5, 10.39] as [number, number, number], length: 5.88, rotation: -2.246 },
 ];
 
 interface CounterWallsProps {
