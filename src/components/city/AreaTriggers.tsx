@@ -1,4 +1,4 @@
-import { RigidBody } from '@react-three/rapier';
+import { RigidBody, CuboidCollider } from '@react-three/rapier';
 import { useState } from 'react';
 
 // Define trigger zones for area transitions
@@ -49,15 +49,21 @@ export default function AreaTriggers({ visible = true }: AreaTriggersProps) {
           sensor
           onIntersectionEnter={() => handleTriggerEnter(trigger)}
         >
-          <mesh visible={visible}>
-            <boxGeometry args={trigger.size} />
-            <meshStandardMaterial
-              color="cyan"
-              transparent
-              opacity={visible ? 0.5 : 0}
-              wireframe={visible}
-            />
-          </mesh>
+          {/* Explicit collider for sensor detection */}
+          <CuboidCollider args={[trigger.size[0] / 2, trigger.size[1] / 2, trigger.size[2] / 2]} />
+
+          {/* Visual mesh (only visible when visible prop is true) */}
+          {visible && (
+            <mesh>
+              <boxGeometry args={trigger.size} />
+              <meshStandardMaterial
+                color="cyan"
+                transparent
+                opacity={0.5}
+                wireframe
+              />
+            </mesh>
+          )}
         </RigidBody>
       ))}
     </>
