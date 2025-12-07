@@ -68,10 +68,10 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
     // Tank controls: A/D rotate, W/S move forward/backward
     let newRotation = rotation;
     if (keys.current.left) {
-      newRotation -= rotationSpeed * delta;
+      newRotation += rotationSpeed * delta;
     }
     if (keys.current.right) {
-      newRotation += rotationSpeed * delta;
+      newRotation -= rotationSpeed * delta;
     }
     setRotation(newRotation);
 
