@@ -76,14 +76,15 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
     setRotation(newRotation);
 
     // Calculate movement based on rotation
+    // Red line points in -Z direction, so negate to move forward
     const velocity = { x: 0, y: 0, z: 0 };
     if (keys.current.forward) {
-      velocity.x = Math.sin(newRotation) * speed;
-      velocity.z = Math.cos(newRotation) * speed;
-    }
-    if (keys.current.backward) {
       velocity.x = -Math.sin(newRotation) * speed;
       velocity.z = -Math.cos(newRotation) * speed;
+    }
+    if (keys.current.backward) {
+      velocity.x = Math.sin(newRotation) * speed;
+      velocity.z = Math.cos(newRotation) * speed;
     }
 
     // Set velocity (preserve Y for gravity)
