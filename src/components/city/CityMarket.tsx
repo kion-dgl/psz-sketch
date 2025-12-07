@@ -53,6 +53,11 @@ export default function CityMarket() {
   const [isWallStart, setIsWallStart] = useState(true);
   const [spawnPosition, setSpawnPosition] = useState<[number, number, number]>([0.98, 10, 62.79]);
 
+  const handleNPCInteraction = (npcName: string) => {
+    console.log(`[Market] Player interacted with: ${npcName}`);
+    // TODO: Open dialogue UI, shop interface, etc.
+  };
+
   useEffect(() => {
     // Check URL parameter for spawn location
     const urlParams = new URLSearchParams(window.location.search);
@@ -172,6 +177,9 @@ export default function CityMarket() {
         <div style={{ marginTop: '0.5rem', color: '#ffd700' }}>
           Press SPACE: {isWallStart ? 'Wall Start' : 'Wall Stop'}
         </div>
+        <div style={{ marginTop: '0.5rem', color: '#ff6b6b' }}>
+          Press E to interact with NPCs
+        </div>
       </div>
 
       {/* 3D Scene */}
@@ -204,6 +212,7 @@ export default function CityMarket() {
               character={selectedCharacter}
               onPositionChange={setPlayerPosition}
               spawnPosition={spawnPosition}
+              onInteraction={handleNPCInteraction}
             />
 
             {/* NPC Placeholders */}

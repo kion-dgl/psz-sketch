@@ -52,6 +52,11 @@ export default function CounterArea() {
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0 });
   const [isWallStart, setIsWallStart] = useState(true);
 
+  const handleNPCInteraction = (npcName: string) => {
+    console.log(`[Counter] Player interacted with: ${npcName}`);
+    // TODO: Open dialogue UI, storage interface, quest menu, etc.
+  };
+
   useEffect(() => {
     // Load selected character from localStorage
     try {
@@ -163,6 +168,9 @@ export default function CounterArea() {
         <div style={{ marginTop: '0.5rem', color: '#ffd700' }}>
           Press SPACE: {isWallStart ? 'Wall Start' : 'Wall Stop'}
         </div>
+        <div style={{ marginTop: '0.5rem', color: '#ff6b6b' }}>
+          Press E to interact with NPCs
+        </div>
       </div>
 
       {/* 3D Scene */}
@@ -197,6 +205,7 @@ export default function CounterArea() {
             <PlayerCharacter
               character={selectedCharacter}
               onPositionChange={setPlayerPosition}
+              onInteraction={handleNPCInteraction}
             />
           </Physics>
         </Suspense>
