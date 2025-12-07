@@ -51,8 +51,17 @@ export default function CityMarket() {
   const [loading, setLoading] = useState(true);
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0 });
   const [isWallStart, setIsWallStart] = useState(true);
+  const [spawnPosition, setSpawnPosition] = useState<[number, number, number]>([0.98, 10, 62.79]);
 
   useEffect(() => {
+    // Check URL parameter for spawn location
+    const urlParams = new URLSearchParams(window.location.search);
+    const spawn = urlParams.get('spawn');
+
+    if (spawn === 'counter-exit') {
+      setSpawnPosition([0.98, 10, 18.84]);
+    }
+
     // Load selected character from localStorage
     try {
       const selectedCharacterId = localStorage.getItem('selectedCharacterId');
@@ -194,6 +203,7 @@ export default function CityMarket() {
             <PlayerCharacter
               character={selectedCharacter}
               onPositionChange={setPlayerPosition}
+              spawnPosition={spawnPosition}
             />
 
             {/* NPC Placeholders */}

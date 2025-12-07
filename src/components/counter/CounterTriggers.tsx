@@ -14,7 +14,7 @@ const TRIGGERS: AreaTrigger[] = [
   {
     position: [0.08, 1, 72.20],
     size: [5.28, 3, 1],
-    targetArea: '/stage/city',
+    targetArea: '/stage/city?spawn=counter-exit',
     name: 'Exit to Market'
   }
 ];

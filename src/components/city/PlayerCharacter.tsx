@@ -7,9 +7,10 @@ import type { Character } from '../../stores/characterStore';
 interface PlayerCharacterProps {
   character: Character;
   onPositionChange: (position: { x: number; y: number; z: number }) => void;
+  spawnPosition?: [number, number, number];
 }
 
-export default function PlayerCharacter({ character, onPositionChange }: PlayerCharacterProps) {
+export default function PlayerCharacter({ character, onPositionChange, spawnPosition = [0.98, 10, 62.79] }: PlayerCharacterProps) {
   const rigidBodyRef = useRef<RapierRigidBody>(null);
 
   // Keyboard state
@@ -87,7 +88,7 @@ export default function PlayerCharacter({ character, onPositionChange }: PlayerC
   return (
     <RigidBody
       ref={rigidBodyRef}
-      position={[0.98, 10, 62.79]}
+      position={spawnPosition}
       enabledRotations={[false, false, false]}
       lockRotations
     >
