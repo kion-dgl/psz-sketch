@@ -20,8 +20,8 @@ const WALLS = [
   { position: [-9.96, 2.5, 1.25] as [number, number, number], length: 3.38, rotation: 1.571 },
   // Wall 7: (-11.65, 1.25) → (-11.65, -4.44)
   { position: [-11.65, 2.5, -1.595] as [number, number, number], length: 5.69, rotation: 0 },
-  // Wall 8: (-11.65, -4.44) → (-5.13, -11.08)
-  { position: [-8.39, 2.5, -7.76] as [number, number, number], length: 9.31, rotation: 2.356 },
+  // Wall 8: (-11.65, -4.44) → (-5.13, -11.08) - Moved back towards counter
+  { position: [-8.39, 2.5, -10.0] as [number, number, number], length: 9.31, rotation: 2.356 },
   // Wall 9: (-5.13, -11.08) → (-2.57, -12.15)
   { position: [-3.85, 2.5, -11.615] as [number, number, number], length: 2.78, rotation: 1.964 },
   // Wall 10: (-5.54, 12.20) → (-10.17, 8.58)
@@ -63,6 +63,8 @@ export default function CounterWalls({ visible = true }: CounterWallsProps) {
           type="fixed"
           position={wall.position}
           rotation={[0, wall.rotation, 0]}
+          collisionGroups={0x00010001}
+          userData={{ type: 'wall', index }}
         >
           <CuboidCollider args={[WALL_THICKNESS / 2, WALL_HEIGHT / 2, wall.length / 2]} />
           {visible && (

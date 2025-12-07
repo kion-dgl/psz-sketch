@@ -1,12 +1,12 @@
 import { useRef, useEffect, useState } from 'react';
-import { RigidBody, useRapier } from '@react-three/rapier';
+import { RigidBody, useRapier, CylinderCollider } from '@react-three/rapier';
 import type { RapierRigidBody } from '@react-three/rapier';
 import { useFrame } from '@react-three/fiber';
 import type { Character } from '../../stores/characterStore';
 
 interface PlayerCharacterProps {
   character: Character;
-  onPositionChange: (position: { x: number; y: number; z: number }) => void;
+  onPositionChange: (position: { x: number; y: number; z: number; rotation: number }) => void;
   spawnPosition?: [number, number, number];
   onInteraction?: (npcName: string) => void;
 }
@@ -107,7 +107,8 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
     onPositionChange({
       x: position.x,
       y: position.y,
-      z: position.z
+      z: position.z,
+      rotation: newRotation
     });
 
     // Raycast to detect NPCs in front of player
@@ -131,13 +132,40 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
         z: dirZ / dirLength
       };
 
-      // Cast ray with filter to exclude the player's own collider
+      // Cast ray with NO filter to see what's actually in front of player
+      const debugRay = world.castRay(
+        { origin: rayOrigin, dir: rayDirection },
+        rayLength,
+        true,
+        undefined, // filterFlags
+        undefined, // filterGroups - hit EVERYTHING
+        undefined, // filterExcludeCollider
+        rigidBodyRef.current // filterExcludeRigidBody - exclude player
+      );
+
+      if (debugRay) {
+        const debugParent = debugRay.collider.parent();
+        const groups = debugRay.collider.collisionGroups();
+        const userData = debugParent?.userData;
+
+        // Decode collision group
+        let groupName = 'UNKNOWN';
+        if (groups === 0x00010001) groupName = 'WALL';
+        else if (groups === 0x00020002) groupName = 'NPC';
+        else if (groups === 0x00030003) groupName = 'GROUND';
+        else if (groups === 0x00040004) groupName = 'TRIGGER';
+
+        console.log(`[Ray] ${groupName} at distance ${debugRay.timeOfImpact.toFixed(2)} | Groups: 0x${groups.toString(16)} | userData:`, userData);
+      }
+
+      // Cast ray with filter to exclude the player's own collider and walls
+      // Only hit collision group 1 (NPCs), not group 0 (walls)
       const ray = world.castRay(
         { origin: rayOrigin, dir: rayDirection },
         rayLength,
         true,
         undefined, // filterFlags
-        undefined, // filterGroups
+        0x00020002, // filterGroups - only hit group 1 (NPCs)
         undefined, // filterExcludeCollider
         rigidBodyRef.current // filterExcludeRigidBody - exclude player
       );
@@ -187,11 +215,24 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
       position={spawnPosition}
       enabledRotations={[false, false, false]}
       lockRotations
+      onCollisionEnter={(event) => {
+        const parent = event.other.parent();
+        const collisionGroups = event.other.collisionGroups();
+        console.log('=== Player Collision ===');
+        console.log('Collision groups (hex):', '0x' + collisionGroups.toString(16));
+        console.log('RigidBody userData:', parent?.userData);
+        console.log('RigidBodyObject name:', event.other.rigidBodyObject?.name);
+        console.log('ColliderObject name:', event.other.colliderObject?.name);
+        console.log('Full event:', event.other);
+      }}
     >
+      {/* Cylinder collider matching NPC dimensions */}
+      <CylinderCollider args={[1, 0.5]} />
+
       <group rotation={[0, rotation, 0]}>
-        {/* Simple cube for debugging */}
+        {/* Cylinder player matching NPC dimensions */}
         <mesh castShadow>
-          <boxGeometry args={[1, 2, 1]} />
+          <cylinderGeometry args={[0.5, 0.5, 2, 16]} />
           <meshStandardMaterial color="blue" />
         </mesh>
 

@@ -12,7 +12,9 @@ export default function NPCs() {
     <>
       {NPCS.map((npc, index) => (
         <group key={index} position={[npc.x, npc.y, npc.z]}>
-          <RigidBody type="fixed" userData={{ npcName: npc.name }}>
+          {/* RigidBody kept for userData, sensor to disable physical collision */}
+          {/* Group 1 for NPCs, separate from walls (group 0) */}
+          <RigidBody type="fixed" sensor userData={{ npcName: npc.name }} collisionGroups={0x00020002}>
             <CylinderCollider args={[1, 0.5]} />
             <mesh castShadow receiveShadow>
               <cylinderGeometry args={[0.5, 0.5, 2, 16]} />

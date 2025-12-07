@@ -47,6 +47,8 @@ export default function CounterTriggers({ visible = true }: CounterTriggersProps
           type="fixed"
           position={trigger.position}
           sensor
+          collisionGroups={0x00040004}
+          userData={{ type: 'trigger', name: trigger.name }}
           onIntersectionEnter={() => handleTriggerEnter(trigger)}
         >
           {/* Explicit collider for sensor detection */}

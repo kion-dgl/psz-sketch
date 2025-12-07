@@ -29,8 +29,8 @@ function CameraController({ target }: { target: { x: number; y: number; z: numbe
 
   useFrame(() => {
     // Position camera behind and above the player with rotation
-    const distance = 12;
-    const height = 4; // Reduced from 8 for a lower, more horizontal angle
+    const distance = 6; // Closer camera for better view
+    const height = 3;
 
     const offsetX = Math.sin(rotationRef.current) * distance;
     const offsetZ = Math.cos(rotationRef.current) * distance;
@@ -49,7 +49,7 @@ function CameraController({ target }: { target: { x: number; y: number; z: numbe
 export default function CityMarket() {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [loading, setLoading] = useState(true);
-  const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0 });
+  const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0, rotation: 0 });
   const [isWallStart, setIsWallStart] = useState(true);
   const [spawnPosition, setSpawnPosition] = useState<[number, number, number]>([0.98, 10, 62.79]);
 
@@ -174,6 +174,7 @@ export default function CityMarket() {
         <div>X: {playerPosition.x.toFixed(2)}</div>
         <div>Y: {playerPosition.y.toFixed(2)}</div>
         <div>Z: {playerPosition.z.toFixed(2)}</div>
+        <div>Rotation: {playerPosition.rotation.toFixed(2)}</div>
         <div style={{ marginTop: '0.5rem', color: '#ffd700' }}>
           Press SPACE: {isWallStart ? 'Wall Start' : 'Wall Stop'}
         </div>
@@ -202,7 +203,7 @@ export default function CityMarket() {
             <MarketEnvironment />
 
             {/* Invisible Walls */}
-            <InvisibleWalls visible={false} />
+            <InvisibleWalls visible={true} />
 
             {/* Area Triggers */}
             <AreaTriggers visible={false} />

@@ -3,7 +3,7 @@ import { Physics } from '@react-three/rapier';
 import { Suspense, useState, useEffect, useRef } from 'react';
 import { PerspectiveCamera } from '@react-three/drei';
 import type { Character } from '../../stores/characterStore';
-import CounterEnvironment from './CounterEnvironment';
+import CounterEnvironment, { CounterGroundPlane } from './CounterEnvironment';
 import PlayerCharacter from '../city/PlayerCharacter';
 import CounterNPCs from './CounterNPCs';
 import CounterWalls from './CounterWalls';
@@ -29,8 +29,8 @@ function CameraController({ target }: { target: { x: number; y: number; z: numbe
 
   useFrame(() => {
     // Position camera behind and above the player with rotation
-    const distance = 12;
-    const height = 4;
+    const distance = 6; // Closer camera for better view
+    const height = 3;
 
     const offsetX = Math.sin(rotationRef.current) * distance;
     const offsetZ = Math.cos(rotationRef.current) * distance;
@@ -49,7 +49,7 @@ function CameraController({ target }: { target: { x: number; y: number; z: numbe
 export default function CounterArea() {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [loading, setLoading] = useState(true);
-  const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0 });
+  const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0, rotation: 0 });
   const [isWallStart, setIsWallStart] = useState(true);
 
   const handleNPCInteraction = (npcName: string) => {
@@ -165,6 +165,7 @@ export default function CounterArea() {
         <div>X: {playerPosition.x.toFixed(2)}</div>
         <div>Y: {playerPosition.y.toFixed(2)}</div>
         <div>Z: {playerPosition.z.toFixed(2)}</div>
+        <div>Rotation: {playerPosition.rotation.toFixed(2)}</div>
         <div style={{ marginTop: '0.5rem', color: '#ffd700' }}>
           Press SPACE: {isWallStart ? 'Wall Start' : 'Wall Stop'}
         </div>
@@ -188,12 +189,15 @@ export default function CounterArea() {
         />
 
         <Suspense fallback={null}>
+          {/* Counter Environment - OUTSIDE Physics to prevent auto-collision */}
+          <CounterEnvironment />
+
           <Physics gravity={[0, -9.81, 0]}>
-            {/* Counter Environment */}
-            <CounterEnvironment />
+            {/* Ground plane */}
+            <CounterGroundPlane />
 
             {/* Counter Walls */}
-            <CounterWalls visible={false} />
+            <CounterWalls visible={true} />
 
             {/* Area Triggers */}
             <CounterTriggers visible={false} />

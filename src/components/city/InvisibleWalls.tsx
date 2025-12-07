@@ -76,6 +76,7 @@ export default function InvisibleWalls({ visible = true }: InvisibleWallsProps) 
           type="fixed"
           position={wall.position}
           rotation={[0, wall.rotation, 0]}
+          collisionGroups={0x00010001} // Group 0, collides with group 0 (player)
         >
           <CuboidCollider args={[WALL_THICKNESS / 2, WALL_HEIGHT / 2, wall.length / 2]} />
           {visible && (
