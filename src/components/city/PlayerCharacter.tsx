@@ -119,38 +119,28 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
   });
 
   return (
-    <group>
-      <RigidBody
-        ref={rigidBodyRef}
-        position={spawnPosition}
-        enabledRotations={[false, false, false]}
-        lockRotations
-      >
-        {/* Simple cube for debugging - rotates to show facing direction */}
-        <mesh castShadow rotation={[0, rotation, 0]}>
+    <RigidBody
+      ref={rigidBodyRef}
+      position={spawnPosition}
+      enabledRotations={[false, false, false]}
+      lockRotations
+    >
+      <group rotation={[0, rotation, 0]}>
+        {/* Simple cube for debugging */}
+        <mesh castShadow>
           <boxGeometry args={[1, 2, 1]} />
           <meshStandardMaterial color="blue" />
         </mesh>
-      </RigidBody>
 
-      {/* Red line indicator showing interaction raycast */}
-      {rigidBodyRef.current && rigidBodyRef.current.translation() && (
+        {/* Red line indicator - child of player so it rotates with player */}
         <mesh
-          position={[
-            rigidBodyRef.current.translation().x + Math.sin(rotation) * 1.5,
-            rigidBodyRef.current.translation().y + 1,
-            rigidBodyRef.current.translation().z + Math.cos(rotation) * 1.5
-          ]}
-          rotation={[
-            Math.PI / 2, // Rotate 90 degrees to make cylinder horizontal
-            0,
-            rotation // Rotate around vertical axis to match player facing
-          ]}
+          position={[0, 1, -1.5]} // Position in front of player (local coordinates)
+          rotation={[Math.PI / 2, 0, 0]} // Rotate to make horizontal
         >
           <cylinderGeometry args={[0.05, 0.05, 3, 8]} />
           <meshStandardMaterial color="red" emissive="red" emissiveIntensity={0.5} />
         </mesh>
-      )}
-    </group>
+      </group>
+    </RigidBody>
   );
 }
