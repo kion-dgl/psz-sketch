@@ -93,6 +93,8 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
 
     // Update position display
     const position = rigidBodyRef.current.translation();
+    if (!position) return; // Guard against undefined position in early frames
+
     onPositionChange({
       x: position.x,
       y: position.y,
