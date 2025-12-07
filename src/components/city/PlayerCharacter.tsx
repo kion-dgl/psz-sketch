@@ -1,9 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
-import { RigidBody, useRapier } from '@react-three/rapier';
+import { RigidBody } from '@react-three/rapier';
 import type { RapierRigidBody } from '@react-three/rapier';
 import { useFrame } from '@react-three/fiber';
 import type { Character } from '../../stores/characterStore';
-import * as THREE from 'three';
 
 interface PlayerCharacterProps {
   character: Character;
@@ -14,9 +13,8 @@ interface PlayerCharacterProps {
 
 export default function PlayerCharacter({ character, onPositionChange, spawnPosition = [0.98, 10, 62.79], onInteraction }: PlayerCharacterProps) {
   const rigidBodyRef = useRef<RapierRigidBody>(null);
-  const { world } = useRapier();
-  const [facingDirection, setFacingDirection] = useState(new THREE.Vector3(0, 0, -1));
-  const lastMovement = useRef(new THREE.Vector3(0, 0, -1));
+  const [facingDirection, setFacingDirection] = useState({ x: 0, y: 0, z: -1 });
+  const lastMovement = useRef({ x: 0, y: 0, z: -1 });
 
   // Keyboard state
   const keys = useRef({
@@ -76,8 +74,13 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
 
     // Update facing direction based on movement
     if (velocity.x !== 0 || velocity.z !== 0) {
-      const newDirection = new THREE.Vector3(velocity.x, 0, velocity.z).normalize();
-      lastMovement.current.copy(newDirection);
+      const length = Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+      const newDirection = {
+        x: velocity.x / length,
+        y: 0,
+        z: velocity.z / length
+      };
+      lastMovement.current = newDirection;
       setFacingDirection(newDirection);
     }
 
@@ -101,51 +104,12 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
       z: position.z
     });
 
-    // Raycast to detect NPCs in front of player
-    const rayLength = 3;
-    const rayOrigin = {
-      x: position.x,
-      y: position.y + 1, // Cast from player center height
-      z: position.z
-    };
-    const rayDir = {
-      x: lastMovement.current.x,
-      y: 0,
-      z: lastMovement.current.z
-    };
+    // TODO: Raycast to detect NPCs in front of player
+    // Temporarily disabled - need to fix Rapier castRay API usage
 
-    const ray = world.castRay(
-      new THREE.Vector3(rayOrigin.x, rayOrigin.y, rayOrigin.z),
-      new THREE.Vector3(rayDir.x, rayDir.y, rayDir.z),
-      rayLength,
-      true
-    );
-
-    // Handle interaction
-    if (keys.current.interact && ray) {
-      const hit = ray.collider;
-      const parent = hit.parent();
-
-      if (parent) {
-        const userData = parent.userData as { npcName?: string };
-
-        // Log interaction for debugging
-        console.log('Interacting with object at distance:', ray.timeOfImpact);
-        console.log('Hit position:', {
-          x: rayOrigin.x + rayDir.x * ray.timeOfImpact,
-          y: rayOrigin.y,
-          z: rayOrigin.z + rayDir.z * ray.timeOfImpact
-        });
-
-        if (userData?.npcName) {
-          console.log(`Starting conversation with: ${userData.npcName}`);
-          if (onInteraction) {
-            onInteraction(userData.npcName);
-          }
-        } else {
-          console.log('Interacting with non-NPC object');
-        }
-      }
+    // Handle interaction (simplified for now)
+    if (keys.current.interact) {
+      console.log('Interact key pressed - raycast disabled temporarily');
 
       // Debounce interaction
       keys.current.interact = false;
