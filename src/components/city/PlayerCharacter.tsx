@@ -168,7 +168,7 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
       </RigidBody>
 
       {/* Red line indicator showing interaction raycast */}
-      {rigidBodyRef.current && (
+      {rigidBodyRef.current && rigidBodyRef.current.translation() && (
         <mesh
           position={[
             rigidBodyRef.current.translation().x + facingDirection.x * 1.5,
