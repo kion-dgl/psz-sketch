@@ -15,6 +15,7 @@ export interface Character {
   experience: number;
   slot: number;
   class_id: string;
+  variation_index?: number; // Optional for backwards compatibility
   texture_id: string;
   created_at: string;
 }

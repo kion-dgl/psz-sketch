@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useCharacterStore } from '../../stores/characterStore';
 
 interface Character {
   character_id: string;
@@ -8,6 +9,8 @@ interface Character {
   class_id: string;
   variation_index?: number; // Optional for backwards compatibility
   texture_id: string;
+  experience?: number;
+  created_at?: string;
 }
 
 export default function CharacterSelectGrid() {
@@ -15,6 +18,7 @@ export default function CharacterSelectGrid() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [characterToDelete, setCharacterToDelete] = useState<Character | null>(null);
   const modalRef = useRef<HTMLDialogElement>(null);
+  const { setSelectedCharacter } = useCharacterStore();
 
   useEffect(() => {
     loadCharacters();
@@ -39,6 +43,13 @@ export default function CharacterSelectGrid() {
     } catch (err) {
       console.error('Error loading characters:', err);
     }
+  };
+
+  const handleCharacterClick = (character: Character) => {
+    // Save selected character ID to localStorage for persistence across page loads
+    localStorage.setItem('selectedCharacterId', character.character_id);
+    // Go directly to city
+    window.location.href = '/stage/city';
   };
 
   const handleDeleteClick = (character: Character, e: React.MouseEvent) => {
@@ -82,11 +93,11 @@ export default function CharacterSelectGrid() {
             <div
               key={slotNum}
               className="card bg-white border-[5px] border-[#a6c9ff] shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer"
-              onClick={() => character && (window.location.href = `/character-selected/${character.character_id}`)}
+              onClick={() => character && handleCharacterClick(character)}
               onKeyDown={(e) => {
                 if (character && (e.key === 'Enter' || e.key === ' ')) {
                   e.preventDefault();
-                  window.location.href = `/character-selected/${character.character_id}`;
+                  handleCharacterClick(character);
                 }
               }}
               role="button"
