@@ -59,7 +59,7 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
   useFrame((state, delta) => {
     if (!rigidBodyRef.current) return;
 
-    const speed = 5;
+    const speed = 7;
     const rotationSpeed = 2; // radians per second
 
     // Get current velocity
@@ -135,7 +135,7 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
 
         {/* Red line indicator - child of player so it rotates with player */}
         <mesh
-          position={[0, 1, -1.5]} // Position in front of player (local coordinates)
+          position={[0, 0.75, -1.5]} // Position in front of player (local coordinates)
           rotation={[Math.PI / 2, 0, 0]} // Rotate to make horizontal
         >
           <cylinderGeometry args={[0.05, 0.05, 3, 8]} />
