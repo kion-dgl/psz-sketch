@@ -1,4 +1,4 @@
-import { RigidBody } from '@react-three/rapier';
+import { RigidBody, CuboidCollider } from '@react-three/rapier';
 
 // Define walls to keep player within market boundaries
 // Format: { position: [x, y, z], size: [thickness, height, length], rotation: angle in radians }
@@ -77,10 +77,13 @@ export default function InvisibleWalls({ visible = true }: InvisibleWallsProps) 
           position={wall.position}
           rotation={[0, wall.rotation, 0]}
         >
-          <mesh visible={visible}>
-            <boxGeometry args={[WALL_THICKNESS, WALL_HEIGHT, wall.length]} />
-            <meshStandardMaterial color="yellow" transparent opacity={visible ? 1 : 0} />
-          </mesh>
+          <CuboidCollider args={[WALL_THICKNESS / 2, WALL_HEIGHT / 2, wall.length / 2]} />
+          {visible && (
+            <mesh>
+              <boxGeometry args={[WALL_THICKNESS, WALL_HEIGHT, wall.length]} />
+              <meshStandardMaterial color="yellow" transparent opacity={0.5} />
+            </mesh>
+          )}
         </RigidBody>
       ))}
     </>
