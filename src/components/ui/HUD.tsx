@@ -22,7 +22,7 @@ export default function HUD() {
     <div style={{
       position: 'absolute',
       top: '20px',
-      right: '20px',
+      left: '20px',
       background: 'rgba(0, 0, 0, 0.7)',
       color: 'white',
       padding: '1rem',
@@ -33,14 +33,18 @@ export default function HUD() {
       pointerEvents: 'none',
       minWidth: '200px'
     }}>
-      {/* Character Name */}
+      {/* Character Name and Level */}
       <div style={{
         fontSize: '16px',
         fontWeight: 'bold',
         marginBottom: '0.75rem',
-        color: '#ffd700'
+        color: '#ffd700',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
       }}>
-        {selectedCharacter.character_name}
+        <span>{selectedCharacter.character_name}</span>
+        <span style={{ fontSize: '14px', color: '#aaa' }}>Lv.1</span>
       </div>
 
       {/* HP Bar */}

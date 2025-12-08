@@ -181,7 +181,6 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
 
           // Handle interaction when E is pressed
           if (keys.current.interact) {
-            console.log(`Starting conversation with: ${userData.npcName}`);
             if (onInteraction) {
               onInteraction(userData.npcName);
             }
@@ -195,9 +194,6 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
       }
     } catch (error) {
       if (!hasErrored.current) {
-        console.error('Raycast error:', error);
-        console.log('Position:', position);
-        console.log('Rotation:', newRotation);
         hasErrored.current = true;
       }
       setNpcDetected(false);

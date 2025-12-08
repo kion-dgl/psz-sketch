@@ -18,9 +18,6 @@ export default function PauseMenu() {
       if (e.key === 'Tab' || e.key === 'Escape') {
         e.preventDefault();
         e.stopPropagation();
-        console.log('[PauseMenu] Toggling menu with key:', e.key);
-        console.log('[PauseMenu] isPauseMenuOpen:', isPauseMenuOpen);
-        console.log('[PauseMenu] selectedCharacter:', selectedCharacter);
         togglePauseMenu();
       }
     };
@@ -28,12 +25,9 @@ export default function PauseMenu() {
     // Use capture phase to ensure we get the event first
     window.addEventListener('keydown', handleKeyDown, true);
     return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [togglePauseMenu, isPauseMenuOpen, selectedCharacter]);
+  }, [togglePauseMenu]);
 
-  if (!isPauseMenuOpen || !selectedCharacter) {
-    console.log('[PauseMenu] Not rendering - isPauseMenuOpen:', isPauseMenuOpen, 'selectedCharacter:', selectedCharacter);
-    return null;
-  }
+  if (!isPauseMenuOpen || !selectedCharacter) return null;
 
   const handleUnequip = (slot: 'weapon' | 'armor' | 'accessory1' | 'accessory2') => {
     equipItem(slot, undefined);

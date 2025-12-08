@@ -29,9 +29,6 @@ export default function AreaTriggers({ visible = true }: AreaTriggersProps) {
   const handleTriggerEnter = (trigger: AreaTrigger) => {
     if (triggeredAreas.has(trigger.name)) return;
 
-    console.log(`Entering trigger: ${trigger.name}`);
-    console.log(`Navigating to: ${trigger.targetArea}`);
-
     // Mark as triggered to prevent repeated triggers
     setTriggeredAreas(prev => new Set(prev).add(trigger.name));
 

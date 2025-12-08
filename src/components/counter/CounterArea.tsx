@@ -59,7 +59,6 @@ export default function CounterArea() {
   const { selectedCharacter, setSelectedCharacter } = useCharacterStore();
 
   const handleNPCInteraction = (npcName: string) => {
-    console.log(`[Counter] Player interacted with: ${npcName}`);
     openShop(npcName);
   };
 
@@ -82,28 +81,27 @@ export default function CounterArea() {
       }
       setLoading(false);
     } catch (err) {
-      console.error('Error loading character:', err);
       setLoading(false);
     }
   }, [setSelectedCharacter]);
 
-  useEffect(() => {
-    // Spacebar listener for wall position logging
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space') {
-        e.preventDefault();
-        if (isWallStart) {
-          console.log(`wall start: x: ${playerPosition.x.toFixed(2)}, y: ${playerPosition.y.toFixed(2)}, z: ${playerPosition.z.toFixed(2)}`);
-        } else {
-          console.log(`wall stop: x: ${playerPosition.x.toFixed(2)}, y: ${playerPosition.y.toFixed(2)}, z: ${playerPosition.z.toFixed(2)}`);
-        }
-        setIsWallStart(!isWallStart);
-      }
-    };
+  // Wall position logging - Disabled
+  // useEffect(() => {
+  //   const handleKeyDown = (e: KeyboardEvent) => {
+  //     if (e.code === 'Space') {
+  //       e.preventDefault();
+  //       if (isWallStart) {
+  //         console.log(`wall start: x: ${playerPosition.x.toFixed(2)}, y: ${playerPosition.y.toFixed(2)}, z: ${playerPosition.z.toFixed(2)}`);
+  //       } else {
+  //         console.log(`wall stop: x: ${playerPosition.x.toFixed(2)}, y: ${playerPosition.y.toFixed(2)}, z: ${playerPosition.z.toFixed(2)}`);
+  //       }
+  //       setIsWallStart(!isWallStart);
+  //     }
+  //   };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [playerPosition, isWallStart]);
+  //   window.addEventListener('keydown', handleKeyDown);
+  //   return () => window.removeEventListener('keydown', handleKeyDown);
+  // }, [playerPosition, isWallStart]);
 
   if (loading) {
     return (

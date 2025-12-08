@@ -53,7 +53,6 @@ export default function ShopMenu() {
   const items = SHOP_INVENTORY[activeShopNPC] || [];
 
   const handleBuy = (item: ShopItem) => {
-    console.log(`Buying ${item.name} for ${item.price} gold`);
     // TODO: Implement actual purchase logic
   };
 
