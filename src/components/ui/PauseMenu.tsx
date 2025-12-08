@@ -38,53 +38,23 @@ export default function PauseMenu() {
       {/* Semi-transparent overlay */}
       <div
         onClick={togglePauseMenu}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          background: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 2000,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
+        className="absolute inset-0 w-screen h-screen bg-black/50 z-[2000] flex items-center justify-center"
       >
         {/* Menu panel */}
         <div
           onClick={(e) => e.stopPropagation()}
-          style={{
-            background: 'rgba(20, 20, 40, 0.95)',
-            color: 'white',
-            padding: '2rem',
-            borderRadius: '12px',
-            fontFamily: 'monospace',
-            minWidth: '400px',
-            maxWidth: '600px',
-            border: '2px solid rgba(255, 255, 255, 0.2)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
-          }}
+          className="bg-[#141428]/95 text-white p-8 rounded-xl font-mono min-w-[400px] max-w-[600px] border-2 border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
         >
           {/* Header */}
-          <div style={{
-            fontSize: '24px',
-            fontWeight: 'bold',
-            marginBottom: '1.5rem',
-            borderBottom: '2px solid rgba(255, 255, 255, 0.3)',
-            paddingBottom: '0.75rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
+          <div className="text-2xl font-bold mb-6 border-b-2 border-white/30 pb-3 flex justify-between items-center">
             <span>Equipment</span>
-            <span style={{ fontSize: '14px', color: '#aaa' }}>
+            <span className="text-sm text-gray-400">
               {selectedCharacter.character_name} - Lv.{selectedCharacter.level}
             </span>
           </div>
 
           {/* Equipment Slots */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="flex flex-col gap-4">
             {/* Weapon */}
             <EquipmentSlot
               label="Weapon"
@@ -115,14 +85,7 @@ export default function PauseMenu() {
           </div>
 
           {/* Footer */}
-          <div style={{
-            marginTop: '1.5rem',
-            paddingTop: '1rem',
-            borderTop: '1px solid rgba(255, 255, 255, 0.2)',
-            fontSize: '12px',
-            color: '#888',
-            textAlign: 'center'
-          }}>
+          <div className="mt-6 pt-4 border-t border-white/20 text-xs text-gray-500 text-center">
             Press TAB or ESC to close
           </div>
         </div>
@@ -133,24 +96,12 @@ export default function PauseMenu() {
 
 function EquipmentSlot({ label, item, onUnequip }: { label: string; item?: string; onUnequip: () => void }) {
   return (
-    <div style={{
-      background: 'rgba(255, 255, 255, 0.05)',
-      padding: '0.75rem',
-      borderRadius: '6px',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    }}>
+    <div className="bg-white/5 p-3 rounded-md border border-white/10 flex justify-between items-center">
       <div>
-        <div style={{ fontSize: '12px', color: '#aaa', marginBottom: '4px' }}>
+        <div className="text-xs text-gray-400 mb-1">
           {label}
         </div>
-        <div style={{
-          fontSize: '14px',
-          color: item ? '#ffd700' : '#666',
-          fontWeight: item ? 'bold' : 'normal'
-        }}>
+        <div className={`text-sm ${item ? 'text-yellow-400 font-bold' : 'text-gray-600'}`}>
           {item || 'Empty'}
         </div>
       </div>
@@ -158,18 +109,7 @@ function EquipmentSlot({ label, item, onUnequip }: { label: string; item?: strin
       {item && (
         <button
           onClick={onUnequip}
-          style={{
-            background: 'rgba(231, 76, 60, 0.8)',
-            color: 'white',
-            border: 'none',
-            padding: '0.5rem 1rem',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '12px',
-            fontFamily: 'monospace'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(231, 76, 60, 1)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(231, 76, 60, 0.8)'}
+          className="bg-red-500/80 hover:bg-red-500 text-white border-none px-4 py-2 rounded cursor-pointer text-xs font-mono transition-colors"
         >
           Unequip
         </button>

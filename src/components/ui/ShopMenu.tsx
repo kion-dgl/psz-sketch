@@ -61,85 +61,33 @@ export default function ShopMenu() {
       {/* Semi-transparent overlay */}
       <div
         onClick={closeShop}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          background: 'rgba(0, 0, 0, 0.4)',
-          zIndex: 2000,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
+        className="absolute inset-0 w-screen h-screen bg-black/40 z-[2000] flex items-center justify-center"
       >
         {/* Shop panel */}
         <div
           onClick={(e) => e.stopPropagation()}
-          style={{
-            background: 'rgba(30, 20, 40, 0.95)',
-            color: 'white',
-            padding: '2rem',
-            borderRadius: '12px',
-            fontFamily: 'monospace',
-            minWidth: '500px',
-            maxWidth: '700px',
-            maxHeight: '80vh',
-            overflow: 'auto',
-            border: '2px solid rgba(255, 215, 0, 0.3)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
-          }}
+          className="bg-[#1e1428]/95 text-white p-8 rounded-xl font-mono min-w-[500px] max-w-[700px] max-h-[80vh] overflow-auto border-2 border-yellow-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
         >
           {/* Header */}
-          <div style={{
-            fontSize: '24px',
-            fontWeight: 'bold',
-            marginBottom: '1.5rem',
-            borderBottom: '2px solid rgba(255, 215, 0, 0.3)',
-            paddingBottom: '0.75rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
+          <div className="text-2xl font-bold mb-6 border-b-2 border-yellow-500/30 pb-3 flex justify-between items-center">
             <span>{activeShopNPC}</span>
             <button
               onClick={closeShop}
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                color: 'white',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                padding: '0.5rem 1rem',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontFamily: 'monospace'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
+              className="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-4 py-2 rounded cursor-pointer text-sm font-mono transition-colors"
             >
               Close
             </button>
           </div>
 
           {/* Gold display */}
-          <div style={{
-            background: 'rgba(255, 215, 0, 0.1)',
-            padding: '0.75rem',
-            borderRadius: '6px',
-            marginBottom: '1.5rem',
-            border: '1px solid rgba(255, 215, 0, 0.3)',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            color: '#ffd700'
-          }}>
+          <div className="bg-yellow-500/10 p-3 rounded-md mb-6 border border-yellow-500/30 text-base font-bold text-yellow-400">
             Gold: 1000 {/* TODO: Get from player inventory */}
           </div>
 
           {/* Items list */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="flex flex-col gap-4">
             {items.length === 0 ? (
-              <div style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>
+              <div className="text-center text-gray-500 p-8">
                 No items available
               </div>
             ) : (
@@ -150,14 +98,7 @@ export default function ShopMenu() {
           </div>
 
           {/* Footer */}
-          <div style={{
-            marginTop: '1.5rem',
-            paddingTop: '1rem',
-            borderTop: '1px solid rgba(255, 255, 255, 0.2)',
-            fontSize: '12px',
-            color: '#888',
-            textAlign: 'center'
-          }}>
+          <div className="mt-6 pt-4 border-t border-white/20 text-xs text-gray-500 text-center">
             Press ESC to close
           </div>
         </div>
@@ -168,30 +109,16 @@ export default function ShopMenu() {
 
 function ShopItemRow({ item, onBuy }: { item: ShopItem; onBuy: (item: ShopItem) => void }) {
   return (
-    <div style={{
-      background: 'rgba(255, 255, 255, 0.05)',
-      padding: '1rem',
-      borderRadius: '6px',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      gap: '1rem'
-    }}>
+    <div className="bg-white/5 p-4 rounded-md border border-white/10 flex justify-between items-center gap-4">
       {/* Item info */}
-      <div style={{ flex: 1 }}>
-        <div style={{
-          fontSize: '16px',
-          fontWeight: 'bold',
-          color: '#ffd700',
-          marginBottom: '4px'
-        }}>
+      <div className="flex-1">
+        <div className="text-base font-bold text-yellow-400 mb-1">
           {item.name}
         </div>
-        <div style={{ fontSize: '12px', color: '#aaa', marginBottom: '8px' }}>
+        <div className="text-xs text-gray-400 mb-2">
           {item.description}
         </div>
-        <div style={{ fontSize: '14px', color: '#f39c12', fontWeight: 'bold' }}>
+        <div className="text-sm text-orange-500 font-bold">
           {item.price} Gold
         </div>
       </div>
@@ -199,20 +126,7 @@ function ShopItemRow({ item, onBuy }: { item: ShopItem; onBuy: (item: ShopItem) 
       {/* Buy button */}
       <button
         onClick={() => onBuy(item)}
-        style={{
-          background: 'rgba(46, 204, 113, 0.8)',
-          color: 'white',
-          border: 'none',
-          padding: '0.75rem 1.5rem',
-          borderRadius: '6px',
-          cursor: 'pointer',
-          fontSize: '14px',
-          fontFamily: 'monospace',
-          fontWeight: 'bold',
-          whiteSpace: 'nowrap'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(46, 204, 113, 1)'}
-        onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(46, 204, 113, 0.8)'}
+        className="bg-green-500/80 hover:bg-green-500 text-white border-none px-6 py-3 rounded-md cursor-pointer text-sm font-mono font-bold whitespace-nowrap transition-colors"
       >
         Buy
       </button>

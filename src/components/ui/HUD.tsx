@@ -1,7 +1,7 @@
 /**
  * HUD Component
  *
- * Displays character name, HP, and MP in the top right corner.
+ * Displays character name, HP, and MP in the top left corner.
  * Styled with semi-transparent background for readability while
  * maintaining immersion.
  */
@@ -18,88 +18,47 @@ export default function HUD() {
   const hpPercentage = (hp / maxHp) * 100;
   const mpPercentage = (mp / maxMp) * 100;
 
+  // Determine HP bar color based on percentage
+  const hpBarColor = hpPercentage > 50
+    ? 'bg-green-500'
+    : hpPercentage > 25
+    ? 'bg-orange-500'
+    : 'bg-red-500';
+
   return (
-    <div style={{
-      position: 'absolute',
-      top: '20px',
-      left: '20px',
-      background: 'rgba(0, 0, 0, 0.7)',
-      color: 'white',
-      padding: '1rem',
-      borderRadius: '8px',
-      fontFamily: 'monospace',
-      fontSize: '14px',
-      zIndex: 1000,
-      pointerEvents: 'none',
-      minWidth: '200px'
-    }}>
+    <div className="absolute top-5 left-5 bg-black/70 text-white p-4 rounded-lg font-mono text-sm z-[1000] pointer-events-none min-w-[200px]">
       {/* Character Name and Level */}
-      <div style={{
-        fontSize: '16px',
-        fontWeight: 'bold',
-        marginBottom: '0.75rem',
-        color: '#ffd700',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
+      <div className="flex justify-between items-center text-base font-bold mb-3 text-yellow-400">
         <span>{selectedCharacter.character_name}</span>
-        <span style={{ fontSize: '14px', color: '#aaa' }}>Lv.1</span>
+        {/* TODO: Use selectedCharacter.level instead of hardcoded value */}
+        <span className="text-sm text-gray-400">Lv.1</span>
       </div>
 
       {/* HP Bar */}
-      <div style={{ marginBottom: '0.5rem' }}>
-        <div style={{
-          fontSize: '12px',
-          marginBottom: '4px',
-          display: 'flex',
-          justifyContent: 'space-between'
-        }}>
+      <div className="mb-2">
+        <div className="flex justify-between text-xs mb-1">
           <span>HP</span>
           <span>{hp} / {maxHp}</span>
         </div>
-        <div style={{
-          width: '100%',
-          height: '20px',
-          background: 'rgba(255, 255, 255, 0.2)',
-          borderRadius: '4px',
-          overflow: 'hidden',
-          border: '1px solid rgba(255, 255, 255, 0.3)'
-        }}>
-          <div style={{
-            width: `${hpPercentage}%`,
-            height: '100%',
-            background: hpPercentage > 50 ? '#2ecc71' : hpPercentage > 25 ? '#f39c12' : '#e74c3c',
-            transition: 'width 0.3s ease, background 0.3s ease'
-          }} />
+        <div className="w-full h-5 bg-white/20 rounded border border-white/30 overflow-hidden">
+          <div
+            className={`h-full ${hpBarColor} transition-all duration-300 ease-in-out`}
+            style={{ width: `${hpPercentage}%` }}
+          />
         </div>
       </div>
 
       {/* MP Bar */}
       <div>
-        <div style={{
-          fontSize: '12px',
-          marginBottom: '4px',
-          display: 'flex',
-          justifyContent: 'space-between'
-        }}>
+        <div className="flex justify-between text-xs mb-1">
           <span>MP</span>
           <span>{mp} / {maxMp}</span>
         </div>
-        <div style={{
-          width: '100%',
-          height: '20px',
-          background: 'rgba(255, 255, 255, 0.2)',
-          borderRadius: '4px',
-          overflow: 'hidden',
-          border: '1px solid rgba(255, 255, 255, 0.3)'
-        }}>
-          <div style={{
-            width: `${mpPercentage}%`,
-            height: '100%',
-            background: '#3498db',
-            transition: 'width 0.3s ease'
-          }} />
+        <div className="w-full h-5 bg-white/20 rounded border border-white/30 overflow-hidden">
+          <div
+            className="h-full bg-blue-500 transition-all duration-300 ease-in-out"
+            style={{ width: `${mpPercentage}%` }}
+          />
         </div>
       </div>
     </div>
