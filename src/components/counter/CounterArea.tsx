@@ -3,6 +3,7 @@ import { Physics } from '@react-three/rapier';
 import { Suspense, useState, useEffect, useRef } from 'react';
 import { PerspectiveCamera } from '@react-three/drei';
 import type { Character } from '../../stores/characterStore';
+import { useCharacterStore } from '../../stores/characterStore';
 import { useGameState } from '../../stores/gameStateStore';
 import CounterEnvironment, { CounterGroundPlane } from './CounterEnvironment';
 import PlayerCharacter from '../city/PlayerCharacter';
@@ -51,11 +52,11 @@ function CameraController({ target }: { target: { x: number; y: number; z: numbe
 }
 
 export default function CounterArea() {
-  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [loading, setLoading] = useState(true);
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0, rotation: 0 });
   const [isWallStart, setIsWallStart] = useState(true);
   const { openShop } = useGameState();
+  const { selectedCharacter, setSelectedCharacter } = useCharacterStore();
 
   const handleNPCInteraction = (npcName: string) => {
     console.log(`[Counter] Player interacted with: ${npcName}`);
@@ -76,6 +77,7 @@ export default function CounterArea() {
       const character = chars.find((c: Character | null) => c?.character_id === selectedCharacterId);
 
       if (character) {
+        // Set in global store so UI components can access it
         setSelectedCharacter(character);
       }
       setLoading(false);
@@ -83,7 +85,7 @@ export default function CounterArea() {
       console.error('Error loading character:', err);
       setLoading(false);
     }
-  }, []);
+  }, [setSelectedCharacter]);
 
   useEffect(() => {
     // Spacebar listener for wall position logging

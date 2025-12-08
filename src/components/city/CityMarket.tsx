@@ -3,6 +3,7 @@ import { Physics } from '@react-three/rapier';
 import { Suspense, useState, useEffect, useRef } from 'react';
 import { PerspectiveCamera } from '@react-three/drei';
 import type { Character } from '../../stores/characterStore';
+import { useCharacterStore } from '../../stores/characterStore';
 import { useGameState } from '../../stores/gameStateStore';
 import MarketEnvironment from './MarketEnvironment';
 import PlayerCharacter from './PlayerCharacter';
@@ -51,12 +52,12 @@ function CameraController({ target }: { target: { x: number; y: number; z: numbe
 }
 
 export default function CityMarket() {
-  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [loading, setLoading] = useState(true);
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0, rotation: 0 });
   const [isWallStart, setIsWallStart] = useState(true);
   const [spawnPosition, setSpawnPosition] = useState<[number, number, number]>([0.98, 10, 62.79]);
   const { openShop } = useGameState();
+  const { selectedCharacter, setSelectedCharacter } = useCharacterStore();
 
   const handleNPCInteraction = (npcName: string) => {
     console.log(`[Market] Player interacted with: ${npcName}`);
@@ -85,6 +86,7 @@ export default function CityMarket() {
       const character = chars.find((c: Character | null) => c?.character_id === selectedCharacterId);
 
       if (character) {
+        // Set in global store so UI components can access it
         setSelectedCharacter(character);
       }
       setLoading(false);
@@ -92,7 +94,7 @@ export default function CityMarket() {
       console.error('Error loading character:', err);
       setLoading(false);
     }
-  }, []);
+  }, [setSelectedCharacter]);
 
   useEffect(() => {
     // Spacebar listener for wall position logging
