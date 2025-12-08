@@ -155,6 +155,7 @@ export default function CharacterSelectedView({ characterId }: CharacterSelected
         }}>
           <CharacterPreview
             classId={character.class_id}
+            variationIndex={(character as any).variation_index ?? 0}
             textureId={character.texture_id}
             autoRotate={true}
           />

@@ -1,69 +1,10 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import CityMarket from '../../components/city/CityMarket';
 
 export const prerender = false;
 ---
 
-<Layout title="City - Density Dwarf">
-  <div class="city-stage">
-    <h1>City Stage</h1>
-    <p>Welcome to the city! This is where the game will start.</p>
-    <p class="placeholder">Game stages will be implemented here.</p>
-
-    <div class="actions">
-      <a href="/character-select" class="back-button">← Back to Character Select</a>
-    </div>
-  </div>
+<Layout title="City Market - Density Dwarf">
+  <CityMarket client:load />
 </Layout>
-
-<style>
-  .city-stage {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    color: white;
-    padding: 2rem;
-    text-align: center;
-  }
-
-  h1 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-  }
-
-  p {
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .placeholder {
-    font-size: 1rem;
-    opacity: 0.7;
-    margin-bottom: 2rem;
-  }
-
-  .actions {
-    margin-top: 2rem;
-  }
-
-  .back-button {
-    display: inline-block;
-    padding: 1rem 2rem;
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    text-decoration: none;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: all 0.3s;
-  }
-
-  .back-button:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: translateY(-2px);
-  }
-</style>

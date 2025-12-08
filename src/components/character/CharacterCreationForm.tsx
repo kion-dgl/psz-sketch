@@ -98,7 +98,11 @@ export default function CharacterCreationForm({ slot }: CharacterCreationFormPro
       chars[slot] = newCharacter;
       localStorage.setItem('characters', JSON.stringify(chars));
 
-      window.location.href = `/character-selected/${newCharacter.character_id}`;
+      // Save selected character ID to localStorage for persistence across page loads
+      localStorage.setItem('selectedCharacterId', newCharacter.character_id);
+
+      // Go directly to city
+      window.location.href = '/stage/city';
     } catch (err) {
       console.error('Error creating character:', err);
       setError(err instanceof Error ? err.message : 'Failed to create character');

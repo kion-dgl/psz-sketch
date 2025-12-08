@@ -8,10 +8,13 @@ import { loadGLB, loadTexture } from '../../utils/assetCache';
 
 interface CharacterPreviewProps {
   classId: string | null;
-  variationIndex: number;
-  bodyColorIndex: number;
-  hairColorIndex: number;
-  skinToneIndex: number;
+  variationIndex?: number;
+  bodyColorIndex?: number;
+  hairColorIndex?: number;
+  skinToneIndex?: number;
+  // Alternative: provide texture_id directly for displaying saved characters
+  textureId?: string;
+  autoRotate?: boolean;
 }
 
 interface ModelProps {
@@ -58,7 +61,15 @@ function CharacterModel({ url, textureUrl }: ModelProps) {
   return <primitive ref={group} object={gltf.scene} />;
 }
 
-export default function CharacterPreview({ classId, variationIndex, bodyColorIndex, hairColorIndex, skinToneIndex }: CharacterPreviewProps) {
+export default function CharacterPreview({
+  classId,
+  variationIndex = 0,
+  bodyColorIndex = 0,
+  hairColorIndex = 0,
+  skinToneIndex = 0,
+  textureId,
+  autoRotate = false
+}: CharacterPreviewProps) {
   const [modelUrl, setModelUrl] = useState<string | null>(null);
   const [textureUrl, setTextureUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -84,17 +95,25 @@ export default function CharacterPreview({ classId, variationIndex, bodyColorInd
         // Get the selected variation
         const variation = characterClass.variations[variationIndex];
 
-        // Calculate the actual skin tone from hair color and skin tone indices
-        // skinTone is: hairColorIndex * 3 + skinToneIndex (0-8)
-        const actualSkinTone = hairColorIndex * 3 + skinToneIndex;
-
         // Load model
         const modelPath = getModelPath(variation);
         const cachedModelUrl = await loadGLB(modelPath);
         setModelUrl(cachedModelUrl);
 
-        // Load texture
-        const textureName = getTextureName(variation, bodyColorIndex, actualSkinTone);
+        // Load texture - either from textureId or from individual params
+        let textureName: string;
+        if (textureId) {
+          // Parse texture_id (format: "skinTone_bodyColor")
+          const [skinTone, bodyColor] = textureId.split('_').map(Number);
+          const textureIndex = Math.floor(skinTone / 3) * 100 + (skinTone % 3) * 10 + bodyColor;
+          textureName = `${variation}_${textureIndex.toString().padStart(3, '0')}`;
+        } else {
+          // Calculate the actual skin tone from hair color and skin tone indices
+          // skinTone is: hairColorIndex * 3 + skinToneIndex (0-8)
+          const actualSkinTone = hairColorIndex * 3 + skinToneIndex;
+          textureName = getTextureName(variation, bodyColorIndex, actualSkinTone);
+        }
+
         const texturePath = getTexturePath(variation, textureName);
         const cachedTextureUrl = await loadTexture(texturePath);
         setTextureUrl(cachedTextureUrl);
@@ -108,7 +127,7 @@ export default function CharacterPreview({ classId, variationIndex, bodyColorInd
     };
 
     loadCharacter();
-  }, [classId, variationIndex, bodyColorIndex, hairColorIndex, skinToneIndex]);
+  }, [classId, variationIndex, bodyColorIndex, hairColorIndex, skinToneIndex, textureId]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '400px', borderRadius: '12px', overflow: 'hidden' }}>
@@ -167,6 +186,8 @@ export default function CharacterPreview({ classId, variationIndex, bodyColorInd
             enableDamping
             dampingFactor={0.05}
             target={[0, 0.8, 0]}
+            autoRotate={autoRotate}
+            autoRotateSpeed={2}
           />
 
           <ambientLight intensity={0.6} />
