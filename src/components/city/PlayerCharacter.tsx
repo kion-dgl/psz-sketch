@@ -132,31 +132,31 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
         z: dirZ / dirLength
       };
 
-      // Cast ray with NO filter to see what's actually in front of player
-      const debugRay = world.castRay(
-        { origin: rayOrigin, dir: rayDirection },
-        rayLength,
-        true,
-        undefined, // filterFlags
-        undefined, // filterGroups - hit EVERYTHING
-        undefined, // filterExcludeCollider
-        rigidBodyRef.current // filterExcludeRigidBody - exclude player
-      );
+      // Debug raycast - Disabled
+      // const debugRay = world.castRay(
+      //   { origin: rayOrigin, dir: rayDirection },
+      //   rayLength,
+      //   true,
+      //   undefined, // filterFlags
+      //   undefined, // filterGroups - hit EVERYTHING
+      //   undefined, // filterExcludeCollider
+      //   rigidBodyRef.current // filterExcludeRigidBody - exclude player
+      // );
 
-      if (debugRay) {
-        const debugParent = debugRay.collider.parent();
-        const groups = debugRay.collider.collisionGroups();
-        const userData = debugParent?.userData;
+      // if (debugRay) {
+      //   const debugParent = debugRay.collider.parent();
+      //   const groups = debugRay.collider.collisionGroups();
+      //   const userData = debugParent?.userData;
 
-        // Decode collision group
-        let groupName = 'UNKNOWN';
-        if (groups === 0x00010001) groupName = 'WALL';
-        else if (groups === 0x00020002) groupName = 'NPC';
-        else if (groups === 0x00030003) groupName = 'GROUND';
-        else if (groups === 0x00040004) groupName = 'TRIGGER';
+      //   // Decode collision group
+      //   let groupName = 'UNKNOWN';
+      //   if (groups === 0x00010001) groupName = 'WALL';
+      //   else if (groups === 0x00020002) groupName = 'NPC';
+      //   else if (groups === 0x00030003) groupName = 'GROUND';
+      //   else if (groups === 0x00040004) groupName = 'TRIGGER';
 
-        console.log(`[Ray] ${groupName} at distance ${debugRay.timeOfImpact.toFixed(2)} | Groups: 0x${groups.toString(16)} | userData:`, userData);
-      }
+      //   console.log(`[Ray] ${groupName} at distance ${debugRay.timeOfImpact.toFixed(2)} | Groups: 0x${groups.toString(16)} | userData:`, userData);
+      // }
 
       // Cast ray with filter to exclude the player's own collider and walls
       // Only hit collision group 1 (NPCs), not group 0 (walls)
@@ -215,16 +215,17 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
       position={spawnPosition}
       enabledRotations={[false, false, false]}
       lockRotations
-      onCollisionEnter={(event) => {
-        const parent = event.other.parent();
-        const collisionGroups = event.other.collisionGroups();
-        console.log('=== Player Collision ===');
-        console.log('Collision groups (hex):', '0x' + collisionGroups.toString(16));
-        console.log('RigidBody userData:', parent?.userData);
-        console.log('RigidBodyObject name:', event.other.rigidBodyObject?.name);
-        console.log('ColliderObject name:', event.other.colliderObject?.name);
-        console.log('Full event:', event.other);
-      }}
+      // Debug collision logging - Disabled
+      // onCollisionEnter={(event) => {
+      //   const parent = event.other.parent();
+      //   const collisionGroups = event.other.collisionGroups();
+      //   console.log('=== Player Collision ===');
+      //   console.log('Collision groups (hex):', '0x' + collisionGroups.toString(16));
+      //   console.log('RigidBody userData:', parent?.userData);
+      //   console.log('RigidBodyObject name:', event.other.rigidBodyObject?.name);
+      //   console.log('ColliderObject name:', event.other.colliderObject?.name);
+      //   console.log('Full event:', event.other);
+      // }}
     >
       {/* Cylinder collider matching NPC dimensions */}
       <CylinderCollider args={[1, 0.5]} />

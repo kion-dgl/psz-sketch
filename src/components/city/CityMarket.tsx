@@ -3,11 +3,15 @@ import { Physics } from '@react-three/rapier';
 import { Suspense, useState, useEffect, useRef } from 'react';
 import { PerspectiveCamera } from '@react-three/drei';
 import type { Character } from '../../stores/characterStore';
+import { useGameState } from '../../stores/gameStateStore';
 import MarketEnvironment from './MarketEnvironment';
 import PlayerCharacter from './PlayerCharacter';
 import NPCs from './NPCs';
 import InvisibleWalls from './InvisibleWalls';
 import AreaTriggers from './AreaTriggers';
+import HUD from '../ui/HUD';
+import PauseMenu from '../ui/PauseMenu';
+import ShopMenu from '../ui/ShopMenu';
 
 function CameraController({ target }: { target: { x: number; y: number; z: number } }) {
   const { camera } = useThree();
@@ -52,10 +56,11 @@ export default function CityMarket() {
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0, rotation: 0 });
   const [isWallStart, setIsWallStart] = useState(true);
   const [spawnPosition, setSpawnPosition] = useState<[number, number, number]>([0.98, 10, 62.79]);
+  const { openShop } = useGameState();
 
   const handleNPCInteraction = (npcName: string) => {
     console.log(`[Market] Player interacted with: ${npcName}`);
-    // TODO: Open dialogue UI, shop interface, etc.
+    openShop(npcName);
   };
 
   useEffect(() => {
@@ -154,8 +159,17 @@ export default function CityMarket() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
-      {/* Position Display */}
-      <div style={{
+      {/* HUD - Character stats */}
+      <HUD />
+
+      {/* Pause Menu - Equipment */}
+      <PauseMenu />
+
+      {/* Shop Menu - NPC interactions */}
+      <ShopMenu />
+
+      {/* Debug Position Display - Disabled */}
+      {/* <div style={{
         position: 'absolute',
         top: '20px',
         left: '20px',
@@ -181,7 +195,10 @@ export default function CityMarket() {
         <div style={{ marginTop: '0.5rem', color: '#ff6b6b' }}>
           Press E to interact with NPCs
         </div>
-      </div>
+        <div style={{ marginTop: '0.5rem', color: '#3498db' }}>
+          Press TAB for Equipment Menu
+        </div>
+      </div> */}
 
       {/* 3D Scene */}
       <Canvas shadows>

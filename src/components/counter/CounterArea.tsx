@@ -3,11 +3,15 @@ import { Physics } from '@react-three/rapier';
 import { Suspense, useState, useEffect, useRef } from 'react';
 import { PerspectiveCamera } from '@react-three/drei';
 import type { Character } from '../../stores/characterStore';
+import { useGameState } from '../../stores/gameStateStore';
 import CounterEnvironment, { CounterGroundPlane } from './CounterEnvironment';
 import PlayerCharacter from '../city/PlayerCharacter';
 import CounterNPCs from './CounterNPCs';
 import CounterWalls from './CounterWalls';
 import CounterTriggers from './CounterTriggers';
+import HUD from '../ui/HUD';
+import PauseMenu from '../ui/PauseMenu';
+import ShopMenu from '../ui/ShopMenu';
 
 function CameraController({ target }: { target: { x: number; y: number; z: number } }) {
   const { camera } = useThree();
@@ -51,10 +55,11 @@ export default function CounterArea() {
   const [loading, setLoading] = useState(true);
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0, rotation: 0 });
   const [isWallStart, setIsWallStart] = useState(true);
+  const { openShop } = useGameState();
 
   const handleNPCInteraction = (npcName: string) => {
     console.log(`[Counter] Player interacted with: ${npcName}`);
-    // TODO: Open dialogue UI, storage interface, quest menu, etc.
+    openShop(npcName);
   };
 
   useEffect(() => {
@@ -145,8 +150,17 @@ export default function CounterArea() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
-      {/* Position Display */}
-      <div style={{
+      {/* HUD - Character stats */}
+      <HUD />
+
+      {/* Pause Menu - Equipment */}
+      <PauseMenu />
+
+      {/* Shop Menu - NPC interactions */}
+      <ShopMenu />
+
+      {/* Debug Position Display - Disabled */}
+      {/* <div style={{
         position: 'absolute',
         top: '20px',
         left: '20px',
@@ -172,7 +186,10 @@ export default function CounterArea() {
         <div style={{ marginTop: '0.5rem', color: '#ff6b6b' }}>
           Press E to interact with NPCs
         </div>
-      </div>
+        <div style={{ marginTop: '0.5rem', color: '#3498db' }}>
+          Press TAB for Equipment Menu
+        </div>
+      </div> */}
 
       {/* 3D Scene */}
       <Canvas shadows>
