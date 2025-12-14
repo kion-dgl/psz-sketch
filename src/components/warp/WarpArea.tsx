@@ -207,14 +207,11 @@ export default function WarpArea() {
             {/* Debug: Visual plane at y=0 (no collision) */}
             <DebugPlaneAtZero />
 
-            {/* Debug: Test collision plane at y=0 (HAS collision) - ORANGE */}
-            <TestCollisionPlane />
-
             {/* Ground plane - GREEN */}
             <WarpGroundPlane />
 
-            {/* Warp Walls - RED wireframe cylinder */}
-            <WarpWalls visible={true} />
+            {/* Warp Walls - DISABLED (causes floating bug) */}
+            {/* <WarpWalls visible={true} /> */}
 
             {/* Kill plane to respawn player if they fall */}
             <KillPlane onRespawn={handleRespawn} />
