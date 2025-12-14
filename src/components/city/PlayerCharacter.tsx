@@ -82,26 +82,53 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
 
       // Cast rays in multiple directions
       const rayDown = { x: 0, y: -1, z: 0 };
-      const testRay = world.castRay(
+
+      // Test 1: Ray filtered to GROUND GROUP ONLY (0x00030003)
+      const groundOnlyRay = world.castRay(
+        { origin: { x: position.x, y: position.y + 0.5, z: position.z }, dir: rayDown },
+        20,
+        true,
+        undefined,
+        0x00030003, // Only check ground collision group
+        undefined,
+        rigidBodyRef.current
+      );
+
+      // Test 2: Ray that hits EVERYTHING (except player)
+      const allRay = world.castRay(
         { origin: { x: position.x, y: position.y + 0.5, z: position.z }, dir: rayDown },
         20,
         true,
         undefined,
         undefined, // Hit EVERYTHING
         undefined,
-        undefined
+        rigidBodyRef.current
       );
 
-      if (testRay) {
-        const collider = testRay.collider;
+      console.log('--- Ground Group Ray (0x00030003) ---');
+      if (groundOnlyRay) {
+        const collider = groundOnlyRay.collider;
         const parent = collider.parent();
-        console.log('Ray HIT at distance:', testRay.timeOfImpact.toFixed(3));
-        console.log('  Hit Y position:', (position.y + 0.5 - testRay.timeOfImpact).toFixed(3));
+        console.log('GROUND HIT at distance:', groundOnlyRay.timeOfImpact.toFixed(3));
+        console.log('  Hit Y position:', (position.y + 0.5 - groundOnlyRay.timeOfImpact).toFixed(3));
         console.log('  Collision groups:', '0x' + collider.collisionGroups().toString(16));
         console.log('  UserData:', parent?.userData);
         console.log('  Shape type:', collider.shape?.type);
       } else {
-        console.log('Ray MISSED - no ground beneath player!');
+        console.log('GROUND MISS - TrimeshCollider not detected!');
+      }
+
+      console.log('--- All Collision Ray ---');
+      if (allRay) {
+        const collider = allRay.collider;
+        const parent = collider.parent();
+        console.log('HIT at distance:', allRay.timeOfImpact.toFixed(3));
+        console.log('  Hit Y position:', (position.y + 0.5 - allRay.timeOfImpact).toFixed(3));
+        console.log('  Collision groups:', '0x' + collider.collisionGroups().toString(16));
+        console.log('  UserData:', parent?.userData);
+        console.log('  Shape type:', collider.shape?.type);
+      } else {
+        console.log('MISS - no collision beneath player at all!');
       }
 
       keys.current.debug = false; // Reset
