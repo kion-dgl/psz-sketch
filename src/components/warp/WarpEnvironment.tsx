@@ -128,8 +128,8 @@ export function WarpGroundPlane() {
           new Uint32Array(collisionHull.indices)
         ]}
       />
-      {/* Visible mesh for debugging */}
-      <mesh geometry={geometry} receiveShadow>
+      {/* Visible mesh for debugging - disable auto-collision */}
+      <mesh geometry={geometry} receiveShadow userData={{ collider: false }}>
         <meshStandardMaterial color="#00ff00" transparent opacity={0.3} side={THREE.DoubleSide} />
       </mesh>
     </RigidBody>

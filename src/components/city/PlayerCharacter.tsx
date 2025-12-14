@@ -81,13 +81,58 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
     // Calculate movement based on rotation
     // Red line points in -Z direction, so negate to move forward
     const velocity = { x: 0, y: 0, z: 0 };
-    if (keys.current.forward) {
-      velocity.x = -Math.sin(newRotation) * speed;
-      velocity.z = -Math.cos(newRotation) * speed;
-    }
-    if (keys.current.backward) {
-      velocity.x = Math.sin(newRotation) * speed;
-      velocity.z = Math.cos(newRotation) * speed;
+    let canMove = true;
+
+    if (keys.current.forward || keys.current.backward) {
+      const direction = keys.current.forward ? 1 : -1;
+      const moveX = -Math.sin(newRotation) * speed * direction;
+      const moveZ = -Math.cos(newRotation) * speed * direction;
+
+      // Get current position
+      const position = rigidBodyRef.current.translation();
+
+      // Calculate intended position (check a bit ahead to predict movement)
+      const checkDistance = 0.5; // Check 0.5 units ahead
+      const intendedX = position.x + (moveX / speed) * checkDistance;
+      const intendedZ = position.z + (moveZ / speed) * checkDistance;
+
+      // Raycast downward from intended position to check for ground
+      try {
+        const rayOrigin = {
+          x: intendedX,
+          y: position.y + 1, // Start ray from above player
+          z: intendedZ
+        };
+        const rayDirection = { x: 0, y: -1, z: 0 }; // Downward
+        const rayLength = 5; // Check 5 units down
+
+        const groundCheck = world.castRay(
+          { origin: rayOrigin, dir: rayDirection },
+          rayLength,
+          true,
+          undefined,
+          0x00030003, // Only check for ground collision group
+          undefined,
+          undefined
+        );
+
+        // Only allow movement if ground is detected
+        if (groundCheck) {
+          velocity.x = moveX;
+          velocity.z = moveZ;
+          // Debug: Log when ground is detected
+          if (Math.random() < 0.01) { // Only log 1% of the time to avoid spam
+            console.log('[Ground Check] Ground found at distance:', groundCheck.timeOfImpact);
+          }
+        } else {
+          canMove = false;
+          console.log('[Ground Check] NO GROUND - blocking movement at', intendedX.toFixed(2), intendedZ.toFixed(2));
+        }
+      } catch (error) {
+        // If raycast fails, allow movement (safer than blocking)
+        velocity.x = moveX;
+        velocity.z = moveZ;
+      }
     }
 
     // Set velocity (preserve Y for gravity)
@@ -211,17 +256,16 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
       position={spawnPosition}
       enabledRotations={[false, false, false]}
       lockRotations
-      // Debug collision logging - Disabled
-      // onCollisionEnter={(event) => {
-      //   const parent = event.other.parent();
-      //   const collisionGroups = event.other.collisionGroups();
-      //   console.log('=== Player Collision ===');
-      //   console.log('Collision groups (hex):', '0x' + collisionGroups.toString(16));
-      //   console.log('RigidBody userData:', parent?.userData);
-      //   console.log('RigidBodyObject name:', event.other.rigidBodyObject?.name);
-      //   console.log('ColliderObject name:', event.other.colliderObject?.name);
-      //   console.log('Full event:', event.other);
-      // }}
+      // Debug collision logging - ENABLED for debugging
+      onCollisionEnter={(event) => {
+        const parent = event.other.parent();
+        const collisionGroups = event.other.collisionGroups();
+        console.log('=== Player Collision ===');
+        console.log('Collision groups (hex):', '0x' + collisionGroups.toString(16));
+        console.log('RigidBody userData:', parent?.userData);
+        console.log('Collider type:', event.other.collider?.type);
+        console.log('Collider shape:', event.other.collider?.shape?.type);
+      }}
     >
       {/* Cylinder collider matching NPC dimensions */}
       <CylinderCollider args={[1, 0.5]} />
