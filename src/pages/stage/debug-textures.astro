@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import StageTextureDebug from '../../components/debug/StageTextureDebug';
+
+export const prerender = false;
+---
+
+<Layout title="Stage Texture Debug - Density Dwarf">
+  <StageTextureDebug client:load />
+</Layout>
