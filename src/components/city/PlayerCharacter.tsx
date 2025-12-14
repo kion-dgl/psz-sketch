@@ -256,6 +256,7 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
       position={spawnPosition}
       enabledRotations={[false, false, false]}
       lockRotations
+      collisionGroups={0xFFFFFFFF}
       // Debug collision logging - ENABLED for debugging
       onCollisionEnter={(event) => {
         const parent = event.other.parent();

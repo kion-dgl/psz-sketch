@@ -107,7 +107,13 @@ export function WarpGroundPlane() {
   useEffect(() => {
     fetch('/city_e/s00e_sa3/lndmd/s00e_sa3_m-collision-hull.json')
       .then(response => response.json())
-      .then(data => setCollisionHull(data))
+      .then(data => {
+        console.log('[Collision Hull] Loaded:', data);
+        console.log('[Collision Hull] Vertices count:', data.vertices.length / 3);
+        console.log('[Collision Hull] Indices count:', data.indices.length);
+        console.log('[Collision Hull] Triangle count:', data.triangleCount);
+        setCollisionHull(data);
+      })
       .catch(error => console.error('Failed to load collision hull:', error));
   }, []);
 
@@ -118,6 +124,12 @@ export function WarpGroundPlane() {
     geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(collisionHull.vertices), 3));
     geo.setIndex(new THREE.BufferAttribute(new Uint32Array(collisionHull.indices), 1));
     geo.computeVertexNormals();
+
+    console.log('[Geometry] Created with', geo.attributes.position.count, 'vertices');
+    console.log('[Geometry] Bounding box:', geo.boundingBox);
+    geo.computeBoundingBox();
+    console.log('[Geometry] Computed bounding box:', geo.boundingBox);
+
     return geo;
   }, [collisionHull]);
 
@@ -126,7 +138,16 @@ export function WarpGroundPlane() {
   }
 
   return (
-    <RigidBody type="fixed" position={[0, 0, 0]} collisionGroups={0x00030003} userData={{ type: 'ground' }}>
+    <RigidBody
+      type="fixed"
+      position={[0, 0, 0]}
+      collisionGroups={0x00030003}
+      userData={{ type: 'ground' }}
+      onCollisionEnter={(event) => {
+        console.log('=== Ground Collision ===');
+        console.log('Something hit the ground hull!');
+      }}
+    >
       {/* Trimesh collider using the collision hull data */}
       <TrimeshCollider
         args={[
@@ -134,9 +155,9 @@ export function WarpGroundPlane() {
           new Uint32Array(collisionHull.indices)
         ]}
       />
-      {/* Visible mesh for debugging - disable auto-collision */}
+      {/* Visible mesh for debugging - disable auto-collision - MORE OPAQUE */}
       <mesh geometry={geometry} receiveShadow userData={{ collider: false }}>
-        <meshStandardMaterial color="#00ff00" transparent opacity={0.3} side={THREE.DoubleSide} />
+        <meshStandardMaterial color="#00ff00" transparent opacity={0.8} side={THREE.DoubleSide} />
       </mesh>
     </RigidBody>
   );

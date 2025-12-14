@@ -94,6 +94,7 @@ export default function WarpArea() {
   const [loading, setLoading] = useState(true);
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0, rotation: 0 });
   const [respawnKey, setRespawnKey] = useState(0);
+  const [showStage, setShowStage] = useState(true);
   const { openShop } = useGameState();
   const { selectedCharacter, setSelectedCharacter } = useCharacterStore();
 
@@ -176,6 +177,42 @@ export default function WarpArea() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
+      {/* Debug Controls */}
+      <div style={{
+        position: 'absolute',
+        top: '10px',
+        right: '10px',
+        zIndex: 1000,
+        background: 'rgba(0,0,0,0.7)',
+        color: 'white',
+        padding: '10px',
+        borderRadius: '5px',
+        fontFamily: 'monospace',
+        fontSize: '12px'
+      }}>
+        <div>
+          <button
+            onClick={() => setShowStage(!showStage)}
+            style={{
+              padding: '5px 10px',
+              marginBottom: '10px',
+              cursor: 'pointer',
+              background: showStage ? '#4CAF50' : '#f44336',
+              color: 'white',
+              border: 'none',
+              borderRadius: '3px'
+            }}
+          >
+            Stage: {showStage ? 'ON' : 'OFF'}
+          </button>
+        </div>
+        <div>Player Position:</div>
+        <div>X: {playerPosition.x.toFixed(2)}</div>
+        <div>Y: {playerPosition.y.toFixed(2)}</div>
+        <div>Z: {playerPosition.z.toFixed(2)}</div>
+        <div>Rot: {playerPosition.rotation.toFixed(2)}</div>
+      </div>
+
       {/* HUD - Character stats */}
       <HUD />
 
@@ -201,7 +238,7 @@ export default function WarpArea() {
 
         <Suspense fallback={null}>
           {/* Warp Environment - OUTSIDE Physics to prevent auto-collision */}
-          <WarpEnvironment />
+          {showStage && <WarpEnvironment />}
 
           <Physics gravity={[0, -9.81, 0]}>
             {/* Ground plane - GREEN */}
