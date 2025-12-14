@@ -130,6 +130,20 @@ export function WarpGroundPlane() {
     geo.computeBoundingBox();
     console.log('[Geometry] Computed bounding box:', geo.boundingBox);
 
+    // Check for vertices at Y=0 or near Y=0
+    const vertices = collisionHull.vertices;
+    let y0Count = 0;
+    for (let i = 0; i < vertices.length; i += 3) {
+      const y = vertices[i + 1];
+      if (Math.abs(y) < 0.1) { // Y is at or near 0
+        const x = vertices[i];
+        const z = vertices[i + 2];
+        console.log(`Vertex at Y≈0: (${x.toFixed(2)}, ${y.toFixed(4)}, ${z.toFixed(2)})`);
+        y0Count++;
+      }
+    }
+    console.log(`[Geometry] Found ${y0Count} vertices at Y≈0`);
+
     return geo;
   }, [collisionHull]);
 
