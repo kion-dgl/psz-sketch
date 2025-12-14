@@ -3,6 +3,7 @@ import { RigidBody, useRapier, CylinderCollider } from '@react-three/rapier';
 import type { RapierRigidBody } from '@react-three/rapier';
 import { useFrame } from '@react-three/fiber';
 import type { Character } from '../../stores/characterStore';
+import * as THREE from 'three';
 
 interface PlayerCharacterProps {
   character: Character;
@@ -17,6 +18,7 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
   const [rotation, setRotation] = useState(0); // Tank control rotation
   const [npcDetected, setNpcDetected] = useState(false); // Track if NPC is in range
   const hasErrored = useRef(false); // Prevent error spam
+  const debugLineRef = useRef<THREE.Line | null>(null);
 
   // Keyboard state
   const keys = useRef({
@@ -24,7 +26,8 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
     backward: false,
     left: false,
     right: false,
-    interact: false
+    interact: false,
+    debug: false
   });
 
   // Keyboard event listeners
@@ -36,6 +39,7 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
         case 'a': keys.current.left = true; break;
         case 'd': keys.current.right = true; break;
         case 'e': keys.current.interact = true; break;
+        case 'g': keys.current.debug = true; break; // Debug ground check
       }
     };
 
@@ -46,6 +50,7 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
         case 'a': keys.current.left = false; break;
         case 'd': keys.current.right = false; break;
         case 'e': keys.current.interact = false; break;
+        case 'g': keys.current.debug = false; break;
       }
     };
 
@@ -67,6 +72,40 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
 
     // Get current velocity
     const currentVel = rigidBodyRef.current.linvel();
+
+    // Debug ground check when G is pressed
+    if (keys.current.debug) {
+      const position = rigidBodyRef.current.translation();
+      console.log('=== GROUND DEBUG (Press G) ===');
+      console.log('Player position:', position.x.toFixed(2), position.y.toFixed(2), position.z.toFixed(2));
+      console.log('Player velocity:', currentVel.x.toFixed(2), currentVel.y.toFixed(2), currentVel.z.toFixed(2));
+
+      // Cast rays in multiple directions
+      const rayDown = { x: 0, y: -1, z: 0 };
+      const testRay = world.castRay(
+        { origin: { x: position.x, y: position.y + 0.5, z: position.z }, dir: rayDown },
+        20,
+        true,
+        undefined,
+        undefined, // Hit EVERYTHING
+        undefined,
+        undefined
+      );
+
+      if (testRay) {
+        const collider = testRay.collider;
+        const parent = collider.parent();
+        console.log('Ray HIT at distance:', testRay.timeOfImpact.toFixed(3));
+        console.log('  Hit Y position:', (position.y + 0.5 - testRay.timeOfImpact).toFixed(3));
+        console.log('  Collision groups:', '0x' + collider.collisionGroups().toString(16));
+        console.log('  UserData:', parent?.userData);
+        console.log('  Shape type:', collider.shape?.type);
+      } else {
+        console.log('Ray MISSED - no ground beneath player!');
+      }
+
+      keys.current.debug = false; // Reset
+    }
 
     // Tank controls: A/D rotate, W/S move forward/backward
     let newRotation = rotation;
@@ -104,7 +143,18 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
           z: intendedZ
         };
         const rayDirection = { x: 0, y: -1, z: 0 }; // Downward
-        const rayLength = 5; // Check 5 units down
+        const rayLength = 10; // Check 10 units down
+
+        // Also raycast from current position to see what we're standing on
+        const currentPosRay = world.castRay(
+          { origin: { x: position.x, y: position.y + 1, z: position.z }, dir: rayDirection },
+          rayLength,
+          true,
+          undefined,
+          0x00030003,
+          undefined,
+          undefined
+        );
 
         const groundCheck = world.castRay(
           { origin: rayOrigin, dir: rayDirection },
@@ -116,19 +166,25 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
           undefined
         );
 
+        // Log current ground status periodically
+        if (Math.random() < 0.02) { // Log 2% of frames
+          console.log('[Ground Status]');
+          console.log('  Player at:', position.x.toFixed(2), position.y.toFixed(2), position.z.toFixed(2));
+          console.log('  Current ground ray:', currentPosRay ? `HIT at ${currentPosRay.timeOfImpact.toFixed(2)}` : 'NO HIT');
+          console.log('  Intended pos:', intendedX.toFixed(2), intendedZ.toFixed(2));
+          console.log('  Intended ground ray:', groundCheck ? `HIT at ${groundCheck.timeOfImpact.toFixed(2)}` : 'NO HIT');
+        }
+
         // Only allow movement if ground is detected
         if (groundCheck) {
           velocity.x = moveX;
           velocity.z = moveZ;
-          // Debug: Log when ground is detected
-          if (Math.random() < 0.01) { // Only log 1% of the time to avoid spam
-            console.log('[Ground Check] Ground found at distance:', groundCheck.timeOfImpact);
-          }
         } else {
           canMove = false;
-          console.log('[Ground Check] NO GROUND - blocking movement at', intendedX.toFixed(2), intendedZ.toFixed(2));
+          console.log('[Ground Check] NO GROUND AHEAD - blocking at', intendedX.toFixed(2), intendedZ.toFixed(2));
         }
       } catch (error) {
+        console.error('[Ground Check] Raycast error:', error);
         // If raycast fails, allow movement (safer than blocking)
         velocity.x = moveX;
         velocity.z = moveZ;
