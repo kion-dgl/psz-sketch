@@ -1,5 +1,5 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Physics, RigidBody, Debug } from '@react-three/rapier';
+import { Physics, RigidBody } from '@react-three/rapier';
 import { Suspense, useState, useEffect, useRef } from 'react';
 import { PerspectiveCamera } from '@react-three/drei';
 import type { Character } from '../../stores/characterStore';
@@ -38,6 +38,18 @@ function DebugPlaneAtZero() {
       <planeGeometry args={[100, 100]} />
       <meshStandardMaterial color="magenta" transparent opacity={0.5} side={2} />
     </mesh>
+  );
+}
+
+// Add a visible flat collision plane at y=0 to test if player stands on it
+function TestCollisionPlane() {
+  return (
+    <RigidBody type="fixed" position={[0, 0, 0]} collisionGroups={0x00030003} userData={{ type: 'test-plane' }}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[50, 50]} />
+        <meshStandardMaterial color="orange" transparent opacity={0.7} side={2} />
+      </mesh>
+    </RigidBody>
   );
 }
 
@@ -192,16 +204,16 @@ export default function WarpArea() {
           <WarpEnvironment />
 
           <Physics gravity={[0, -9.81, 0]}>
-            {/* Debug: Show ALL collision shapes */}
-            <Debug />
-
-            {/* Debug: Visual plane at y=0 to see if player stands on it */}
+            {/* Debug: Visual plane at y=0 (no collision) */}
             <DebugPlaneAtZero />
 
-            {/* Ground plane */}
+            {/* Debug: Test collision plane at y=0 (HAS collision) - ORANGE */}
+            <TestCollisionPlane />
+
+            {/* Ground plane - GREEN */}
             <WarpGroundPlane />
 
-            {/* Warp Walls - Make visible to debug */}
+            {/* Warp Walls - RED wireframe cylinder */}
             <WarpWalls visible={true} />
 
             {/* Kill plane to respawn player if they fall */}
