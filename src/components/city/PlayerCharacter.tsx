@@ -180,7 +180,7 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
           undefined,
           0x00030003,
           undefined,
-          undefined
+          rigidBodyRef.current // EXCLUDE PLAYER
         );
 
         const groundCheck = world.castRay(
@@ -190,7 +190,7 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
           undefined,
           0x00030003, // Only check for ground collision group
           undefined,
-          undefined
+          rigidBodyRef.current // EXCLUDE PLAYER
         );
 
         // Log current ground status periodically
