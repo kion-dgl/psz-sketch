@@ -204,9 +204,6 @@ export default function WarpArea() {
           <WarpEnvironment />
 
           <Physics gravity={[0, -9.81, 0]}>
-            {/* Debug: Visual plane at y=0 (no collision) */}
-            <DebugPlaneAtZero />
-
             {/* Ground plane - GREEN */}
             <WarpGroundPlane />
 
