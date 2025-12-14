@@ -49,7 +49,13 @@ export default function WarpEnvironment() {
         child.receiveShadow = true;
         // Aggressively disable Rapier auto-collision generation
         child.userData.collider = false;
+        // Also set on material just in case
+        if (child.material) {
+          child.material.userData = { ...child.material.userData, collider: false };
+        }
       }
+      // Also disable on the object itself
+      child.userData.collider = false;
     });
   }, [scene]);
 

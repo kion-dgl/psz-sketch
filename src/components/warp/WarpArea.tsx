@@ -1,5 +1,5 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Physics, RigidBody } from '@react-three/rapier';
+import { Physics, RigidBody, Debug } from '@react-three/rapier';
 import { Suspense, useState, useEffect, useRef } from 'react';
 import { PerspectiveCamera } from '@react-three/drei';
 import type { Character } from '../../stores/characterStore';
@@ -25,9 +25,19 @@ function KillPlane({ onRespawn }: { onRespawn: () => void }) {
     >
       <mesh>
         <boxGeometry args={[200, 1, 200]} />
-        <meshStandardMaterial color="red" transparent opacity={0} />
+        <meshStandardMaterial color="red" transparent opacity={0.3} />
       </mesh>
     </RigidBody>
+  );
+}
+
+// Debug plane at y=0 to visualize if something is there
+function DebugPlaneAtZero() {
+  return (
+    <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <planeGeometry args={[100, 100]} />
+      <meshStandardMaterial color="magenta" transparent opacity={0.5} side={2} />
+    </mesh>
   );
 }
 
@@ -182,11 +192,17 @@ export default function WarpArea() {
           <WarpEnvironment />
 
           <Physics gravity={[0, -9.81, 0]}>
+            {/* Debug: Show ALL collision shapes */}
+            <Debug />
+
+            {/* Debug: Visual plane at y=0 to see if player stands on it */}
+            <DebugPlaneAtZero />
+
             {/* Ground plane */}
             <WarpGroundPlane />
 
-            {/* Warp Walls - Disabled for now, was causing player to float */}
-            {/* <WarpWalls visible={false} /> */}
+            {/* Warp Walls - Make visible to debug */}
+            <WarpWalls visible={true} />
 
             {/* Kill plane to respawn player if they fall */}
             <KillPlane onRespawn={handleRespawn} />
