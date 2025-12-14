@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CollisionHullDebug from '../../components/debug/CollisionHullDebug';
+
+export const prerender = false;
+---
+
+<Layout title="Collision Hull Debug - Density Dwarf">
+  <CollisionHullDebug client:load />
+</Layout>

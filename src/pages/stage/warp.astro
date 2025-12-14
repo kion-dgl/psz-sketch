@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import WarpArea from '../../components/warp/WarpArea';
+
+export const prerender = false;
+---
+
+<Layout title="Warp - Density Dwarf">
+  <WarpArea client:load />
+</Layout>
