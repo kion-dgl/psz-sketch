@@ -16,6 +16,13 @@ const TRIGGERS: AreaTrigger[] = [
     size: [5.28, 3, 1],
     targetArea: '/stage/city?spawn=counter-exit',
     name: 'Exit to Market'
+  },
+  // Exit trigger to Warp: (1.63, 1.00, -21.85) → (-1.66, 1.00, -22.76)
+  {
+    position: [-0.015, 1, -22.305],
+    size: [3.29, 3, 0.91],
+    targetArea: '/stage/warp',
+    name: 'Exit to Warp'
   }
 ];
 

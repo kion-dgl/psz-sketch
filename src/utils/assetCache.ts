@@ -31,12 +31,12 @@ export async function loadGLB(url: string): Promise<string> {
     const cached = await glbCache.getItem<CachedAsset>(url);
 
     if (cached && cached.blob) {
-      console.log(`[Cache HIT] GLB: ${url}`);
+      // console.log(`[Cache HIT] GLB: ${url}`);
       return URL.createObjectURL(cached.blob);
     }
 
     // Fetch from network
-    console.log(`[Cache MISS] GLB: ${url}`);
+    // console.log(`[Cache MISS] GLB: ${url}`);
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
@@ -69,12 +69,12 @@ export async function loadTexture(url: string): Promise<string> {
     const cached = await textureCache.getItem<CachedAsset>(url);
 
     if (cached && cached.blob) {
-      console.log(`[Cache HIT] Texture: ${url}`);
+      // console.log(`[Cache HIT] Texture: ${url}`);
       return URL.createObjectURL(cached.blob);
     }
 
     // Fetch from network
-    console.log(`[Cache MISS] Texture: ${url}`);
+    // console.log(`[Cache MISS] Texture: ${url}`);
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
@@ -102,7 +102,7 @@ export async function loadTexture(url: string): Promise<string> {
 export async function clearCache(): Promise<void> {
   await glbCache.clear();
   await textureCache.clear();
-  console.log('Cache cleared');
+  // console.log('Cache cleared');
 }
 
 /**

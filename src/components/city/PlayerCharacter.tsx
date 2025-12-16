@@ -9,13 +9,14 @@ interface PlayerCharacterProps {
   character: Character;
   onPositionChange: (position: { x: number; y: number; z: number; rotation: number }) => void;
   spawnPosition?: [number, number, number];
+  spawnRotation?: number;
   onInteraction?: (npcName: string) => void;
 }
 
-export default function PlayerCharacter({ character, onPositionChange, spawnPosition = [0.98, 10, 62.79], onInteraction }: PlayerCharacterProps) {
+export default function PlayerCharacter({ character, onPositionChange, spawnPosition = [0.98, 10, 62.79], spawnRotation = 0, onInteraction }: PlayerCharacterProps) {
   const rigidBodyRef = useRef<RapierRigidBody>(null);
   const { world } = useRapier();
-  const [rotation, setRotation] = useState(0); // Tank control rotation
+  const [rotation, setRotation] = useState(spawnRotation); // Tank control rotation
   const [npcDetected, setNpcDetected] = useState(false); // Track if NPC is in range
   const hasErrored = useRef(false); // Prevent error spam
   const debugLineRef = useRef<THREE.Line | null>(null);
@@ -76,9 +77,9 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
     // Debug ground check when G is pressed
     if (keys.current.debug) {
       const position = rigidBodyRef.current.translation();
-      console.log('=== GROUND DEBUG (Press G) ===');
-      console.log('Player position:', position.x.toFixed(2), position.y.toFixed(2), position.z.toFixed(2));
-      console.log('Player velocity:', currentVel.x.toFixed(2), currentVel.y.toFixed(2), currentVel.z.toFixed(2));
+      // console.log('=== GROUND DEBUG (Press G) ===');
+      // console.log('Player position:', position.x.toFixed(2), position.y.toFixed(2), position.z.toFixed(2));
+      // console.log('Player velocity:', currentVel.x.toFixed(2), currentVel.y.toFixed(2), currentVel.z.toFixed(2));
 
       // Cast rays in multiple directions
       const rayDown = { x: 0, y: -1, z: 0 };
@@ -105,31 +106,31 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
         rigidBodyRef.current
       );
 
-      console.log('--- Ground Group Ray (0x00030003) ---');
-      if (groundOnlyRay) {
-        const collider = groundOnlyRay.collider;
-        const parent = collider.parent();
-        console.log('GROUND HIT at distance:', groundOnlyRay.timeOfImpact.toFixed(3));
-        console.log('  Hit Y position:', (position.y + 0.5 - groundOnlyRay.timeOfImpact).toFixed(3));
-        console.log('  Collision groups:', '0x' + collider.collisionGroups().toString(16));
-        console.log('  UserData:', parent?.userData);
-        console.log('  Shape type:', collider.shape?.type);
-      } else {
-        console.log('GROUND MISS - TrimeshCollider not detected!');
-      }
+      // console.log('--- Ground Group Ray (0x00030003) ---');
+      // if (groundOnlyRay) {
+      //   const collider = groundOnlyRay.collider;
+      //   const parent = collider.parent();
+      //   console.log('GROUND HIT at distance:', groundOnlyRay.timeOfImpact.toFixed(3));
+      //   console.log('  Hit Y position:', (position.y + 0.5 - groundOnlyRay.timeOfImpact).toFixed(3));
+      //   console.log('  Collision groups:', '0x' + collider.collisionGroups().toString(16));
+      //   console.log('  UserData:', parent?.userData);
+      //   console.log('  Shape type:', collider.shape?.type);
+      // } else {
+      //   console.log('GROUND MISS - TrimeshCollider not detected!');
+      // }
 
-      console.log('--- All Collision Ray ---');
-      if (allRay) {
-        const collider = allRay.collider;
-        const parent = collider.parent();
-        console.log('HIT at distance:', allRay.timeOfImpact.toFixed(3));
-        console.log('  Hit Y position:', (position.y + 0.5 - allRay.timeOfImpact).toFixed(3));
-        console.log('  Collision groups:', '0x' + collider.collisionGroups().toString(16));
-        console.log('  UserData:', parent?.userData);
-        console.log('  Shape type:', collider.shape?.type);
-      } else {
-        console.log('MISS - no collision beneath player at all!');
-      }
+      // console.log('--- All Collision Ray ---');
+      // if (allRay) {
+      //   const collider = allRay.collider;
+      //   const parent = collider.parent();
+      //   console.log('HIT at distance:', allRay.timeOfImpact.toFixed(3));
+      //   console.log('  Hit Y position:', (position.y + 0.5 - allRay.timeOfImpact).toFixed(3));
+      //   console.log('  Collision groups:', '0x' + collider.collisionGroups().toString(16));
+      //   console.log('  UserData:', parent?.userData);
+      //   console.log('  Shape type:', collider.shape?.type);
+      // } else {
+      //   console.log('MISS - no collision beneath player at all!');
+      // }
 
       keys.current.debug = false; // Reset
     }
@@ -194,13 +195,13 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
         );
 
         // Log current ground status periodically
-        if (Math.random() < 0.02) { // Log 2% of frames
-          console.log('[Ground Status]');
-          console.log('  Player at:', position.x.toFixed(2), position.y.toFixed(2), position.z.toFixed(2));
-          console.log('  Current ground ray:', currentPosRay ? `HIT at ${currentPosRay.timeOfImpact.toFixed(2)}` : 'NO HIT');
-          console.log('  Intended pos:', intendedX.toFixed(2), intendedZ.toFixed(2));
-          console.log('  Intended ground ray:', groundCheck ? `HIT at ${groundCheck.timeOfImpact.toFixed(2)}` : 'NO HIT');
-        }
+        // if (Math.random() < 0.02) { // Log 2% of frames
+        //   console.log('[Ground Status]');
+        //   console.log('  Player at:', position.x.toFixed(2), position.y.toFixed(2), position.z.toFixed(2));
+        //   console.log('  Current ground ray:', currentPosRay ? `HIT at ${currentPosRay.timeOfImpact.toFixed(2)}` : 'NO HIT');
+        //   console.log('  Intended pos:', intendedX.toFixed(2), intendedZ.toFixed(2));
+        //   console.log('  Intended ground ray:', groundCheck ? `HIT at ${groundCheck.timeOfImpact.toFixed(2)}` : 'NO HIT');
+        // }
 
         // Only allow movement if ground is detected
         if (groundCheck) {
@@ -208,7 +209,7 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
           velocity.z = moveZ;
         } else {
           canMove = false;
-          console.log('[Ground Check] NO GROUND AHEAD - blocking at', intendedX.toFixed(2), intendedZ.toFixed(2));
+          // console.log('[Ground Check] NO GROUND AHEAD - blocking at', intendedX.toFixed(2), intendedZ.toFixed(2));
         }
       } catch (error) {
         console.error('[Ground Check] Raycast error:', error);
@@ -342,13 +343,13 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
       collisionGroups={0xFFFFFFFF}
       // Debug collision logging - ENABLED for debugging
       onCollisionEnter={(event) => {
-        const parent = event.other.parent();
-        const collisionGroups = event.other.collisionGroups();
-        console.log('=== Player Collision ===');
-        console.log('Collision groups (hex):', '0x' + collisionGroups.toString(16));
-        console.log('RigidBody userData:', parent?.userData);
-        console.log('Collider type:', event.other.collider?.type);
-        console.log('Collider shape:', event.other.collider?.shape?.type);
+        // const parent = event.other.parent();
+        // const collisionGroups = event.other.collisionGroups();
+        // console.log('=== Player Collision ===');
+        // console.log('Collision groups (hex):', '0x' + collisionGroups.toString(16));
+        // console.log('RigidBody userData:', parent?.userData);
+        // console.log('Collider type:', event.other.collider?.type);
+        // console.log('Collider shape:', event.other.collider?.shape?.type);
       }}
     >
       {/* Cylinder collider matching NPC dimensions */}

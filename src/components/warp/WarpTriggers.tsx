@@ -10,8 +10,13 @@ interface AreaTrigger {
 }
 
 const TRIGGERS: AreaTrigger[] = [
-  // TODO: Add actual triggers for warp area
-  // Example: Exit trigger back to counter or other areas
+  // Exit trigger to Counter: (2.16, 1.00, 18.37) → (-1.95, 1.00, 18.15)
+  {
+    position: [0.105, 1, 18.26],
+    size: [4.11, 3, 1],
+    targetArea: '/stage/counter',
+    name: 'Exit to Counter'
+  }
 ];
 
 interface WarpTriggersProps {

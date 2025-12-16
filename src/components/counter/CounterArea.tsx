@@ -55,6 +55,7 @@ export default function CounterArea() {
   const [loading, setLoading] = useState(true);
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0, rotation: 0 });
   const [isWallStart, setIsWallStart] = useState(true);
+  const [triggerDebugStart, setTriggerDebugStart] = useState(true); // Toggle between start/stop
   const { openShop } = useGameState();
   const { selectedCharacter, setSelectedCharacter } = useCharacterStore();
 
@@ -85,23 +86,23 @@ export default function CounterArea() {
     }
   }, [setSelectedCharacter]);
 
-  // Wall position logging - Disabled
-  // useEffect(() => {
-  //   const handleKeyDown = (e: KeyboardEvent) => {
-  //     if (e.code === 'Space') {
-  //       e.preventDefault();
-  //       if (isWallStart) {
-  //         console.log(`wall start: x: ${playerPosition.x.toFixed(2)}, y: ${playerPosition.y.toFixed(2)}, z: ${playerPosition.z.toFixed(2)}`);
-  //       } else {
-  //         console.log(`wall stop: x: ${playerPosition.x.toFixed(2)}, y: ${playerPosition.y.toFixed(2)}, z: ${playerPosition.z.toFixed(2)}`);
-  //       }
-  //       setIsWallStart(!isWallStart);
-  //     }
-  //   };
+  // Trigger position logging
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        const { x, y, z } = playerPosition;
+        if (triggerDebugStart) {
+          console.log(`trigger start: ${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}`);
+        } else {
+          console.log(`trigger stop: ${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}`);
+        }
+        setTriggerDebugStart(!triggerDebugStart);
+      }
+    };
 
-  //   window.addEventListener('keydown', handleKeyDown);
-  //   return () => window.removeEventListener('keydown', handleKeyDown);
-  // }, [playerPosition, isWallStart]);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [playerPosition, triggerDebugStart]);
 
   if (loading) {
     return (
@@ -159,37 +160,28 @@ export default function CounterArea() {
       {/* Shop Menu - NPC interactions */}
       <ShopMenu />
 
-      {/* Debug Position Display - Disabled */}
-      {/* <div style={{
+      {/* Debug Position Display */}
+      <div style={{
         position: 'absolute',
-        top: '20px',
-        left: '20px',
-        background: 'rgba(0, 0, 0, 0.7)',
-        color: 'white',
-        padding: '1rem',
-        borderRadius: '8px',
-        fontFamily: 'monospace',
-        fontSize: '14px',
+        top: '10px',
+        right: '10px',
         zIndex: 1000,
-        pointerEvents: 'none'
+        background: 'rgba(0,0,0,0.7)',
+        color: 'white',
+        padding: '10px',
+        borderRadius: '5px',
+        fontFamily: 'monospace',
+        fontSize: '12px'
       }}>
-        <div>Character: {selectedCharacter.character_name}</div>
-        <div>Class: {selectedCharacter.class_id}</div>
-        <div>Position:</div>
+        <div>Player Position:</div>
         <div>X: {playerPosition.x.toFixed(2)}</div>
         <div>Y: {playerPosition.y.toFixed(2)}</div>
         <div>Z: {playerPosition.z.toFixed(2)}</div>
-        <div>Rotation: {playerPosition.rotation.toFixed(2)}</div>
+        <div>Rot: {playerPosition.rotation.toFixed(2)}</div>
         <div style={{ marginTop: '0.5rem', color: '#ffd700' }}>
-          Press SPACE: {isWallStart ? 'Wall Start' : 'Wall Stop'}
+          Press SPACE: {triggerDebugStart ? 'Trigger Start' : 'Trigger Stop'}
         </div>
-        <div style={{ marginTop: '0.5rem', color: '#ff6b6b' }}>
-          Press E to interact with NPCs
-        </div>
-        <div style={{ marginTop: '0.5rem', color: '#3498db' }}>
-          Press TAB for Equipment Menu
-        </div>
-      </div> */}
+      </div>
 
       {/* 3D Scene */}
       <Canvas shadows>
@@ -217,7 +209,7 @@ export default function CounterArea() {
             <CounterWalls visible={true} />
 
             {/* Area Triggers */}
-            <CounterTriggers visible={false} />
+            <CounterTriggers visible={true} />
 
             {/* Counter NPCs */}
             <CounterNPCs />
@@ -227,6 +219,8 @@ export default function CounterArea() {
               character={selectedCharacter}
               onPositionChange={setPlayerPosition}
               onInteraction={handleNPCInteraction}
+              spawnPosition={[0.50, 10, -15.33]}
+              spawnRotation={-3.15}
             />
           </Physics>
         </Suspense>

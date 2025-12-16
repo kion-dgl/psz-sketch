@@ -95,6 +95,7 @@ export default function WarpArea() {
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0, rotation: 0 });
   const [respawnKey, setRespawnKey] = useState(0);
   const [showStage, setShowStage] = useState(true);
+  const [wallDebugStart, setWallDebugStart] = useState(true); // Toggle between start/stop
   const { openShop } = useGameState();
   const { selectedCharacter, setSelectedCharacter } = useCharacterStore();
 
@@ -129,6 +130,24 @@ export default function WarpArea() {
       setLoading(false);
     }
   }, [setSelectedCharacter]);
+
+  // Debug wall position logging when pressing space
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        const { x, y, z } = playerPosition;
+        if (wallDebugStart) {
+          console.log(`wall start: ${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}`);
+        } else {
+          console.log(`wall stop: ${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}`);
+        }
+        setWallDebugStart(!wallDebugStart);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [playerPosition, wallDebugStart]);
 
   if (loading) {
     return (
@@ -244,14 +263,14 @@ export default function WarpArea() {
             {/* Ground plane - GREEN */}
             <WarpGroundPlane />
 
-            {/* Warp Walls - DISABLED (causes floating bug) */}
-            {/* <WarpWalls visible={true} /> */}
+            {/* Warp Walls */}
+            <WarpWalls visible={true} />
 
             {/* Kill plane to respawn player if they fall */}
             <KillPlane onRespawn={handleRespawn} />
 
             {/* Area Triggers */}
-            <WarpTriggers visible={false} />
+            <WarpTriggers visible={true} />
 
             {/* Warp NPCs */}
             <WarpNPCs />
@@ -262,7 +281,7 @@ export default function WarpArea() {
               character={selectedCharacter}
               onPositionChange={setPlayerPosition}
               onInteraction={handleNPCInteraction}
-              spawnPosition={[0, 5, 0]}
+              spawnPosition={[0.08, 5, 15.26]}
             />
           </Physics>
         </Suspense>

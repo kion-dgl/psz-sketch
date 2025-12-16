@@ -108,10 +108,10 @@ export function WarpGroundPlane() {
     fetch('/city_e/s00e_sa3/lndmd/s00e_sa3_m-collision-hull.json')
       .then(response => response.json())
       .then(data => {
-        console.log('[Collision Hull] Loaded:', data);
-        console.log('[Collision Hull] Vertices count:', data.vertices.length / 3);
-        console.log('[Collision Hull] Indices count:', data.indices.length);
-        console.log('[Collision Hull] Triangle count:', data.triangleCount);
+        // console.log('[Collision Hull] Loaded:', data);
+        // console.log('[Collision Hull] Vertices count:', data.vertices.length / 3);
+        // console.log('[Collision Hull] Indices count:', data.indices.length);
+        // console.log('[Collision Hull] Triangle count:', data.triangleCount);
         setCollisionHull(data);
       })
       .catch(error => console.error('Failed to load collision hull:', error));
@@ -125,10 +125,10 @@ export function WarpGroundPlane() {
     geo.setIndex(new THREE.BufferAttribute(new Uint32Array(collisionHull.indices), 1));
     geo.computeVertexNormals();
 
-    console.log('[Geometry] Created with', geo.attributes.position.count, 'vertices');
-    console.log('[Geometry] Bounding box:', geo.boundingBox);
+    // console.log('[Geometry] Created with', geo.attributes.position.count, 'vertices');
+    // console.log('[Geometry] Bounding box:', geo.boundingBox);
     geo.computeBoundingBox();
-    console.log('[Geometry] Computed bounding box:', geo.boundingBox);
+    // console.log('[Geometry] Computed bounding box:', geo.boundingBox);
 
     // Check for vertices at Y=0 or near Y=0
     const vertices = collisionHull.vertices;
@@ -136,13 +136,13 @@ export function WarpGroundPlane() {
     for (let i = 0; i < vertices.length; i += 3) {
       const y = vertices[i + 1];
       if (Math.abs(y) < 0.1) { // Y is at or near 0
-        const x = vertices[i];
-        const z = vertices[i + 2];
-        console.log(`Vertex at Y≈0: (${x.toFixed(2)}, ${y.toFixed(4)}, ${z.toFixed(2)})`);
+        // const x = vertices[i];
+        // const z = vertices[i + 2];
+        // console.log(`Vertex at Y≈0: (${x.toFixed(2)}, ${y.toFixed(4)}, ${z.toFixed(2)})`);
         y0Count++;
       }
     }
-    console.log(`[Geometry] Found ${y0Count} vertices at Y≈0`);
+    // console.log(`[Geometry] Found ${y0Count} vertices at Y≈0`);
 
     return geo;
   }, [collisionHull]);
@@ -158,8 +158,8 @@ export function WarpGroundPlane() {
       collisionGroups={0x00030003}
       userData={{ type: 'ground' }}
       onCollisionEnter={(event) => {
-        console.log('=== Ground Collision ===');
-        console.log('Something hit the ground hull!');
+        // console.log('=== Ground Collision ===');
+        // console.log('Something hit the ground hull!');
       }}
     >
       {/* Trimesh collider using the collision hull data */}
