@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import UndergroundArea from '../../components/underground/UndergroundArea';
+
+export const prerender = false;
+---
+
+<Layout title="Underground - Density Dwarf">
+  <UndergroundArea client:load />
+</Layout>

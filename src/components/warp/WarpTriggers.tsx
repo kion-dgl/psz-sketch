@@ -10,27 +10,20 @@ interface AreaTrigger {
 }
 
 const TRIGGERS: AreaTrigger[] = [
-  // Exit trigger to Market: Updated to be near x:0, z:20
+  // Exit trigger to Counter: (2.16, 1.00, 18.37) → (-1.95, 1.00, 18.15)
   {
-    position: [0, 1, 20],
-    size: [4, 3, 1],
-    targetArea: '/stage/city?spawn=counter-exit',
-    name: 'Exit to Market'
-  },
-  // Exit trigger to Warp: (1.63, 1.00, -21.85) → (-1.66, 1.00, -22.76)
-  {
-    position: [-0.015, 1, -22.305],
-    size: [3.29, 3, 0.91],
-    targetArea: '/stage/warp',
-    name: 'Exit to Warp'
+    position: [0.105, 1, 18.26],
+    size: [4.11, 3, 1],
+    targetArea: '/stage/counter?spawn=warp-exit',
+    name: 'Exit to Counter'
   }
 ];
 
-interface CounterTriggersProps {
+interface WarpTriggersProps {
   visible?: boolean;
 }
 
-export default function CounterTriggers({ visible = true }: CounterTriggersProps) {
+export default function WarpTriggers({ visible = true }: WarpTriggersProps) {
   const [triggeredAreas, setTriggeredAreas] = useState<Set<string>>(new Set());
 
   const handleTriggerEnter = (trigger: AreaTrigger) => {

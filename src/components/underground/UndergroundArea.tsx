@@ -5,11 +5,12 @@ import { PerspectiveCamera } from '@react-three/drei';
 import type { Character } from '../../stores/characterStore';
 import { useCharacterStore } from '../../stores/characterStore';
 import { useGameState } from '../../stores/gameStateStore';
-import CounterEnvironment, { CounterGroundPlane } from './CounterEnvironment';
+import UndergroundEnvironment, { UndergroundGroundPlane, DebugGroundPlane } from './UndergroundEnvironment';
 import PlayerCharacter from '../city/PlayerCharacter';
-import CounterNPCs from './CounterNPCs';
-import CounterWalls from './CounterWalls';
-import CounterTriggers from './CounterTriggers';
+import UndergroundNPCs from './UndergroundNPCs';
+import UndergroundWalls from './UndergroundWalls';
+import UndergroundTriggers from './UndergroundTriggers';
+import InteractiveTriggers, { InteractiveTriggerUI } from './InteractiveTriggers';
 import HUD from '../ui/HUD';
 import PauseMenu from '../ui/PauseMenu';
 import ShopMenu from '../ui/ShopMenu';
@@ -34,7 +35,7 @@ function CameraController({ target }: { target: { x: number; y: number; z: numbe
 
   useFrame(() => {
     // Position camera behind and above the player with rotation
-    const distance = 6; // Closer camera for better view
+    const distance = 6;
     const height = 3;
 
     const offsetX = Math.sin(rotationRef.current) * distance;
@@ -51,13 +52,11 @@ function CameraController({ target }: { target: { x: number; y: number; z: numbe
   return null;
 }
 
-export default function CounterArea() {
+export default function UndergroundArea() {
   const [loading, setLoading] = useState(true);
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0, rotation: 0 });
-  const [isWallStart, setIsWallStart] = useState(true);
-  const [triggerDebugStart, setTriggerDebugStart] = useState(true); // Toggle between start/stop
-  const [spawnPosition, setSpawnPosition] = useState<[number, number, number]>([0.06, 10, 12.95]);
-  const [spawnRotation, setSpawnRotation] = useState(-6.28);
+  const [debugStart, setDebugStart] = useState(true);
+  const [playerInInteractiveZone, setPlayerInInteractiveZone] = useState<string | null>(null);
   const { openShop } = useGameState();
   const { selectedCharacter, setSelectedCharacter } = useCharacterStore();
 
@@ -66,20 +65,6 @@ export default function CounterArea() {
   };
 
   useEffect(() => {
-    // Check URL parameter for spawn location
-    const urlParams = new URLSearchParams(window.location.search);
-    const spawn = urlParams.get('spawn');
-
-    if (spawn === 'warp-exit') {
-      // Coming from Warp
-      setSpawnPosition([0.50, 10, -15.33]);
-      setSpawnRotation(-3.15);
-    } else {
-      // Default: Coming from City
-      setSpawnPosition([0.06, 10, 12.95]);
-      setSpawnRotation(-6.28);
-    }
-
     // Load selected character from localStorage
     try {
       const selectedCharacterId = localStorage.getItem('selectedCharacterId');
@@ -93,7 +78,6 @@ export default function CounterArea() {
       const character = chars.find((c: Character | null) => c?.character_id === selectedCharacterId);
 
       if (character) {
-        // Set in global store so UI components can access it
         setSelectedCharacter(character);
       }
       setLoading(false);
@@ -102,23 +86,23 @@ export default function CounterArea() {
     }
   }, [setSelectedCharacter]);
 
-  // Trigger position logging
+  // Debug position logging
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Space') {
         const { x, y, z } = playerPosition;
-        if (triggerDebugStart) {
-          console.log(`trigger start: ${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}`);
+        if (debugStart) {
+          console.log(`debug start: ${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}`);
         } else {
-          console.log(`trigger stop: ${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}`);
+          console.log(`debug stop: ${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}`);
         }
-        setTriggerDebugStart(!triggerDebugStart);
+        setDebugStart(!debugStart);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [playerPosition, triggerDebugStart]);
+  }, [playerPosition, debugStart]);
 
   if (loading) {
     return (
@@ -195,7 +179,7 @@ export default function CounterArea() {
         <div>Z: {playerPosition.z.toFixed(2)}</div>
         <div>Rot: {playerPosition.rotation.toFixed(2)}</div>
         <div style={{ marginTop: '0.5rem', color: '#ffd700' }}>
-          Press SPACE: {triggerDebugStart ? 'Trigger Start' : 'Trigger Stop'}
+          Press SPACE: {debugStart ? 'Debug Start' : 'Debug Stop'}
         </div>
       </div>
 
@@ -214,33 +198,41 @@ export default function CounterArea() {
         />
 
         <Suspense fallback={null}>
-          {/* Counter Environment - OUTSIDE Physics to prevent auto-collision */}
-          <CounterEnvironment />
+          {/* Underground Environment - OUTSIDE Physics to prevent auto-collision */}
+          <UndergroundEnvironment />
 
           <Physics gravity={[0, -9.81, 0]}>
-            {/* Ground plane */}
-            <CounterGroundPlane />
+            {/* Debug ground plane at Y=0 */}
+            <DebugGroundPlane />
 
-            {/* Counter Walls */}
-            <CounterWalls visible={true} />
+            {/* Ground plane - disabled until collision hull exists */}
+            {/* <UndergroundGroundPlane /> */}
+
+            {/* Underground Walls */}
+            <UndergroundWalls visible={true} />
 
             {/* Area Triggers */}
-            <CounterTriggers visible={false} />
+            <UndergroundTriggers visible={false} />
 
-            {/* Counter NPCs */}
-            <CounterNPCs />
+            {/* Interactive Triggers (require 'e' key) */}
+            <InteractiveTriggers visible={true} onPlayerInZone={setPlayerInInteractiveZone} />
+
+            {/* Underground NPCs */}
+            <UndergroundNPCs />
 
             {/* Player Character */}
             <PlayerCharacter
               character={selectedCharacter}
               onPositionChange={setPlayerPosition}
               onInteraction={handleNPCInteraction}
-              spawnPosition={spawnPosition}
-              spawnRotation={spawnRotation}
+              spawnPosition={[0, 10, 0]}
             />
           </Physics>
         </Suspense>
       </Canvas>
+
+      {/* Interactive trigger UI prompt */}
+      <InteractiveTriggerUI playerInZone={playerInInteractiveZone} />
     </div>
   );
 }

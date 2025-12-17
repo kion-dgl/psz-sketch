@@ -10,6 +10,7 @@ import PlayerCharacter from './PlayerCharacter';
 import NPCs from './NPCs';
 import InvisibleWalls from './InvisibleWalls';
 import AreaTriggers from './AreaTriggers';
+import InteractiveTriggers, { InteractiveTriggerUI } from './InteractiveTriggers';
 import HUD from '../ui/HUD';
 import PauseMenu from '../ui/PauseMenu';
 import ShopMenu from '../ui/ShopMenu';
@@ -55,7 +56,10 @@ export default function CityMarket() {
   const [loading, setLoading] = useState(true);
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0, rotation: 0 });
   const [isWallStart, setIsWallStart] = useState(true);
+  const [debugStart, setDebugStart] = useState(true); // Toggle between start/stop
   const [spawnPosition, setSpawnPosition] = useState<[number, number, number]>([0.98, 10, 62.79]);
+  const [spawnRotation, setSpawnRotation] = useState(0);
+  const [playerInInteractiveZone, setPlayerInInteractiveZone] = useState<string | null>(null);
   const { openShop } = useGameState();
   const { selectedCharacter, setSelectedCharacter } = useCharacterStore();
 
@@ -70,6 +74,7 @@ export default function CityMarket() {
 
     if (spawn === 'counter-exit') {
       setSpawnPosition([0.98, 10, 18.84]);
+      setSpawnRotation(Math.PI); // Face away from door into the stage
     }
 
     // Load selected character from localStorage
@@ -94,23 +99,23 @@ export default function CityMarket() {
     }
   }, [setSelectedCharacter]);
 
-  // Wall position logging - Disabled
-  // useEffect(() => {
-  //   const handleKeyDown = (e: KeyboardEvent) => {
-  //     if (e.code === 'Space') {
-  //       e.preventDefault();
-  //       if (isWallStart) {
-  //         console.log(`wall start: x: ${playerPosition.x.toFixed(2)}, y: ${playerPosition.y.toFixed(2)}, z: ${playerPosition.z.toFixed(2)}`);
-  //       } else {
-  //         console.log(`wall stop: x: ${playerPosition.x.toFixed(2)}, y: ${playerPosition.y.toFixed(2)}, z: ${playerPosition.z.toFixed(2)}`);
-  //       }
-  //       setIsWallStart(!isWallStart);
-  //     }
-  //   };
+  // Debug position logging
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        const { x, y, z } = playerPosition;
+        if (debugStart) {
+          console.log(`debug start: ${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}`);
+        } else {
+          console.log(`debug stop: ${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}`);
+        }
+        setDebugStart(!debugStart);
+      }
+    };
 
-  //   window.addEventListener('keydown', handleKeyDown);
-  //   return () => window.removeEventListener('keydown', handleKeyDown);
-  // }, [playerPosition, isWallStart]);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [playerPosition, debugStart]);
 
   if (loading) {
     return (
@@ -168,37 +173,28 @@ export default function CityMarket() {
       {/* Shop Menu - NPC interactions */}
       <ShopMenu />
 
-      {/* Debug Position Display - Disabled */}
-      {/* <div style={{
+      {/* Debug Position Display */}
+      <div style={{
         position: 'absolute',
-        top: '20px',
-        left: '20px',
-        background: 'rgba(0, 0, 0, 0.7)',
-        color: 'white',
-        padding: '1rem',
-        borderRadius: '8px',
-        fontFamily: 'monospace',
-        fontSize: '14px',
+        top: '10px',
+        right: '10px',
         zIndex: 1000,
-        pointerEvents: 'none'
+        background: 'rgba(0,0,0,0.7)',
+        color: 'white',
+        padding: '10px',
+        borderRadius: '5px',
+        fontFamily: 'monospace',
+        fontSize: '12px'
       }}>
-        <div>Character: {selectedCharacter.character_name}</div>
-        <div>Class: {selectedCharacter.class_id}</div>
-        <div>Position:</div>
+        <div>Player Position:</div>
         <div>X: {playerPosition.x.toFixed(2)}</div>
         <div>Y: {playerPosition.y.toFixed(2)}</div>
         <div>Z: {playerPosition.z.toFixed(2)}</div>
-        <div>Rotation: {playerPosition.rotation.toFixed(2)}</div>
+        <div>Rot: {playerPosition.rotation.toFixed(2)}</div>
         <div style={{ marginTop: '0.5rem', color: '#ffd700' }}>
-          Press SPACE: {isWallStart ? 'Wall Start' : 'Wall Stop'}
+          Press SPACE: {debugStart ? 'Debug Start' : 'Debug Stop'}
         </div>
-        <div style={{ marginTop: '0.5rem', color: '#ff6b6b' }}>
-          Press E to interact with NPCs
-        </div>
-        <div style={{ marginTop: '0.5rem', color: '#3498db' }}>
-          Press TAB for Equipment Menu
-        </div>
-      </div> */}
+      </div>
 
       {/* 3D Scene */}
       <Canvas shadows>
@@ -225,11 +221,15 @@ export default function CityMarket() {
             {/* Area Triggers */}
             <AreaTriggers visible={false} />
 
+            {/* Interactive Triggers (require 'e' key) */}
+            <InteractiveTriggers visible={true} onPlayerInZone={setPlayerInInteractiveZone} />
+
             {/* Player Character */}
             <PlayerCharacter
               character={selectedCharacter}
               onPositionChange={setPlayerPosition}
               spawnPosition={spawnPosition}
+              spawnRotation={spawnRotation}
               onInteraction={handleNPCInteraction}
             />
 
@@ -238,6 +238,9 @@ export default function CityMarket() {
           </Physics>
         </Suspense>
       </Canvas>
+
+      {/* Interactive trigger UI prompt */}
+      <InteractiveTriggerUI playerInZone={playerInInteractiveZone} />
     </div>
   );
 }
