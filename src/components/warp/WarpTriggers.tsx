@@ -14,7 +14,7 @@ const TRIGGERS: AreaTrigger[] = [
   {
     position: [0.105, 1, 18.26],
     size: [4.11, 3, 1],
-    targetArea: '/stage/counter',
+    targetArea: '/stage/counter?spawn=warp-exit',
     name: 'Exit to Counter'
   }
 ];

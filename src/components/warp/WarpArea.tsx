@@ -209,27 +209,14 @@ export default function WarpArea() {
         fontFamily: 'monospace',
         fontSize: '12px'
       }}>
-        <div>
-          <button
-            onClick={() => setShowStage(!showStage)}
-            style={{
-              padding: '5px 10px',
-              marginBottom: '10px',
-              cursor: 'pointer',
-              background: showStage ? '#4CAF50' : '#f44336',
-              color: 'white',
-              border: 'none',
-              borderRadius: '3px'
-            }}
-          >
-            Stage: {showStage ? 'ON' : 'OFF'}
-          </button>
-        </div>
         <div>Player Position:</div>
         <div>X: {playerPosition.x.toFixed(2)}</div>
         <div>Y: {playerPosition.y.toFixed(2)}</div>
         <div>Z: {playerPosition.z.toFixed(2)}</div>
         <div>Rot: {playerPosition.rotation.toFixed(2)}</div>
+        <div style={{ marginTop: '0.5rem', color: '#ffd700' }}>
+          Press SPACE: {wallDebugStart ? 'Wall Start' : 'Wall Stop'}
+        </div>
       </div>
 
       {/* HUD - Character stats */}
@@ -270,7 +257,7 @@ export default function WarpArea() {
             <KillPlane onRespawn={handleRespawn} />
 
             {/* Area Triggers */}
-            <WarpTriggers visible={true} />
+            <WarpTriggers visible={false} />
 
             {/* Warp NPCs */}
             <WarpNPCs />
