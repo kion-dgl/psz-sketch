@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ValleyAreaA_GA1 from '../../components/valley/ValleyAreaA_GA1';
+
+export const prerender = false;
+---
+
+<Layout title="Gurhacia Valley - Density Dwarf">
+  <ValleyAreaA_GA1 client:load />
+</Layout>

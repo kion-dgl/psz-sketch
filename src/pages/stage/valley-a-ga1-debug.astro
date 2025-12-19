@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ValleyAreaA_GA1_Debug from '../../components/valley/ValleyAreaA_GA1_Debug';
+
+export const prerender = false;
+---
+
+<Layout title="Gurhacia Valley - Debug Mode">
+  <ValleyAreaA_GA1_Debug client:load />
+</Layout>
