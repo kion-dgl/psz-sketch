@@ -5,7 +5,8 @@ import * as THREE from 'three';
 interface MapTriggerProps {
   position: [number, number, number];
   size?: [number, number, number];
-  targetMap: string;
+  targetMap?: string;
+  targetUrl?: string;
   spawnPosition?: [number, number, number];
   spawnRotation?: number;
   label?: string;
@@ -15,6 +16,7 @@ export default function MapTrigger({
   position,
   size = [2, 3, 2],
   targetMap,
+  targetUrl,
   spawnPosition,
   spawnRotation,
   label
@@ -26,10 +28,10 @@ export default function MapTrigger({
     setIsPlayerInside(true);
     if (!hasTriggered) {
       setHasTriggered(true);
-      console.log(`[MapTrigger] Transitioning to ${targetMap}`);
+      console.log(`[MapTrigger] Transitioning to ${targetUrl || targetMap}`);
 
       // Build URL with spawn parameters
-      let url = `/stage/valley-${targetMap}`;
+      let url = targetUrl || `/stage/valley-${targetMap}`;
       const params = new URLSearchParams();
 
       if (spawnPosition) {

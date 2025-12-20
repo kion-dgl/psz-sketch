@@ -10,6 +10,7 @@ import PlayerCharacter from '../city/PlayerCharacter';
 import WarpNPCs from './WarpNPCs';
 import WarpWalls from './WarpWalls';
 import WarpTriggers from './WarpTriggers';
+import InteractiveTriggers, { InteractiveTriggerUI } from './InteractiveTriggers';
 import HUD from '../ui/HUD';
 import PauseMenu from '../ui/PauseMenu';
 import ShopMenu from '../ui/ShopMenu';
@@ -96,6 +97,7 @@ export default function WarpArea() {
   const [respawnKey, setRespawnKey] = useState(0);
   const [showStage, setShowStage] = useState(true);
   const [wallDebugStart, setWallDebugStart] = useState(true); // Toggle between start/stop
+  const [playerInInteractiveZone, setPlayerInInteractiveZone] = useState<string | null>(null);
   const { openShop } = useGameState();
   const { selectedCharacter, setSelectedCharacter } = useCharacterStore();
 
@@ -259,6 +261,9 @@ export default function WarpArea() {
             {/* Area Triggers */}
             <WarpTriggers visible={false} />
 
+            {/* Interactive Triggers (require 'e' key) */}
+            <InteractiveTriggers visible={true} onPlayerInZone={setPlayerInInteractiveZone} />
+
             {/* Warp NPCs */}
             <WarpNPCs />
 
@@ -273,6 +278,9 @@ export default function WarpArea() {
           </Physics>
         </Suspense>
       </Canvas>
+
+      {/* Interactive trigger UI prompt */}
+      <InteractiveTriggerUI playerInZone={playerInInteractiveZone} />
     </div>
   );
 }

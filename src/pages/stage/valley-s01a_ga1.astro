@@ -1,14 +1,31 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import ValleyArea from '../../components/valley/ValleyArea';
+import MapTrigger from '../../components/valley/MapTrigger';
 
 export const prerender = false;
 ---
 
 <Layout title="Gurhacia Valley - Gateway">
-  <ValleyArea 
+  <ValleyArea
     mapId="s01a_ga1"
     mapName="Gurhacia Valley - Gateway"
-    client:load 
-  />
+    client:load
+  >
+    {/* North trigger - leads back to valley index */}
+    <MapTrigger
+      position={[2.03, 1.00, -20.14]}
+      targetUrl="/stage/valley"
+      label="North Exit"
+      client:only="react"
+    />
+
+    {/* South trigger - leads back to valley index */}
+    <MapTrigger
+      position={[-5.91, 1.00, 33.99]}
+      targetUrl="/stage/valley"
+      label="South Exit"
+      client:only="react"
+    />
+  </ValleyArea>
 </Layout>

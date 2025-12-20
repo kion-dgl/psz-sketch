@@ -4,7 +4,7 @@ import Layout from '../../layouts/Layout.astro';
 export const prerender = false;
 
 const valleySections = [
-  { id: 's01a_ga1', name: 'Gateway', category: 'Gateway' },
+  { id: 's01a_ga1', name: 'Gateway', category: 'Gateway', triggers: 'North & South exits' },
   { id: 's01a_ib1', name: 'Inner Bridge 1', category: 'Inner' },
   { id: 's01a_ib2', name: 'Inner Bridge 2', category: 'Inner' },
   { id: 's01a_ic1', name: 'Inner Canyon 1', category: 'Inner' },
@@ -125,6 +125,11 @@ const categories = ['Gateway', 'Inner', 'Lower', 'North', 'South', 'Top', 'East'
                   <div style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.7);">
                     {section.id}
                   </div>
+                  {section.triggers && (
+                    <div style="font-size: 0.75rem; color: rgba(100, 255, 100, 0.8); margin-top: 0.5rem;">
+                      🚪 {section.triggers}
+                    </div>
+                  )}
                 </a>
               ))}
             </div>
