@@ -1,7 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import ValleyArea from '../../components/valley/ValleyArea';
-import MapTrigger from '../../components/valley/MapTrigger';
 
 export const prerender = false;
 ---
@@ -10,20 +9,18 @@ export const prerender = false;
   <ValleyArea
     mapId="s01a_ib1"
     mapName="Gurhacia Valley - Inner Bridge 1"
+    triggers={[
+      {
+        position: [-17.06, 1.00, -27.61],
+        targetUrl: "/stage/valley",
+        label: "North Exit"
+      },
+      {
+        position: [14.14, 1.00, 27.79],
+        targetUrl: "/stage/valley",
+        label: "South Exit"
+      }
+    ]}
     client:load
-  >
-    {/* North trigger - leads back to valley index */}
-    <MapTrigger
-      position={[-17.06, 1.00, -27.61]}
-      targetUrl="/stage/valley"
-      label="North Exit"
-    />
-
-    {/* South trigger - leads back to valley index */}
-    <MapTrigger
-      position={[14.14, 1.00, 27.79]}
-      targetUrl="/stage/valley"
-      label="South Exit"
-    />
-  </ValleyArea>
+  />
 </Layout>

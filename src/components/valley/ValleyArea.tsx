@@ -12,6 +12,7 @@ import HUD from '../ui/HUD';
 import PauseMenu from '../ui/PauseMenu';
 import ShopMenu from '../ui/ShopMenu';
 import Compass from '../ui/Compass';
+import MapTrigger from './MapTrigger';
 
 function CameraController({ target }: { target: { x: number; y: number; z: number } }) {
   const { camera } = useThree();
@@ -48,15 +49,25 @@ function CameraController({ target }: { target: { x: number; y: number; z: numbe
   return null;
 }
 
+interface TriggerConfig {
+  position: [number, number, number];
+  targetUrl?: string;
+  targetMap?: string;
+  label?: string;
+  spawnPosition?: [number, number, number];
+  spawnRotation?: number;
+}
+
 interface ValleyAreaProps {
   mapId: string;
   mapName: string;
   spawnPosition?: [number, number, number];
   spawnRotation?: number;
+  triggers?: TriggerConfig[];
   children?: React.ReactNode;
 }
 
-export default function ValleyArea({ mapId, mapName, spawnPosition: defaultSpawn = [0, 10, 0], spawnRotation: defaultRotation = 0, children }: ValleyAreaProps) {
+export default function ValleyArea({ mapId, mapName, spawnPosition: defaultSpawn = [0, 10, 0], spawnRotation: defaultRotation = 0, triggers = [], children }: ValleyAreaProps) {
   const [loading, setLoading] = useState(true);
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0, rotation: 0 });
   const [debugStart, setDebugStart] = useState(true);
@@ -237,6 +248,17 @@ export default function ValleyArea({ mapId, mapName, spawnPosition: defaultSpawn
             <ValleyFloorCollision mapId={mapId} />
 
             {/* Map triggers (loading zones) */}
+            {triggers.map((trigger, index) => (
+              <MapTrigger
+                key={index}
+                position={trigger.position}
+                targetUrl={trigger.targetUrl}
+                targetMap={trigger.targetMap}
+                label={trigger.label}
+                spawnPosition={trigger.spawnPosition}
+                spawnRotation={trigger.spawnRotation}
+              />
+            ))}
             {children}
 
             {/* Player Character */}
