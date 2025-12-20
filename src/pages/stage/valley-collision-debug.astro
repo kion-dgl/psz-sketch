@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ValleyCollisionDebug from '../../components/valley/ValleyCollisionDebug';
+
+export const prerender = false;
+---
+
+<Layout title="Valley Collision Debug">
+  <ValleyCollisionDebug client:load />
+</Layout>
