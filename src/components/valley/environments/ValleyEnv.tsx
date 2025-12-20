@@ -19,12 +19,22 @@ interface ValleyEnvProps {
   showFloorCollision?: boolean;
 }
 
+// Get valley directory based on mapId prefix (s01a_* -> valley_a, s01b_* -> valley_b, etc.)
+function getValleyDir(mapId: string): string {
+  const match = mapId.match(/^s01([a-z])_/);
+  if (match) {
+    return `valley_${match[1]}`;
+  }
+  return 'valley_a'; // fallback
+}
+
 export function ValleyFloorCollision({ mapId, showVisual = false }: { mapId: string; showVisual?: boolean }) {
   const [floorGeometry, setFloorGeometry] = useState<THREE.BufferGeometry | null>(null);
 
   useEffect(() => {
     const loader = new GLTFLoader();
-    const glbPath = `/valley_a/${mapId}/lndmd/${mapId}_m.glb`;
+    const valleyDir = getValleyDir(mapId);
+    const glbPath = `/${valleyDir}/${mapId}/lndmd/${mapId}_m.glb`;
 
     loader.load(glbPath, (gltf) => {
       const floorVertices: number[] = [];
@@ -117,7 +127,8 @@ export function ValleyFloorCollision({ mapId, showVisual = false }: { mapId: str
 }
 
 export default function ValleyEnv({ mapId, showFloorCollision = false }: ValleyEnvProps) {
-  const glbPath = `/valley_a/${mapId}/lndmd/${mapId}_m.glb`;
+  const valleyDir = getValleyDir(mapId);
+  const glbPath = `/${valleyDir}/${mapId}/lndmd/${mapId}_m.glb`;
   const { scene } = useGLTF(glbPath);
 
   useEffect(() => {

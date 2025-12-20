@@ -1,0 +1,15 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ValleyArea from '../../components/valley/ValleyArea';
+
+export const prerender = false;
+---
+
+<Layout title="Gurhacia Valley B - Gateway">
+  <ValleyArea
+    mapId="s01b_ga1"
+    mapName="Gurhacia Valley B - Gateway"
+    spawnPosition={[0, 5, 0]}
+    client:load
+  />
+</Layout>
