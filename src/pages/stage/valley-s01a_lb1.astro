@@ -1,0 +1,14 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ValleyArea from '../../components/valley/ValleyArea';
+
+export const prerender = false;
+---
+
+<Layout title="Gurhacia Valley - Lower Bridge 1">
+  <ValleyArea 
+    mapId="s01a_lb1"
+    mapName="Gurhacia Valley - Lower Bridge 1"
+    client:load 
+  />
+</Layout>

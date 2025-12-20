@@ -1,0 +1,14 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ValleyArea from '../../components/valley/ValleyArea';
+
+export const prerender = false;
+---
+
+<Layout title="Gurhacia Valley - Top Domain 1">
+  <ValleyArea 
+    mapId="s01a_td1"
+    mapName="Gurhacia Valley - Top Domain 1"
+    client:load 
+  />
+</Layout>

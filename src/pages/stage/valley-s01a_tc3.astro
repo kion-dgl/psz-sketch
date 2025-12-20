@@ -1,0 +1,14 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ValleyArea from '../../components/valley/ValleyArea';
+
+export const prerender = false;
+---
+
+<Layout title="Gurhacia Valley - Top Canyon 3">
+  <ValleyArea 
+    mapId="s01a_tc3"
+    mapName="Gurhacia Valley - Top Canyon 3"
+    client:load 
+  />
+</Layout>

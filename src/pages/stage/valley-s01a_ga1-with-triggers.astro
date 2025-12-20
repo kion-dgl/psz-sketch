@@ -1,0 +1,32 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ValleyArea from '../../components/valley/ValleyArea';
+import MapTrigger from '../../components/valley/MapTrigger';
+
+export const prerender = false;
+---
+
+<Layout title="Gurhacia Valley - Gateway (With Triggers)">
+  <ValleyArea
+    mapId="s01a_ga1"
+    mapName="Gurhacia Valley - Gateway"
+    client:load
+  >
+    {/* Example triggers - add actual positions based on map exploration */}
+    <MapTrigger
+      position={[5, 1, 0]}
+      targetMap="s01a_ib1"
+      spawnPosition={[-5, 10, 0]}
+      label="To Inner Bridge 1"
+      client:only="react"
+    />
+
+    <MapTrigger
+      position={[-5, 1, 0]}
+      targetMap="s01a_na1"
+      spawnPosition={[5, 10, 0]}
+      label="To North Area 1"
+      client:only="react"
+    />
+  </ValleyArea>
+</Layout>
