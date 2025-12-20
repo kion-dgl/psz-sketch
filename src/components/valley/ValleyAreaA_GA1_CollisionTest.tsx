@@ -11,6 +11,7 @@ import SandParticles from './SandParticles';
 import HUD from '../ui/HUD';
 import PauseMenu from '../ui/PauseMenu';
 import ShopMenu from '../ui/ShopMenu';
+import Compass from '../ui/Compass';
 
 function CameraController({ target }: { target: { x: number; y: number; z: number } }) {
   const { camera } = useThree();
@@ -153,6 +154,9 @@ export default function ValleyAreaA_GA1_CollisionTest() {
 
       {/* Shop Menu - NPC interactions */}
       <ShopMenu />
+
+      {/* Compass */}
+      <Compass rotation={playerPosition.rotation} position="bottom-right" />
 
       {/* Debug Position Display */}
       <div style={{
