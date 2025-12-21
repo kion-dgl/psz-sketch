@@ -60,7 +60,7 @@ interface TriggerConfig {
 }
 
 type TimeOfDay = 'day' | 'dusk' | 'night';
-type Weather = 'clear' | 'sandstorm' | 'rain';
+type Weather = 'clear' | 'sandstorm' | 'rain' | 'rain-heavy';
 
 interface LightingConfig {
   ambientIntensity: number;
@@ -128,11 +128,13 @@ export default function ValleyArea({ mapId, mapName, spawnPosition: defaultSpawn
   const weatherAdjustedLighting = {
     ...lighting,
     // Sandstorm reduces visibility significantly
-    fogNear: weather === 'sandstorm' ? 10 : weather === 'rain' ? 20 : lighting.fogNear,
-    fogFar: weather === 'sandstorm' ? 60 : weather === 'rain' ? 80 : lighting.fogFar,
-    // Rain darkens the scene slightly
-    ambientIntensity: weather === 'rain' ? lighting.ambientIntensity * 0.7 : lighting.ambientIntensity,
-    directionalIntensity: weather === 'rain' ? lighting.directionalIntensity * 0.5 : lighting.directionalIntensity,
+    fogNear: weather === 'sandstorm' ? 10 : weather === 'rain' ? 20 : weather === 'rain-heavy' ? 10 : lighting.fogNear,
+    fogFar: weather === 'sandstorm' ? 60 : weather === 'rain' ? 80 : weather === 'rain-heavy' ? 50 : lighting.fogFar,
+    // Rain uses dark blue fog
+    fogColor: weather === 'rain' ? '#2a3a5a' : weather === 'rain-heavy' ? '#1a2a4a' : lighting.fogColor,
+    // Rain darkens the scene
+    ambientIntensity: weather === 'rain' ? lighting.ambientIntensity * 0.7 : weather === 'rain-heavy' ? lighting.ambientIntensity * 0.5 : lighting.ambientIntensity,
+    directionalIntensity: weather === 'rain' ? lighting.directionalIntensity * 0.5 : weather === 'rain-heavy' ? lighting.directionalIntensity * 0.3 : lighting.directionalIntensity,
   };
   const [debugStart, setDebugStart] = useState(true);
   const { openShop } = useGameState();
@@ -311,6 +313,8 @@ export default function ValleyArea({ mapId, mapName, spawnPosition: defaultSpawn
           {/* Weather particle effects */}
           {weather === 'rain' ? (
             <RainParticles intensity="normal" />
+          ) : weather === 'rain-heavy' ? (
+            <RainParticles intensity="heavy" />
           ) : (
             <SandParticles intensity={weather === 'sandstorm' ? 'heavy' : weather === 'clear' ? 'light' : 'normal'} />
           )}
