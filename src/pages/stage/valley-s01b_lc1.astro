@@ -9,7 +9,19 @@ export const prerender = false;
   <ValleyArea
     mapId="s01b_lc1"
     mapName="Gurhacia Valley B - Lower Canyon 1"
-    spawnPosition={[0, 5, 0]}
+    spawnPosition={[10, 5, 0]}
+    triggers={[
+      {
+        position: [-15.68, 1.00, -30.35],
+        targetUrl: "/stage/valley",
+        label: "North Exit"
+      },
+      {
+        position: [38.70, 1.00, 1.99],
+        targetUrl: "/stage/valley",
+        label: "West Exit"
+      }
+    ]}
     client:load
   />
 </Layout>

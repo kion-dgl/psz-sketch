@@ -10,6 +10,18 @@ export const prerender = false;
     mapId="s01b_ib1"
     mapName="Gurhacia Valley B - Inner Bridge 1"
     spawnPosition={[0, 5, 0]}
+    triggers={[
+      {
+        position: [-16.14, 1.00, -30.56],
+        targetUrl: "/stage/valley",
+        label: "North Exit"
+      },
+      {
+        position: [15.45, 1.00, 33.63],
+        targetUrl: "/stage/valley",
+        label: "South Exit"
+      }
+    ]}
     client:load
   />
 </Layout>
