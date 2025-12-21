@@ -8,6 +8,7 @@ import { useGameState } from '../../stores/gameStateStore';
 import ValleyEnv, { ValleyFloorCollision } from './environments/ValleyEnv';
 import PlayerCharacter from '../city/PlayerCharacter';
 import SandParticles from './SandParticles';
+import RainParticles from './RainParticles';
 import HUD from '../ui/HUD';
 import PauseMenu from '../ui/PauseMenu';
 import ShopMenu from '../ui/ShopMenu';
@@ -58,18 +59,81 @@ interface TriggerConfig {
   spawnRotation?: number;
 }
 
+type TimeOfDay = 'day' | 'dusk' | 'night';
+type Weather = 'clear' | 'sandstorm' | 'rain';
+
+interface LightingConfig {
+  ambientIntensity: number;
+  ambientColor: string;
+  directionalIntensity: number;
+  directionalColor: string;
+  directionalPosition: [number, number, number];
+  fogColor: string;
+  fogNear: number;
+  fogFar: number;
+}
+
+const LIGHTING_CONFIGS: Record<TimeOfDay, LightingConfig> = {
+  day: {
+    ambientIntensity: 0.6,
+    ambientColor: '#ffffff',
+    directionalIntensity: 0.8,
+    directionalColor: '#fffaf0',
+    directionalPosition: [10, 20, 10],
+    fogColor: '#87ceeb',
+    fogNear: 50,
+    fogFar: 200,
+  },
+  dusk: {
+    ambientIntensity: 0.35,
+    ambientColor: '#ff9966',
+    directionalIntensity: 0.5,
+    directionalColor: '#ff6633',
+    directionalPosition: [30, 5, 10],
+    fogColor: '#ff7744',
+    fogNear: 30,
+    fogFar: 150,
+  },
+  night: {
+    ambientIntensity: 0.15,
+    ambientColor: '#4466aa',
+    directionalIntensity: 0.25,
+    directionalColor: '#aaccff',
+    directionalPosition: [-10, 15, -10],
+    fogColor: '#1a1a2e',
+    fogNear: 20,
+    fogFar: 100,
+  },
+};
+
 interface ValleyAreaProps {
   mapId: string;
   mapName: string;
   spawnPosition?: [number, number, number];
   spawnRotation?: number;
   triggers?: TriggerConfig[];
+  timeOfDay?: TimeOfDay;
+  weather?: Weather;
   children?: React.ReactNode;
 }
 
-export default function ValleyArea({ mapId, mapName, spawnPosition: defaultSpawn = [0, 10, 0], spawnRotation: defaultRotation = 0, triggers = [], children }: ValleyAreaProps) {
+export default function ValleyArea({ mapId, mapName, spawnPosition: defaultSpawn = [0, 10, 0], spawnRotation: defaultRotation = 0, triggers = [], timeOfDay = 'day', weather = 'clear', children }: ValleyAreaProps) {
   const [loading, setLoading] = useState(true);
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0, rotation: 0 });
+
+  // Get lighting configuration based on time of day
+  const lighting = LIGHTING_CONFIGS[timeOfDay];
+
+  // Adjust lighting for weather
+  const weatherAdjustedLighting = {
+    ...lighting,
+    // Sandstorm reduces visibility significantly
+    fogNear: weather === 'sandstorm' ? 10 : weather === 'rain' ? 20 : lighting.fogNear,
+    fogFar: weather === 'sandstorm' ? 60 : weather === 'rain' ? 80 : lighting.fogFar,
+    // Rain darkens the scene slightly
+    ambientIntensity: weather === 'rain' ? lighting.ambientIntensity * 0.7 : lighting.ambientIntensity,
+    directionalIntensity: weather === 'rain' ? lighting.directionalIntensity * 0.5 : lighting.directionalIntensity,
+  };
   const [debugStart, setDebugStart] = useState(true);
   const { openShop } = useGameState();
   const { selectedCharacter, setSelectedCharacter } = useCharacterStore();
@@ -227,10 +291,14 @@ export default function ValleyArea({ mapId, mapName, spawnPosition: defaultSpawn
         <PerspectiveCamera makeDefault position={[0, 4, 12]} />
         <CameraController target={playerPosition} />
 
-        <ambientLight intensity={0.6} />
+        {/* Fog for atmosphere */}
+        <fog attach="fog" args={[weatherAdjustedLighting.fogColor, weatherAdjustedLighting.fogNear, weatherAdjustedLighting.fogFar]} />
+
+        <ambientLight intensity={weatherAdjustedLighting.ambientIntensity} color={weatherAdjustedLighting.ambientColor} />
         <directionalLight
-          position={[10, 20, 10]}
-          intensity={0.8}
+          position={weatherAdjustedLighting.directionalPosition}
+          intensity={weatherAdjustedLighting.directionalIntensity}
+          color={weatherAdjustedLighting.directionalColor}
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
@@ -240,8 +308,12 @@ export default function ValleyArea({ mapId, mapName, spawnPosition: defaultSpawn
           {/* Valley Environment - OUTSIDE Physics */}
           <ValleyEnv mapId={mapId} />
 
-          {/* Sand particle effect */}
-          <SandParticles />
+          {/* Weather particle effects */}
+          {weather === 'rain' ? (
+            <RainParticles intensity="normal" />
+          ) : (
+            <SandParticles intensity={weather === 'sandstorm' ? 'heavy' : weather === 'clear' ? 'light' : 'normal'} />
+          )}
 
           <Physics gravity={[0, -9.81, 0]}>
             {/* Floor collision mesh */}

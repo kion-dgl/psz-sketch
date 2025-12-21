@@ -57,14 +57,24 @@ const valleyZSections = [
   { id: 's01z_na1', name: 'North Area 1', category: 'Boss' },
 ];
 
+// Weather variants - testing different times and weather conditions
+const weatherSections = [
+  { id: 's01a_sa1-day', name: 'Day (Clear)', category: 'Time of Day' },
+  { id: 's01a_sa1-dusk', name: 'Dusk (Sunset)', category: 'Time of Day' },
+  { id: 's01a_sa1-night', name: 'Night (Moonlit)', category: 'Time of Day' },
+  { id: 's01a_sa1-sandstorm', name: 'Sandstorm', category: 'Weather' },
+  { id: 's01a_sa1-rain', name: 'Rain', category: 'Weather' },
+];
+
 const valleyTypes = [
   { key: 'a', name: 'Valley A - First Set', sections: valleyASections, color: '#1e3c72' },
   { key: 'e', name: 'Valley E - Midpoint', sections: valleyESections, color: '#2d5016' },
   { key: 'b', name: 'Valley B - Second Set', sections: valleyBSections, color: '#4a1e72' },
   { key: 'z', name: 'Valley Z - Boss Area', sections: valleyZSections, color: '#721e1e' },
+  { key: 'weather', name: 'Weather Variants (South Area 1)', sections: weatherSections, color: '#cc7722' },
 ];
 
-const categories = ['Gateway', 'Inner', 'Lower', 'North', 'South', 'Top', 'East', 'Midpoint', 'Boss'];
+const categories = ['Gateway', 'Inner', 'Lower', 'North', 'South', 'Top', 'East', 'Midpoint', 'Boss', 'Time of Day', 'Weather'];
 ---
 
 <Layout title="Gurhacia Valley - All Sections">

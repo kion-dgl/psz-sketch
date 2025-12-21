@@ -2,47 +2,40 @@ import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-interface SandParticlesProps {
-  intensity?: 'light' | 'normal' | 'heavy'; // light = clear, normal = default, heavy = sandstorm
+interface RainParticlesProps {
+  intensity?: 'light' | 'normal' | 'heavy';
 }
 
-export default function SandParticles({ intensity = 'normal' }: SandParticlesProps) {
+export default function RainParticles({ intensity = 'normal' }: RainParticlesProps) {
   const particlesRef = useRef<THREE.Points>(null);
 
-  // Adjust particle count and speed based on intensity
   const config = useMemo(() => {
     switch (intensity) {
       case 'light':
-        return { count: 300, speedMult: 0.5, opacity: 0.3, size: 0.03 };
+        return { count: 2000, speed: 15, opacity: 0.3, size: 0.02 };
       case 'heavy':
-        return { count: 3000, speedMult: 3.0, opacity: 0.8, size: 0.08 };
+        return { count: 8000, speed: 25, opacity: 0.6, size: 0.04 };
       default:
-        return { count: 1000, speedMult: 1.0, opacity: 0.6, size: 0.05 };
+        return { count: 4000, speed: 20, opacity: 0.4, size: 0.03 };
     }
   }, [intensity]);
 
   const particleCount = config.count;
 
-  const { positions, velocities } = useMemo(() => {
+  const positions = useMemo(() => {
     const positions = new Float32Array(particleCount * 3);
-    const velocities = new Float32Array(particleCount * 3);
 
     for (let i = 0; i < particleCount; i++) {
       const i3 = i * 3;
 
       // Random positions in a large area
       positions[i3] = (Math.random() - 0.5) * 100; // x
-      positions[i3 + 1] = Math.random() * 5; // y (0-5 height)
+      positions[i3 + 1] = Math.random() * 30; // y (0-30 height)
       positions[i3 + 2] = (Math.random() - 0.5) * 100; // z
-
-      // Random velocities for wind effect (scaled by intensity)
-      velocities[i3] = (Math.random() * 0.5 + 0.2) * config.speedMult; // x drift
-      velocities[i3 + 1] = (Math.random() * 0.1 - 0.05) * config.speedMult; // y wobble
-      velocities[i3 + 2] = (Math.random() * 0.2 - 0.1) * config.speedMult; // z drift
     }
 
-    return { positions, velocities };
-  }, [particleCount, config.speedMult]);
+    return positions;
+  }, [particleCount]);
 
   useFrame((state, delta) => {
     if (!particlesRef.current) return;
@@ -52,20 +45,23 @@ export default function SandParticles({ intensity = 'normal' }: SandParticlesPro
     for (let i = 0; i < particleCount; i++) {
       const i3 = i * 3;
 
-      // Update positions based on velocity
-      positions[i3] += velocities[i3] * delta;
-      positions[i3 + 1] += velocities[i3 + 1] * delta;
-      positions[i3 + 2] += velocities[i3 + 2] * delta;
+      // Rain falls down quickly
+      positions[i3 + 1] -= config.speed * delta;
 
-      // Wrap around if particle goes too far
+      // Slight wind drift
+      positions[i3] += 0.5 * delta;
+
+      // Reset if below ground
+      if (positions[i3 + 1] < 0) {
+        positions[i3 + 1] = 30;
+        positions[i3] = (Math.random() - 0.5) * 100;
+        positions[i3 + 2] = (Math.random() - 0.5) * 100;
+      }
+
+      // Wrap around horizontally
       if (positions[i3] > 50) positions[i3] = -50;
-      if (positions[i3] < -50) positions[i3] = 50;
       if (positions[i3 + 2] > 50) positions[i3 + 2] = -50;
       if (positions[i3 + 2] < -50) positions[i3 + 2] = 50;
-
-      // Reset height if too low or too high
-      if (positions[i3 + 1] < 0) positions[i3 + 1] = 5;
-      if (positions[i3 + 1] > 5) positions[i3 + 1] = 0;
     }
 
     particlesRef.current.geometry.attributes.position.needsUpdate = true;
@@ -83,7 +79,7 @@ export default function SandParticles({ intensity = 'normal' }: SandParticlesPro
       </bufferGeometry>
       <pointsMaterial
         size={config.size}
-        color="#e8d4a8"
+        color="#aaccff"
         transparent
         opacity={config.opacity}
         sizeAttenuation
