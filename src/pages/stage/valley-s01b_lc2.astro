@@ -1,0 +1,27 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ValleyArea from '../../components/valley/ValleyArea';
+
+export const prerender = false;
+---
+
+<Layout title="Gurhacia Valley B - Lower Canyon 2">
+  <ValleyArea
+    mapId="s01b_lc2"
+    mapName="Gurhacia Valley B - Lower Canyon 2"
+    spawnPosition={[13, 5, 0]}
+    triggers={[
+      {
+        position: [9.66, 1.00, -38.84],
+        targetUrl: "/stage/valley",
+        label: "North Exit"
+      },
+      {
+        position: [28.53, 1.00, 15.41],
+        targetUrl: "/stage/valley",
+        label: "West Exit"
+      }
+    ]}
+    client:load
+  />
+</Layout>

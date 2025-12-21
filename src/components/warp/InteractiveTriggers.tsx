@@ -1,0 +1,121 @@
+import { RigidBody, CylinderCollider } from '@react-three/rapier';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+
+// Define interactive trigger zones that require 'e' key to activate
+interface InteractiveTrigger {
+  position: [number, number, number];
+  radius: number;
+  height: number;
+  targetArea: string;
+  name: string;
+}
+
+const TRIGGERS: InteractiveTrigger[] = [
+  // Gurhacia Valley entrance at X: 4.55, Y: 1.00, Z: -4.10
+  {
+    position: [4.55, 1, -4.10],
+    radius: 2,
+    height: 3,
+    targetArea: '/stage/valley-a-ga1',
+    name: 'Enter Gurhacia Valley'
+  }
+];
+
+interface InteractiveTriggersProps {
+  visible?: boolean;
+  onPlayerInZone?: (zone: string | null) => void;
+}
+
+export default function InteractiveTriggers({ visible = true, onPlayerInZone }: InteractiveTriggersProps) {
+  const [playerInZone, setPlayerInZone] = useState<string | null>(null);
+  const [activated, setActivated] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (onPlayerInZone) {
+      onPlayerInZone(playerInZone);
+    }
+  }, [playerInZone, onPlayerInZone]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 'e' && playerInZone && !activated.has(playerInZone)) {
+        // Find the trigger
+        const trigger = TRIGGERS.find(t => t.name === playerInZone);
+        if (trigger) {
+          setActivated(prev => new Set(prev).add(playerInZone));
+          window.location.href = trigger.targetArea;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [playerInZone, activated]);
+
+  const handleEnter = (triggerName: string) => {
+    setPlayerInZone(triggerName);
+  };
+
+  const handleExit = () => {
+    setPlayerInZone(null);
+  };
+
+  return (
+    <>
+      {TRIGGERS.map((trigger, index) => (
+        <RigidBody
+          key={index}
+          type="fixed"
+          position={trigger.position}
+          sensor
+          collisionGroups={0x00040004}
+          userData={{ type: 'interactive-trigger', name: trigger.name }}
+          onIntersectionEnter={() => handleEnter(trigger.name)}
+          onIntersectionExit={handleExit}
+        >
+          {/* Cylindrical collider for circular trigger */}
+          <CylinderCollider args={[trigger.height / 2, trigger.radius]} />
+
+          {/* Visual mesh (only visible when visible prop is true) */}
+          {visible && (
+            <mesh>
+              <cylinderGeometry args={[trigger.radius, trigger.radius, trigger.height, 16]} />
+              <meshStandardMaterial
+                color={playerInZone === trigger.name ? "green" : "purple"}
+                transparent
+                opacity={0.5}
+                wireframe
+              />
+            </mesh>
+          )}
+        </RigidBody>
+      ))}
+    </>
+  );
+}
+
+// Separate component for the UI prompt
+export function InteractiveTriggerUI({ playerInZone }: { playerInZone: string | null }) {
+  if (!playerInZone) return null;
+
+  return createPortal(
+    <div style={{
+      position: 'absolute',
+      bottom: '100px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      zIndex: 1000,
+      background: 'rgba(0,0,0,0.8)',
+      color: 'white',
+      padding: '15px 30px',
+      borderRadius: '8px',
+      fontFamily: 'monospace',
+      fontSize: '16px',
+      textAlign: 'center'
+    }}>
+      Press <strong>E</strong> to {playerInZone}
+    </div>,
+    document.body
+  );
+}

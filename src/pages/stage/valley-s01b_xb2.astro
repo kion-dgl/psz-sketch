@@ -1,0 +1,37 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ValleyArea from '../../components/valley/ValleyArea';
+
+export const prerender = false;
+---
+
+<Layout title="Gurhacia Valley B - East Bridge 2">
+  <ValleyArea
+    mapId="s01b_xb2"
+    mapName="Gurhacia Valley B - East Bridge 2"
+    spawnPosition={[0, 5, 0]}
+    triggers={[
+      {
+        position: [-10.07, 1.00, -23.27],
+        targetUrl: "/stage/valley",
+        label: "North Exit"
+      },
+      {
+        position: [-31.99, 1.00, 16.28],
+        targetUrl: "/stage/valley",
+        label: "East Exit"
+      },
+      {
+        position: [17.05, 1.00, 24.00],
+        targetUrl: "/stage/valley",
+        label: "South Exit"
+      },
+      {
+        position: [34.09, 1.00, -14.88],
+        targetUrl: "/stage/valley",
+        label: "West Exit"
+      }
+    ]}
+    client:load
+  />
+</Layout>

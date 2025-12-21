@@ -1,0 +1,210 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+export const prerender = false;
+
+// Valley A - First set of stages
+const valleyASections = [
+  { id: 's01a_ga1', name: 'Gateway', category: 'Gateway', triggers: 'North & South exits' },
+  { id: 's01a_ib1', name: 'Inner Bridge 1', category: 'Inner', triggers: 'North & South exits' },
+  { id: 's01a_ib2', name: 'Inner Bridge 2', category: 'Inner', triggers: 'North & South exits' },
+  { id: 's01a_ic1', name: 'Inner Canyon 1', category: 'Inner', triggers: 'North & South exits' },
+  { id: 's01a_ic3', name: 'Inner Canyon 3', category: 'Inner', triggers: 'North & South exits' },
+  { id: 's01a_lb1', name: 'Lower Bridge 1', category: 'Lower', triggers: 'North & West exits' },
+  { id: 's01a_lb3', name: 'Lower Bridge 3', category: 'Lower', triggers: 'North & West exits' },
+  { id: 's01a_lc1', name: 'Lower Canyon 1', category: 'Lower', triggers: 'North & West exits' },
+  { id: 's01a_lc2', name: 'Lower Canyon 2', category: 'Lower', triggers: 'North & West exits' },
+  { id: 's01a_na1', name: 'North Area 1', category: 'North', triggers: 'South exit' },
+  { id: 's01a_nb2', name: 'North Bridge 2', category: 'North', triggers: 'South exit' },
+  { id: 's01a_nc2', name: 'North Canyon 2', category: 'North', triggers: 'South exit' },
+  { id: 's01a_sa1', name: 'South Area 1', category: 'South', triggers: 'South exit' },
+  { id: 's01a_tb3', name: 'Top Bridge 3', category: 'Top', triggers: 'West, South & East exits' },
+  { id: 's01a_tc3', name: 'Top Canyon 3', category: 'Top', triggers: 'West, South & East exits' },
+  { id: 's01a_td1', name: 'Top Domain 1', category: 'Top', triggers: 'West, South & East exits' },
+  { id: 's01a_td2', name: 'Top Domain 2', category: 'Top', triggers: 'West, South & East exits' },
+  { id: 's01a_xb2', name: 'East Bridge 2', category: 'East', triggers: 'North, South, East & West exits' },
+];
+
+// Valley E - Midpoint
+const valleyESections = [
+  { id: 's01e_ia1', name: 'Inner Area 1', category: 'Midpoint', triggers: 'North & South exits' },
+];
+
+// Valley B - Second set of stages
+const valleyBSections = [
+  { id: 's01b_ga1', name: 'Gateway', category: 'Gateway', triggers: 'South exit' },
+  { id: 's01b_ib1', name: 'Inner Bridge 1', category: 'Inner', triggers: 'North & South exits' },
+  { id: 's01b_ib2', name: 'Inner Bridge 2', category: 'Inner', triggers: 'North & South exits' },
+  { id: 's01b_ic1', name: 'Inner Canyon 1', category: 'Inner', triggers: 'North & South exits' },
+  { id: 's01b_ic3', name: 'Inner Canyon 3', category: 'Inner', triggers: 'North & South exits' },
+  { id: 's01b_lb1', name: 'Lower Bridge 1', category: 'Lower', triggers: 'North & West exits' },
+  { id: 's01b_lb3', name: 'Lower Bridge 3', category: 'Lower', triggers: 'North & West exits' },
+  { id: 's01b_lc1', name: 'Lower Canyon 1', category: 'Lower', triggers: 'North & West exits' },
+  { id: 's01b_lc2', name: 'Lower Canyon 2', category: 'Lower', triggers: 'North & West exits' },
+  { id: 's01b_na1', name: 'North Area 1', category: 'North', triggers: 'West exit' },
+  { id: 's01b_nb2', name: 'North Bridge 2', category: 'North', triggers: 'South exit' },
+  { id: 's01b_nc2', name: 'North Canyon 2', category: 'North', triggers: 'South exit' },
+  { id: 's01b_sa1', name: 'South Area 1', category: 'South', triggers: 'North & South exits' },
+  { id: 's01b_tb3', name: 'Top Bridge 3', category: 'Top', triggers: 'East, South & West exits' },
+  { id: 's01b_tc3', name: 'Top Canyon 3', category: 'Top', triggers: 'West, South & East exits' },
+  { id: 's01b_td1', name: 'Top Domain 1', category: 'Top', triggers: 'East, South & West exits' },
+  { id: 's01b_td2', name: 'Top Domain 2', category: 'Top', triggers: 'East, South & West exits' },
+  { id: 's01b_xb2', name: 'East Bridge 2', category: 'East', triggers: 'North, East, South & West exits' },
+];
+
+// Valley Z - Boss area
+const valleyZSections = [
+  { id: 's01z_na1', name: 'North Area 1', category: 'Boss' },
+];
+
+// Weather variants - testing different times and weather conditions
+const weatherSections = [
+  { id: 's01a_sa1-day', name: 'Day (Clear)', category: 'Time of Day' },
+  { id: 's01a_sa1-dusk', name: 'Dusk (Sunset)', category: 'Time of Day' },
+  { id: 's01a_sa1-night', name: 'Night (Moonlit)', category: 'Time of Day' },
+  { id: 's01a_sa1-sandstorm', name: 'Sandstorm', category: 'Weather' },
+  { id: 's01a_sa1-rain', name: 'Rain (Light)', category: 'Weather' },
+  { id: 's01a_sa1-rain-heavy', name: 'Rain (Heavy)', category: 'Weather' },
+];
+
+const valleyTypes = [
+  { key: 'a', name: 'Valley A - First Set', sections: valleyASections, color: '#1e3c72' },
+  { key: 'e', name: 'Valley E - Midpoint', sections: valleyESections, color: '#2d5016' },
+  { key: 'b', name: 'Valley B - Second Set', sections: valleyBSections, color: '#4a1e72' },
+  { key: 'z', name: 'Valley Z - Boss Area', sections: valleyZSections, color: '#721e1e' },
+  { key: 'weather', name: 'Weather Variants (South Area 1)', sections: weatherSections, color: '#cc7722' },
+];
+
+const categories = ['Gateway', 'Inner', 'Lower', 'North', 'South', 'Top', 'East', 'Midpoint', 'Boss', 'Time of Day', 'Weather'];
+---
+
+<Layout title="Gurhacia Valley - All Sections">
+  <style>
+    body { overflow: auto !important; }
+  </style>
+  <div style="min-height: 100vh; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 2rem; padding-bottom: 4rem;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+      <h1 style="color: white; font-family: monospace; margin-bottom: 2rem; text-align: center;">
+        Gurhacia Valley - All Sections
+      </h1>
+
+      <div style="margin-bottom: 2rem; text-align: center;">
+        <a
+          href="/stage/valley-collision-debug"
+          style="
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: rgba(100, 100, 200, 0.9);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 0 0.5rem;
+          "
+        >
+          Collision Debug Tool
+        </a>
+        <a
+          href="/stage/valley-a-ga1-debug"
+          style="
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: rgba(200, 100, 50, 0.9);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 0 0.5rem;
+          "
+        >
+          Texture Debug Tool
+        </a>
+        <a
+          href="/stage/valley-s01a_ga1-with-triggers"
+          style="
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: rgba(50, 200, 50, 0.9);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 0 0.5rem;
+          "
+        >
+          Gateway (With Triggers)
+        </a>
+      </div>
+
+      {valleyTypes.map(valleyType => (
+        <div key={valleyType.key} style="margin-bottom: 3rem;">
+          <h2 style={`
+            color: white;
+            font-family: monospace;
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: ${valleyType.color};
+            border-radius: 8px;
+          `}>
+            {valleyType.name}
+          </h2>
+          <div style="
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+          ">
+            {valleyType.sections.map(section => (
+              <a
+                key={section.id}
+                href={`/stage/valley-${section.id}`}
+                style="
+                  display: block;
+                  padding: 1rem;
+                  background: rgba(255, 255, 255, 0.1);
+                  color: white;
+                  text-decoration: none;
+                  border-radius: 8px;
+                  font-family: monospace;
+                  transition: all 0.3s ease;
+                  border: 2px solid transparent;
+                "
+                onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.borderColor='rgba(255, 255, 255, 0.5)';"
+                onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.borderColor='transparent';"
+              >
+                <div style="font-weight: bold; margin-bottom: 0.25rem;">
+                  {section.name}
+                </div>
+                <div style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.7);">
+                  {section.id}
+                </div>
+                {section.triggers && (
+                  <div style="font-size: 0.75rem; color: rgba(100, 255, 100, 0.8); margin-top: 0.5rem;">
+                    🚪 {section.triggers}
+                  </div>
+                )}
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <div style="text-align: center; margin-top: 3rem;">
+        <a
+          href="/"
+          style="
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: rgba(200, 50, 50, 0.9);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-family: monospace;
+          "
+        >
+          Back to Home
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>

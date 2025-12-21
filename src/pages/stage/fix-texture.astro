@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import FixTextureArea from '../../components/debug/FixTextureArea';
+
+export const prerender = false;
+---
+
+<Layout title="Fix Textures - Density Dwarf">
+  <FixTextureArea client:load />
+</Layout>

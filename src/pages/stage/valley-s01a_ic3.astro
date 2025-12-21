@@ -1,0 +1,27 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ValleyArea from '../../components/valley/ValleyArea';
+
+export const prerender = false;
+---
+
+<Layout title="Gurhacia Valley - Inner Canyon 3">
+  <ValleyArea
+    mapId="s01a_ic3"
+    mapName="Gurhacia Valley - Inner Canyon 3"
+    spawnPosition={[10, 5, 0]}
+    triggers={[
+      {
+        position: [-19.35, 1.00, -28.29],
+        targetUrl: "/stage/valley",
+        label: "North Exit"
+      },
+      {
+        position: [18.77, 1.00, 27.59],
+        targetUrl: "/stage/valley",
+        label: "South Exit"
+      }
+    ]}
+    client:load
+  />
+</Layout>
