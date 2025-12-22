@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import WetlandsTriggerDebug from '../../components/wetlands/WetlandsTriggerDebug';
+
+export const prerender = false;
+---
+
+<Layout title="Ozette Wetlands - Trigger Debug">
+  <WetlandsTriggerDebug client:load />
+</Layout>

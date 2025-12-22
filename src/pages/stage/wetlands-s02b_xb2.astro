@@ -1,0 +1,15 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import WetlandsArea from '../../components/wetlands/WetlandsArea';
+
+export const prerender = false;
+---
+
+<Layout title="Ozette Wetlands - East Bridge 2">
+  <WetlandsArea
+    mapId="s02b_xb2"
+    mapName="Ozette Wetlands - East Bridge 2"
+    spawnPosition={[0, 5, 0]}
+    client:load
+  />
+</Layout>
