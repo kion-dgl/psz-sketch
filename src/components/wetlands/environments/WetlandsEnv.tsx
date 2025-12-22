@@ -72,6 +72,7 @@ export function WetlandsFloorCollision({ mapId, showVisual = false }: { mapId: s
                 v1.applyMatrix4(mesh.matrixWorld);
                 v2.applyMatrix4(mesh.matrixWorld);
 
+
                 // Check if all vertices have y close to 0
                 const tolerance = 0.25;
                 if (Math.abs(v0.y) < tolerance &&
@@ -95,7 +96,6 @@ export function WetlandsFloorCollision({ mapId, showVisual = false }: { mapId: s
         geometry.setAttribute('position', new THREE.Float32BufferAttribute(floorVertices, 3));
         geometry.computeVertexNormals();
         setFloorGeometry(geometry);
-        console.log(`[${mapId}] Created floor collision with ${floorVertices.length / 9} triangles`);
       }
     });
   }, [mapId]);
@@ -151,16 +151,23 @@ export default function WetlandsEnv({ mapId, showFloorCollision = false }: Wetla
 
     const texture = (material as any).map as THREE.Texture;
 
-    // Get texture filename from source
+    // Get texture filename from source or name
     const textureSrc = texture.image?.src || texture.source?.data?.src || '';
+    const textureName = texture.name || '';
 
     // Extract filename without extension (e.g., "s02_0_hasim" from ".../s02_0_hasim.png")
-    const match = textureSrc.match(/\/([^/]+)\.(png|jpg|jpeg)$/i);
-    if (!match) return;
+    let match = textureSrc.match(/\/([^/]+)\.(png|jpg|jpeg)$/i);
+    let textureFilename = match ? match[1] : '';
 
-    const textureFilename = match[1];
+    // If no match from src, try the texture name
+    if (!textureFilename && textureName) {
+      const nameMatch = textureName.match(/^(.+)\.(png|jpg|jpeg)$/i);
+      textureFilename = nameMatch ? nameMatch[1] : textureName;
+    }
+
+    if (!textureFilename) return;
+
     const fixes = TEXTURE_FIXES[textureFilename];
-
     if (!fixes) return;
 
     // Apply fixes
