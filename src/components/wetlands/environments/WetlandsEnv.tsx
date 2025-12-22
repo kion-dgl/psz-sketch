@@ -1,8 +1,7 @@
 import { useGLTF } from '@react-three/drei';
 import { RigidBody, TrimeshCollider } from '@react-three/rapier';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // Texture fix settings - keyed by texture image filename
 const TEXTURE_FIXES: Record<string, { repeatX: number; repeatY: number; offsetX: number; offsetY: number }> = {
@@ -25,80 +24,79 @@ function getWetlandsDir(mapId: string): string {
 }
 
 export function WetlandsFloorCollision({ mapId, showVisual = false }: { mapId: string; showVisual?: boolean }) {
-  const [floorGeometry, setFloorGeometry] = useState<THREE.BufferGeometry | null>(null);
+  const wetlandsDir = getWetlandsDir(mapId);
+  const glbPath = `/${wetlandsDir}/${mapId}/lndmd/${mapId}_m.glb`;
+  const { scene } = useGLTF(glbPath);
 
-  useEffect(() => {
-    const loader = new GLTFLoader();
-    const wetlandsDir = getWetlandsDir(mapId);
-    const glbPath = `/${wetlandsDir}/${mapId}/lndmd/${mapId}_m.glb`;
+  // Extract floor collision geometry synchronously from the loaded scene
+  const floorGeometry = useMemo(() => {
+    if (!scene) return null;
 
-    loader.load(glbPath, (gltf) => {
-      const floorVertices: number[] = [];
+    const floorVertices: number[] = [];
 
-      // Extract floor faces (faces where all vertices have y ≈ 0)
-      gltf.scene.traverse((object) => {
-        if ((object as THREE.Mesh).isMesh) {
-          const mesh = object as THREE.Mesh;
-          const geometry = mesh.geometry;
+    // Extract floor faces (faces where all vertices have y ≈ 0)
+    scene.traverse((object) => {
+      if ((object as THREE.Mesh).isMesh) {
+        const mesh = object as THREE.Mesh;
+        const geometry = mesh.geometry;
 
-          if (geometry.attributes.position) {
-            const positions = geometry.attributes.position;
-            const index = geometry.index;
+        if (geometry.attributes.position) {
+          const positions = geometry.attributes.position;
+          const index = geometry.index;
 
-            if (index) {
-              for (let i = 0; i < index.count; i += 3) {
-                const i0 = index.getX(i);
-                const i1 = index.getX(i + 1);
-                const i2 = index.getX(i + 2);
+          if (index) {
+            for (let i = 0; i < index.count; i += 3) {
+              const i0 = index.getX(i);
+              const i1 = index.getX(i + 1);
+              const i2 = index.getX(i + 2);
 
-                const v0 = new THREE.Vector3(
-                  positions.getX(i0),
-                  positions.getY(i0),
-                  positions.getZ(i0)
-                );
-                const v1 = new THREE.Vector3(
-                  positions.getX(i1),
-                  positions.getY(i1),
-                  positions.getZ(i1)
-                );
-                const v2 = new THREE.Vector3(
-                  positions.getX(i2),
-                  positions.getY(i2),
-                  positions.getZ(i2)
-                );
+              const v0 = new THREE.Vector3(
+                positions.getX(i0),
+                positions.getY(i0),
+                positions.getZ(i0)
+              );
+              const v1 = new THREE.Vector3(
+                positions.getX(i1),
+                positions.getY(i1),
+                positions.getZ(i1)
+              );
+              const v2 = new THREE.Vector3(
+                positions.getX(i2),
+                positions.getY(i2),
+                positions.getZ(i2)
+              );
 
-                // Transform to world space
-                v0.applyMatrix4(mesh.matrixWorld);
-                v1.applyMatrix4(mesh.matrixWorld);
-                v2.applyMatrix4(mesh.matrixWorld);
+              // Transform to world space
+              v0.applyMatrix4(mesh.matrixWorld);
+              v1.applyMatrix4(mesh.matrixWorld);
+              v2.applyMatrix4(mesh.matrixWorld);
 
+              // Check if all vertices have y close to 0
+              const tolerance = 0.25;
+              if (Math.abs(v0.y) < tolerance &&
+                  Math.abs(v1.y) < tolerance &&
+                  Math.abs(v2.y) < tolerance) {
 
-                // Check if all vertices have y close to 0
-                const tolerance = 0.25;
-                if (Math.abs(v0.y) < tolerance &&
-                    Math.abs(v1.y) < tolerance &&
-                    Math.abs(v2.y) < tolerance) {
-
-                  // Add vertices at y = 0 for collision
-                  floorVertices.push(v0.x, 0, v0.z);
-                  floorVertices.push(v1.x, 0, v1.z);
-                  floorVertices.push(v2.x, 0, v2.z);
-                }
+                // Add vertices at y = 0 for collision
+                floorVertices.push(v0.x, 0, v0.z);
+                floorVertices.push(v1.x, 0, v1.z);
+                floorVertices.push(v2.x, 0, v2.z);
               }
             }
           }
         }
-      });
-
-      // Create collision geometry
-      if (floorVertices.length > 0) {
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(floorVertices, 3));
-        geometry.computeVertexNormals();
-        setFloorGeometry(geometry);
       }
     });
-  }, [mapId]);
+
+    // Create collision geometry
+    if (floorVertices.length > 0) {
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(floorVertices, 3));
+      geometry.computeVertexNormals();
+      return geometry;
+    }
+    return null;
+  }, [scene]);
 
   if (!floorGeometry) return null;
 
