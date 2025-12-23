@@ -128,12 +128,12 @@ function DebugMarkers({
             {/* Direction arrow - points in the direction player will face */}
             <group rotation={[0, spawn.rotation, 0]}>
               {/* Arrow shaft */}
-              <mesh position={[0, 0.3, -1.2]}>
+              <mesh position={[0, 0.3, 1.2]}>
                 <boxGeometry args={[0.2, 0.2, 2]} />
                 <meshBasicMaterial color={color} />
               </mesh>
-              {/* Arrow head - pointing forward (-Z when rotation=0) */}
-              <mesh position={[0, 0.3, -2.5]} rotation={[-Math.PI / 2, 0, 0]}>
+              {/* Arrow head - pointing forward (+Z when rotation=0) */}
+              <mesh position={[0, 0.3, 2.5]} rotation={[Math.PI / 2, 0, 0]}>
                 <coneGeometry args={[0.4, 0.8, 8]} />
                 <meshBasicMaterial color={color} />
               </mesh>
@@ -496,7 +496,7 @@ export default function WetlandsArea({ mapId, mapName, spawnPosition: propSpawn,
               onPositionChange={setPlayerPosition}
               onInteraction={handleNPCInteraction}
               spawnPosition={spawnPosition}
-              spawnRotation={spawnRotation}
+              spawnRotation={spawnRotation + Math.PI}
             />
           </Physics>
 
