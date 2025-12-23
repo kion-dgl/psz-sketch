@@ -270,9 +270,9 @@ export default function WetlandsArea({ mapId, mapName, spawnPosition: propSpawn,
     fogFar: weather === 'foggy' ? 40 : weather === 'rain' ? 60 : weather === 'rain-heavy' ? 70 : lighting.fogFar,
     // Rain uses darker fog
     fogColor: weather === 'rain' ? '#3a4a3a' : weather === 'rain-heavy' ? '#2a3a2a' : weather === 'foggy' ? '#6a8a6a' : lighting.fogColor,
-    // Rain darkens the scene
-    ambientIntensity: weather === 'rain' ? lighting.ambientIntensity * 0.7 : weather === 'rain-heavy' ? lighting.ambientIntensity * 0.5 : lighting.ambientIntensity,
-    directionalIntensity: weather === 'rain' ? lighting.directionalIntensity * 0.5 : weather === 'rain-heavy' ? lighting.directionalIntensity * 0.3 : lighting.directionalIntensity,
+    // Rain darkens the scene - heavy rain is very dark to emphasize lamp posts
+    ambientIntensity: weather === 'rain' ? lighting.ambientIntensity * 0.7 : weather === 'rain-heavy' ? lighting.ambientIntensity * 0.15 : lighting.ambientIntensity,
+    directionalIntensity: weather === 'rain' ? lighting.directionalIntensity * 0.5 : weather === 'rain-heavy' ? lighting.directionalIntensity * 0.1 : lighting.directionalIntensity,
   };
   const [debugStart, setDebugStart] = useState(true);
   const { openShop } = useGameState();
