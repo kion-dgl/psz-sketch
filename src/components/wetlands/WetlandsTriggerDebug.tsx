@@ -8,6 +8,7 @@ interface MarkerData {
   id: string;
   type: 'spawn' | 'trigger';
   position: [number, number, number];
+  rotation: number; // in radians, snapped to 45 degrees
   label: string;
 }
 
@@ -20,18 +21,39 @@ function getWetlandsDir(mapId: string): string {
   return 'stages/wetlands_a';
 }
 
+// Arrow component for showing direction
+function DirectionArrow({ rotation, color }: { rotation: number; color: string }) {
+  return (
+    <group rotation={[0, rotation, 0]}>
+      {/* Arrow shaft */}
+      <mesh position={[0, 0.5, 1.5]}>
+        <boxGeometry args={[0.3, 0.3, 2]} />
+        <meshBasicMaterial color={color} />
+      </mesh>
+      {/* Arrow head */}
+      <mesh position={[0, 0.5, 2.8]} rotation={[Math.PI / 2, 0, 0]}>
+        <coneGeometry args={[0.6, 1, 8]} />
+        <meshBasicMaterial color={color} />
+      </mesh>
+    </group>
+  );
+}
+
 function TopDownScene({
   selectedMap,
   markers,
   onAddMarker,
-  selectedMarkerType
+  selectedMarkerType,
+  showFloorMesh
 }: {
   selectedMap: string;
   markers: MarkerData[];
   onAddMarker: (position: [number, number, number]) => void;
   selectedMarkerType: 'spawn' | 'trigger';
+  showFloorMesh: boolean;
 }) {
   const [scene, setScene] = useState<THREE.Group | null>(null);
+  const [floorGeometry, setFloorGeometry] = useState<THREE.BufferGeometry | null>(null);
   const [loading, setLoading] = useState(true);
   const { camera, gl } = useThree();
   const planeRef = useRef<THREE.Mesh>(null);
@@ -39,6 +61,7 @@ function TopDownScene({
   useEffect(() => {
     setLoading(true);
     setScene(null);
+    setFloorGeometry(null);
 
     const loader = new GLTFLoader();
     const wetlandsDir = getWetlandsDir(selectedMap);
@@ -48,6 +71,51 @@ function TopDownScene({
       // Rotate scene to be viewed from top
       gltf.scene.rotation.x = 0;
       setScene(gltf.scene);
+
+      // Extract floor geometry
+      const floorVertices: number[] = [];
+      gltf.scene.traverse((object) => {
+        if ((object as THREE.Mesh).isMesh) {
+          const mesh = object as THREE.Mesh;
+          const geometry = mesh.geometry;
+
+          if (geometry.attributes.position) {
+            const positions = geometry.attributes.position;
+            const index = geometry.index;
+
+            if (index) {
+              for (let i = 0; i < index.count; i += 3) {
+                const i0 = index.getX(i);
+                const i1 = index.getX(i + 1);
+                const i2 = index.getX(i + 2);
+
+                const v0 = new THREE.Vector3(positions.getX(i0), positions.getY(i0), positions.getZ(i0));
+                const v1 = new THREE.Vector3(positions.getX(i1), positions.getY(i1), positions.getZ(i1));
+                const v2 = new THREE.Vector3(positions.getX(i2), positions.getY(i2), positions.getZ(i2));
+
+                v0.applyMatrix4(mesh.matrixWorld);
+                v1.applyMatrix4(mesh.matrixWorld);
+                v2.applyMatrix4(mesh.matrixWorld);
+
+                const tolerance = 0.25;
+                if (Math.abs(v0.y) < tolerance && Math.abs(v1.y) < tolerance && Math.abs(v2.y) < tolerance) {
+                  floorVertices.push(v0.x, 0.1, v0.z);
+                  floorVertices.push(v1.x, 0.1, v1.z);
+                  floorVertices.push(v2.x, 0.1, v2.z);
+                }
+              }
+            }
+          }
+        }
+      });
+
+      if (floorVertices.length > 0) {
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(floorVertices, 3));
+        geometry.computeVertexNormals();
+        setFloorGeometry(geometry);
+      }
+
       setLoading(false);
     });
   }, [selectedMap]);
@@ -71,6 +139,13 @@ function TopDownScene({
   return (
     <>
       <primitive object={scene} />
+
+      {/* Green floor debug mesh */}
+      {showFloorMesh && floorGeometry && (
+        <mesh geometry={floorGeometry}>
+          <meshBasicMaterial color="#00ff00" transparent opacity={0.4} side={THREE.DoubleSide} />
+        </mesh>
+      )}
 
       {/* Invisible click plane */}
       <mesh
@@ -103,6 +178,10 @@ function TopDownScene({
               side={THREE.DoubleSide}
             />
           </mesh>
+          {/* Direction arrow for spawn points */}
+          {marker.type === 'spawn' && (
+            <DirectionArrow rotation={marker.rotation} color="#00ff00" />
+          )}
         </group>
       ))}
     </>
@@ -126,12 +205,18 @@ const WETLANDS_B_MAPS = [
 const WETLANDS_E_MAPS = ['s02e_ia1'];
 const WETLANDS_Z_MAPS = ['s02z_na1'];
 
+// Helper to convert radians to degrees
+const radToDeg = (rad: number) => Math.round((rad * 180) / Math.PI);
+// Helper to convert degrees to radians
+const degToRad = (deg: number) => (deg * Math.PI) / 180;
+
 export default function WetlandsTriggerDebug() {
   const [selectedMap, setSelectedMap] = useState('s02a_ga1');
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [selectedMarkerType, setSelectedMarkerType] = useState<'spawn' | 'trigger'>('spawn');
   const [zoom, setZoom] = useState(50);
   const [cameraPosition, setCameraPosition] = useState({ x: 0, z: 0 });
+  const [showFloorMesh, setShowFloorMesh] = useState(true);
 
   // Clear markers when map changes
   useEffect(() => {
@@ -143,9 +228,25 @@ export default function WetlandsTriggerDebug() {
       id: `${Date.now()}`,
       type: selectedMarkerType,
       position,
+      rotation: 0, // Default rotation facing +Z
       label: selectedMarkerType === 'spawn' ? 'Spawn Point' : `Trigger ${markers.filter(m => m.type === 'trigger').length + 1}`
     };
     setMarkers(prev => [...prev, newMarker]);
+  };
+
+  // Rotate marker by 45 degrees
+  const handleRotateMarker = (id: string, direction: 'cw' | 'ccw') => {
+    setMarkers(prev => prev.map(m => {
+      if (m.id === id) {
+        const step = degToRad(45);
+        let newRotation = direction === 'cw' ? m.rotation + step : m.rotation - step;
+        // Normalize to 0-2PI
+        if (newRotation < 0) newRotation += Math.PI * 2;
+        if (newRotation >= Math.PI * 2) newRotation -= Math.PI * 2;
+        return { ...m, rotation: newRotation };
+      }
+      return m;
+    }));
   };
 
   const handleRemoveMarker = (id: string) => {
@@ -160,6 +261,7 @@ export default function WetlandsTriggerDebug() {
 
     if (spawnMarker) {
       code += `spawnPosition={[${spawnMarker.position.join(', ')}]}\n`;
+      code += `spawnRotation={${spawnMarker.rotation.toFixed(4)}} // ${radToDeg(spawnMarker.rotation)}°\n`;
     }
 
     if (triggerMarkers.length > 0) {
@@ -322,6 +424,19 @@ export default function WetlandsTriggerDebug() {
           />
         </div>
 
+        {/* Floor Mesh Toggle */}
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={showFloorMesh}
+              onChange={(e) => setShowFloorMesh(e.target.checked)}
+              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+            />
+            <span style={{ fontWeight: 'bold' }}>Show Floor Debug Mesh</span>
+          </label>
+        </div>
+
         {/* Instructions */}
         <div style={{
           marginBottom: '15px',
@@ -345,41 +460,74 @@ export default function WetlandsTriggerDebug() {
           {markers.length === 0 ? (
             <div style={{ color: '#666', fontStyle: 'italic' }}>No markers placed</div>
           ) : (
-            <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+            <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
               {markers.map((marker) => (
                 <div
                   key={marker.id}
                   style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '5px 8px',
+                    padding: '8px',
                     background: marker.type === 'spawn' ? 'rgba(0,255,0,0.2)' : 'rgba(255,102,0,0.2)',
                     borderRadius: '4px',
                     marginBottom: '5px',
                     fontSize: '11px'
                   }}
                 >
-                  <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                     <div style={{ fontWeight: 'bold' }}>{marker.label}</div>
-                    <div style={{ color: '#aaa' }}>
-                      [{marker.position.map(p => p.toFixed(2)).join(', ')}]
-                    </div>
+                    <button
+                      onClick={() => handleRemoveMarker(marker.id)}
+                      style={{
+                        background: '#aa0000',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '4px 8px',
+                        cursor: 'pointer',
+                        fontSize: '10px'
+                      }}
+                    >
+                      X
+                    </button>
                   </div>
-                  <button
-                    onClick={() => handleRemoveMarker(marker.id)}
-                    style={{
-                      background: '#aa0000',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      padding: '4px 8px',
-                      cursor: 'pointer',
-                      fontSize: '10px'
-                    }}
-                  >
-                    X
-                  </button>
+                  <div style={{ color: '#aaa', marginBottom: '4px' }}>
+                    [{marker.position.map(p => p.toFixed(2)).join(', ')}]
+                  </div>
+                  {/* Rotation controls for spawn markers */}
+                  {marker.type === 'spawn' && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
+                      <span style={{ color: '#8f8' }}>Rot: {radToDeg(marker.rotation)}°</span>
+                      <button
+                        onClick={() => handleRotateMarker(marker.id, 'ccw')}
+                        style={{
+                          background: '#336633',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          padding: '4px 10px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        ↺ -45°
+                      </button>
+                      <button
+                        onClick={() => handleRotateMarker(marker.id, 'cw')}
+                        style={{
+                          background: '#336633',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          padding: '4px 10px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        ↻ +45°
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -447,6 +595,7 @@ export default function WetlandsTriggerDebug() {
             markers={markers}
             onAddMarker={handleAddMarker}
             selectedMarkerType={selectedMarkerType}
+            showFloorMesh={showFloorMesh}
           />
         </Suspense>
       </Canvas>
