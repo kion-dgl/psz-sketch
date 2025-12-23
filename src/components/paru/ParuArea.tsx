@@ -7,7 +7,7 @@ import { useCharacterStore } from '../../stores/characterStore';
 import { useGameState } from '../../stores/gameStateStore';
 import ParuEnv, { ParuFloorCollision } from './environments/ParuEnv';
 import PlayerCharacter from '../city/PlayerCharacter';
-import FireflyParticles from './FireflyParticles';
+import SporeSparkParticles from './SporeSparkParticles';
 import HUD from '../ui/HUD';
 import PauseMenu from '../ui/PauseMenu';
 import ShopMenu from '../ui/ShopMenu';
@@ -72,35 +72,35 @@ interface LightingConfig {
   fogFar: number;
 }
 
-// Paru Jungle lighting - dense tropical jungle with warm humidity
+// Oblivion City Paru lighting - overgrown futuristic ruins with broken tech
 const LIGHTING_CONFIGS: Record<TimeOfDay, LightingConfig> = {
   day: {
-    ambientIntensity: 0.4,
-    ambientColor: '#3a5a3a',
-    directionalIntensity: 0.5,
-    directionalColor: '#aacc88',
+    ambientIntensity: 0.35,
+    ambientColor: '#4a5a4a',
+    directionalIntensity: 0.45,
+    directionalColor: '#99aa88',
     directionalPosition: [10, 30, 10],
     fogColor: '#2a3a2a',
-    fogNear: 25,
+    fogNear: 30,
     fogFar: 120,
   },
   dusk: {
-    ambientIntensity: 0.3,
-    ambientColor: '#4a4a2a',
-    directionalIntensity: 0.4,
-    directionalColor: '#cc9955',
+    ambientIntensity: 0.25,
+    ambientColor: '#3a4a3a',
+    directionalIntensity: 0.35,
+    directionalColor: '#88aa77',
     directionalPosition: [30, 8, 10],
-    fogColor: '#2a2a1a',
-    fogNear: 20,
+    fogColor: '#1a2a1a',
+    fogNear: 25,
     fogFar: 100,
   },
   night: {
-    ambientIntensity: 0.15,
-    ambientColor: '#1a2a1a',
-    directionalIntensity: 0.2,
-    directionalColor: '#447744',
+    ambientIntensity: 0.12,
+    ambientColor: '#1a2a2a',
+    directionalIntensity: 0.15,
+    directionalColor: '#3a5a5a',
     directionalPosition: [-10, 20, -10],
-    fogColor: '#0a150a',
+    fogColor: '#0a1510',
     fogNear: 15,
     fogFar: 70,
   },
@@ -310,8 +310,8 @@ export default function ParuArea({ mapId, mapName, spawnPosition: defaultSpawn =
           {/* Paru Environment - OUTSIDE Physics */}
           <ParuEnv mapId={mapId} />
 
-          {/* Floating firefly particles - glowing jungle insects */}
-          <FireflyParticles intensity="light" />
+          {/* Floating spores and electrical sparks from overgrown tech */}
+          <SporeSparkParticles intensity="light" />
 
           <Physics gravity={[0, -9.81, 0]}>
             {/* Floor collision mesh */}
