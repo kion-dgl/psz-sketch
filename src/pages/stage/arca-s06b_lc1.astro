@@ -1,0 +1,15 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ArcaArea from '../../components/arca/ArcaArea';
+
+export const prerender = false;
+---
+
+<Layout title="Arca Plant - s06b_lc1">
+  <ArcaArea
+    mapId="s06b_lc1"
+    mapName="Arca Plant - s06b_lc1"
+    spawnPosition={[0, 5, 0]}
+    client:load
+  />
+</Layout>

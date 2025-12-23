@@ -51,6 +51,14 @@ const TRIGGERS: InteractiveTrigger[] = [
     height: 3,
     targetArea: '/stage/paru',
     name: 'Enter Oblivion City Paru'
+  },
+  // Arca Plant entrance at X: -6.68, Y: 1.00, Z: 0.42
+  {
+    position: [-6.68, 1, 0.42],
+    radius: 1,
+    height: 3,
+    targetArea: '/stage/arca',
+    name: 'Enter Arca Plant'
   }
 ];
 
