@@ -67,6 +67,14 @@ const TRIGGERS: InteractiveTrigger[] = [
     height: 3,
     targetArea: '/stage/shrine',
     name: 'Enter Dark Shrine'
+  },
+  // Eternal Tower entrance at X: 0.08, Y: 1.00, Z: -6.25
+  {
+    position: [0.08, 1, -6.25],
+    radius: 1,
+    height: 3,
+    targetArea: '/stage/tower',
+    name: 'Enter Eternal Tower'
   }
 ];
 

@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import TowerArea from '../../components/tower/TowerArea';
+
+export const prerender = false;
+---
+
+<Layout title="Eternal Tower - s082_lb1">
+  <TowerArea mapId="s082_lb1" mapName="Eternal Tower - s082_lb1" spawnPosition={[0, 5, 0]} client:load />
+</Layout>
