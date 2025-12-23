@@ -35,6 +35,14 @@ const TRIGGERS: InteractiveTrigger[] = [
     height: 3,
     targetArea: '/stage/snowfield',
     name: 'Enter Rioh Snowfield'
+  },
+  // Makara Ruins entrance at X: 0.08, Y: 1.00, Z: 6.72
+  {
+    position: [0.08, 1, 6.72],
+    radius: 1,
+    height: 3,
+    targetArea: '/stage/makara',
+    name: 'Enter Makara Ruins'
   }
 ];
 
