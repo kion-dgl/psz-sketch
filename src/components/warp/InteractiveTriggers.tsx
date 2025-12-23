@@ -43,6 +43,14 @@ const TRIGGERS: InteractiveTrigger[] = [
     height: 3,
     targetArea: '/stage/makara',
     name: 'Enter Makara Ruins'
+  },
+  // Paru Jungle entrance at X: -4.50, Y: 1.00, Z: 4.50
+  {
+    position: [-4.50, 1, 4.50],
+    radius: 1,
+    height: 3,
+    targetArea: '/stage/paru',
+    name: 'Enter Paru Jungle'
   }
 ];
 

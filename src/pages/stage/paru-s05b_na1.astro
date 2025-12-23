@@ -1,0 +1,15 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ParuArea from '../../components/paru/ParuArea';
+
+export const prerender = false;
+---
+
+<Layout title="Paru Jungle - s05b_na1">
+  <ParuArea
+    mapId="s05b_na1"
+    mapName="Paru Jungle - s05b_na1"
+    spawnPosition={[0, 5, 0]}
+    client:load
+  />
+</Layout>
