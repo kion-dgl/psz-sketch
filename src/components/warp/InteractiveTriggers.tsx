@@ -27,6 +27,14 @@ const TRIGGERS: InteractiveTrigger[] = [
     height: 3,
     targetArea: '/stage/wetlands',
     name: 'Enter Ozette Wetlands'
+  },
+  // Rioh Snowfield entrance at X: 4.65, Y: 1.00, Z: 5.14
+  {
+    position: [4.65, 1, 5.14],
+    radius: 1,
+    height: 3,
+    targetArea: '/stage/snowfield',
+    name: 'Enter Rioh Snowfield'
   }
 ];
 

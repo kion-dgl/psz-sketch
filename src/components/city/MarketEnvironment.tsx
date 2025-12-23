@@ -3,7 +3,7 @@ import { RigidBody, CuboidCollider } from '@react-three/rapier';
 import { useEffect } from 'react';
 
 export default function MarketEnvironment() {
-  const { scene } = useGLTF('/city_e/market/s00e_sa1_m.glb');
+  const { scene } = useGLTF('/stages/city_e/market/s00e_sa1_m.glb');
 
   useEffect(() => {
     // Traverse the scene and enable shadows + disable physics
@@ -36,4 +36,4 @@ export default function MarketEnvironment() {
 }
 
 // Preload the model
-useGLTF.preload('/city_e/market/s00e_sa1_m.glb');
+useGLTF.preload('/stages/city_e/market/s00e_sa1_m.glb');

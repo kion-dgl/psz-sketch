@@ -15,9 +15,9 @@ interface MarkerData {
 function getWetlandsDir(mapId: string): string {
   const match = mapId.match(/^s02([a-z])_/);
   if (match) {
-    return `wetlands_${match[1]}`;
+    return `stages/wetlands_${match[1]}`;
   }
-  return 'wetlands_a';
+  return 'stages/wetlands_a';
 }
 
 function TopDownScene({

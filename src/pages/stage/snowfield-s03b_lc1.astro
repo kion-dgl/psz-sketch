@@ -1,0 +1,15 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SnowfieldArea from '../../components/snowfield/SnowfieldArea';
+
+export const prerender = false;
+---
+
+<Layout title="Rioh Snowfield - s03b_lc1">
+  <SnowfieldArea
+    mapId="s03b_lc1"
+    mapName="Rioh Snowfield - s03b_lc1"
+    spawnPosition={[0, 5, 0]}
+    client:load
+  />
+</Layout>

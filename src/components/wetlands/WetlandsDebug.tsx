@@ -15,9 +15,9 @@ interface TextureInfo {
 function getWetlandsDir(mapId: string): string {
   const match = mapId.match(/^s02([a-z])_/);
   if (match) {
-    return `wetlands_${match[1]}`;
+    return `stages/wetlands_${match[1]}`;
   }
-  return 'wetlands_a';
+  return 'stages/wetlands_a';
 }
 
 function WetlandsDebugScene({ selectedMap, textureSettings, onTextureAdjustmentsChange }: { selectedMap: string; textureSettings: Record<string, any>; onTextureAdjustmentsChange: (key: string, adjustments: any) => void }) {

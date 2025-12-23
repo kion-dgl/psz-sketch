@@ -30,12 +30,12 @@ const getWrappingMode = (mode: string): number => {
 };
 
 export default function UndergroundEnvironment() {
-  const { scene } = useGLTF('/city_e/s00e_sa4/lndmd/s00e_sa4_m.glb');
+  const { scene } = useGLTF('/stages/city_e/s00e_sa4/lndmd/s00e_sa4_m.glb');
   const [textureConfig, setTextureConfig] = useState<StageConfig | null>(null);
 
   // Load texture configuration if it exists
   useEffect(() => {
-    fetch('/city_e/s00e_sa4/lndmd/s00e_sa4_m-texture-config.json')
+    fetch('/stages/city_e/s00e_sa4/lndmd/s00e_sa4_m-texture-config.json')
       .then(response => response.json())
       .then(config => setTextureConfig(config))
       .catch(error => {
@@ -103,7 +103,7 @@ export function UndergroundGroundPlane() {
   const [collisionHull, setCollisionHull] = useState<any>(null);
 
   useEffect(() => {
-    fetch('/city_e/s00e_sa4/lndmd/s00e_sa4_m-collision-hull.json')
+    fetch('/stages/city_e/s00e_sa4/lndmd/s00e_sa4_m-collision-hull.json')
       .then(response => response.json())
       .then(data => {
         setCollisionHull(data);
@@ -165,4 +165,4 @@ export function DebugGroundPlane() {
 }
 
 // Preload the model
-useGLTF.preload('/city_e/s00e_sa4/lndmd/s00e_sa4_m.glb');
+useGLTF.preload('/stages/city_e/s00e_sa4/lndmd/s00e_sa4_m.glb');

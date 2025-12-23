@@ -30,12 +30,12 @@ const getWrappingMode = (mode: string): number => {
 };
 
 export default function WarpEnvironment() {
-  const { scene } = useGLTF('/city_e/s00e_sa3/lndmd/s00e_sa3_m.glb');
+  const { scene } = useGLTF('/stages/city_e/s00e_sa3/lndmd/s00e_sa3_m.glb');
   const [textureConfig, setTextureConfig] = useState<StageConfig | null>(null);
 
   // Load texture configuration
   useEffect(() => {
-    fetch('/city_e/s00e_sa3/lndmd/s00e_sa3_m-texture-config.json')
+    fetch('/stages/city_e/s00e_sa3/lndmd/s00e_sa3_m-texture-config.json')
       .then(response => response.json())
       .then(config => setTextureConfig(config))
       .catch(error => console.error('Failed to load texture config:', error));
@@ -105,7 +105,7 @@ export function WarpGroundPlane() {
   const [collisionHull, setCollisionHull] = useState<any>(null);
 
   useEffect(() => {
-    fetch('/city_e/s00e_sa3/lndmd/s00e_sa3_m-collision-hull.json')
+    fetch('/stages/city_e/s00e_sa3/lndmd/s00e_sa3_m-collision-hull.json')
       .then(response => response.json())
       .then(data => {
         // console.log('[Collision Hull] Loaded:', data);
@@ -174,4 +174,4 @@ export function WarpGroundPlane() {
 }
 
 // Preload the model
-useGLTF.preload('/city_e/s00e_sa3/lndmd/s00e_sa3_m.glb');
+useGLTF.preload('/stages/city_e/s00e_sa3/lndmd/s00e_sa3_m.glb');

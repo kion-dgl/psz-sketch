@@ -14,14 +14,14 @@ function CollisionMesh({ onTriangleClick, selectedTriangles, groundRadius }: {
   selectedTriangles: SelectedTriangle[];
   groundRadius: number;
 }) {
-  const { scene } = useGLTF('/city_e/s00e_sa3/lndmd/s00e_sa3_m.glb');
+  const { scene } = useGLTF('/stages/city_e/s00e_sa3/lndmd/s00e_sa3_m.glb');
   const [hoveredFace, setHoveredFace] = useState<{ meshName: string; faceIndex: number } | null>(null);
   const [textureConfig, setTextureConfig] = useState<any>(null);
   const { camera, raycaster, pointer } = useThree();
 
   // Load texture configuration
   useEffect(() => {
-    fetch('/city_e/s00e_sa3/lndmd/s00e_sa3_m-texture-config.json')
+    fetch('/stages/city_e/s00e_sa3/lndmd/s00e_sa3_m-texture-config.json')
       .then(response => response.json())
       .then(config => setTextureConfig(config))
       .catch(error => console.error('Failed to load texture config:', error));
@@ -484,4 +484,4 @@ export default function CollisionHullDebug() {
 }
 
 // Preload the model
-useGLTF.preload('/city_e/s00e_sa3/lndmd/s00e_sa3_m.glb');
+useGLTF.preload('/stages/city_e/s00e_sa3/lndmd/s00e_sa3_m.glb');
