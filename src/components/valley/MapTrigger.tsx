@@ -5,6 +5,7 @@ import * as THREE from 'three';
 interface MapTriggerProps {
   position: [number, number, number];
   size?: [number, number, number];
+  rotation?: number; // Y-axis rotation in radians
   targetMap?: string;
   targetUrl?: string;
   spawnPosition?: [number, number, number];
@@ -15,6 +16,7 @@ interface MapTriggerProps {
 export default function MapTrigger({
   position,
   size = [2, 3, 2],
+  rotation = 0,
   targetMap,
   targetUrl,
   spawnPosition,
@@ -67,20 +69,23 @@ export default function MapTrigger({
         onIntersectionEnter={handleIntersectionEnter}
         onIntersectionExit={handleIntersectionExit}
         position={position}
+        rotation={[0, rotation, 0]}
       >
         <CuboidCollider args={[size[0] / 2, size[1] / 2, size[2] / 2]} />
       </RigidBody>
 
       {/* Visual indicator (optional) */}
       {label && (
-        <mesh position={[position[0], position[1] + size[1] / 2 + 0.5, position[2]]}>
-          <boxGeometry args={[0.2, 0.2, 0.2]} />
-          <meshBasicMaterial
-            color={isPlayerInside ? 0x00ff00 : 0xffff00}
-            transparent
-            opacity={0.7}
-          />
-        </mesh>
+        <group position={position} rotation={[0, rotation, 0]}>
+          <mesh position={[0, size[1] / 2 + 0.5, 0]}>
+            <boxGeometry args={[0.2, 0.2, 0.2]} />
+            <meshBasicMaterial
+              color={isPlayerInside ? 0x00ff00 : 0xffff00}
+              transparent
+              opacity={0.7}
+            />
+          </mesh>
+        </group>
       )}
     </>
   );

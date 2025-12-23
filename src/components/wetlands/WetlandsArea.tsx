@@ -18,9 +18,11 @@ import { getMapConfig, getDefaultSpawn, type TriggerConfig as ConfigTrigger, typ
 
 function CameraController({ target }: { target: { x: number; y: number; z: number } }) {
   const { camera, gl } = useThree();
-  const rotationRef = useRef(0);
+  const rotationRef = useRef(0); // Horizontal rotation (yaw)
+  const pitchRef = useRef(0.3); // Vertical rotation (pitch) - start slightly above
   const isDragging = useRef(false);
   const lastMouseX = useRef(0);
+  const lastMouseY = useRef(0);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -29,12 +31,17 @@ function CameraController({ target }: { target: { x: number; y: number; z: numbe
         rotationRef.current -= rotationSpeed;
       } else if (e.key === 'ArrowRight') {
         rotationRef.current += rotationSpeed;
+      } else if (e.key === 'ArrowUp') {
+        pitchRef.current = Math.min(pitchRef.current + rotationSpeed, Math.PI / 2 - 0.1);
+      } else if (e.key === 'ArrowDown') {
+        pitchRef.current = Math.max(pitchRef.current - rotationSpeed, -Math.PI / 2 + 0.1);
       }
     };
 
     const handleMouseDown = (e: MouseEvent) => {
       isDragging.current = true;
       lastMouseX.current = e.clientX;
+      lastMouseY.current = e.clientY;
     };
 
     const handleMouseUp = () => {
@@ -45,9 +52,18 @@ function CameraController({ target }: { target: { x: number; y: number; z: numbe
       if (!isDragging.current) return;
 
       const deltaX = e.clientX - lastMouseX.current;
+      const deltaY = e.clientY - lastMouseY.current;
       const rotationSpeed = 0.005;
-      rotationRef.current += deltaX * rotationSpeed;
+
+      rotationRef.current -= deltaX * rotationSpeed;
+      // Clamp pitch to avoid flipping (between -80 and +80 degrees)
+      pitchRef.current = Math.max(
+        -Math.PI / 2 + 0.1,
+        Math.min(Math.PI / 2 - 0.1, pitchRef.current + deltaY * rotationSpeed)
+      );
+
       lastMouseX.current = e.clientX;
+      lastMouseY.current = e.clientY;
     };
 
     const canvas = gl.domElement;
@@ -66,13 +82,16 @@ function CameraController({ target }: { target: { x: number; y: number; z: numbe
 
   useFrame(() => {
     const distance = 6;
-    const height = 3;
 
-    const offsetX = Math.sin(rotationRef.current) * distance;
-    const offsetZ = Math.cos(rotationRef.current) * distance;
+    // Calculate camera position using spherical coordinates
+    const horizontalDist = Math.cos(pitchRef.current) * distance;
+    const height = Math.sin(pitchRef.current) * distance;
+
+    const offsetX = Math.sin(rotationRef.current) * horizontalDist;
+    const offsetZ = Math.cos(rotationRef.current) * horizontalDist;
 
     camera.position.x = target.x + offsetX;
-    camera.position.y = target.y + height;
+    camera.position.y = target.y + 1 + height; // +1 to orbit around character center
     camera.position.z = target.z + offsetZ;
 
     camera.lookAt(target.x, target.y + 1, target.z);
@@ -131,8 +150,9 @@ function DebugMarkers({
       {/* Exit trigger markers - blue boxes centered at trigger position */}
       {triggers.map((trigger, index) => {
         const size: [number, number, number] = trigger.size || [6, 3, 2]; // Wide triggers to block paths
+        const rotation = trigger.rotation || 0;
         return (
-          <group key={index} position={trigger.position}>
+          <group key={index} position={trigger.position} rotation={[0, rotation, 0]}>
             {/* Blue transparent box - centered at trigger position (matching CuboidCollider behavior) */}
             <mesh>
               <boxGeometry args={size} />
@@ -158,6 +178,7 @@ function DebugMarkers({
 interface TriggerConfig {
   position: [number, number, number];
   size?: [number, number, number];
+  rotation?: number;
   targetUrl?: string;
   targetMap?: string;
   label?: string;
@@ -459,6 +480,7 @@ export default function WetlandsArea({ mapId, mapName, spawnPosition: propSpawn,
                 key={index}
                 position={trigger.position}
                 size={trigger.size || [6, 3, 2]}
+                rotation={trigger.rotation || 0}
                 targetUrl={trigger.targetUrl}
                 targetMap={trigger.targetMap}
                 label={trigger.label}

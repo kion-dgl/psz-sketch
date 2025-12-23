@@ -12,6 +12,12 @@ interface MarkerData {
   label: string;
 }
 
+interface StoredMapConfig {
+  markers: MarkerData[];
+}
+
+const STORAGE_KEY = 'wetlands-trigger-configs';
+
 // Get wetlands directory based on mapId prefix
 function getWetlandsDir(mapId: string): string {
   const match = mapId.match(/^s02([a-z])_/);
@@ -19,6 +25,21 @@ function getWetlandsDir(mapId: string): string {
     return `stages/wetlands_${match[1]}`;
   }
   return 'stages/wetlands_a';
+}
+
+// Load all configs from localStorage
+function loadAllConfigs(): Record<string, StoredMapConfig> {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
+// Save all configs to localStorage
+function saveAllConfigs(configs: Record<string, StoredMapConfig>) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(configs));
 }
 
 // Arrow component for showing direction
@@ -161,26 +182,47 @@ function TopDownScene({
       {/* Render markers */}
       {markers.map((marker) => (
         <group key={marker.id} position={marker.position}>
-          {/* Marker sphere */}
-          <mesh>
-            <sphereGeometry args={[1, 16, 16]} />
-            <meshBasicMaterial
-              color={marker.type === 'spawn' ? '#00ff00' : '#ff6600'}
-              transparent
-              opacity={0.8}
-            />
-          </mesh>
-          {/* Marker ring */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[1.2, 1.5, 32]} />
-            <meshBasicMaterial
-              color={marker.type === 'spawn' ? '#00ff00' : '#ff6600'}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-          {/* Direction arrow for spawn points */}
-          {marker.type === 'spawn' && (
-            <DirectionArrow rotation={marker.rotation} color="#00ff00" />
+          {marker.type === 'spawn' ? (
+            <>
+              {/* Spawn marker - sphere */}
+              <mesh>
+                <sphereGeometry args={[1, 16, 16]} />
+                <meshBasicMaterial color="#00ff00" transparent opacity={0.8} />
+              </mesh>
+              {/* Marker ring */}
+              <mesh rotation={[-Math.PI / 2, 0, 0]}>
+                <ringGeometry args={[1.2, 1.5, 32]} />
+                <meshBasicMaterial color="#00ff00" side={THREE.DoubleSide} />
+              </mesh>
+              {/* Direction arrow */}
+              <DirectionArrow rotation={marker.rotation} color="#00ff00" />
+            </>
+          ) : (
+            <>
+              {/* Trigger marker - rectangular box with rotation */}
+              <group rotation={[0, marker.rotation, 0]}>
+                {/* Box representing trigger zone (6x3x2 default size) */}
+                <mesh position={[0, 1.5, 0]}>
+                  <boxGeometry args={[6, 3, 2]} />
+                  <meshBasicMaterial color="#ff6600" transparent opacity={0.4} side={THREE.DoubleSide} />
+                </mesh>
+                {/* Wireframe outline */}
+                <lineSegments position={[0, 1.5, 0]}>
+                  <edgesGeometry args={[new THREE.BoxGeometry(6, 3, 2)]} />
+                  <lineBasicMaterial color="#ff8800" linewidth={2} />
+                </lineSegments>
+                {/* Center marker */}
+                <mesh position={[0, 0.2, 0]}>
+                  <cylinderGeometry args={[0.5, 0.5, 0.4, 16]} />
+                  <meshBasicMaterial color="#ff6600" />
+                </mesh>
+                {/* Direction indicator (shows which way it's facing) */}
+                <mesh position={[0, 0.5, -1.5]}>
+                  <coneGeometry args={[0.4, 0.8, 8]} />
+                  <meshBasicMaterial color="#ffaa00" />
+                </mesh>
+              </group>
+            </>
           )}
         </group>
       ))}
@@ -205,6 +247,8 @@ const WETLANDS_B_MAPS = [
 const WETLANDS_E_MAPS = ['s02e_ia1'];
 const WETLANDS_Z_MAPS = ['s02z_na1'];
 
+const ALL_MAPS = [...WETLANDS_A_MAPS, ...WETLANDS_B_MAPS, ...WETLANDS_E_MAPS, ...WETLANDS_Z_MAPS];
+
 // Helper to convert radians to degrees
 const radToDeg = (rad: number) => Math.round((rad * 180) / Math.PI);
 // Helper to convert degrees to radians
@@ -213,15 +257,39 @@ const degToRad = (deg: number) => (deg * Math.PI) / 180;
 export default function WetlandsTriggerDebug() {
   const [selectedMap, setSelectedMap] = useState('s02a_ga1');
   const [markers, setMarkers] = useState<MarkerData[]>([]);
+  const [allConfigs, setAllConfigs] = useState<Record<string, StoredMapConfig>>({});
   const [selectedMarkerType, setSelectedMarkerType] = useState<'spawn' | 'trigger'>('spawn');
   const [zoom, setZoom] = useState(50);
   const [cameraPosition, setCameraPosition] = useState({ x: 0, z: 0 });
   const [showFloorMesh, setShowFloorMesh] = useState(true);
 
-  // Clear markers when map changes
+  // Load all configs from localStorage on mount
   useEffect(() => {
-    setMarkers([]);
+    const configs = loadAllConfigs();
+    setAllConfigs(configs);
+    // Load markers for initial map
+    if (configs[selectedMap]) {
+      setMarkers(configs[selectedMap].markers);
+    }
+  }, []);
+
+  // Load markers when map changes
+  useEffect(() => {
+    const configs = loadAllConfigs();
+    setMarkers(configs[selectedMap]?.markers || []);
   }, [selectedMap]);
+
+  // Save markers to localStorage whenever they change
+  useEffect(() => {
+    const configs = loadAllConfigs();
+    if (markers.length > 0) {
+      configs[selectedMap] = { markers };
+    } else {
+      delete configs[selectedMap];
+    }
+    saveAllConfigs(configs);
+    setAllConfigs(configs);
+  }, [markers, selectedMap]);
 
   const handleAddMarker = (position: [number, number, number]) => {
     const newMarker: MarkerData = {
@@ -253,6 +321,12 @@ export default function WetlandsTriggerDebug() {
     setMarkers(prev => prev.filter(m => m.id !== id));
   };
 
+  const handleClearMap = () => {
+    if (confirm(`Clear all markers for ${selectedMap}?`)) {
+      setMarkers([]);
+    }
+  };
+
   const handleExportCode = () => {
     const spawnMarker = markers.find(m => m.type === 'spawn');
     const triggerMarkers = markers.filter(m => m.type === 'trigger');
@@ -269,6 +343,9 @@ export default function WetlandsTriggerDebug() {
       triggerMarkers.forEach((trigger, i) => {
         code += `  {\n`;
         code += `    position: [${trigger.position.join(', ')}],\n`;
+        if (trigger.rotation !== 0) {
+          code += `    rotation: ${trigger.rotation.toFixed(4)}, // ${radToDeg(trigger.rotation)}°\n`;
+        }
         code += `    targetUrl: "/stage/wetlands",\n`;
         code += `    label: "${trigger.label}"\n`;
         code += `  }${i < triggerMarkers.length - 1 ? ',' : ''}\n`;
@@ -278,6 +355,56 @@ export default function WetlandsTriggerDebug() {
 
     navigator.clipboard.writeText(code);
     alert('Code copied to clipboard!');
+  };
+
+  const handleExportAll = () => {
+    const configs = loadAllConfigs();
+    const configuredMaps = Object.keys(configs).sort();
+
+    if (configuredMaps.length === 0) {
+      alert('No maps configured yet!');
+      return;
+    }
+
+    let code = `// Wetlands stage configurations - Generated from debug tool\n`;
+    code += `// Configured maps: ${configuredMaps.length}\n\n`;
+    code += `export const WETLANDS_CONFIG: Record<string, MapConfig> = {\n`;
+
+    configuredMaps.forEach((mapId, mapIndex) => {
+      const config = configs[mapId];
+      const spawnMarkers = config.markers.filter(m => m.type === 'spawn');
+      const triggerMarkers = config.markers.filter(m => m.type === 'trigger');
+
+      code += `  '${mapId}': {\n`;
+      code += `    spawnPoints: [\n`;
+      spawnMarkers.forEach((spawn, i) => {
+        code += `      {\n`;
+        code += `        position: [${spawn.position.join(', ')}],\n`;
+        code += `        rotation: ${spawn.rotation.toFixed(4)}, // ${radToDeg(spawn.rotation)}°\n`;
+        code += `        label: '${spawn.label}',\n`;
+        code += `        isDefault: ${i === 0}\n`;
+        code += `      }${i < spawnMarkers.length - 1 ? ',' : ''}\n`;
+      });
+      code += `    ],\n`;
+      code += `    triggers: [\n`;
+      triggerMarkers.forEach((trigger, i) => {
+        code += `      {\n`;
+        code += `        position: [${trigger.position.join(', ')}],\n`;
+        if (trigger.rotation !== 0) {
+          code += `        rotation: ${trigger.rotation.toFixed(4)}, // ${radToDeg(trigger.rotation)}°\n`;
+        }
+        code += `        targetUrl: '/stage/wetlands',\n`;
+        code += `        label: '${trigger.label}'\n`;
+        code += `      }${i < triggerMarkers.length - 1 ? ',' : ''}\n`;
+      });
+      code += `    ]\n`;
+      code += `  }${mapIndex < configuredMaps.length - 1 ? ',' : ''}\n`;
+    });
+
+    code += `};\n`;
+
+    navigator.clipboard.writeText(code);
+    alert(`Exported ${configuredMaps.length} map configs to clipboard!`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -301,6 +428,9 @@ export default function WetlandsTriggerDebug() {
         break;
     }
   };
+
+  const configuredCount = Object.keys(allConfigs).length;
+  const hasCurrentConfig = !!allConfigs[selectedMap];
 
   return (
     <div
@@ -349,25 +479,47 @@ export default function WetlandsTriggerDebug() {
           >
             <optgroup label="Wetlands A">
               {WETLANDS_A_MAPS.map((map) => (
-                <option key={map} value={map}>{map}</option>
+                <option key={map} value={map}>{allConfigs[map] ? '✓ ' : '  '}{map}</option>
               ))}
             </optgroup>
             <optgroup label="Wetlands B">
               {WETLANDS_B_MAPS.map((map) => (
-                <option key={map} value={map}>{map}</option>
+                <option key={map} value={map}>{allConfigs[map] ? '✓ ' : '  '}{map}</option>
               ))}
             </optgroup>
             <optgroup label="Wetlands E">
               {WETLANDS_E_MAPS.map((map) => (
-                <option key={map} value={map}>{map}</option>
+                <option key={map} value={map}>{allConfigs[map] ? '✓ ' : '  '}{map}</option>
               ))}
             </optgroup>
             <optgroup label="Wetlands Z">
               {WETLANDS_Z_MAPS.map((map) => (
-                <option key={map} value={map}>{map}</option>
+                <option key={map} value={map}>{allConfigs[map] ? '✓ ' : '  '}{map}</option>
               ))}
             </optgroup>
           </select>
+        </div>
+
+        {/* Config Status */}
+        <div style={{
+          marginBottom: '15px',
+          padding: '10px',
+          background: hasCurrentConfig ? 'rgba(0,150,0,0.3)' : 'rgba(150,100,0,0.3)',
+          borderRadius: '4px',
+          border: hasCurrentConfig ? '1px solid #0a0' : '1px solid #a80'
+        }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
+            {hasCurrentConfig ? '✓ Config saved (localStorage)' : '⚠ No config yet'}
+          </div>
+          {hasCurrentConfig && (
+            <div style={{ fontSize: '11px', color: '#aaa' }}>
+              <div>Spawns: {markers.filter(m => m.type === 'spawn').length}</div>
+              <div>Triggers: {markers.filter(m => m.type === 'trigger').length}</div>
+            </div>
+          )}
+          <div style={{ fontSize: '11px', color: '#888', marginTop: '5px' }}>
+            Configured: {configuredCount} / {ALL_MAPS.length} maps
+          </div>
         </div>
 
         {/* Marker Type Toggle */}
@@ -450,17 +602,38 @@ export default function WetlandsTriggerDebug() {
           <div>Click on map to place marker</div>
           <div>WASD / Arrow keys to pan</div>
           <div>Slider to zoom in/out</div>
+          <div style={{ marginTop: '5px', color: '#8f8' }}>
+            <b>Auto-saves to localStorage!</b>
+          </div>
         </div>
 
         {/* Markers List */}
         <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-            Placed Markers:
-          </label>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+            <label style={{ fontWeight: 'bold' }}>
+              Placed Markers:
+            </label>
+            {markers.length > 0 && (
+              <button
+                onClick={handleClearMap}
+                style={{
+                  background: '#660000',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '4px 8px',
+                  cursor: 'pointer',
+                  fontSize: '10px'
+                }}
+              >
+                Clear All
+              </button>
+            )}
+          </div>
           {markers.length === 0 ? (
             <div style={{ color: '#666', fontStyle: 'italic' }}>No markers placed</div>
           ) : (
-            <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
+            <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
               {markers.map((marker) => (
                 <div
                   key={marker.id}
@@ -492,66 +665,87 @@ export default function WetlandsTriggerDebug() {
                   <div style={{ color: '#aaa', marginBottom: '4px' }}>
                     [{marker.position.map(p => p.toFixed(2)).join(', ')}]
                   </div>
-                  {/* Rotation controls for spawn markers */}
-                  {marker.type === 'spawn' && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
-                      <span style={{ color: '#8f8' }}>Rot: {radToDeg(marker.rotation)}°</span>
-                      <button
-                        onClick={() => handleRotateMarker(marker.id, 'ccw')}
-                        style={{
-                          background: '#336633',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          padding: '4px 10px',
-                          cursor: 'pointer',
-                          fontSize: '12px',
-                          fontWeight: 'bold'
-                        }}
-                      >
-                        ↺ -45°
-                      </button>
-                      <button
-                        onClick={() => handleRotateMarker(marker.id, 'cw')}
-                        style={{
-                          background: '#336633',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          padding: '4px 10px',
-                          cursor: 'pointer',
-                          fontSize: '12px',
-                          fontWeight: 'bold'
-                        }}
-                      >
-                        ↻ +45°
-                      </button>
-                    </div>
-                  )}
+                  {/* Rotation controls for all markers */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
+                    <span style={{ color: marker.type === 'spawn' ? '#8f8' : '#fa8' }}>
+                      Rot: {radToDeg(marker.rotation)}°
+                    </span>
+                    <button
+                      onClick={() => handleRotateMarker(marker.id, 'ccw')}
+                      style={{
+                        background: marker.type === 'spawn' ? '#336633' : '#664422',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '4px 10px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      ↺ -45°
+                    </button>
+                    <button
+                      onClick={() => handleRotateMarker(marker.id, 'cw')}
+                      style={{
+                        background: marker.type === 'spawn' ? '#336633' : '#664422',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '4px 10px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      ↻ +45°
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* Export Button */}
-        <button
-          onClick={handleExportCode}
-          disabled={markers.length === 0}
-          style={{
-            width: '100%',
-            padding: '10px',
-            background: markers.length === 0 ? '#333' : '#0066aa',
-            color: markers.length === 0 ? '#666' : 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: markers.length === 0 ? 'not-allowed' : 'pointer',
-            fontFamily: 'monospace',
-            fontWeight: 'bold'
-          }}
-        >
-          Copy Code to Clipboard
-        </button>
+        {/* Export Buttons */}
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+          <button
+            onClick={handleExportCode}
+            disabled={markers.length === 0}
+            style={{
+              flex: 1,
+              padding: '10px',
+              background: markers.length === 0 ? '#333' : '#0066aa',
+              color: markers.length === 0 ? '#666' : 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: markers.length === 0 ? 'not-allowed' : 'pointer',
+              fontFamily: 'monospace',
+              fontWeight: 'bold',
+              fontSize: '11px'
+            }}
+          >
+            Copy This Map
+          </button>
+          <button
+            onClick={handleExportAll}
+            disabled={configuredCount === 0}
+            style={{
+              flex: 1,
+              padding: '10px',
+              background: configuredCount === 0 ? '#333' : '#006644',
+              color: configuredCount === 0 ? '#666' : 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: configuredCount === 0 ? 'not-allowed' : 'pointer',
+              fontFamily: 'monospace',
+              fontWeight: 'bold',
+              fontSize: '11px'
+            }}
+          >
+            Export All ({configuredCount})
+          </button>
+        </div>
       </div>
 
       {/* Back Button */}
