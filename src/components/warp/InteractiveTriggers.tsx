@@ -15,10 +15,18 @@ const TRIGGERS: InteractiveTrigger[] = [
   // Gurhacia Valley entrance at X: 4.55, Y: 1.00, Z: -4.10
   {
     position: [4.55, 1, -4.10],
-    radius: 2,
+    radius: 1,
     height: 3,
-    targetArea: '/stage/valley-a-ga1',
+    targetArea: '/stage/valley',
     name: 'Enter Gurhacia Valley'
+  },
+  // Ozette Wetlands entrance at X: 6.56, Z: 0.42
+  {
+    position: [6.56, 1, 0.42],
+    radius: 1,
+    height: 3,
+    targetArea: '/stage/wetlands',
+    name: 'Enter Ozette Wetlands'
   }
 ];
 

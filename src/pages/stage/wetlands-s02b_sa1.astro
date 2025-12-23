@@ -1,0 +1,15 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import WetlandsArea from '../../components/wetlands/WetlandsArea';
+
+export const prerender = false;
+---
+
+<Layout title="Ozette Wetlands - South Area 1">
+  <WetlandsArea
+    mapId="s02b_sa1"
+    mapName="Ozette Wetlands - South Area 1"
+    spawnPosition={[0, 5, 0]}
+    client:load
+  />
+</Layout>

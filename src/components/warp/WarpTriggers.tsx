@@ -10,12 +10,12 @@ interface AreaTrigger {
 }
 
 const TRIGGERS: AreaTrigger[] = [
-  // Exit trigger to Counter: (2.16, 1.00, 18.37) → (-1.95, 1.00, 18.15)
+  // Exit trigger to Valley
   {
     position: [0.105, 1, 18.26],
-    size: [4.11, 3, 1],
-    targetArea: '/stage/counter?spawn=warp-exit',
-    name: 'Exit to Counter'
+    size: [1, 2, 1],
+    targetArea: '/stage/valley',
+    name: 'Exit to Valley'
   }
 ];
 
