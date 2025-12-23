@@ -1,0 +1,15 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ShrineArea from '../../components/shrine/ShrineArea';
+
+export const prerender = false;
+---
+
+<Layout title="Dark Shrine - s07a_ib2">
+  <ShrineArea
+    mapId="s07a_ib2"
+    mapName="Dark Shrine - s07a_ib2"
+    spawnPosition={[0, 5, 0]}
+    client:load
+  />
+</Layout>

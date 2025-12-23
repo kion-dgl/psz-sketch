@@ -59,6 +59,14 @@ const TRIGGERS: InteractiveTrigger[] = [
     height: 3,
     targetArea: '/stage/arca',
     name: 'Enter Arca Plant'
+  },
+  // Dark Shrine entrance at X: -4.69, Y: 1.00, Z: -4.17
+  {
+    position: [-4.69, 1, -4.17],
+    radius: 1,
+    height: 3,
+    targetArea: '/stage/shrine',
+    name: 'Enter Dark Shrine'
   }
 ];
 
