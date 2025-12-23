@@ -266,8 +266,8 @@ export default function WetlandsArea({ mapId, mapName, spawnPosition: propSpawn,
   const weatherAdjustedLighting = {
     ...lighting,
     // Foggy weather reduces visibility
-    fogNear: weather === 'foggy' ? 5 : weather === 'rain' ? 15 : weather === 'rain-heavy' ? 8 : lighting.fogNear,
-    fogFar: weather === 'foggy' ? 40 : weather === 'rain' ? 60 : weather === 'rain-heavy' ? 35 : lighting.fogFar,
+    fogNear: weather === 'foggy' ? 5 : weather === 'rain' ? 15 : weather === 'rain-heavy' ? 20 : lighting.fogNear,
+    fogFar: weather === 'foggy' ? 40 : weather === 'rain' ? 60 : weather === 'rain-heavy' ? 70 : lighting.fogFar,
     // Rain uses darker fog
     fogColor: weather === 'rain' ? '#3a4a3a' : weather === 'rain-heavy' ? '#2a3a2a' : weather === 'foggy' ? '#6a8a6a' : lighting.fogColor,
     // Rain darkens the scene
