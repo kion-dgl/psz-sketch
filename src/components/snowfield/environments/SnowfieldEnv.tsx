@@ -3,10 +3,83 @@ import { RigidBody, TrimeshCollider } from '@react-three/rapier';
 import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 
-// Texture fix settings - keyed by texture image filename
+// Texture fix settings - keyed by texture filename with instance number (e.g., "s03_1_lamp1.png#1")
 const TEXTURE_FIXES: Record<string, { repeatX: number; repeatY: number; offsetX: number; offsetY: number }> = {
-  // Add snowfield-specific texture fixes here as needed
+  "s03_1_lamp1.png#1": {
+    "repeatX": 2,
+    "repeatY": 1,
+    "offsetX": 0.6,
+    "offsetY": 0.6
+  },
+  "s03_0_tile1.png#1": {
+    "repeatX": 2,
+    "repeatY": 1,
+    "offsetX": 0,
+    "offsetY": 0
+  },
+  "s03_1_snow2.png#1": {
+    "repeatX": 1,
+    "repeatY": 1,
+    "offsetX": 0,
+    "offsetY": 0
+  },
+  "s03_0_view1.png#1": {
+    "repeatX": 1,
+    "repeatY": 1,
+    "offsetX": 0,
+    "offsetY": 0
+  },
+  "s03_0_yuka1.png#1": {
+    "repeatX": 1,
+    "repeatY": 1,
+    "offsetX": 0,
+    "offsetY": 0
+  },
+  "s03_0_mizu1.png#1": {
+    "repeatX": 1,
+    "repeatY": 1,
+    "offsetX": 0,
+    "offsetY": 0
+  },
+  "s03_1_lamp1.png#2": {
+    "repeatX": 2,
+    "repeatY": 1,
+    "offsetX": 0,
+    "offsetY": 0
+  },
+  "s03_1_etc2.png#1": {
+    "repeatX": 1,
+    "repeatY": 1,
+    "offsetX": 0,
+    "offsetY": 0
+  },
+  "s03_1_tree1.png#1": {
+    "repeatX": 1,
+    "repeatY": 1,
+    "offsetX": 0,
+    "offsetY": 0
+  },
+  "s03_0_yuka2.png#1": {
+    "repeatX": 1,
+    "repeatY": 1,
+    "offsetX": 0,
+    "offsetY": 0
+  }
 };
+
+// Helper to get texture filename
+function getTextureFilename(texture: THREE.Texture): string {
+  if (texture.name) {
+    const parts = texture.name.split('/');
+    return parts[parts.length - 1];
+  }
+  const image = texture.image as { src?: string } | null;
+  if (image && image.src) {
+    const parts = image.src.split('/');
+    return parts[parts.length - 1];
+  }
+  return 'unknown';
+}
 
 interface SnowfieldEnvProps {
   mapId: string;
@@ -126,54 +199,37 @@ export default function SnowfieldEnv({ mapId, showFloorCollision = false }: Snow
 
   useEffect(() => {
     if (scene) {
-      // Apply texture fixes
+      // Track texture instances by filename
+      const textureInstanceCounts: Record<string, number> = {};
+
+      // Apply texture fixes with instance tracking
       scene.traverse((object) => {
         if ((object as THREE.Mesh).isMesh) {
           const mesh = object as THREE.Mesh;
-          const material = mesh.material;
+          const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
 
-          if (Array.isArray(material)) {
-            material.forEach((mat) => applyTextureFixes(mat));
-          } else {
-            applyTextureFixes(material);
-          }
+          materials.forEach((mat) => {
+            const m = mat as any;
+            if (m.map) {
+              const filename = getTextureFilename(m.map);
+              textureInstanceCounts[filename] = (textureInstanceCounts[filename] || 0) + 1;
+              const instanceNum = textureInstanceCounts[filename];
+              const key = `${filename}#${instanceNum}`;
+
+              const fixes = TEXTURE_FIXES[key];
+              if (fixes) {
+                m.map.wrapS = THREE.MirroredRepeatWrapping;
+                m.map.wrapT = THREE.MirroredRepeatWrapping;
+                m.map.repeat.set(fixes.repeatX, fixes.repeatY);
+                m.map.offset.set(fixes.offsetX, fixes.offsetY);
+                m.map.needsUpdate = true;
+              }
+            }
+          });
         }
       });
     }
   }, [scene]);
-
-  const applyTextureFixes = (material: THREE.Material) => {
-    // Check if material has a diffuse map
-    if (!(material as any).map) return;
-
-    const texture = (material as any).map as THREE.Texture;
-
-    // Get texture filename from source or name
-    const textureSrc = texture.image?.src || texture.source?.data?.src || '';
-    const textureName = texture.name || '';
-
-    // Extract filename without extension (e.g., "s03_0_tile1" from ".../s03_0_tile1.png")
-    let match = textureSrc.match(/\/([^/]+)\.(png|jpg|jpeg)$/i);
-    let textureFilename = match ? match[1] : '';
-
-    // If no match from src, try the texture name
-    if (!textureFilename && textureName) {
-      const nameMatch = textureName.match(/^(.+)\.(png|jpg|jpeg)$/i);
-      textureFilename = nameMatch ? nameMatch[1] : textureName;
-    }
-
-    if (!textureFilename) return;
-
-    const fixes = TEXTURE_FIXES[textureFilename];
-    if (!fixes) return;
-
-    // Apply fixes
-    texture.wrapS = THREE.MirroredRepeatWrapping;
-    texture.wrapT = THREE.MirroredRepeatWrapping;
-    texture.repeat.set(fixes.repeatX, fixes.repeatY);
-    texture.offset.set(fixes.offsetX, fixes.offsetY);
-    texture.needsUpdate = true;
-  };
 
   return (
     <primitive object={scene} />

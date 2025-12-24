@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SnowfieldDebug from '../../components/snowfield/SnowfieldDebug';
+
+export const prerender = false;
+---
+
+<Layout title="Rioh Snowfield - Texture Debug">
+  <SnowfieldDebug client:load />
+</Layout>
