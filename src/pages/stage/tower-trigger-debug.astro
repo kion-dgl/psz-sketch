@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import TowerTriggerDebug from '../../components/tower/TowerTriggerDebug';
+
+export const prerender = false;
+---
+
+<Layout title="Eternal Tower - Trigger Debug">
+  <TowerTriggerDebug client:load />
+</Layout>

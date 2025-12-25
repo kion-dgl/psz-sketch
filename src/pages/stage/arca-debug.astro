@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ArcaDebug from '../../components/arca/ArcaDebug';
+
+export const prerender = false;
+---
+
+<Layout title="Arca Plant - Texture Debug">
+  <ArcaDebug client:load />
+</Layout>

@@ -3,9 +3,81 @@ import { RigidBody, TrimeshCollider } from '@react-three/rapier';
 import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 
-// Texture fix settings - keyed by texture image filename
+// Texture fix settings - keyed by texture image filename (without .png extension)
+// Generated from texture debug tool for Arca Plant walkable areas
 const TEXTURE_FIXES: Record<string, { repeatX: number; repeatY: number; offsetX: number; offsetY: number }> = {
-  // Add arca-specific texture fixes here as needed
+  // Main area textures
+  's06_0_kaid1': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_wall02': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_zkaid1': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_1_door02': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_1_wall04': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_kazae1': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_zyuk01': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_yuka02': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_wall03': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_1_gren02': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_yuka03': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_1_pilr01': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_yuka01': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_1_lamp01': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 1.5 },
+  's06_1_door01': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_wall01': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_kaza01': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 1.3 },
+  's06_1_hashi1': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 1.5 },
+  's06_0_yuka00': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_1_gren01': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_1_spce03': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_spce02': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_1_tree01': { repeatX: 2, repeatY: 2, offsetX: 0, offsetY: 1 },
+  's06_1_symb1': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: -0.5 },
+  's06_0_bwat01': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_1_clock1': { repeatX: 2.1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_1_door03': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: -0.5 },
+  's06_1_door04': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0.5 },
+  's06_0_zdoo01': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: -0.5 },
+  // B-area textures
+  's06_0_bwal06': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_bwal04': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_bwal07': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_byuk04': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_bdoo07': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_1_zbsak02': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_byuk05': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_eyuk01': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_byuk01': { repeatX: 2, repeatY: 2, offsetX: 0, offsetY: 0 },
+  's06_0_bdis00': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_bdoo02': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_bwal02': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_byuk00': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_bsuid00': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_blin01': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_1_bsak01': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_byuk02': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_bwat00': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_bwal05': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_bdoo04': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_bdoo05': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: -0.5 },
+  's06_1_bsak02': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_2_btak00': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_byuk03': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_bdoo06': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  // E-area textures
+  's06_0_ekaid1': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_1_eido01': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_eyuk02': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_eyuk04': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_ewal03': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_1_egait1': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  // Z-area textures
+  's06_0_zpipe2': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_zturo1': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_zhass1': { repeatX: 2, repeatY: 2, offsetX: 0, offsetY: -1 },
+  's06_0_zro0': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_zkaga1': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_1_zbsak01': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_zpipe1': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's06_0_zhaik1': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
 };
 
 interface ArcaEnvProps {

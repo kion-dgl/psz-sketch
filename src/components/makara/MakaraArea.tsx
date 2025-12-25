@@ -2,6 +2,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
 import { Suspense, useState, useEffect, useRef } from 'react';
 import { PerspectiveCamera } from '@react-three/drei';
+import * as THREE from 'three';
 import type { Character } from '../../stores/characterStore';
 import { useCharacterStore } from '../../stores/characterStore';
 import { useGameState } from '../../stores/gameStateStore';
@@ -13,10 +14,15 @@ import PauseMenu from '../ui/PauseMenu';
 import ShopMenu from '../ui/ShopMenu';
 import Compass from '../ui/Compass';
 import MapTrigger from '../valley/MapTrigger';
+import { getMapConfig, getDefaultSpawn, type TriggerConfig as ConfigTrigger, type SpawnPoint } from './makaraConfig';
 
 function CameraController({ target }: { target: { x: number; y: number; z: number } }) {
-  const { camera } = useThree();
+  const { camera, gl } = useThree();
   const rotationRef = useRef(0);
+  const pitchRef = useRef(0.3);
+  const isDragging = useRef(false);
+  const lastMouseX = useRef(0);
+  const lastMouseY = useRef(0);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -25,22 +31,65 @@ function CameraController({ target }: { target: { x: number; y: number; z: numbe
         rotationRef.current -= rotationSpeed;
       } else if (e.key === 'ArrowRight') {
         rotationRef.current += rotationSpeed;
+      } else if (e.key === 'ArrowUp') {
+        pitchRef.current = Math.min(pitchRef.current + rotationSpeed, Math.PI / 2 - 0.1);
+      } else if (e.key === 'ArrowDown') {
+        pitchRef.current = Math.max(pitchRef.current - rotationSpeed, -Math.PI / 2 + 0.1);
       }
     };
 
+    const handleMouseDown = (e: MouseEvent) => {
+      isDragging.current = true;
+      lastMouseX.current = e.clientX;
+      lastMouseY.current = e.clientY;
+    };
+
+    const handleMouseUp = () => {
+      isDragging.current = false;
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current) return;
+
+      const deltaX = e.clientX - lastMouseX.current;
+      const deltaY = e.clientY - lastMouseY.current;
+      const rotationSpeed = 0.005;
+
+      rotationRef.current -= deltaX * rotationSpeed;
+      pitchRef.current = Math.max(
+        -Math.PI / 2 + 0.1,
+        Math.min(Math.PI / 2 - 0.1, pitchRef.current + deltaY * rotationSpeed)
+      );
+
+      lastMouseX.current = e.clientX;
+      lastMouseY.current = e.clientY;
+    };
+
+    const canvas = gl.domElement;
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+    canvas.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      canvas.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, [gl]);
 
   useFrame(() => {
     const distance = 6;
-    const height = 3;
 
-    const offsetX = Math.sin(rotationRef.current) * distance;
-    const offsetZ = Math.cos(rotationRef.current) * distance;
+    const horizontalDist = Math.cos(pitchRef.current) * distance;
+    const height = Math.sin(pitchRef.current) * distance;
+
+    const offsetX = Math.sin(rotationRef.current) * horizontalDist;
+    const offsetZ = Math.cos(rotationRef.current) * horizontalDist;
 
     camera.position.x = target.x + offsetX;
-    camera.position.y = target.y + height;
+    camera.position.y = target.y + 1 + height;
     camera.position.z = target.z + offsetZ;
 
     camera.lookAt(target.x, target.y + 1, target.z);
@@ -49,8 +98,80 @@ function CameraController({ target }: { target: { x: number; y: number; z: numbe
   return null;
 }
 
+// Debug visualization for spawn points and triggers
+function DebugMarkers({
+  spawnPoints,
+  triggers
+}: {
+  spawnPoints: SpawnPoint[];
+  triggers: ConfigTrigger[];
+}) {
+  return (
+    <group>
+      {/* Spawn point markers - green for default, yellow for others */}
+      {spawnPoints.map((spawn, index) => {
+        const color = spawn.isDefault ? '#00ff00' : '#ffff00';
+        return (
+          <group key={index} position={spawn.position}>
+            {/* Base platform */}
+            <mesh position={[0, 0.05, 0]}>
+              <cylinderGeometry args={[0.8, 0.8, 0.1, 32]} />
+              <meshBasicMaterial color={color} transparent opacity={0.5} />
+            </mesh>
+            {/* Spawn indicator pole */}
+            <mesh position={[0, 1, 0]}>
+              <cylinderGeometry args={[0.1, 0.1, 2, 8]} />
+              <meshBasicMaterial color={color} />
+            </mesh>
+            {/* Direction arrow */}
+            <group rotation={[0, spawn.rotation, 0]}>
+              <mesh position={[0, 0.3, 1.2]}>
+                <boxGeometry args={[0.2, 0.2, 2]} />
+                <meshBasicMaterial color={color} />
+              </mesh>
+              <mesh position={[0, 0.3, 2.5]} rotation={[Math.PI / 2, 0, 0]}>
+                <coneGeometry args={[0.4, 0.8, 8]} />
+                <meshBasicMaterial color={color} />
+              </mesh>
+            </group>
+            {/* Label sphere at top */}
+            <mesh position={[0, 2.2, 0]}>
+              <sphereGeometry args={[0.25, 16, 16]} />
+              <meshBasicMaterial color={color} />
+            </mesh>
+          </group>
+        );
+      })}
+
+      {/* Exit trigger markers - blue boxes */}
+      {triggers.map((trigger, index) => {
+        const size: [number, number, number] = trigger.size || [6, 3, 2];
+        const rotation = trigger.rotation || 0;
+        return (
+          <group key={index} position={trigger.position} rotation={[0, rotation, 0]}>
+            <mesh>
+              <boxGeometry args={size} />
+              <meshBasicMaterial color="#0088ff" transparent opacity={0.3} side={THREE.DoubleSide} />
+            </mesh>
+            <lineSegments>
+              <edgesGeometry args={[new THREE.BoxGeometry(...size)]} />
+              <lineBasicMaterial color="#00aaff" linewidth={2} />
+            </lineSegments>
+            <mesh position={[0, size[1] / 2 + 0.5, 0]}>
+              <sphereGeometry args={[0.3, 16, 16]} />
+              <meshBasicMaterial color="#0088ff" />
+            </mesh>
+          </group>
+        );
+      })}
+    </group>
+  );
+}
+
 interface TriggerConfig {
   position: [number, number, number];
+  size?: [number, number, number];
+  rotation?: number;
   targetUrl?: string;
   targetMap?: string;
   label?: string;
@@ -114,12 +235,22 @@ interface MakaraAreaProps {
   triggers?: TriggerConfig[];
   timeOfDay?: TimeOfDay;
   weather?: Weather;
+  debugMode?: boolean;
   children?: React.ReactNode;
 }
 
-export default function MakaraArea({ mapId, mapName, spawnPosition: defaultSpawn = [0, 10, 0], spawnRotation: defaultRotation = 0, triggers = [], timeOfDay = 'day', weather = 'clear', children }: MakaraAreaProps) {
+export default function MakaraArea({ mapId, mapName, spawnPosition: propSpawn, spawnRotation: propRotation, triggers: propTriggers, timeOfDay = 'day', weather = 'clear', debugMode: initialDebug = true, children }: MakaraAreaProps) {
   const [loading, setLoading] = useState(true);
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0, rotation: 0 });
+  const [showDebugMarkers, setShowDebugMarkers] = useState(initialDebug);
+
+  // Get config from makaraConfig.ts, with prop overrides
+  const mapConfig = getMapConfig(mapId);
+  const defaultSpawn = getDefaultSpawn(mapConfig);
+  const configSpawn = propSpawn || defaultSpawn.position;
+  const configRotation = propRotation ?? defaultSpawn.rotation;
+  const configTriggers = propTriggers && propTriggers.length > 0 ? propTriggers : mapConfig.triggers;
+  const configSpawnPoints = mapConfig.spawnPoints;
 
   // Get lighting configuration based on time of day
   const lighting = LIGHTING_CONFIGS[timeOfDay];
@@ -127,12 +258,9 @@ export default function MakaraArea({ mapId, mapName, spawnPosition: defaultSpawn
   // Adjust lighting for weather
   const weatherAdjustedLighting = {
     ...lighting,
-    // Humid weather adds haze
     fogNear: weather === 'humid' ? 15 : weather === 'rain' ? 10 : lighting.fogNear,
     fogFar: weather === 'humid' ? 80 : weather === 'rain' ? 50 : lighting.fogFar,
-    // Humid uses hazier fog
     fogColor: weather === 'humid' ? '#7a9a6a' : weather === 'rain' ? '#4a5a4a' : lighting.fogColor,
-    // Rain darkens the scene
     ambientIntensity: weather === 'rain' ? lighting.ambientIntensity * 0.6 : lighting.ambientIntensity,
     directionalIntensity: weather === 'rain' ? lighting.directionalIntensity * 0.4 : lighting.directionalIntensity,
   };
@@ -140,12 +268,11 @@ export default function MakaraArea({ mapId, mapName, spawnPosition: defaultSpawn
   const { openShop } = useGameState();
   const { selectedCharacter, setSelectedCharacter } = useCharacterStore();
 
-  // Read spawn parameters from URL
-  const [spawnPosition, setSpawnPosition] = useState<[number, number, number]>(defaultSpawn);
-  const [spawnRotation, setSpawnRotation] = useState<number>(defaultRotation);
+  // Read spawn parameters from URL, fallback to config
+  const [spawnPosition, setSpawnPosition] = useState<[number, number, number]>(configSpawn);
+  const [spawnRotation, setSpawnRotation] = useState<number>(configRotation);
 
   useEffect(() => {
-    // Check URL parameters for spawn position
     const params = new URLSearchParams(window.location.search);
     const x = params.get('x');
     const y = params.get('y');
@@ -158,14 +285,13 @@ export default function MakaraArea({ mapId, mapName, spawnPosition: defaultSpawn
     if (r !== null) {
       setSpawnRotation(parseFloat(r));
     }
-  }, []);
+  }, [configSpawn, configRotation]);
 
   const handleNPCInteraction = (npcName: string) => {
     openShop(npcName);
   };
 
   useEffect(() => {
-    // Load selected character from localStorage
     try {
       const selectedCharacterId = localStorage.getItem('selectedCharacterId');
       if (!selectedCharacterId) {
@@ -286,6 +412,23 @@ export default function MakaraArea({ mapId, mapName, spawnPosition: defaultSpawn
         <div style={{ marginTop: '0.5rem', color: '#ffd700' }}>
           Press SPACE: {debugStart ? 'Debug Start' : 'Debug Stop'}
         </div>
+        <button
+          onClick={() => setShowDebugMarkers(!showDebugMarkers)}
+          style={{
+            marginTop: '0.5rem',
+            padding: '4px 8px',
+            background: showDebugMarkers ? '#00aa00' : '#555',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontFamily: 'monospace',
+            fontSize: '11px',
+            width: '100%'
+          }}
+        >
+          {showDebugMarkers ? 'Hide' : 'Show'} Debug Markers
+        </button>
       </div>
 
       {/* 3D Scene */}
@@ -318,10 +461,12 @@ export default function MakaraArea({ mapId, mapName, spawnPosition: defaultSpawn
             <MakaraFloorCollision mapId={mapId} />
 
             {/* Map triggers (loading zones) */}
-            {triggers.map((trigger, index) => (
+            {configTriggers.map((trigger, index) => (
               <MapTrigger
                 key={index}
                 position={trigger.position}
+                size={trigger.size || [6, 3, 2]}
+                rotation={trigger.rotation || 0}
                 targetUrl={trigger.targetUrl}
                 targetMap={trigger.targetMap}
                 label={trigger.label}
@@ -337,9 +482,17 @@ export default function MakaraArea({ mapId, mapName, spawnPosition: defaultSpawn
               onPositionChange={setPlayerPosition}
               onInteraction={handleNPCInteraction}
               spawnPosition={spawnPosition}
-              spawnRotation={spawnRotation}
+              spawnRotation={spawnRotation + Math.PI}
             />
           </Physics>
+
+          {/* Debug markers for spawn points and triggers */}
+          {showDebugMarkers && (
+            <DebugMarkers
+              spawnPoints={configSpawnPoints}
+              triggers={configTriggers}
+            />
+          )}
         </Suspense>
       </Canvas>
     </div>

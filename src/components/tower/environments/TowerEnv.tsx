@@ -3,7 +3,77 @@ import { RigidBody, TrimeshCollider } from '@react-three/rapier';
 import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 
-const TEXTURE_FIXES: Record<string, { repeatX: number; repeatY: number; offsetX: number; offsetY: number }> = {};
+// Texture fix settings - keyed by texture image filename (without .png extension)
+// Generated from texture debug tool for Eternal Tower walkable areas
+const TEXTURE_FIXES: Record<string, { repeatX: number; repeatY: number; offsetX: number; offsetY: number }> = {
+  // Shared texture from paru
+  's05_0_hasi1': { repeatX: 1, repeatY: 2, offsetX: 0, offsetY: 0 },
+  // Sky textures
+  's08_0_sky10': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_sky20': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_sky21': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_sky30': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_sky61': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_sky70': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_sky71': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_1_sky11': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  // Passage/platform textures
+  's08_0_ps03': { repeatX: 2, repeatY: 2, offsetX: 0, offsetY: 1 },
+  's08_0_ps07': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_ps11': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_ps12': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_ps13': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_1_ps10': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  // Door textures
+  's08_0_dr01': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_dr02': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  // Upward section textures
+  's08_0_up04': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_up05': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_up09': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_up10': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_up11': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_1_up02': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_1_up06': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_1_up08': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_1_up12': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_2_up07': { repeatX: 2, repeatY: 2, offsetX: 0, offsetY: 1 },
+  // Downward section textures
+  's08_0_dw04': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_dw05': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_dw09': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_dw10': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_dw11': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_1_dw02': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_1_dw06': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_1_dw08': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_1_dw12': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_2_dw07': { repeatX: 2, repeatY: 2, offsetX: 0, offsetY: 1 },
+  // Entrance textures
+  's08_0_en01': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_en03': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_en05': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_1_en02': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_1_en06': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_1_en09': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_2_en07': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_2_en08': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  // Room textures
+  's08_0_rm01': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_rm02': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_rm03': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_rm04': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_rm06': { repeatX: 2, repeatY: 2, offsetX: 0, offsetY: 1 },
+  's08_0_rm10': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_rm11': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_rm12': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_0_rm13': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_1_rm05': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_2_rm08': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's08_2_rm09': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  // Ledge textures
+  's08_0_le10': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+};
 
 interface TowerEnvProps {
   mapId: string;

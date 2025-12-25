@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ParuDebug from '../../components/paru/ParuDebug';
+
+export const prerender = false;
+---
+
+<Layout title="Oblivion City Paru - Texture Debug">
+  <ParuDebug client:load />
+</Layout>

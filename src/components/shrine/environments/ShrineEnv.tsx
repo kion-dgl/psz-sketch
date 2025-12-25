@@ -3,7 +3,66 @@ import { RigidBody, TrimeshCollider } from '@react-three/rapier';
 import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 
-const TEXTURE_FIXES: Record<string, { repeatX: number; repeatY: number; offsetX: number; offsetY: number }> = {};
+// Texture fix settings - keyed by texture image filename (without .png extension)
+// Generated from texture debug tool for Dark Shrine walkable areas
+const TEXTURE_FIXES: Record<string, { repeatX: number; repeatY: number; offsetX: number; offsetY: number }> = {
+  // A-area textures
+  's07_1_amyaku': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_ayukas': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_1_asaku1': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_awall': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_ayuka2': { repeatX: 2, repeatY: 2, offsetX: 0, offsetY: 1 },
+  's07_0_adoor': { repeatX: 2, repeatY: 2, offsetX: 0, offsetY: 1 },
+  's07_0_ayuka3': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_awall2': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_acell': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_apole': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_alined': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_2_aaka': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_acelld': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  // Main area textures
+  's07_1_light3': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_1_earth': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_spces': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_1_saku1': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_1_arch': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_edan': { repeatX: 1.9, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_1_table': { repeatX: 2, repeatY: 1.6, offsetX: 0, offsetY: -0.6 },
+  's07_0_door': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0.4 },
+  's07_0_yuka3': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_1_blight': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_1_myaku': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_pole': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_wall': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_yuka2': { repeatX: 2, repeatY: 2, offsetX: 0, offsetY: 1 },
+  's07_0_cell': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_line2': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_lined': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_2_aka': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_yukas': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_kaidan': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_wall2': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_1_btable': { repeatX: 2, repeatY: 2, offsetX: 0, offsetY: -1 },
+  's07_2_kemuri': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  // Z-area textures
+  's07_0_zjime': { repeatX: 2, repeatY: 2, offsetX: 0, offsetY: 0 },
+  's07_0_zline': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_2_zkemu1': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_zhaikei': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_zjime3': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_1_ztou01': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_1_code1': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_1_zmyaku': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_1_zdoore': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_zyuka2': { repeatX: 2, repeatY: 2, offsetX: 0, offsetY: 1 },
+  's07_0_zyuka': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_zsky': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_zsky3': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_zhikari': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_0_zwall': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_1_ztou': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's07_2_zmoya3': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+};
 
 interface ShrineEnvProps {
   mapId: string;

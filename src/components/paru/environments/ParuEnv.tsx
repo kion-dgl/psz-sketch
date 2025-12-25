@@ -3,9 +3,29 @@ import { RigidBody, TrimeshCollider } from '@react-three/rapier';
 import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 
-// Texture fix settings - keyed by texture image filename
+// Texture fix settings - keyed by texture image filename (without .png extension)
+// Generated from texture debug tool for Oblivion City Paru walkable areas
 const TEXTURE_FIXES: Record<string, { repeatX: number; repeatY: number; offsetX: number; offsetY: number }> = {
-  // Add paru-specific texture fixes here as needed
+  's05_0_road1': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's05_0_road3': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's05_0_view1': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's05_0_tail1b': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's05_0_tail2': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's05_1_exit1': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's05_0_etc1': { repeatX: 2, repeatY: 1.5, offsetX: 0, offsetY: 1.3 },
+  's05_1_etc1': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's05_1_reaf2': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's05_0_wall1': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's05_0_edge1': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's05_0_tree2': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's05_1_reaf5': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's05_0_field': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's05_0_tree1': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's05_0_wat1': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's05_0_hasi1': { repeatX: 1, repeatY: 2, offsetX: 0, offsetY: 1 },
+  's05_0_kan1': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's05_0_view4b': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's05_1_reaf3': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
 };
 
 interface ParuEnvProps {

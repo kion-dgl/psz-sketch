@@ -3,9 +3,27 @@ import { RigidBody, TrimeshCollider } from '@react-three/rapier';
 import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 
-// Texture fix settings - keyed by texture image filename
+// Texture fix settings - keyed by texture image filename (without .png extension)
+// Generated from texture debug tool for Makara Ruins walkable areas
 const TEXTURE_FIXES: Record<string, { repeatX: number; repeatY: number; offsetX: number; offsetY: number }> = {
-  // Add makara-specific texture fixes here as needed
+  's04_1_hana2': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's04_0_kaidan': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's04_0_etcs': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's04_1_quart1': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's04_0_yukas': { repeatX: 1.1, repeatY: 2, offsetX: 0, offsetY: 1 },
+  's04_0_yukam1': { repeatX: 2, repeatY: 2, offsetX: 0, offsetY: 1 },
+  's04_0_yukam2': { repeatX: 2, repeatY: 2, offsetX: 0, offsetY: 1 },
+  's04_0_wallz2': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's04_0_zyuka3': { repeatX: 2, repeatY: 2, offsetX: 0, offsetY: 1 },
+  's04_0_sekihi': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's04_0_wallz': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's04_0_quartz': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's04_0_zyuka2': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's04_0_zline2': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's04_0_hikari': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's04_0_cliff3': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's04_0_zline': { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 0 },
+  's04_0_zdan': { repeatX: 2, repeatY: 1, offsetX: 0, offsetY: 0 },
 };
 
 interface MakaraEnvProps {

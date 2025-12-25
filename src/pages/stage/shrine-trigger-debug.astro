@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ShrineTriggerDebug from '../../components/shrine/ShrineTriggerDebug';
+
+export const prerender = false;
+---
+
+<Layout title="Dark Shrine - Trigger Debug">
+  <ShrineTriggerDebug client:load />
+</Layout>
