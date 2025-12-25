@@ -4,7 +4,13 @@ import { RigidBody, CuboidCollider } from '@react-three/rapier';
 const WALL_THICKNESS = 0.5;
 const WALL_HEIGHT = 5;
 
-const WALLS = [
+interface WallConfig {
+  position: [number, number, number];
+  rotation: number;
+  length: number;
+}
+
+const WALLS: WallConfig[] = [
   // TODO: Add wall boundaries for underground area
 ];
 

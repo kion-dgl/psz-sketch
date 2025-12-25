@@ -221,7 +221,7 @@ export default function ArcaEnv({ mapId, showFloorCollision = false }: ArcaEnvPr
     const texture = (material as any).map as THREE.Texture;
 
     // Get texture filename from source or name
-    const textureSrc = texture.image?.src || texture.source?.data?.src || '';
+    const textureSrc = ((texture.image as any)?.src || (texture.source?.data as any)?.src || '') as string;
     const textureName = texture.name || '';
 
     // Extract filename without extension

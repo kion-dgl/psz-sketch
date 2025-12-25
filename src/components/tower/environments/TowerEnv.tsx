@@ -184,7 +184,7 @@ export default function TowerEnv({ mapId }: TowerEnvProps) {
   const applyTextureFixes = (material: THREE.Material) => {
     if (!(material as any).map) return;
     const texture = (material as any).map as THREE.Texture;
-    const textureSrc = texture.image?.src || texture.source?.data?.src || '';
+    const textureSrc = ((texture.image as any)?.src || (texture.source?.data as any)?.src || '') as string;
     const textureName = texture.name || '';
     let match = textureSrc.match(/\/([^/]+)\.(png|jpg|jpeg)$/i);
     let textureFilename = match ? match[1] : '';

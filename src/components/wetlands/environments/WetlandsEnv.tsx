@@ -125,7 +125,7 @@ function materialUsesTexture(material: THREE.Material, textureNameToFind: string
   if (!(material as any).map) return false;
 
   const texture = (material as any).map as THREE.Texture;
-  const textureSrc = texture.image?.src || texture.source?.data?.src || '';
+  const textureSrc = ((texture.image as any)?.src || (texture.source?.data as any)?.src || '') as string;
   const textureName = texture.name || '';
 
   // Extract filename without extension
@@ -266,7 +266,7 @@ export default function WetlandsEnv({ mapId, showFloorCollision = false }: Wetla
     const texture = (material as any).map as THREE.Texture;
 
     // Get texture filename from source or name
-    const textureSrc = texture.image?.src || texture.source?.data?.src || '';
+    const textureSrc = ((texture.image as any)?.src || (texture.source?.data as any)?.src || '') as string;
     const textureName = texture.name || '';
 
     // Extract filename without extension (e.g., "s02_0_hasim" from ".../s02_0_hasim.png")
