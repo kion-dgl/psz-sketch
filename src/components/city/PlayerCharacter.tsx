@@ -15,7 +15,7 @@ interface PlayerCharacterProps {
 
 export default function PlayerCharacter({ character, onPositionChange, spawnPosition = [0.98, 10, 62.79], spawnRotation = 0, onInteraction }: PlayerCharacterProps) {
   const rigidBodyRef = useRef<RapierRigidBody>(null);
-  const { world } = useRapier();
+  const { world, rapier } = useRapier();
   const [rotation, setRotation] = useState(spawnRotation); // Tank control rotation
   const [npcDetected, setNpcDetected] = useState(false); // Track if NPC is in range
   const hasErrored = useRef(false); // Prevent error spam
@@ -85,8 +85,12 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
       const rayDown = { x: 0, y: -1, z: 0 };
 
       // Test 1: Ray filtered to GROUND GROUP ONLY (0x00030003)
+      const debugRayOrigin = new rapier.Ray(
+        { x: position.x, y: position.y + 0.5, z: position.z },
+        rayDown
+      );
       const groundOnlyRay = world.castRay(
-        { origin: { x: position.x, y: position.y + 0.5, z: position.z }, dir: rayDown },
+        debugRayOrigin,
         20,
         true,
         undefined,
@@ -97,7 +101,7 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
 
       // Test 2: Ray that hits EVERYTHING (except player)
       const allRay = world.castRay(
-        { origin: { x: position.x, y: position.y + 0.5, z: position.z }, dir: rayDown },
+        debugRayOrigin,
         20,
         true,
         undefined,
@@ -174,8 +178,12 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
         const rayLength = 10; // Check 10 units down
 
         // Also raycast from current position to see what we're standing on
+        const currentPosRayObj = new rapier.Ray(
+          { x: position.x, y: position.y + 1, z: position.z },
+          rayDirection
+        );
         const currentPosRay = world.castRay(
-          { origin: { x: position.x, y: position.y + 1, z: position.z }, dir: rayDirection },
+          currentPosRayObj,
           rayLength,
           true,
           undefined,
@@ -184,8 +192,9 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
           rigidBodyRef.current // EXCLUDE PLAYER
         );
 
+        const groundCheckRayObj = new rapier.Ray(rayOrigin, rayDirection);
         const groundCheck = world.castRay(
-          { origin: rayOrigin, dir: rayDirection },
+          groundCheckRayObj,
           rayLength,
           true,
           undefined,
@@ -289,8 +298,9 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
 
       // Cast ray with filter to exclude the player's own collider and walls
       // Only hit collision group 1 (NPCs), not group 0 (walls)
+      const npcRayObj = new rapier.Ray(rayOrigin, rayDirection);
       const ray = world.castRay(
-        { origin: rayOrigin, dir: rayDirection },
+        npcRayObj,
         rayLength,
         true,
         undefined, // filterFlags

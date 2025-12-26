@@ -89,9 +89,7 @@ export default function SnowParticles({ intensity = 'light' }: SnowParticlesProp
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          count={particleCount}
-          array={particleData.positions}
-          itemSize={3}
+          args={[particleData.positions, 3]}
         />
       </bufferGeometry>
       <pointsMaterial

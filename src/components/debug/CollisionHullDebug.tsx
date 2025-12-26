@@ -1,6 +1,6 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, OrbitControls } from '@react-three/drei';
-import { Suspense, useState, useEffect, useRef, useMemo } from 'react';
+import React, { Suspense, useState, useEffect, useRef, useMemo } from 'react';
 import * as THREE from 'three';
 
 interface SelectedTriangle {
@@ -70,7 +70,7 @@ function CollisionMesh({ onTriangleClick, selectedTriangles, groundRadius }: {
 
   // Create highlight meshes for selected triangles
   const selectedMeshes = useMemo(() => {
-    const meshes: JSX.Element[] = [];
+    const meshes: React.JSX.Element[] = [];
 
     selectedTriangles.forEach((triangle, index) => {
       const geometry = new THREE.BufferGeometry();
@@ -131,11 +131,12 @@ function CollisionMesh({ onTriangleClick, selectedTriangles, groundRadius }: {
 
     if (!hoveredTriangle) return null;
 
+    const tri = hoveredTriangle as SelectedTriangle;
     const geometry = new THREE.BufferGeometry();
     const vertices = new Float32Array([
-      hoveredTriangle.vertices[0].x, hoveredTriangle.vertices[0].y, hoveredTriangle.vertices[0].z,
-      hoveredTriangle.vertices[1].x, hoveredTriangle.vertices[1].y, hoveredTriangle.vertices[1].z,
-      hoveredTriangle.vertices[2].x, hoveredTriangle.vertices[2].y, hoveredTriangle.vertices[2].z,
+      tri.vertices[0].x, tri.vertices[0].y, tri.vertices[0].z,
+      tri.vertices[1].x, tri.vertices[1].y, tri.vertices[1].z,
+      tri.vertices[2].x, tri.vertices[2].y, tri.vertices[2].z,
     ]);
     geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     geometry.setIndex([0, 1, 2]);

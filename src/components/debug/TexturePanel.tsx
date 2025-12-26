@@ -32,8 +32,8 @@ export default function TexturePanel({ textures, selectedIndex, onSelectTexture,
       setOffsetY(selectedTexture.texture.offset.y);
 
       // Generate preview image
-      const image = selectedTexture.texture.image;
-      if (image) {
+      const image = selectedTexture.texture.image as HTMLImageElement | undefined;
+      if (image && image.width && image.height) {
         const canvas = document.createElement('canvas');
         canvas.width = 256;
         canvas.height = 256;

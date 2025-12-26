@@ -11,7 +11,15 @@
  * - Can evolve to proper migrations later when stable
  */
 
-import type { Db } from 'mongodb';
+import type { Db, IndexDirection } from 'mongodb';
+
+interface IndexDefinition {
+  key: Record<string, IndexDirection>;
+  name: string;
+  unique?: boolean;
+  partialFilterExpression?: Record<string, unknown>;
+  expireAfterSeconds?: number;
+}
 
 /**
  * User Collection
@@ -50,7 +58,7 @@ const UsersCollectionSchema = {
   validationLevel: 'moderate', // Don't validate existing documents on update
 };
 
-const UsersIndexes = [
+const UsersIndexes: IndexDefinition[] = [
   {
     key: { fingerprint: 1 },
     unique: true,
@@ -141,7 +149,7 @@ const CharactersCollectionSchema = {
   validationLevel: 'moderate',
 };
 
-const CharactersIndexes = [
+const CharactersIndexes: IndexDefinition[] = [
   {
     key: { userId: 1, slot: 1 },
     unique: true,

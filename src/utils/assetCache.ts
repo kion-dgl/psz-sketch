@@ -14,7 +14,7 @@ const textureCache = localforage.createInstance({
   description: 'Cache for texture image files'
 });
 
-export interface CachedAsset {
+interface CachedAsset {
   url: string;
   blob: Blob;
   cachedAt: number;
@@ -99,7 +99,7 @@ export async function loadTexture(url: string): Promise<string> {
 /**
  * Clear all cached assets
  */
-export async function clearCache(): Promise<void> {
+async function clearCache(): Promise<void> {
   await glbCache.clear();
   await textureCache.clear();
   // console.log('Cache cleared');
@@ -108,7 +108,7 @@ export async function clearCache(): Promise<void> {
 /**
  * Get cache statistics
  */
-export async function getCacheStats(): Promise<{
+async function getCacheStats(): Promise<{
   glbCount: number;
   textureCount: number;
 }> {

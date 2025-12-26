@@ -108,15 +108,11 @@ export default function EmberParticles({ intensity = 'light' }: EmberParticlesPr
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          count={particleCount}
-          array={particleData.positions}
-          itemSize={3}
+          args={[particleData.positions, 3]}
         />
         <bufferAttribute
           attach="attributes-color"
-          count={particleCount}
-          array={particleData.colors}
-          itemSize={3}
+          args={[particleData.colors, 3]}
         />
       </bufferGeometry>
       <pointsMaterial

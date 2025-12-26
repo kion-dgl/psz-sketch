@@ -10,10 +10,14 @@ import PlayerCharacter from '../city/PlayerCharacter';
 import UndergroundNPCs from './UndergroundNPCs';
 import UndergroundWalls from './UndergroundWalls';
 import UndergroundTriggers from './UndergroundTriggers';
-import InteractiveTriggers, { InteractiveTriggerUI } from './InteractiveTriggers';
+import InteractiveTriggers, { InteractiveTriggerUI, type InteractiveTrigger } from '../shared/InteractiveTriggers';
 import HUD from '../ui/HUD';
 import PauseMenu from '../ui/PauseMenu';
 import ShopMenu from '../ui/ShopMenu';
+
+const UNDERGROUND_TRIGGERS: InteractiveTrigger[] = [
+  { position: [0.04, 1, -3.91], radius: 2, height: 3, targetArea: '/stage/city', name: 'Exit to City' }
+];
 
 function CameraController({ target }: { target: { x: number; y: number; z: number } }) {
   const { camera } = useThree();
@@ -215,7 +219,7 @@ export default function UndergroundArea() {
             <UndergroundTriggers visible={false} />
 
             {/* Interactive Triggers (require 'e' key) */}
-            <InteractiveTriggers visible={true} onPlayerInZone={setPlayerInInteractiveZone} />
+            <InteractiveTriggers triggers={UNDERGROUND_TRIGGERS} visible={true} onPlayerInZone={setPlayerInInteractiveZone} />
 
             {/* Underground NPCs */}
             <UndergroundNPCs />

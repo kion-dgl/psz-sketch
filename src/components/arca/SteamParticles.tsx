@@ -184,15 +184,11 @@ export default function SteamParticles({ intensity = 'light' }: SteamParticlesPr
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={steamConfig.count}
-            array={steamData.positions}
-            itemSize={3}
+            args={[steamData.positions, 3]}
           />
           <bufferAttribute
             attach="attributes-color"
-            count={steamConfig.count}
-            array={steamData.colors}
-            itemSize={3}
+            args={[steamData.colors, 3]}
           />
         </bufferGeometry>
         <pointsMaterial
@@ -211,15 +207,11 @@ export default function SteamParticles({ intensity = 'light' }: SteamParticlesPr
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={dustConfig.count}
-            array={dustData.positions}
-            itemSize={3}
+            args={[dustData.positions, 3]}
           />
           <bufferAttribute
             attach="attributes-color"
-            count={dustConfig.count}
-            array={dustData.colors}
-            itemSize={3}
+            args={[dustData.colors, 3]}
           />
         </bufferGeometry>
         <pointsMaterial

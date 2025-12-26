@@ -37,6 +37,9 @@ export async function createUserSession(
   fingerprint: string,
   expiresInSeconds: number = 3600 // 1 hour default
 ): Promise<void> {
+  if (!session) {
+    throw new Error('Session not configured');
+  }
   const now = Date.now();
   const sessionData: UserSession = {
     fingerprint,
@@ -53,6 +56,9 @@ export async function createUserSession(
 export async function getUserSession(
   session: AstroGlobal['session']
 ): Promise<UserSession | null> {
+  if (!session) {
+    return null;
+  }
   const userData = await session.get('user');
 
   if (!userData) {
@@ -75,6 +81,9 @@ export async function getUserSession(
 export async function destroyUserSession(
   session: AstroGlobal['session']
 ): Promise<void> {
+  if (!session) {
+    return;
+  }
   await session.destroy();
 }
 

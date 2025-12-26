@@ -11,7 +11,7 @@ interface TextureInfo {
   material: THREE.Material;
 }
 
-function ValleyDebugScene({ selectedMap, textureSettings, onTextureAdjustmentsChange }: { selectedMap: string; textureSettings: Record<string, any>; onTextureAdjustmentsChange: (adjustments: Record<string, any>) => void }) {
+function ValleyDebugScene({ selectedMap, textureSettings, onTextureAdjustmentsChange }: { selectedMap: string; textureSettings: Record<string, any>; onTextureAdjustmentsChange: (textureKey: string, adjustments: Record<string, any>) => void }) {
   const [textures, setTextures] = useState<TextureInfo[]>([]);
   const [selectedTextureIndex, setSelectedTextureIndex] = useState<number>(0);
   const [cleanedScene, setCleanedScene] = useState<THREE.Group | null>(null);

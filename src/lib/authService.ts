@@ -9,11 +9,11 @@ import {
   signData,
 } from './keyManager';
 
-export interface ChallengeResponse {
+interface ChallengeResponse {
   challenge: string;
 }
 
-export interface AuthenticateResponse {
+interface AuthenticateResponse {
   jwt: string;
 }
 
@@ -21,7 +21,7 @@ export interface AuthenticateResponse {
  * Performs the complete authentication flow
  * Returns a JWT token on success
  */
-export async function authenticate(apiBaseUrl: string = ''): Promise<string> {
+async function authenticate(apiBaseUrl: string = ''): Promise<string> {
   // Step 1: Get or create the key pair
   const keyPair = await getOrCreateKey();
 
@@ -77,7 +77,7 @@ export async function authenticate(apiBaseUrl: string = ''): Promise<string> {
  */
 let currentJwt: string | null = null;
 
-export function setJwt(jwt: string): void {
+function setJwt(jwt: string): void {
   currentJwt = jwt;
   // Optionally store in sessionStorage for persistence
   if (typeof sessionStorage !== 'undefined') {
@@ -85,7 +85,7 @@ export function setJwt(jwt: string): void {
   }
 }
 
-export function getJwt(): string | null {
+function getJwt(): string | null {
   if (currentJwt) {
     return currentJwt;
   }
@@ -96,7 +96,7 @@ export function getJwt(): string | null {
   return currentJwt;
 }
 
-export function clearJwt(): void {
+function clearJwt(): void {
   currentJwt = null;
   if (typeof sessionStorage !== 'undefined') {
     sessionStorage.removeItem('jwt');
@@ -106,7 +106,7 @@ export function clearJwt(): void {
 /**
  * Makes an authenticated API request with the JWT token
  */
-export async function authenticatedFetch(
+async function authenticatedFetch(
   url: string,
   options: RequestInit = {}
 ): Promise<Response> {

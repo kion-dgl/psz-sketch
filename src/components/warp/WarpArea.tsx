@@ -10,10 +10,21 @@ import PlayerCharacter from '../city/PlayerCharacter';
 import WarpNPCs from './WarpNPCs';
 import WarpWalls from './WarpWalls';
 import WarpTriggers from './WarpTriggers';
-import InteractiveTriggers, { InteractiveTriggerUI } from './InteractiveTriggers';
+import InteractiveTriggers, { InteractiveTriggerUI, type InteractiveTrigger } from '../shared/InteractiveTriggers';
 import HUD from '../ui/HUD';
 import PauseMenu from '../ui/PauseMenu';
 import ShopMenu from '../ui/ShopMenu';
+
+const WARP_TRIGGERS: InteractiveTrigger[] = [
+  { position: [4.55, 1, -4.10], radius: 1, height: 3, targetArea: '/stage/valley', name: 'Enter Gurhacia Valley' },
+  { position: [6.56, 1, 0.42], radius: 1, height: 3, targetArea: '/stage/wetlands', name: 'Enter Ozette Wetlands' },
+  { position: [4.65, 1, 5.14], radius: 1, height: 3, targetArea: '/stage/snowfield', name: 'Enter Rioh Snowfield' },
+  { position: [0.08, 1, 6.72], radius: 1, height: 3, targetArea: '/stage/makara', name: 'Enter Makara Ruins' },
+  { position: [-4.50, 1, 4.50], radius: 1, height: 3, targetArea: '/stage/paru', name: 'Enter Oblivion City Paru' },
+  { position: [-6.68, 1, 0.42], radius: 1, height: 3, targetArea: '/stage/arca', name: 'Enter Arca Plant' },
+  { position: [-4.69, 1, -4.17], radius: 1, height: 3, targetArea: '/stage/shrine', name: 'Enter Dark Shrine' },
+  { position: [0.08, 1, -6.25], radius: 1, height: 3, targetArea: '/stage/tower', name: 'Enter Eternal Tower' }
+];
 
 // Kill plane component to respawn player if they fall
 function KillPlane({ onRespawn }: { onRespawn: () => void }) {
@@ -262,7 +273,7 @@ export default function WarpArea() {
             <WarpTriggers visible={false} />
 
             {/* Interactive Triggers (require 'e' key) */}
-            <InteractiveTriggers visible={true} onPlayerInZone={setPlayerInInteractiveZone} />
+            <InteractiveTriggers triggers={WARP_TRIGGERS} visible={true} onPlayerInZone={setPlayerInInteractiveZone} />
 
             {/* Warp NPCs */}
             <WarpNPCs />

@@ -10,10 +10,14 @@ import PlayerCharacter from './PlayerCharacter';
 import NPCs from './NPCs';
 import InvisibleWalls from './InvisibleWalls';
 import AreaTriggers from './AreaTriggers';
-import InteractiveTriggers, { InteractiveTriggerUI } from './InteractiveTriggers';
+import InteractiveTriggers, { InteractiveTriggerUI, type InteractiveTrigger } from '../shared/InteractiveTriggers';
 import HUD from '../ui/HUD';
 import PauseMenu from '../ui/PauseMenu';
 import ShopMenu from '../ui/ShopMenu';
+
+const CITY_TRIGGERS: InteractiveTrigger[] = [
+  { position: [-13.44, 1, 57.44], radius: 2, height: 3, targetArea: '/stage/underground', name: 'Enter Underground' }
+];
 
 function CameraController({ target }: { target: { x: number; y: number; z: number } }) {
   const { camera } = useThree();
@@ -222,7 +226,7 @@ export default function CityMarket() {
             <AreaTriggers visible={false} />
 
             {/* Interactive Triggers (require 'e' key) */}
-            <InteractiveTriggers visible={true} onPlayerInZone={setPlayerInInteractiveZone} />
+            <InteractiveTriggers triggers={CITY_TRIGGERS} visible={true} onPlayerInZone={setPlayerInInteractiveZone} />
 
             {/* Player Character */}
             <PlayerCharacter
