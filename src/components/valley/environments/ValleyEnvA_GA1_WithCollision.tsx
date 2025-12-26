@@ -19,7 +19,7 @@ export function ValleyFloorCollision() {
 
   useEffect(() => {
     const loader = new GLTFLoader();
-    const glbPath = '/valley_a/s01a_ga1/lndmd/s01a_ga1_m.glb';
+    const glbPath = '/stages/valley_a/s01a_ga1/lndmd/s01a_ga1_m.glb';
 
     loader.load(glbPath, (gltf) => {
       const floorVertices: number[] = [];
@@ -110,7 +110,7 @@ export function ValleyFloorCollision() {
 }
 
 export default function ValleyEnvA_GA1_WithCollision() {
-  const { scene } = useGLTF('/valley_a/s01a_ga1/lndmd/s01a_ga1_m.glb');
+  const { scene } = useGLTF('/stages/valley_a/s01a_ga1/lndmd/s01a_ga1_m.glb');
 
   useEffect(() => {
     if (scene) {
@@ -156,4 +156,4 @@ export default function ValleyEnvA_GA1_WithCollision() {
   );
 }
 
-useGLTF.preload('/valley_a/s01a_ga1/lndmd/s01a_ga1_m.glb');
+useGLTF.preload('/stages/valley_a/s01a_ga1/lndmd/s01a_ga1_m.glb');

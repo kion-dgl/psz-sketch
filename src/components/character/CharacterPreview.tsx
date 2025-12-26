@@ -42,11 +42,11 @@ function CharacterModel({ url, textureUrl }: ModelProps) {
             if (mesh.material) {
               if (Array.isArray(mesh.material)) {
                 mesh.material.forEach(mat => {
-                  mat.map = texture;
+                  (mat as any).map = texture;
                   mat.needsUpdate = true;
                 });
               } else {
-                mesh.material.map = texture;
+                (mesh.material as any).map = texture;
                 mesh.material.needsUpdate = true;
               }
             }
@@ -139,7 +139,6 @@ export default function CharacterPreview({
           transform: 'translate(-50%, -50%)',
           textAlign: 'center',
           color: '#dbeafe',
-          fontSize: '1.1rem',
           fontFamily: "'Press Start 2P', monospace",
           fontSize: '0.7rem'
         }}>
@@ -155,7 +154,6 @@ export default function CharacterPreview({
           transform: 'translate(-50%, -50%)',
           textAlign: 'center',
           color: '#dbeafe',
-          fontSize: '1.1rem',
           fontFamily: "'Press Start 2P', monospace",
           fontSize: '0.7rem'
         }}>
@@ -171,7 +169,6 @@ export default function CharacterPreview({
           transform: 'translate(-50%, -50%)',
           textAlign: 'center',
           color: '#f44336',
-          fontSize: '1.1rem',
           fontFamily: "'Press Start 2P', monospace",
           fontSize: '0.7rem'
         }}>

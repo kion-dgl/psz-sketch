@@ -1,0 +1,776 @@
+// Tower stage configurations - Generated from debug tool
+// Configured maps: 27
+
+export interface TriggerConfig {
+  position: [number, number, number];
+  size?: [number, number, number];
+  rotation?: number;
+  targetUrl?: string;
+  targetMap?: string;
+  label?: string;
+  spawnPosition?: [number, number, number];
+  spawnRotation?: number;
+}
+
+export interface SpawnPoint {
+  position: [number, number, number];
+  rotation: number;
+  label?: string;
+  isDefault?: boolean;
+}
+
+export interface MapConfig {
+  spawnPoints: SpawnPoint[];
+  triggers: TriggerConfig[];
+}
+
+export const TOWER_CONFIG: Record<string, MapConfig> = {
+  's080_sa0': {
+    spawnPoints: [
+      {
+        position: [-2, 1, -15.28],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      }
+    ],
+    triggers: [
+      {
+        position: [-2.85, 1, 13.12],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      }
+    ]
+  },
+  's081_ga1': {
+    spawnPoints: [
+      {
+        position: [0, 1, 23.07],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [0, 1, -1.33],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [-0.15, 1, 27.02],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [-0.05, 1, -4.08],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's081_ib1': {
+    spawnPoints: [
+      {
+        position: [0.05, 1, -24.03],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [-0.05, 1, 23.07],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [-0.05, 1, -27.18],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [-0.15, 1, 26.82],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's081_lb1': {
+    spawnPoints: [
+      {
+        position: [-0.05, 1, -23.38],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [22.45, 1, 0.12],
+        rotation: 4.7124,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [0, 1, -26.93],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [26.25, 1, 0.02],
+        rotation: 1.5708,
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's081_sa1': {
+    spawnPoints: [
+      {
+        position: [0.1, 1, -0.43],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [0, 1, 23.52],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [0, 1, -3.73],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [-0.1, 1, 26.97],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's082_ga1': {
+    spawnPoints: [
+      {
+        position: [-0.25, 1, -1.33],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [-0.35, 1, 22.92],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [-0.2, 1, 26.22],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [0.05, 1, -3.83],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's082_ib1': {
+    spawnPoints: [
+      {
+        position: [-0.25, 1, 22.72],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [-0.1, 1, -23.83],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [-0.1, 1, -26.88],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [-0.15, 1, 26.72],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's082_lb1': {
+    spawnPoints: [
+      {
+        position: [-0.05, 1, -24.38],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [23.7, 1, -0.23],
+        rotation: 4.7124,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [0, 1, -27.18],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [26.5, 1, -0.18],
+        rotation: 1.5708,
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's082_sa1': {
+    spawnPoints: [
+      {
+        position: [0.05, 1, -0.83],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [-0.2, 1, 23.47],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [-0.25, 1, -3.58],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [-0.1, 1, 26.62],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's083_ga1': {
+    spawnPoints: [
+      {
+        position: [-0.05, 1, -0.88],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [-0.1, 1, 23.67],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [0, 1, -3.48],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [0.15, 1, 26.77],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's083_ib1': {
+    spawnPoints: [
+      {
+        position: [-0.05, 1, -23.33],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [-0.15, 1, 21.97],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [0.2, 1, -26.73],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [-0.2, 1, 26.62],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's083_lb1': {
+    spawnPoints: [
+      {
+        position: [0, 1, -23.63],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [23.65, 1, -0.23],
+        rotation: 4.7124,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [-0.05, 1, -26.68],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [26.7, 1, -0.13],
+        rotation: 4.7124,
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's083_sa1': {
+    spawnPoints: [
+      {
+        position: [-0.15, 1, -0.98],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [-0.05, 1, 22.92],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [-0.25, 1, -3.83],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [0, 1, 26.92],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's084_ga1': {
+    spawnPoints: [
+      {
+        position: [0.1, 1, -1.23],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [-0.15, 1, 23.57],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [0, 1, -3.33],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [0.05, 1, 26.67],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's084_ib1': {
+    spawnPoints: [
+      {
+        position: [0.05, 1, 22.52],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [-0.05, 1, -23.58],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [-0.1, 1, -26.58],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [-0.1, 1, 26.42],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's084_lb1': {
+    spawnPoints: [
+      {
+        position: [-0.1, 1, -24.13],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [23.6, 1, -0.08],
+        rotation: 4.7124,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [-0.05, 1, -26.83],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [26.55, 1, -0.08],
+        rotation: 1.5708,
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's084_sa1': {
+    spawnPoints: [
+      {
+        position: [-0.05, 1, -0.63],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [-0.25, 1, 22.77],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [0.05, 1, -3.48],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [-0.1, 1, 26.77],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's085_ga1': {
+    spawnPoints: [
+      {
+        position: [0.05, 1, -0.43],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [-0.15, 1, 23.22],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [-0.05, 1, -3.28],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [-0.1, 1, 26.77],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's085_ib1': {
+    spawnPoints: [
+      {
+        position: [0, 1, -23.68],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [0.05, 1, 22.42],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [-0.05, 1, 26.57],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [-0.15, 1, -26.63],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's085_lb1': {
+    spawnPoints: [
+      {
+        position: [-0.05, 1, -23.53],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [22.75, 1, -0.23],
+        rotation: 4.7124,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [26.45, 1, -0.13],
+        rotation: 1.5708,
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [0.05, 1, -26.38],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's085_sa1': {
+    spawnPoints: [
+      {
+        position: [-0.05, 1, -0.03],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [0.05, 1, 22.27],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [-0.2, 1, 26.07],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [-0.15, 1, -3.23],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's086_ga1': {
+    spawnPoints: [
+      {
+        position: [0, 1, -0.33],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [-0.05, 1, 23.27],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [-0.25, 1, -3.08],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [0, 1, 26.67],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's086_ib1': {
+    spawnPoints: [
+      {
+        position: [-0.1, 1, 21.97],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [0, 1, -22.88],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [-0.05, 1, -26.38],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [0, 1, 26.52],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's086_lb1': {
+    spawnPoints: [
+      {
+        position: [0.05, 1, -23.88],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [23.1, 1, -0.03],
+        rotation: 4.7124,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [-0.05, 1, -26.68],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [26.5, 1, -0.13],
+        rotation: 4.7124,
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's086_sa1': {
+    spawnPoints: [
+      {
+        position: [0.1, 1, -0.38],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [0, 1, 23.07],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [-0.1, 1, -3.23],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [0, 1, 26.82],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  },
+  's087_na1': {
+    spawnPoints: [
+      {
+        position: [0, 1, 22.37],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: true
+      }
+    ],
+    triggers: [
+      {
+        position: [0, 1, 27.22],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      }
+    ]
+  },
+  's08e_ib1': {
+    spawnPoints: [
+      {
+        position: [-0.1, 1, -23.28],
+        rotation: 0.0000,
+        label: 'Spawn Point',
+        isDefault: true
+      },
+      {
+        position: [0, 1, 21.97],
+        rotation: 3.1416,
+        label: 'Spawn Point',
+        isDefault: false
+      }
+    ],
+    triggers: [
+      {
+        position: [0, 1, 26.37],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 1'
+      },
+      {
+        position: [-0.05, 1, -26.43],
+        targetUrl: '/stage/tower',
+        label: 'Trigger 2'
+      }
+    ]
+  }
+};
+
+export function getMapConfig(mapId: string): MapConfig {
+  return TOWER_CONFIG[mapId] || { spawnPoints: [{ position: [0, 5, 0], rotation: 0, isDefault: true }], triggers: [] };
+}
+
+export function getDefaultSpawn(config: MapConfig): SpawnPoint {
+  return config.spawnPoints.find(sp => sp.isDefault) || config.spawnPoints[0] || { position: [0, 5, 0], rotation: 0, isDefault: true };
+}

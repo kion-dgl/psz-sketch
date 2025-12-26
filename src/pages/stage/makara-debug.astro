@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import MakaraDebug from '../../components/makara/MakaraDebug';
+
+export const prerender = false;
+---
+
+<Layout title="Makara Ruins - Texture Debug">
+  <MakaraDebug client:load />
+</Layout>

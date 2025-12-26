@@ -23,9 +23,9 @@ interface ValleyEnvProps {
 function getValleyDir(mapId: string): string {
   const match = mapId.match(/^s01([a-z])_/);
   if (match) {
-    return `valley_${match[1]}`;
+    return `stages/valley_${match[1]}`;
   }
-  return 'valley_a'; // fallback
+  return 'stages/valley_a'; // fallback
 }
 
 export function ValleyFloorCollision({ mapId, showVisual = false }: { mapId: string; showVisual?: boolean }) {

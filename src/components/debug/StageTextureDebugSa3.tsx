@@ -20,7 +20,7 @@ function StageModel({ textureConfigs, onTextureUpdate }: {
   textureConfigs: TextureConfig[];
   onTextureUpdate: (configs: TextureConfig[], textureMap: Map<string, THREE.Texture>) => void;
 }) {
-  const { scene } = useGLTF('/city_e/s00e_sa3/lndmd/s00e_sa3_m.glb');
+  const { scene } = useGLTF('/stages/city_e/s00e_sa3/lndmd/s00e_sa3_m.glb');
 
   useEffect(() => {
     const textures: TextureConfig[] = [];
@@ -446,4 +446,4 @@ export default function StageTextureDebugSa3() {
 }
 
 // Preload the model
-useGLTF.preload('/city_e/s00e_sa3/lndmd/s00e_sa3_m.glb');
+useGLTF.preload('/stages/city_e/s00e_sa3/lndmd/s00e_sa3_m.glb');

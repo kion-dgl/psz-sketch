@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SnowfieldTriggerDebug from '../../components/snowfield/SnowfieldTriggerDebug';
+
+export const prerender = false;
+---
+
+<Layout title="Rioh Snowfield - Trigger Debug">
+  <SnowfieldTriggerDebug client:load />
+</Layout>

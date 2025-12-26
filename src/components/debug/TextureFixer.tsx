@@ -6,7 +6,7 @@ import TextureFixerScene from './TextureFixerScene';
 // Map configuration - defines which GLB to load for each map
 const MAP_CONFIG: Record<string, { glbPath: string; name: string }> = {
   'valley-a-ga1': {
-    glbPath: '/valley_a/s01a_ga1/lndmd/s01a_ga1_m.glb',
+    glbPath: '/stages/valley_a/s01a_ga1/lndmd/s01a_ga1_m.glb',
     name: 'Gurhacia Valley A-GA1'
   }
 };

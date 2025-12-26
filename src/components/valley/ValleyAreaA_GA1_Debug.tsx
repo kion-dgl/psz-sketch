@@ -23,7 +23,7 @@ function ValleyDebugScene({ selectedMap, textureSettings, onTextureAdjustmentsCh
     setCleanedScene(null);
 
     const loader = new GLTFLoader();
-    const glbPath = `/valley_a/${selectedMap}/lndmd/${selectedMap}_m.glb`;
+    const glbPath = `/stages/valley_a/${selectedMap}/lndmd/${selectedMap}_m.glb`;
 
     loader.load(glbPath, (gltf) => {
       const labels: any[] = [];

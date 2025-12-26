@@ -27,6 +27,54 @@ const TRIGGERS: InteractiveTrigger[] = [
     height: 3,
     targetArea: '/stage/wetlands',
     name: 'Enter Ozette Wetlands'
+  },
+  // Rioh Snowfield entrance at X: 4.65, Y: 1.00, Z: 5.14
+  {
+    position: [4.65, 1, 5.14],
+    radius: 1,
+    height: 3,
+    targetArea: '/stage/snowfield',
+    name: 'Enter Rioh Snowfield'
+  },
+  // Makara Ruins entrance at X: 0.08, Y: 1.00, Z: 6.72
+  {
+    position: [0.08, 1, 6.72],
+    radius: 1,
+    height: 3,
+    targetArea: '/stage/makara',
+    name: 'Enter Makara Ruins'
+  },
+  // Oblivion City Paru entrance at X: -4.50, Y: 1.00, Z: 4.50
+  {
+    position: [-4.50, 1, 4.50],
+    radius: 1,
+    height: 3,
+    targetArea: '/stage/paru',
+    name: 'Enter Oblivion City Paru'
+  },
+  // Arca Plant entrance at X: -6.68, Y: 1.00, Z: 0.42
+  {
+    position: [-6.68, 1, 0.42],
+    radius: 1,
+    height: 3,
+    targetArea: '/stage/arca',
+    name: 'Enter Arca Plant'
+  },
+  // Dark Shrine entrance at X: -4.69, Y: 1.00, Z: -4.17
+  {
+    position: [-4.69, 1, -4.17],
+    radius: 1,
+    height: 3,
+    targetArea: '/stage/shrine',
+    name: 'Enter Dark Shrine'
+  },
+  // Eternal Tower entrance at X: 0.08, Y: 1.00, Z: -6.25
+  {
+    position: [0.08, 1, -6.25],
+    radius: 1,
+    height: 3,
+    targetArea: '/stage/tower',
+    name: 'Enter Eternal Tower'
   }
 ];
 

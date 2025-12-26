@@ -1,6 +1,6 @@
 import { useGLTF } from '@react-three/drei';
 import { RigidBody, TrimeshCollider } from '@react-three/rapier';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import * as THREE from 'three';
 
 // Texture fix settings - keyed by texture image filename
@@ -18,9 +18,9 @@ interface WetlandsEnvProps {
 function getWetlandsDir(mapId: string): string {
   const match = mapId.match(/^s02([a-z])_/);
   if (match) {
-    return `wetlands_${match[1]}`;
+    return `stages/wetlands_${match[1]}`;
   }
-  return 'wetlands_a'; // fallback
+  return 'stages/wetlands_a'; // fallback
 }
 
 export function WetlandsFloorCollision({ mapId, showVisual = false }: { mapId: string; showVisual?: boolean }) {
@@ -120,26 +120,142 @@ export function WetlandsFloorCollision({ mapId, showVisual = false }: { mapId: s
   );
 }
 
+// Helper to check if a material uses a specific texture
+function materialUsesTexture(material: THREE.Material, textureNameToFind: string): boolean {
+  if (!(material as any).map) return false;
+
+  const texture = (material as any).map as THREE.Texture;
+  const textureSrc = ((texture.image as any)?.src || (texture.source?.data as any)?.src || '') as string;
+  const textureName = texture.name || '';
+
+  // Extract filename without extension
+  let match = textureSrc.match(/\/([^/]+)\.(png|jpg|jpeg)$/i);
+  let textureFilename = match ? match[1] : '';
+
+  if (!textureFilename && textureName) {
+    const nameMatch = textureName.match(/^(.+)\.(png|jpg|jpeg)$/i);
+    textureFilename = nameMatch ? nameMatch[1] : textureName;
+  }
+
+  return textureFilename === textureNameToFind;
+}
+
 export default function WetlandsEnv({ mapId, showFloorCollision = false }: WetlandsEnvProps) {
   const wetlandsDir = getWetlandsDir(mapId);
   const glbPath = `/${wetlandsDir}/${mapId}/lndmd/${mapId}_m.glb`;
   const { scene } = useGLTF(glbPath);
+  const [lightPositions, setLightPositions] = useState<THREE.Vector3[]>([]);
 
   useEffect(() => {
     if (scene) {
-      // Apply texture fixes
+      const foundLightPositions: THREE.Vector3[] = [];
+
+      // Apply texture fixes and find light post positions
       scene.traverse((object) => {
         if ((object as THREE.Mesh).isMesh) {
           const mesh = object as THREE.Mesh;
-          const material = mesh.material;
+          const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+          const geometry = mesh.geometry;
 
-          if (Array.isArray(material)) {
-            material.forEach((mat) => applyTextureFixes(mat));
-          } else {
-            applyTextureFixes(material);
+          // Apply texture fixes to all materials
+          materials.forEach((mat) => applyTextureFixes(mat));
+
+          // Find which material indices use the light texture
+          const lightMaterialIndices: number[] = [];
+          materials.forEach((mat, index) => {
+            if (materialUsesTexture(mat, 's02_1_light')) {
+              lightMaterialIndices.push(index);
+            }
+          });
+
+          if (lightMaterialIndices.length === 0) return;
+
+          // Get geometry data
+          const positions = geometry.attributes.position;
+          const index = geometry.index;
+          const groups = geometry.groups;
+
+          if (!positions || !index) return;
+
+          // Collect vertices that belong to faces using the light material
+          const lightVertices: THREE.Vector3[] = [];
+
+          if (groups && groups.length > 0) {
+            // Multi-material mesh - check groups
+            for (const group of groups) {
+              if (lightMaterialIndices.includes(group.materialIndex ?? 0)) {
+                // This group uses the light material
+                for (let i = group.start; i < group.start + group.count; i++) {
+                  const vertexIndex = index.getX(i);
+                  const vertex = new THREE.Vector3(
+                    positions.getX(vertexIndex),
+                    positions.getY(vertexIndex),
+                    positions.getZ(vertexIndex)
+                  );
+                  vertex.applyMatrix4(mesh.matrixWorld);
+                  lightVertices.push(vertex);
+                }
+              }
+            }
+          } else if (lightMaterialIndices.includes(0)) {
+            // Single material mesh
+            for (let i = 0; i < index.count; i++) {
+              const vertexIndex = index.getX(i);
+              const vertex = new THREE.Vector3(
+                positions.getX(vertexIndex),
+                positions.getY(vertexIndex),
+                positions.getZ(vertexIndex)
+              );
+              vertex.applyMatrix4(mesh.matrixWorld);
+              lightVertices.push(vertex);
+            }
+          }
+
+          // Cluster vertices into separate light posts (group by proximity)
+          const clusters: THREE.Vector3[][] = [];
+          const clusterRadius = 3; // Max distance to be in same cluster
+
+          for (const vertex of lightVertices) {
+            let addedToCluster = false;
+            for (const cluster of clusters) {
+              // Check if vertex is close to any vertex in this cluster
+              const isNear = cluster.some(v => v.distanceTo(vertex) < clusterRadius);
+              if (isNear) {
+                cluster.push(vertex);
+                addedToCluster = true;
+                break;
+              }
+            }
+            if (!addedToCluster) {
+              clusters.push([vertex]);
+            }
+          }
+
+          // Calculate center of each cluster
+          for (const cluster of clusters) {
+            const center = new THREE.Vector3();
+            for (const v of cluster) {
+              center.add(v);
+            }
+            center.divideScalar(cluster.length);
+            foundLightPositions.push(center);
           }
         }
       });
+
+      // Deduplicate nearby positions (within 2 units)
+      const uniquePositions: THREE.Vector3[] = [];
+      for (const pos of foundLightPositions) {
+        const isDuplicate = uniquePositions.some(
+          (existing) => existing.distanceTo(pos) < 2
+        );
+        if (!isDuplicate) {
+          uniquePositions.push(pos);
+        }
+      }
+
+      console.log(`[WetlandsEnv] Found ${uniquePositions.length} light posts`);
+      setLightPositions(uniquePositions);
     }
   }, [scene]);
 
@@ -150,7 +266,7 @@ export default function WetlandsEnv({ mapId, showFloorCollision = false }: Wetla
     const texture = (material as any).map as THREE.Texture;
 
     // Get texture filename from source or name
-    const textureSrc = texture.image?.src || texture.source?.data?.src || '';
+    const textureSrc = ((texture.image as any)?.src || (texture.source?.data as any)?.src || '') as string;
     const textureName = texture.name || '';
 
     // Extract filename without extension (e.g., "s02_0_hasim" from ".../s02_0_hasim.png")
@@ -177,6 +293,25 @@ export default function WetlandsEnv({ mapId, showFloorCollision = false }: Wetla
   };
 
   return (
-    <primitive object={scene} />
+    <>
+      <primitive object={scene} />
+      {/* Light posts - warm light at each lamp position */}
+      {lightPositions.map((pos, index) => (
+        <group key={index}>
+          <pointLight
+            position={[pos.x, pos.y - 0.5, pos.z]}
+            color="#ffaa55"
+            intensity={50}
+            distance={30}
+            decay={2}
+          />
+          {/* Debug sphere to visualize light position */}
+          <mesh position={[pos.x, pos.y - 0.5, pos.z]}>
+            <sphereGeometry args={[0.5, 16, 16]} />
+            <meshBasicMaterial color="#ffaa55" />
+          </mesh>
+        </group>
+      ))}
+    </>
   );
 }

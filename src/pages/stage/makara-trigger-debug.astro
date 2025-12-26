@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import MakaraTriggerDebug from '../../components/makara/MakaraTriggerDebug';
+
+export const prerender = false;
+---
+
+<Layout title="Makara Ruins - Trigger Debug">
+  <MakaraTriggerDebug client:load />
+</Layout>

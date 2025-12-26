@@ -14,7 +14,7 @@ const TEXTURE_FIXES: Record<string, { repeatX: number; repeatY: number; offsetX:
 };
 
 export default function ValleyEnvA_GA1() {
-  const { scene } = useGLTF('/valley_a/s01a_ga1/lndmd/s01a_ga1_m.glb');
+  const { scene } = useGLTF('/stages/valley_a/s01a_ga1/lndmd/s01a_ga1_m.glb');
 
   useEffect(() => {
     if (scene) {
@@ -72,4 +72,4 @@ export function DebugGroundPlane() {
   );
 }
 
-useGLTF.preload('/valley_a/s01a_ga1/lndmd/s01a_ga1_m.glb');
+useGLTF.preload('/stages/valley_a/s01a_ga1/lndmd/s01a_ga1_m.glb');

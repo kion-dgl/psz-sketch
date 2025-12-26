@@ -15,7 +15,7 @@ interface TextureInfo {
 
 export default function FixTextureEnvironment({ onTextureAdjustmentsChange }: FixTextureEnvironmentProps) {
   // Use the EXACT same GLB path as the working valley stage
-  const { scene } = useGLTF('/valley_a/s01a_ga1/lndmd/s01a_ga1_m.glb');
+  const { scene } = useGLTF('/stages/valley_a/s01a_ga1/lndmd/s01a_ga1_m.glb');
   const [textures, setTextures] = useState<TextureInfo[]>([]);
   const [selectedTextureIndex, setSelectedTextureIndex] = useState<number>(0);
 
@@ -153,4 +153,4 @@ export default function FixTextureEnvironment({ onTextureAdjustmentsChange }: Fi
 }
 
 // Preload EXACTLY like the valley stage does
-useGLTF.preload('/valley_a/s01a_ga1/lndmd/s01a_ga1_m.glb');
+useGLTF.preload('/stages/valley_a/s01a_ga1/lndmd/s01a_ga1_m.glb');

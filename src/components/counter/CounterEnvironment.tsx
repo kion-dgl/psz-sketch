@@ -30,12 +30,12 @@ const getWrappingMode = (mode: string): number => {
 };
 
 export default function CounterEnvironment() {
-  const { scene } = useGLTF('/city_e/s00e_sa2/lndmd/s00e_sa2_m.glb');
+  const { scene } = useGLTF('/stages/city_e/s00e_sa2/lndmd/s00e_sa2_m.glb');
   const [textureConfig, setTextureConfig] = useState<StageConfig | null>(null);
 
   // Load texture configuration
   useEffect(() => {
-    fetch('/city_e/s00e_sa2/lndmd/s00e_sa2_m-texture-config.json')
+    fetch('/stages/city_e/s00e_sa2/lndmd/s00e_sa2_m-texture-config.json')
       .then(response => response.json())
       .then(config => setTextureConfig(config))
       .catch(error => console.error('Failed to load texture config:', error));
@@ -109,4 +109,4 @@ export function CounterGroundPlane() {
 }
 
 // Preload the model
-useGLTF.preload('/city_e/s00e_sa2/lndmd/s00e_sa2_m.glb');
+useGLTF.preload('/stages/city_e/s00e_sa2/lndmd/s00e_sa2_m.glb');

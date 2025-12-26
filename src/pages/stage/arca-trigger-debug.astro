@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ArcaTriggerDebug from '../../components/arca/ArcaTriggerDebug';
+
+export const prerender = false;
+---
+
+<Layout title="Arca Plant - Trigger Debug">
+  <ArcaTriggerDebug client:load />
+</Layout>

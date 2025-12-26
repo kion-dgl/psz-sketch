@@ -1,0 +1,14 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import MakaraArea from '../../components/makara/MakaraArea';
+
+export const prerender = false;
+---
+
+<Layout title="Makara Ruins - s04a_td2">
+  <MakaraArea
+    mapId="s04a_td2"
+    mapName="Makara Ruins - s04a_td2"
+    client:load
+  />
+</Layout>

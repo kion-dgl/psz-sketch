@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import TowerDebug from '../../components/tower/TowerDebug';
+
+export const prerender = false;
+---
+
+<Layout title="Eternal Tower - Texture Debug">
+  <TowerDebug client:load />
+</Layout>
