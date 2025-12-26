@@ -437,7 +437,8 @@ export default function TowerArea({ mapId, mapName, spawnPosition: propSpawn, sp
         <PerspectiveCamera makeDefault position={[0, 4, 12]} />
         <CameraController target={playerPosition} />
 
-        {/* No fog for tower - clear visibility */}
+        {/* Distant fog for tower atmosphere */}
+        <fog attach="fog" args={[weatherAdjustedLighting.fogColor, 100, 200]} />
 
         <ambientLight intensity={weatherAdjustedLighting.ambientIntensity} color={weatherAdjustedLighting.ambientColor} />
         <directionalLight
