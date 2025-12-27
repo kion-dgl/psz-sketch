@@ -99,7 +99,7 @@ export async function loadTexture(url: string): Promise<string> {
 /**
  * Clear all cached assets
  */
-async function clearCache(): Promise<void> {
+export async function clearCache(): Promise<void> {
   await glbCache.clear();
   await textureCache.clear();
   // console.log('Cache cleared');
@@ -108,7 +108,7 @@ async function clearCache(): Promise<void> {
 /**
  * Get cache statistics
  */
-async function getCacheStats(): Promise<{
+export async function getCacheStats(): Promise<{
   glbCount: number;
   textureCount: number;
 }> {

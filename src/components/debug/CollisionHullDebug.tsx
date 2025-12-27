@@ -1,6 +1,6 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, OrbitControls } from '@react-three/drei';
-import React, { Suspense, useState, useEffect, useRef, useMemo } from 'react';
+import React, { Suspense, useState, useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 
 interface SelectedTriangle {
