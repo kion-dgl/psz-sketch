@@ -43,20 +43,20 @@ const WRAP_OPTIONS: { label: string; value: THREE.Wrapping }[] = [
 
 function ObjectModel({
   modelPath,
-  textureControls,
+  perTextureControls,
   animationConfig,
   onMeshesFound,
   onTexturesFound
 }: {
   modelPath: string;
-  textureControls: TextureControls;
+  perTextureControls: Record<string, TextureControls>;
   animationConfig?: AnimationConfig;
   onMeshesFound: (meshes: MeshInfo[]) => void;
   onTexturesFound: (textures: TextureInfo[]) => void;
 }) {
   const { scene } = useGLTF(modelPath);
   const clonedScene = useMemo(() => scene.clone(), [scene]);
-  const texturesRef = useRef<THREE.Texture[]>([]);
+  const texturesMapRef = useRef<Map<string, THREE.Texture>>(new Map());
   const animatedMeshRef = useRef<THREE.Object3D | null>(null);
   const animationProgressRef = useRef(0);
   const hasLoggedRef = useRef(false);
@@ -64,9 +64,9 @@ function ObjectModel({
   // Find meshes and textures (only depends on scene, not animationConfig)
   useEffect(() => {
     const meshes: MeshInfo[] = [];
-    const textures: THREE.Texture[] = [];
     const textureInfos: TextureInfo[] = [];
     const seenTextures = new Set<string>();
+    const texturesMap = new Map<string, THREE.Texture>();
 
     clonedScene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
@@ -76,9 +76,13 @@ function ObjectModel({
         materials.forEach((mat) => {
           if (mat instanceof THREE.MeshStandardMaterial || mat instanceof THREE.MeshBasicMaterial) {
             if (mat.map) {
-              textures.push(mat.map);
-              const texName = mat.map.name || `texture_${textures.length}`;
+              const texName = mat.map.name || `texture_${texturesMap.size + 1}`;
               textureNames.push(texName);
+
+              // Store texture reference by name
+              if (!texturesMap.has(texName)) {
+                texturesMap.set(texName, mat.map);
+              }
 
               // Extract texture preview (avoid duplicates)
               if (!seenTextures.has(texName)) {
@@ -119,7 +123,7 @@ function ObjectModel({
     });
 
     console.log('All meshes found:', meshes.map(m => m.name));
-    texturesRef.current = textures;
+    texturesMapRef.current = texturesMap;
     onMeshesFound(meshes);
     onTexturesFound(textureInfos);
     hasLoggedRef.current = false;
@@ -146,15 +150,19 @@ function ObjectModel({
     }
   }, [clonedScene, animationConfig?.meshName]);
 
+  // Apply per-texture controls
   useEffect(() => {
-    texturesRef.current.forEach((texture) => {
-      texture.wrapS = textureControls.wrapS;
-      texture.wrapT = textureControls.wrapT;
-      texture.offset.set(textureControls.offsetX, textureControls.offsetY);
-      texture.repeat.set(textureControls.repeatX, textureControls.repeatY);
-      texture.needsUpdate = true;
+    texturesMapRef.current.forEach((texture, texName) => {
+      const controls = perTextureControls[texName];
+      if (controls) {
+        texture.wrapS = controls.wrapS;
+        texture.wrapT = controls.wrapT;
+        texture.offset.set(controls.offsetX, controls.offsetY);
+        texture.repeat.set(controls.repeatX, controls.repeatY);
+        texture.needsUpdate = true;
+      }
     });
-  }, [textureControls]);
+  }, [perTextureControls]);
 
   // Animation loop for the beam mesh position
   const animLoggedRef = useRef(false);
@@ -318,6 +326,7 @@ const OBJECT_DEFAULTS: Record<string, Partial<TextureControls>> = {
     wrapT: THREE.MirroredRepeatWrapping,
     repeatX: 2,
     repeatY: 2,
+    offsetY: 1.0,
   },
 };
 
@@ -333,10 +342,10 @@ const WRAP_LABELS: Record<number, string> = {
 };
 
 function getStorageKey(areaId: string, objectName: string) {
-  return `objectViewer_${areaId}_${objectName}`;
+  return `objectViewer_v2_${areaId}_${objectName}`;
 }
 
-function loadFromStorage(areaId: string, objectName: string): TextureControls {
+function loadFromStorage(areaId: string, objectName: string): Record<string, TextureControls> {
   try {
     const stored = localStorage.getItem(getStorageKey(areaId, objectName));
     if (stored) {
@@ -345,10 +354,10 @@ function loadFromStorage(areaId: string, objectName: string): TextureControls {
   } catch {
     // Ignore parse errors
   }
-  return getDefaultsForObject(objectName);
+  return {};
 }
 
-function saveToStorage(areaId: string, objectName: string, controls: TextureControls) {
+function saveToStorage(areaId: string, objectName: string, controls: Record<string, TextureControls>) {
   try {
     localStorage.setItem(getStorageKey(areaId, objectName), JSON.stringify(controls));
   } catch {
@@ -375,7 +384,8 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
   const [meshes, setMeshes] = useState<MeshInfo[]>([]);
   const [meshVisibility, setMeshVisibility] = useState<Record<string, boolean>>({});
   const [texturePreviews, setTexturePreviews] = useState<TextureInfo[]>([]);
-  const [textureControls, setTextureControls] = useState<TextureControls>({ ...DEFAULT_CONTROLS });
+  const [perTextureControls, setPerTextureControls] = useState<Record<string, TextureControls>>({});
+  const [selectedTexture, setSelectedTexture] = useState<string | null>(null);
   const [animationEnabled, setAnimationEnabled] = useState(false);
   const [animationSpeed, setAnimationSpeed] = useState(0.5);
   const [animationStartY, setAnimationStartY] = useState(0);
@@ -404,24 +414,61 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
     };
   }, [hasAnimation, selectedObject, animationMeshName, animationEnabled, animationSpeed, animationStartY, animationMaxY]);
 
+  // Get current texture controls (for selected texture or defaults)
+  const currentTextureControls = useMemo(() => {
+    if (!selectedTexture) return { ...DEFAULT_CONTROLS };
+    return perTextureControls[selectedTexture] || { ...DEFAULT_CONTROLS };
+  }, [selectedTexture, perTextureControls]);
+
+  // Update controls for the selected texture
+  const updateTextureControl = useCallback((updates: Partial<TextureControls>) => {
+    if (!selectedTexture) return;
+    setPerTextureControls(prev => ({
+      ...prev,
+      [selectedTexture]: { ...(prev[selectedTexture] || DEFAULT_CONTROLS), ...updates }
+    }));
+  }, [selectedTexture]);
+
   // Load saved config when object changes
   useEffect(() => {
     if (selectedObject) {
       const saved = loadFromStorage(areaId, selectedObject);
-      setTextureControls(saved);
+      setPerTextureControls(saved);
       // Reset animation state when switching objects
       setAnimationEnabled(false);
       // Reset mesh visibility
       setMeshVisibility({});
+      // Reset selected texture
+      setSelectedTexture(null);
     }
   }, [areaId, selectedObject]);
 
+  // Initialize per-texture controls with defaults when textures are found
+  useEffect(() => {
+    if (texturePreviews.length > 0 && selectedObject) {
+      const objectDefaults = getDefaultsForObject(selectedObject);
+      setPerTextureControls(prev => {
+        const updated = { ...prev };
+        texturePreviews.forEach(tex => {
+          if (!updated[tex.name]) {
+            updated[tex.name] = { ...objectDefaults };
+          }
+        });
+        return updated;
+      });
+      // Auto-select first texture if none selected
+      if (!selectedTexture && texturePreviews.length > 0) {
+        setSelectedTexture(texturePreviews[0].name);
+      }
+    }
+  }, [texturePreviews, selectedObject, selectedTexture]);
+
   // Save to localStorage when controls change
   useEffect(() => {
-    if (selectedObject) {
-      saveToStorage(areaId, selectedObject, textureControls);
+    if (selectedObject && Object.keys(perTextureControls).length > 0) {
+      saveToStorage(areaId, selectedObject, perTextureControls);
     }
-  }, [areaId, selectedObject, textureControls]);
+  }, [areaId, selectedObject, perTextureControls]);
 
   const modelPath = selectedObject
     ? `/objects/${areaId}/${selectedObject}/${selectedObject.replace('.imd', '.glb')}`
@@ -436,26 +483,45 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
   }, []);
 
   const handleReset = () => {
+    if (selectedObject && selectedTexture) {
+      // Reset just the selected texture to defaults
+      const objectDefaults = getDefaultsForObject(selectedObject);
+      setPerTextureControls(prev => ({
+        ...prev,
+        [selectedTexture]: { ...objectDefaults }
+      }));
+    }
+  };
+
+  const handleResetAll = () => {
     if (selectedObject) {
       clearFromStorage(areaId, selectedObject);
-      setTextureControls(getDefaultsForObject(selectedObject));
-    } else {
-      setTextureControls({ ...DEFAULT_CONTROLS });
+      const objectDefaults = getDefaultsForObject(selectedObject);
+      const resetControls: Record<string, TextureControls> = {};
+      texturePreviews.forEach(tex => {
+        resetControls[tex.name] = { ...objectDefaults };
+      });
+      setPerTextureControls(resetControls);
     }
   };
 
   const handleExport = () => {
+    const textureConfigs: Record<string, unknown> = {};
+    Object.entries(perTextureControls).forEach(([texName, controls]) => {
+      textureConfigs[texName] = {
+        wrapS: WRAP_LABELS[controls.wrapS] || controls.wrapS,
+        wrapT: WRAP_LABELS[controls.wrapT] || controls.wrapT,
+        offsetX: controls.offsetX,
+        offsetY: controls.offsetY,
+        repeatX: controls.repeatX,
+        repeatY: controls.repeatY,
+      };
+    });
+
     const exportData: Record<string, unknown> = {
       areaId,
       object: selectedObject,
-      controls: {
-        wrapS: WRAP_LABELS[textureControls.wrapS] || textureControls.wrapS,
-        wrapT: WRAP_LABELS[textureControls.wrapT] || textureControls.wrapT,
-        offsetX: textureControls.offsetX,
-        offsetY: textureControls.offsetY,
-        repeatX: textureControls.repeatX,
-        repeatY: textureControls.repeatY,
-      },
+      textures: textureConfigs,
     };
     if (hasAnimation) {
       exportData.animation = {
@@ -510,7 +576,7 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
             <Suspense fallback={null}>
               <ObjectModel
                 modelPath={modelPath}
-                textureControls={textureControls}
+                perTextureControls={perTextureControls}
                 animationConfig={animationConfig}
                 onMeshesFound={handleMeshesFound}
                 onTexturesFound={handleTexturesFound}
@@ -593,36 +659,46 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
           <div style={{ color: '#666', marginBottom: '1.5rem' }}>No object selected</div>
         )}
 
-        <h3 style={{ color: '#88aaff' }}>Texture Previews</h3>
+        <h3 style={{ color: '#88aaff' }}>Textures (click to edit)</h3>
         {texturePreviews.length > 0 ? (
           <div style={{ marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            {texturePreviews.map((tex, i) => (
-              <div key={i} style={{
-                background: '#2a2a4a',
-                padding: '8px',
-                borderRadius: '4px',
-                textAlign: 'center',
-              }}>
-                <img
-                  src={tex.dataUrl}
-                  alt={tex.name}
+            {texturePreviews.map((tex, i) => {
+              const isSelected = selectedTexture === tex.name;
+              return (
+                <div
+                  key={i}
+                  onClick={() => setSelectedTexture(tex.name)}
                   style={{
-                    width: '80px',
-                    height: '80px',
-                    objectFit: 'contain',
-                    imageRendering: 'pixelated',
-                    background: '#111',
+                    background: isSelected ? '#4a4a8a' : '#2a2a4a',
+                    padding: '8px',
                     borderRadius: '4px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    border: isSelected ? '2px solid #88aaff' : '2px solid transparent',
+                    transition: 'all 0.2s',
                   }}
-                />
-                <div style={{ fontSize: '9px', color: '#888', marginTop: '4px', wordBreak: 'break-all' }}>
-                  {tex.name}
+                >
+                  <img
+                    src={tex.dataUrl}
+                    alt={tex.name}
+                    style={{
+                      width: '80px',
+                      height: '80px',
+                      objectFit: 'contain',
+                      imageRendering: 'pixelated',
+                      background: '#111',
+                      borderRadius: '4px',
+                    }}
+                  />
+                  <div style={{ fontSize: '9px', color: isSelected ? '#fff' : '#888', marginTop: '4px', wordBreak: 'break-all' }}>
+                    {tex.name}
+                  </div>
+                  <div style={{ fontSize: '8px', color: '#666' }}>
+                    {tex.width}x{tex.height}
+                  </div>
                 </div>
-                <div style={{ fontSize: '8px', color: '#666' }}>
-                  {tex.width}x{tex.height}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div style={{ color: '#666', marginBottom: '1.5rem', fontSize: '12px' }}>No textures found</div>
@@ -705,114 +781,148 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
           </>
         )}
 
-        <h3 style={{ color: '#88aaff' }}>Texture Controls</h3>
+        <h3 style={{ color: '#88aaff' }}>
+          Texture Controls
+          {selectedTexture && (
+            <span style={{ fontSize: '10px', color: '#888', marginLeft: '8px' }}>
+              ({selectedTexture})
+            </span>
+          )}
+        </h3>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}>Wrap S</label>
-          <select
-            value={textureControls.wrapS}
-            onChange={(e) => setTextureControls(prev => ({ ...prev, wrapS: Number(e.target.value) as THREE.Wrapping }))}
-            style={{ width: '100%', padding: '6px', background: '#2a2a4a', color: 'white', border: '1px solid #444', borderRadius: '4px' }}
-          >
-            {WRAP_OPTIONS.map(opt => (
-              <option key={opt.label} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
+        {selectedTexture ? (
+          <>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}>Wrap S</label>
+              <select
+                value={currentTextureControls.wrapS}
+                onChange={(e) => updateTextureControl({ wrapS: Number(e.target.value) as THREE.Wrapping })}
+                style={{ width: '100%', padding: '6px', background: '#2a2a4a', color: 'white', border: '1px solid #444', borderRadius: '4px' }}
+              >
+                {WRAP_OPTIONS.map(opt => (
+                  <option key={opt.label} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}>Wrap T</label>
-          <select
-            value={textureControls.wrapT}
-            onChange={(e) => setTextureControls(prev => ({ ...prev, wrapT: Number(e.target.value) as THREE.Wrapping }))}
-            style={{ width: '100%', padding: '6px', background: '#2a2a4a', color: 'white', border: '1px solid #444', borderRadius: '4px' }}
-          >
-            {WRAP_OPTIONS.map(opt => (
-              <option key={opt.label} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}>Wrap T</label>
+              <select
+                value={currentTextureControls.wrapT}
+                onChange={(e) => updateTextureControl({ wrapT: Number(e.target.value) as THREE.Wrapping })}
+                style={{ width: '100%', padding: '6px', background: '#2a2a4a', color: 'white', border: '1px solid #444', borderRadius: '4px' }}
+              >
+                {WRAP_OPTIONS.map(opt => (
+                  <option key={opt.label} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}>
-            Offset X: {textureControls.offsetX.toFixed(2)}
-          </label>
-          <input
-            type="range"
-            min="-2"
-            max="2"
-            step="0.01"
-            value={textureControls.offsetX}
-            onChange={(e) => setTextureControls(prev => ({ ...prev, offsetX: parseFloat(e.target.value) }))}
-            style={{ width: '100%' }}
-          />
-        </div>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}>
+                Offset X: {currentTextureControls.offsetX.toFixed(2)}
+              </label>
+              <input
+                type="range"
+                min="-2"
+                max="2"
+                step="0.01"
+                value={currentTextureControls.offsetX}
+                onChange={(e) => updateTextureControl({ offsetX: parseFloat(e.target.value) })}
+                style={{ width: '100%' }}
+              />
+            </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}>
-            Offset Y: {textureControls.offsetY.toFixed(2)}
-          </label>
-          <input
-            type="range"
-            min="-2"
-            max="2"
-            step="0.01"
-            value={textureControls.offsetY}
-            onChange={(e) => setTextureControls(prev => ({ ...prev, offsetY: parseFloat(e.target.value) }))}
-            style={{ width: '100%' }}
-          />
-        </div>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}>
+                Offset Y: {currentTextureControls.offsetY.toFixed(2)}
+              </label>
+              <input
+                type="range"
+                min="-2"
+                max="2"
+                step="0.01"
+                value={currentTextureControls.offsetY}
+                onChange={(e) => updateTextureControl({ offsetY: parseFloat(e.target.value) })}
+                style={{ width: '100%' }}
+              />
+            </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}>
-            Repeat X: {textureControls.repeatX.toFixed(2)}
-          </label>
-          <input
-            type="range"
-            min="0.1"
-            max="5"
-            step="0.1"
-            value={textureControls.repeatX}
-            onChange={(e) => setTextureControls(prev => ({ ...prev, repeatX: parseFloat(e.target.value) }))}
-            style={{ width: '100%' }}
-          />
-        </div>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}>
+                Repeat X: {currentTextureControls.repeatX.toFixed(2)}
+              </label>
+              <input
+                type="range"
+                min="0.1"
+                max="5"
+                step="0.1"
+                value={currentTextureControls.repeatX}
+                onChange={(e) => updateTextureControl({ repeatX: parseFloat(e.target.value) })}
+                style={{ width: '100%' }}
+              />
+            </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}>
-            Repeat Y: {textureControls.repeatY.toFixed(2)}
-          </label>
-          <input
-            type="range"
-            min="0.1"
-            max="5"
-            step="0.1"
-            value={textureControls.repeatY}
-            onChange={(e) => setTextureControls(prev => ({ ...prev, repeatY: parseFloat(e.target.value) }))}
-            style={{ width: '100%' }}
-          />
-        </div>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}>
+                Repeat Y: {currentTextureControls.repeatY.toFixed(2)}
+              </label>
+              <input
+                type="range"
+                min="0.1"
+                max="5"
+                step="0.1"
+                value={currentTextureControls.repeatY}
+                onChange={(e) => updateTextureControl({ repeatY: parseFloat(e.target.value) })}
+                style={{ width: '100%' }}
+              />
+            </div>
 
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '1rem' }}>
-          <button
-            onClick={handleReset}
-            style={{
-              flex: 1,
-              padding: '8px',
-              background: '#4a4a8a',
-              border: 'none',
-              borderRadius: '4px',
-              color: 'white',
-              cursor: 'pointer',
-            }}
-          >
-            Reset
-          </button>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '0.5rem' }}>
+              <button
+                onClick={handleReset}
+                style={{
+                  flex: 1,
+                  padding: '8px',
+                  background: '#4a4a8a',
+                  border: 'none',
+                  borderRadius: '4px',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontSize: '11px',
+                }}
+              >
+                Reset This
+              </button>
+              <button
+                onClick={handleResetAll}
+                style={{
+                  flex: 1,
+                  padding: '8px',
+                  background: '#6a3a3a',
+                  border: 'none',
+                  borderRadius: '4px',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontSize: '11px',
+                }}
+              >
+                Reset All
+              </button>
+            </div>
+          </>
+        ) : (
+          <div style={{ color: '#666', fontSize: '12px', marginBottom: '1rem' }}>
+            Select a texture above to edit its settings
+          </div>
+        )}
+
+        <div style={{ marginTop: '0.5rem' }}>
           <button
             onClick={handleExport}
             disabled={!selectedObject}
             style={{
-              flex: 1,
+              width: '100%',
               padding: '8px',
               background: selectedObject ? '#3a6a3a' : '#333',
               border: 'none',
