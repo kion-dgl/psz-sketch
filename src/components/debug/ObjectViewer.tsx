@@ -59,21 +59,16 @@ function ObjectModel({
   const texturesRef = useRef<THREE.Texture[]>([]);
   const animatedMeshRef = useRef<THREE.Object3D | null>(null);
   const animationProgressRef = useRef(0);
+  const hasLoggedRef = useRef(false);
 
+  // Find meshes and textures (only depends on scene, not animationConfig)
   useEffect(() => {
     const meshes: MeshInfo[] = [];
     const textures: THREE.Texture[] = [];
     const textureInfos: TextureInfo[] = [];
     const seenTextures = new Set<string>();
-    animatedMeshRef.current = null;
 
     clonedScene.traverse((child) => {
-      // Check if this is the animated mesh
-      if (animationConfig && child.name === animationConfig.meshName) {
-        console.log('Found animated mesh:', child.name, child);
-        animatedMeshRef.current = child;
-      }
-
       if (child instanceof THREE.Mesh) {
         const materials = Array.isArray(child.material) ? child.material : [child.material];
         const textureNames: string[] = [];
@@ -124,14 +119,32 @@ function ObjectModel({
     });
 
     console.log('All meshes found:', meshes.map(m => m.name));
-    if (animationConfig) {
-      console.log('Looking for mesh:', animationConfig.meshName, 'Found:', !!animatedMeshRef.current);
-    }
-
     texturesRef.current = textures;
     onMeshesFound(meshes);
     onTexturesFound(textureInfos);
-  }, [clonedScene, onMeshesFound, onTexturesFound, animationConfig]);
+    hasLoggedRef.current = false;
+  }, [clonedScene, onMeshesFound, onTexturesFound]);
+
+  // Find animated mesh separately (depends on animationConfig.meshName)
+  useEffect(() => {
+    animatedMeshRef.current = null;
+    const meshName = animationConfig?.meshName;
+    if (!meshName) return;
+
+    clonedScene.traverse((child) => {
+      if (child.name === meshName) {
+        animatedMeshRef.current = child;
+      }
+    });
+
+    if (!hasLoggedRef.current) {
+      console.log('Looking for mesh:', meshName, 'Found:', !!animatedMeshRef.current);
+      if (animatedMeshRef.current) {
+        console.log('Animated mesh details:', animatedMeshRef.current);
+      }
+      hasLoggedRef.current = true;
+    }
+  }, [clonedScene, animationConfig?.meshName]);
 
   useEffect(() => {
     texturesRef.current.forEach((texture) => {
@@ -144,9 +157,18 @@ function ObjectModel({
   }, [textureControls]);
 
   // Animation loop for the beam mesh position
-  const frameCountRef = useRef(0);
+  const animLoggedRef = useRef(false);
   useFrame((_, delta) => {
-    if (!animationConfig?.enabled || !animatedMeshRef.current) return;
+    if (!animationConfig?.enabled || !animatedMeshRef.current) {
+      animLoggedRef.current = false;
+      return;
+    }
+
+    // Log once when animation starts
+    if (!animLoggedRef.current) {
+      console.log('Animation started for mesh:', animatedMeshRef.current.name);
+      animLoggedRef.current = true;
+    }
 
     animationProgressRef.current += delta * animationConfig.speed;
     if (animationProgressRef.current >= 1) {
@@ -156,16 +178,6 @@ function ObjectModel({
     // Interpolate Y position from startY to maxY
     const currentY = animationConfig.startY + (animationConfig.maxY - animationConfig.startY) * animationProgressRef.current;
     animatedMeshRef.current.position.y = currentY;
-
-    // Debug log every 60 frames
-    frameCountRef.current++;
-    if (frameCountRef.current % 60 === 0) {
-      console.log('Animation frame:', {
-        progress: animationProgressRef.current.toFixed(2),
-        currentY: currentY.toFixed(2),
-        meshPosition: animatedMeshRef.current.position.y.toFixed(2),
-      });
-    }
   });
 
   return <primitive object={clonedScene} />;
@@ -277,15 +289,18 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
   };
 
   const hasAnimation = selectedObject ? !!ANIMATED_OBJECTS[selectedObject] : false;
-  const animationConfig: AnimationConfig | undefined = hasAnimation && selectedObject
-    ? {
-        enabled: animationEnabled,
-        speed: animationSpeed,
-        startY: animationStartY,
-        maxY: animationMaxY,
-        meshName: ANIMATED_OBJECTS[selectedObject].meshName,
-      }
-    : undefined;
+  const animationMeshName = selectedObject && hasAnimation ? ANIMATED_OBJECTS[selectedObject].meshName : null;
+
+  const animationConfig: AnimationConfig | undefined = useMemo(() => {
+    if (!hasAnimation || !selectedObject || !animationMeshName) return undefined;
+    return {
+      enabled: animationEnabled,
+      speed: animationSpeed,
+      startY: animationStartY,
+      maxY: animationMaxY,
+      meshName: animationMeshName,
+    };
+  }, [hasAnimation, selectedObject, animationMeshName, animationEnabled, animationSpeed, animationStartY, animationMaxY]);
 
   // Load saved config when object changes
   useEffect(() => {
