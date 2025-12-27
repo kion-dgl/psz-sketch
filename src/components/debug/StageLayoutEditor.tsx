@@ -242,32 +242,32 @@ function SquareGrid({ size, offset }: { size: number; offset: [number, number] }
 }
 
 // Helper to calculate gate position and rotation
+// positionOffset is in world units from grid center along the edge
 function getGateTransform(
   edge: GateEdge,
-  position: number,
+  positionOffset: number,
   gridSize: number,
   gridOffset: [number, number]
 ): { pos: [number, number, number]; rotation: [number, number, number] } {
   const halfSize = gridSize / 2;
   let pos: [number, number, number] = [0, 0, 0];
   let rotation: [number, number, number] = [0, 0, 0];
-  const edgePosition = (position - 0.5) * gridSize;
 
   switch (edge) {
     case 'north':
-      pos = [gridOffset[0] + edgePosition, 0, gridOffset[1] - halfSize];
+      pos = [gridOffset[0] + positionOffset, 0, gridOffset[1] - halfSize];
       rotation = [0, Math.PI, 0];
       break;
     case 'south':
-      pos = [gridOffset[0] + edgePosition, 0, gridOffset[1] + halfSize];
+      pos = [gridOffset[0] + positionOffset, 0, gridOffset[1] + halfSize];
       rotation = [0, 0, 0];
       break;
     case 'east':
-      pos = [gridOffset[0] + halfSize, 0, gridOffset[1] + edgePosition];
+      pos = [gridOffset[0] + halfSize, 0, gridOffset[1] + positionOffset];
       rotation = [0, -Math.PI / 2, 0];
       break;
     case 'west':
-      pos = [gridOffset[0] - halfSize, 0, gridOffset[1] + edgePosition];
+      pos = [gridOffset[0] - halfSize, 0, gridOffset[1] + positionOffset];
       rotation = [0, Math.PI / 2, 0];
       break;
   }
@@ -301,7 +301,7 @@ function Gate({
   );
 }
 
-// Preview gate shown when in gate placement mode
+// Preview gate shown when in gate placement mode - shows actual model with green tint
 function GatePreview({
   edge,
   position,
@@ -315,24 +315,46 @@ function GatePreview({
   gridOffset: [number, number];
   onClick: () => void;
 }) {
+  const [model, setModel] = useState<THREE.Group | null>(null);
   const { pos, rotation } = getGateTransform(edge, position, gridSize, gridOffset);
+
+  useEffect(() => {
+    const loader = new GLTFLoader();
+    loader.load(GATE_MODEL_PATH, (gltf) => {
+      const clone = gltf.scene.clone();
+      // Apply green preview tint
+      clone.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+          const mesh = child as THREE.Mesh;
+          if (mesh.material) {
+            const mat = (mesh.material as THREE.MeshStandardMaterial).clone();
+            mat.transparent = true;
+            mat.opacity = 0.7;
+            mat.emissive = new THREE.Color(0x00ff00);
+            mat.emissiveIntensity = 0.5;
+            mesh.material = mat;
+          }
+        }
+      });
+      setModel(clone);
+    });
+  }, []);
 
   return (
     <group position={pos} rotation={rotation} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-      {/* Ghost box preview */}
+      {/* Actual gate model with green tint */}
+      {model && <primitive object={model} />}
+
+      {/* Wireframe outline box */}
       <mesh position={[0, 1, 0]}>
-        <boxGeometry args={[2, 2, 0.5]} />
-        <meshBasicMaterial color="#00ff00" transparent opacity={0.4} wireframe />
+        <boxGeometry args={[2.5, 2.5, 0.8]} />
+        <meshBasicMaterial color="#00ff00" transparent opacity={0.3} wireframe />
       </mesh>
-      {/* Solid inner */}
-      <mesh position={[0, 1, 0]}>
-        <boxGeometry args={[2, 2, 0.5]} />
-        <meshBasicMaterial color="#00ff00" transparent opacity={0.15} />
-      </mesh>
+
       {/* Ground marker */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
         <circleGeometry args={[1.5, 32]} />
-        <meshBasicMaterial color="#00ff00" transparent opacity={0.3} />
+        <meshBasicMaterial color="#00ff00" transparent opacity={0.4} />
       </mesh>
     </group>
   );
@@ -544,7 +566,7 @@ export default function StageLayoutEditor() {
 
   // New gate defaults
   const [newGateEdge, setNewGateEdge] = useState<GateEdge>('north');
-  const [newGatePosition, setNewGatePosition] = useState(0.5);
+  const [newGatePosition, setNewGatePosition] = useState(0); // Units from center of edge
   const [newGateWidth, setNewGateWidth] = useState(3);
 
   // New box defaults
@@ -947,32 +969,27 @@ export default function StageLayoutEditor() {
 
             <div style={{ marginBottom: '10px' }}>
               <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>
-                Position: {(newGatePosition * 100).toFixed(0)}%
+                Offset from center (units):
               </label>
               <input
-                type="range"
-                min="0.1"
-                max="0.9"
-                step="0.05"
+                type="number"
+                step="0.5"
                 value={newGatePosition}
                 onChange={(e) => setNewGatePosition(Number(e.target.value))}
-                style={{ width: '100%' }}
+                style={{
+                  width: '100%',
+                  padding: '6px',
+                  background: '#333',
+                  color: 'white',
+                  border: '1px solid #555',
+                  borderRadius: '4px',
+                  fontFamily: 'monospace',
+                  boxSizing: 'border-box'
+                }}
               />
-            </div>
-
-            <div style={{ marginBottom: '10px' }}>
-              <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>
-                Width: {newGateWidth}
-              </label>
-              <input
-                type="range"
-                min="1"
-                max="8"
-                step="0.5"
-                value={newGateWidth}
-                onChange={(e) => setNewGateWidth(Number(e.target.value))}
-                style={{ width: '100%' }}
-              />
+              <div style={{ fontSize: '10px', color: '#888', marginTop: '3px' }}>
+                Negative = left/back, Positive = right/front
+              </div>
             </div>
 
             <button
