@@ -6,7 +6,7 @@ import type { Character } from '../../stores/characterStore';
 import { useCharacterStore } from '../../stores/characterStore';
 import { useGameState } from '../../stores/gameStateStore';
 import PlayerCharacter from '../city/PlayerCharacter';
-import LobbyCameraController from './LobbyCameraController';
+import CameraController from './CameraController';
 import { InteractiveTriggerUI } from './InteractiveTriggers';
 import HUD from '../ui/HUD';
 import PauseMenu from '../ui/PauseMenu';
@@ -215,10 +215,11 @@ export default function LobbyArea({
 
       <Canvas shadows>
         <PerspectiveCamera makeDefault position={[0, 4, 12]} />
-        <LobbyCameraController
+        <CameraController
           target={playerPosition}
           distance={cameraDistance}
           height={cameraHeight}
+          lobbyMode={true}
         />
 
         <ambientLight intensity={0.6} />
