@@ -158,19 +158,48 @@ function ObjectModel({
 
   // Animation loop for the beam mesh position
   const animLoggedRef = useRef(false);
-  const initialPositionRef = useRef<THREE.Vector3 | null>(null);
+  const wrapperGroupRef = useRef<THREE.Group | null>(null);
 
   useFrame((_, delta) => {
     if (!animationConfig?.enabled || !animatedMeshRef.current) {
+      // When animation stops, remove wrapper group
+      if (wrapperGroupRef.current && animatedMeshRef.current) {
+        const wrapper = wrapperGroupRef.current;
+        const mesh = animatedMeshRef.current;
+        const parent = wrapper.parent;
+        if (parent) {
+          parent.add(mesh);
+          parent.remove(wrapper);
+        }
+        wrapperGroupRef.current = null;
+      }
       animLoggedRef.current = false;
-      initialPositionRef.current = null;
       return;
     }
 
-    // Store initial position and log once when animation starts
+    // Create wrapper group on first animation frame
     if (!animLoggedRef.current) {
-      initialPositionRef.current = animatedMeshRef.current.position.clone();
-      console.log('Animation started for mesh:', animatedMeshRef.current.name, 'Initial Y:', initialPositionRef.current.y);
+      const mesh = animatedMeshRef.current;
+      const parent = mesh.parent;
+
+      if (parent && !wrapperGroupRef.current) {
+        // Create a wrapper group
+        const wrapper = new THREE.Group();
+        wrapper.name = 'animation_wrapper';
+
+        // Store mesh's world position
+        const worldPos = new THREE.Vector3();
+        mesh.getWorldPosition(worldPos);
+
+        // Insert wrapper between parent and mesh
+        parent.add(wrapper);
+        wrapper.add(mesh);
+
+        wrapperGroupRef.current = wrapper;
+        console.log('Created animation wrapper for:', mesh.name, 'Parent:', parent.name || parent.type);
+      }
+
+      console.log('Animation started for mesh:', mesh.name);
       animLoggedRef.current = true;
     }
 
@@ -182,18 +211,9 @@ function ObjectModel({
     // Interpolate Y position from startY to maxY
     const currentY = animationConfig.startY + (animationConfig.maxY - animationConfig.startY) * animationProgressRef.current;
 
-    // For SkinnedMesh, we need to modify the position and update matrices
-    const mesh = animatedMeshRef.current;
-    mesh.position.y = currentY;
-    mesh.updateMatrix();
-    mesh.updateMatrixWorld(true);
-
-    // If it's a SkinnedMesh, also update the skeleton
-    if ((mesh as THREE.SkinnedMesh).isSkinnedMesh) {
-      const skinnedMesh = mesh as THREE.SkinnedMesh;
-      if (skinnedMesh.skeleton) {
-        skinnedMesh.skeleton.update();
-      }
+    // Animate the wrapper group's Y position
+    if (wrapperGroupRef.current) {
+      wrapperGroupRef.current.position.y = currentY;
     }
   });
 
