@@ -241,6 +241,39 @@ function SquareGrid({ size, offset }: { size: number; offset: [number, number] }
   return <group>{lines}</group>;
 }
 
+// Helper to calculate gate position and rotation
+function getGateTransform(
+  edge: GateEdge,
+  position: number,
+  gridSize: number,
+  gridOffset: [number, number]
+): { pos: [number, number, number]; rotation: [number, number, number] } {
+  const halfSize = gridSize / 2;
+  let pos: [number, number, number] = [0, 0, 0];
+  let rotation: [number, number, number] = [0, 0, 0];
+  const edgePosition = (position - 0.5) * gridSize;
+
+  switch (edge) {
+    case 'north':
+      pos = [gridOffset[0] + edgePosition, 0, gridOffset[1] - halfSize];
+      rotation = [0, Math.PI, 0];
+      break;
+    case 'south':
+      pos = [gridOffset[0] + edgePosition, 0, gridOffset[1] + halfSize];
+      rotation = [0, 0, 0];
+      break;
+    case 'east':
+      pos = [gridOffset[0] + halfSize, 0, gridOffset[1] + edgePosition];
+      rotation = [0, -Math.PI / 2, 0];
+      break;
+    case 'west':
+      pos = [gridOffset[0] - halfSize, 0, gridOffset[1] + edgePosition];
+      rotation = [0, Math.PI / 2, 0];
+      break;
+  }
+  return { pos, rotation };
+}
+
 function Gate({
   edge,
   position,
@@ -256,31 +289,7 @@ function Gate({
   selected: boolean;
   onClick: () => void;
 }) {
-  const halfSize = gridSize / 2;
-
-  let pos: [number, number, number] = [0, 0, 0];
-  let rotation: [number, number, number] = [0, 0, 0];
-
-  const edgePosition = (position - 0.5) * gridSize;
-
-  switch (edge) {
-    case 'north':
-      pos = [gridOffset[0] + edgePosition, 0, gridOffset[1] - halfSize];
-      rotation = [0, Math.PI, 0]; // Face south
-      break;
-    case 'south':
-      pos = [gridOffset[0] + edgePosition, 0, gridOffset[1] + halfSize];
-      rotation = [0, 0, 0]; // Face north
-      break;
-    case 'east':
-      pos = [gridOffset[0] + halfSize, 0, gridOffset[1] + edgePosition];
-      rotation = [0, -Math.PI / 2, 0]; // Face west
-      break;
-    case 'west':
-      pos = [gridOffset[0] - halfSize, 0, gridOffset[1] + edgePosition];
-      rotation = [0, Math.PI / 2, 0]; // Face east
-      break;
-  }
+  const { pos, rotation } = getGateTransform(edge, position, gridSize, gridOffset);
 
   return (
     <GateModel
@@ -289,6 +298,43 @@ function Gate({
       selected={selected}
       onClick={onClick}
     />
+  );
+}
+
+// Preview gate shown when in gate placement mode
+function GatePreview({
+  edge,
+  position,
+  gridSize,
+  gridOffset,
+  onClick
+}: {
+  edge: GateEdge;
+  position: number;
+  gridSize: number;
+  gridOffset: [number, number];
+  onClick: () => void;
+}) {
+  const { pos, rotation } = getGateTransform(edge, position, gridSize, gridOffset);
+
+  return (
+    <group position={pos} rotation={rotation} onClick={(e) => { e.stopPropagation(); onClick(); }}>
+      {/* Ghost box preview */}
+      <mesh position={[0, 1, 0]}>
+        <boxGeometry args={[2, 2, 0.5]} />
+        <meshBasicMaterial color="#00ff00" transparent opacity={0.4} wireframe />
+      </mesh>
+      {/* Solid inner */}
+      <mesh position={[0, 1, 0]}>
+        <boxGeometry args={[2, 2, 0.5]} />
+        <meshBasicMaterial color="#00ff00" transparent opacity={0.15} />
+      </mesh>
+      {/* Ground marker */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
+        <circleGeometry args={[1.5, 32]} />
+        <meshBasicMaterial color="#00ff00" transparent opacity={0.3} />
+      </mesh>
+    </group>
   );
 }
 
@@ -395,9 +441,11 @@ function LayoutScene({
   onSelectGate,
   onSelectBox,
   onAddBox,
+  onAddGate,
   placementMode,
   showStage,
-  showGrid
+  showGrid,
+  gatePreview
 }: {
   selectedMap: string;
   gridSize: number;
@@ -409,9 +457,11 @@ function LayoutScene({
   onSelectGate: (id: string | null) => void;
   onSelectBox: (id: string | null) => void;
   onAddBox: (position: [number, number]) => void;
+  onAddGate: () => void;
   placementMode: 'gate' | 'box' | 'select';
   showStage: boolean;
   showGrid: boolean;
+  gatePreview: { edge: GateEdge; position: number } | null;
 }) {
   return (
     <>
@@ -426,6 +476,17 @@ function LayoutScene({
         placementMode={placementMode}
         onClick={onAddBox}
       />
+
+      {/* Gate Preview */}
+      {placementMode === 'gate' && gatePreview && (
+        <GatePreview
+          edge={gatePreview.edge}
+          position={gatePreview.position}
+          gridSize={gridSize}
+          gridOffset={gridOffset}
+          onClick={onAddGate}
+        />
+      )}
 
       {/* Gates */}
       {gates.map((gate) => (
@@ -1310,9 +1371,11 @@ export default function StageLayoutEditor() {
             onSelectGate={setSelectedGate}
             onSelectBox={setSelectedBox}
             onAddBox={handleAddBox}
+            onAddGate={handleAddGate}
             placementMode={placementMode}
             showStage={showStage}
             showGrid={showGrid}
+            gatePreview={placementMode === 'gate' ? { edge: newGateEdge, position: newGatePosition } : null}
           />
         </Suspense>
       </Canvas>
