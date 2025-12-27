@@ -1,0 +1,27 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ObjectViewer from '../../components/debug/ObjectViewer';
+
+export const prerender = false;
+
+const objects = [
+  "o01_cont.imd",
+  "o01_wall.imd",
+  "o01_wallptcl.imd",
+  "o0c_dropit.imd",
+  "o0c_droppr.imd",
+  "o0c_dropra.imd",
+  "o0c_dropwe.imd",
+  "o0c_fence.imd",
+  "o0c_fence4.imd",
+  "o0c_meseta.imd",
+  "o0c_mspack.imd",
+  "o0c_point.imd",
+  "o0c_recont.imd",
+  "o0c_trebox.imd"
+];
+---
+
+<Layout title="Valley E Objects - Debug Viewer">
+  <ObjectViewer client:load areaId="01_o01e" objects={objects} />
+</Layout>
