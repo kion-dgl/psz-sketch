@@ -1,7 +1,8 @@
 import ValleyEnv, { ValleyFloorCollision } from './environments/ValleyEnv';
 import SandParticles from './SandParticles';
 import RainParticles from './RainParticles';
-import StageArea, { type LightingConfig, type ThemeConfig, type TriggerConfig } from '../shared/StageArea';
+import StageArea, { type LightingConfig, type ThemeConfig } from '../shared/StageArea';
+import { getMapConfig, getDefaultSpawn, type TriggerConfig } from './valleyConfig';
 
 type TimeOfDay = 'day' | 'dusk' | 'night';
 type Weather = 'clear' | 'sandstorm' | 'rain' | 'rain-heavy';
@@ -76,17 +77,19 @@ interface ValleyAreaProps {
   triggers?: TriggerConfig[];
   timeOfDay?: TimeOfDay;
   weather?: Weather;
+  debugMode?: boolean;
   children?: React.ReactNode;
 }
 
 export default function ValleyArea({
   mapId,
   mapName,
-  spawnPosition = [0, 10, 0],
-  spawnRotation = 0,
-  triggers = [],
+  spawnPosition,
+  spawnRotation,
+  triggers,
   timeOfDay = 'day',
   weather = 'clear',
+  debugMode = true,
   children
 }: ValleyAreaProps) {
   const baseLighting = LIGHTING_CONFIGS[timeOfDay];
@@ -104,9 +107,10 @@ export default function ValleyArea({
       spawnPosition={spawnPosition}
       spawnRotation={spawnRotation}
       triggers={triggers}
-      debugMode={false}
-      showDebugPanel={true}
-      addPiToSpawnRotation={false}
+      getMapConfig={getMapConfig}
+      getDefaultSpawn={getDefaultSpawn}
+      debugMode={debugMode}
+      addPiToSpawnRotation={true}
     >
       {children}
     </StageArea>
