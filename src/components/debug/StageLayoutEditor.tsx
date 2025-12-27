@@ -9,8 +9,8 @@ type GateEdge = 'north' | 'south' | 'east' | 'west';
 interface GateData {
   id: string;
   edge: GateEdge;
-  position: number; // Position along the edge (0-1)
-  width: number;
+  position: number; // Units offset from center of edge
+  scale: number;
   label: string;
 }
 
@@ -84,12 +84,14 @@ function GateModel({
   position,
   rotation,
   selected,
-  onClick
+  onClick,
+  scale = 1
 }: {
   position: [number, number, number];
   rotation: [number, number, number];
   selected: boolean;
   onClick: () => void;
+  scale?: number;
 }) {
   const [model, setModel] = useState<THREE.Group | null>(null);
   const modelRef = useRef<THREE.Group>(null);
@@ -98,30 +100,36 @@ function GateModel({
     const loader = new GLTFLoader();
     loader.load(GATE_MODEL_PATH, (gltf) => {
       const clone = gltf.scene.clone();
-      // Set materials
-      clone.traverse((child) => {
-        if ((child as THREE.Mesh).isMesh) {
-          const mesh = child as THREE.Mesh;
-          if (mesh.material) {
-            const mat = mesh.material as THREE.MeshStandardMaterial;
-            mat.transparent = true;
-            mat.opacity = selected ? 0.9 : 0.7;
-            if (selected) {
-              mat.emissive = new THREE.Color(0x00ffff);
-              mat.emissiveIntensity = 0.3;
-            }
-          }
-        }
-      });
       setModel(clone);
+    }, undefined, (error) => {
+      console.error('Error loading gate model:', error);
     });
-  }, [selected]);
+  }, []);
+
+  // Update material when selection changes
+  useEffect(() => {
+    if (!model) return;
+    model.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        if (mesh.material) {
+          // Create new basic material to avoid emissive issues
+          const newMat = new THREE.MeshBasicMaterial({
+            color: selected ? 0x00ffff : 0xcccccc,
+            transparent: true,
+            opacity: selected ? 0.9 : 0.8,
+          });
+          mesh.material = newMat;
+        }
+      }
+    });
+  }, [model, selected]);
 
   if (!model) {
     // Fallback box while loading
     return (
       <group position={position} rotation={rotation} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-        <mesh>
+        <mesh scale={[scale, scale, scale]}>
           <boxGeometry args={[2, 2, 1]} />
           <meshBasicMaterial color={selected ? '#00ffff' : '#00ff00'} transparent opacity={0.4} />
         </mesh>
@@ -130,7 +138,7 @@ function GateModel({
   }
 
   return (
-    <group ref={modelRef} position={position} rotation={rotation} onClick={(e) => { e.stopPropagation(); onClick(); }}>
+    <group ref={modelRef} position={position} rotation={rotation} scale={[scale, scale, scale]} onClick={(e) => { e.stopPropagation(); onClick(); }}>
       <primitive object={model} />
     </group>
   );
@@ -279,6 +287,7 @@ function Gate({
   position,
   gridSize,
   gridOffset,
+  scale,
   selected,
   onClick
 }: {
@@ -286,6 +295,7 @@ function Gate({
   position: number;
   gridSize: number;
   gridOffset: [number, number];
+  scale: number;
   selected: boolean;
   onClick: () => void;
 }) {
@@ -297,6 +307,7 @@ function Gate({
       rotation={rotation}
       selected={selected}
       onClick={onClick}
+      scale={scale}
     />
   );
 }
@@ -307,12 +318,14 @@ function GatePreview({
   position,
   gridSize,
   gridOffset,
+  scale,
   onClick
 }: {
   edge: GateEdge;
   position: number;
   gridSize: number;
   gridOffset: [number, number];
+  scale: number;
   onClick: () => void;
 }) {
   const [model, setModel] = useState<THREE.Group | null>(null);
@@ -322,38 +335,42 @@ function GatePreview({
     const loader = new GLTFLoader();
     loader.load(GATE_MODEL_PATH, (gltf) => {
       const clone = gltf.scene.clone();
-      // Apply green preview tint
+      // Apply green preview tint using MeshBasicMaterial
       clone.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
           const mesh = child as THREE.Mesh;
           if (mesh.material) {
-            const mat = (mesh.material as THREE.MeshStandardMaterial).clone();
-            mat.transparent = true;
-            mat.opacity = 0.7;
-            mat.emissive = new THREE.Color(0x00ff00);
-            mat.emissiveIntensity = 0.5;
-            mesh.material = mat;
+            const newMat = new THREE.MeshBasicMaterial({
+              color: 0x00ff00,
+              transparent: true,
+              opacity: 0.6,
+            });
+            mesh.material = newMat;
           }
         }
       });
       setModel(clone);
+    }, undefined, (error) => {
+      console.error('Error loading gate preview:', error);
     });
   }, []);
+
+  const scaledSize = 2 * scale;
 
   return (
     <group position={pos} rotation={rotation} onClick={(e) => { e.stopPropagation(); onClick(); }}>
       {/* Actual gate model with green tint */}
-      {model && <primitive object={model} />}
+      {model && <primitive object={model} scale={[scale, scale, scale]} />}
 
       {/* Wireframe outline box */}
-      <mesh position={[0, 1, 0]}>
-        <boxGeometry args={[2.5, 2.5, 0.8]} />
+      <mesh position={[0, scaledSize / 2, 0]}>
+        <boxGeometry args={[scaledSize * 1.2, scaledSize, scaledSize * 0.4]} />
         <meshBasicMaterial color="#00ff00" transparent opacity={0.3} wireframe />
       </mesh>
 
       {/* Ground marker */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
-        <circleGeometry args={[1.5, 32]} />
+        <circleGeometry args={[scaledSize * 0.8, 32]} />
         <meshBasicMaterial color="#00ff00" transparent opacity={0.4} />
       </mesh>
     </group>
@@ -483,7 +500,7 @@ function LayoutScene({
   placementMode: 'gate' | 'box' | 'select';
   showStage: boolean;
   showGrid: boolean;
-  gatePreview: { edge: GateEdge; position: number } | null;
+  gatePreview: { edge: GateEdge; position: number; scale: number } | null;
 }) {
   return (
     <>
@@ -506,6 +523,7 @@ function LayoutScene({
           position={gatePreview.position}
           gridSize={gridSize}
           gridOffset={gridOffset}
+          scale={gatePreview.scale}
           onClick={onAddGate}
         />
       )}
@@ -518,6 +536,7 @@ function LayoutScene({
           position={gate.position}
           gridSize={gridSize}
           gridOffset={gridOffset}
+          scale={gate.scale}
           selected={selectedGate === gate.id}
           onClick={() => onSelectGate(gate.id)}
         />
@@ -567,7 +586,7 @@ export default function StageLayoutEditor() {
   // New gate defaults
   const [newGateEdge, setNewGateEdge] = useState<GateEdge>('north');
   const [newGatePosition, setNewGatePosition] = useState(0); // Units from center of edge
-  const [newGateWidth, setNewGateWidth] = useState(3);
+  const [newGateScale, setNewGateScale] = useState(2.5); // Scale to match ~5 unit paths
 
   // New box defaults
   const [newBoxType, setNewBoxType] = useState<BoxType>('o01_cont');
@@ -613,7 +632,7 @@ export default function StageLayoutEditor() {
       id: `gate_${Date.now()}`,
       edge: newGateEdge,
       position: newGatePosition,
-      width: newGateWidth,
+      scale: newGateScale,
       label: `Gate ${gates.length + 1}`
     };
     setGates(prev => [...prev, newGate]);
@@ -992,6 +1011,24 @@ export default function StageLayoutEditor() {
               </div>
             </div>
 
+            <div style={{ marginBottom: '10px' }}>
+              <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>
+                Scale: {newGateScale}
+              </label>
+              <input
+                type="range"
+                min="1"
+                max="5"
+                step="0.5"
+                value={newGateScale}
+                onChange={(e) => setNewGateScale(Number(e.target.value))}
+                style={{ width: '100%' }}
+              />
+              <div style={{ fontSize: '10px', color: '#888', marginTop: '3px' }}>
+                2.5 ≈ 5 unit path width
+              </div>
+            </div>
+
             <button
               onClick={handleAddGate}
               style={{
@@ -1104,30 +1141,37 @@ export default function StageLayoutEditor() {
 
             <div style={{ marginBottom: '8px' }}>
               <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>
-                Position: {(selectedGateData.position * 100).toFixed(0)}%
+                Offset (units):
               </label>
               <input
-                type="range"
-                min="0.1"
-                max="0.9"
-                step="0.05"
+                type="number"
+                step="0.5"
                 value={selectedGateData.position}
                 onChange={(e) => handleUpdateGate(selectedGateData.id, { position: Number(e.target.value) })}
-                style={{ width: '100%' }}
+                style={{
+                  width: '100%',
+                  padding: '6px',
+                  background: '#333',
+                  color: 'white',
+                  border: '1px solid #555',
+                  borderRadius: '4px',
+                  fontFamily: 'monospace',
+                  boxSizing: 'border-box'
+                }}
               />
             </div>
 
             <div style={{ marginBottom: '8px' }}>
               <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>
-                Width: {selectedGateData.width}
+                Scale: {selectedGateData.scale}
               </label>
               <input
                 type="range"
                 min="1"
-                max="8"
+                max="5"
                 step="0.5"
-                value={selectedGateData.width}
-                onChange={(e) => handleUpdateGate(selectedGateData.id, { width: Number(e.target.value) })}
+                value={selectedGateData.scale}
+                onChange={(e) => handleUpdateGate(selectedGateData.id, { scale: Number(e.target.value) })}
                 style={{ width: '100%' }}
               />
             </div>
@@ -1392,7 +1436,7 @@ export default function StageLayoutEditor() {
             placementMode={placementMode}
             showStage={showStage}
             showGrid={showGrid}
-            gatePreview={placementMode === 'gate' ? { edge: newGateEdge, position: newGatePosition } : null}
+            gatePreview={placementMode === 'gate' ? { edge: newGateEdge, position: newGatePosition, scale: newGateScale } : null}
           />
         </Suspense>
       </Canvas>
