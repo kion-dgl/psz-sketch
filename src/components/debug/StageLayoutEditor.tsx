@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { Suspense, useState, useEffect, useRef } from 'react';
+import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 
@@ -202,7 +202,7 @@ function BoxModel({
 
 function SquareGrid({ size, offset }: { size: number; offset: [number, number] }) {
   const halfSize = size / 2;
-  const lines: JSX.Element[] = [];
+  const lines: React.ReactNode[] = [];
 
   // Grid lines centered on offset
   for (let i = -halfSize; i <= halfSize; i++) {
@@ -210,17 +210,16 @@ function SquareGrid({ size, offset }: { size: number; offset: [number, number] }
     const color = isEdge ? '#ffff00' : (i === 0 ? '#666666' : '#333333');
 
     // Horizontal lines (Z direction)
+    const hPositions = new Float32Array([
+      offset[0] - halfSize, 0.15, offset[1] + i,
+      offset[0] + halfSize, 0.15, offset[1] + i
+    ]);
     lines.push(
       <line key={`h${i}`}>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={2}
-            array={new Float32Array([
-              offset[0] - halfSize, 0.15, offset[1] + i,
-              offset[0] + halfSize, 0.15, offset[1] + i
-            ])}
-            itemSize={3}
+            args={[hPositions, 3]}
           />
         </bufferGeometry>
         <lineBasicMaterial color={color} />
@@ -228,17 +227,16 @@ function SquareGrid({ size, offset }: { size: number; offset: [number, number] }
     );
 
     // Vertical lines (X direction)
+    const vPositions = new Float32Array([
+      offset[0] + i, 0.15, offset[1] - halfSize,
+      offset[0] + i, 0.15, offset[1] + halfSize
+    ]);
     lines.push(
       <line key={`v${i}`}>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={2}
-            array={new Float32Array([
-              offset[0] + i, 0.15, offset[1] - halfSize,
-              offset[0] + i, 0.15, offset[1] + halfSize
-            ])}
-            itemSize={3}
+            args={[vPositions, 3]}
           />
         </bufferGeometry>
         <lineBasicMaterial color={color} />
@@ -428,15 +426,11 @@ function StageModel({
   return <primitive object={model} />;
 }
 
-// Visual ground plane for placement feedback
+// Visual ground plane for box placement - covers entire stage area
 function GroundPlane({
-  gridSize,
-  gridOffset,
   placementMode,
   onClick
 }: {
-  gridSize: number;
-  gridOffset: [number, number];
   placementMode: 'gate' | 'box' | 'select';
   onClick: (position: [number, number]) => void;
 }) {
@@ -452,17 +446,18 @@ function GroundPlane({
     }
   };
 
+  // Large plane covering entire stage area (200x200 units)
   return (
     <mesh
       rotation={[-Math.PI / 2, 0, 0]}
-      position={[gridOffset[0], 0.02, gridOffset[1]]}
+      position={[0, 0.01, 0]}
       onClick={handleClick}
     >
-      <planeGeometry args={[gridSize, gridSize]} />
+      <planeGeometry args={[200, 200]} />
       <meshBasicMaterial
-        color={placementMode === 'box' ? '#004400' : '#222222'}
+        color={placementMode === 'box' ? '#003300' : '#111111'}
         transparent
-        opacity={placementMode === 'box' ? 0.3 : 0.15}
+        opacity={placementMode === 'box' ? 0.2 : 0.1}
         side={THREE.DoubleSide}
       />
     </mesh>
@@ -510,8 +505,6 @@ function LayoutScene({
 
       {/* Visual ground plane for placement */}
       <GroundPlane
-        gridSize={gridSize}
-        gridOffset={gridOffset}
         placementMode={placementMode}
         onClick={onAddBox}
       />
@@ -698,7 +691,7 @@ export default function StageLayoutEditor() {
           case 'east': worldPos = `[${(gridOffset[0] + halfSize).toFixed(2)}, 0, ${(gridOffset[1] + edgePos).toFixed(2)}]`; break;
           case 'west': worldPos = `[${(gridOffset[0] - halfSize).toFixed(2)}, 0, ${(gridOffset[1] + edgePos).toFixed(2)}]`; break;
         }
-        code += `    { edge: '${gate.edge}', position: ${worldPos}, width: ${gate.width}, label: '${gate.label}' }${i < gates.length - 1 ? ',' : ''}\n`;
+        code += `    { edge: '${gate.edge}', position: ${worldPos}, scale: ${gate.scale}, label: '${gate.label}' }${i < gates.length - 1 ? ',' : ''}\n`;
       });
       code += `  ],\n`;
     }
