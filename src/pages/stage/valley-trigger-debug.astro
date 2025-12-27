@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ValleyTriggerDebug from '../../components/valley/ValleyTriggerDebug';
+
+export const prerender = false;
+---
+
+<Layout title="Gurhacia Valley - Trigger Debug">
+  <ValleyTriggerDebug client:load />
+</Layout>
