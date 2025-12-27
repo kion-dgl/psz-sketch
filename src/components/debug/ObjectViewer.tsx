@@ -125,18 +125,73 @@ interface ObjectViewerProps {
   objects: string[];
 }
 
+const DEFAULT_CONTROLS: TextureControls = {
+  wrapS: THREE.RepeatWrapping,
+  wrapT: THREE.RepeatWrapping,
+  offsetX: 0,
+  offsetY: 0,
+  repeatX: 1,
+  repeatY: 1,
+};
+
+const WRAP_LABELS: Record<number, string> = {
+  [THREE.RepeatWrapping]: 'Repeat',
+  [THREE.ClampToEdgeWrapping]: 'Clamp',
+  [THREE.MirroredRepeatWrapping]: 'Mirror',
+};
+
+function getStorageKey(areaId: string, objectName: string) {
+  return `objectViewer_${areaId}_${objectName}`;
+}
+
+function loadFromStorage(areaId: string, objectName: string): TextureControls {
+  try {
+    const stored = localStorage.getItem(getStorageKey(areaId, objectName));
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return { ...DEFAULT_CONTROLS };
+}
+
+function saveToStorage(areaId: string, objectName: string, controls: TextureControls) {
+  try {
+    localStorage.setItem(getStorageKey(areaId, objectName), JSON.stringify(controls));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+function clearFromStorage(areaId: string, objectName: string) {
+  try {
+    localStorage.removeItem(getStorageKey(areaId, objectName));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
   const [selectedObject, setSelectedObject] = useState<string | null>(null);
   const [meshes, setMeshes] = useState<MeshInfo[]>([]);
   const [texturePreviews, setTexturePreviews] = useState<TextureInfo[]>([]);
-  const [textureControls, setTextureControls] = useState<TextureControls>({
-    wrapS: THREE.RepeatWrapping,
-    wrapT: THREE.RepeatWrapping,
-    offsetX: 0,
-    offsetY: 0,
-    repeatX: 1,
-    repeatY: 1,
-  });
+  const [textureControls, setTextureControls] = useState<TextureControls>({ ...DEFAULT_CONTROLS });
+
+  // Load saved config when object changes
+  useEffect(() => {
+    if (selectedObject) {
+      const saved = loadFromStorage(areaId, selectedObject);
+      setTextureControls(saved);
+    }
+  }, [areaId, selectedObject]);
+
+  // Save to localStorage when controls change
+  useEffect(() => {
+    if (selectedObject) {
+      saveToStorage(areaId, selectedObject, textureControls);
+    }
+  }, [areaId, selectedObject, textureControls]);
 
   const modelPath = selectedObject
     ? `/objects/${areaId}/${selectedObject}/${selectedObject.replace('.imd', '.glb')}`
@@ -148,6 +203,35 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
 
   const handleTexturesFound = (newTextures: TextureInfo[]) => {
     setTexturePreviews(newTextures);
+  };
+
+  const handleReset = () => {
+    if (selectedObject) {
+      clearFromStorage(areaId, selectedObject);
+    }
+    setTextureControls({ ...DEFAULT_CONTROLS });
+  };
+
+  const handleExport = () => {
+    const exportData = {
+      areaId,
+      object: selectedObject,
+      controls: {
+        wrapS: WRAP_LABELS[textureControls.wrapS] || textureControls.wrapS,
+        wrapT: WRAP_LABELS[textureControls.wrapT] || textureControls.wrapT,
+        offsetX: textureControls.offsetX,
+        offsetY: textureControls.offsetY,
+        repeatX: textureControls.repeatX,
+        repeatY: textureControls.repeatY,
+      },
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${areaId}_${selectedObject?.replace('.imd', '') || 'config'}_texture.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -371,29 +455,39 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
           />
         </div>
 
-        <button
-          onClick={() => setTextureControls({
-            wrapS: THREE.RepeatWrapping,
-            wrapT: THREE.RepeatWrapping,
-            offsetX: 0,
-            offsetY: 0,
-            repeatX: 1,
-            repeatY: 1,
-          })}
-          style={{
-            width: '100%',
-            padding: '8px',
-            background: '#4a4a8a',
-            border: 'none',
-            borderRadius: '4px',
-            color: 'white',
-            cursor: 'pointer',
-          }}
-        >
-          Reset Controls
-        </button>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '1rem' }}>
+          <button
+            onClick={handleReset}
+            style={{
+              flex: 1,
+              padding: '8px',
+              background: '#4a4a8a',
+              border: 'none',
+              borderRadius: '4px',
+              color: 'white',
+              cursor: 'pointer',
+            }}
+          >
+            Reset
+          </button>
+          <button
+            onClick={handleExport}
+            disabled={!selectedObject}
+            style={{
+              flex: 1,
+              padding: '8px',
+              background: selectedObject ? '#3a6a3a' : '#333',
+              border: 'none',
+              borderRadius: '4px',
+              color: selectedObject ? 'white' : '#666',
+              cursor: selectedObject ? 'pointer' : 'not-allowed',
+            }}
+          >
+            Export JSON
+          </button>
+        </div>
 
-        <div style={{ marginTop: '2rem' }}>
+        <div style={{ marginTop: '1rem' }}>
           <a
             href="/stage/valley"
             style={{ color: '#88aaff', textDecoration: 'none' }}
