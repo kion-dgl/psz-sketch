@@ -134,6 +134,33 @@ const DEFAULT_CONTROLS: TextureControls = {
   repeatY: 1,
 };
 
+// Object-specific default configs (applied across all areas)
+const OBJECT_DEFAULTS: Record<string, Partial<TextureControls>> = {
+  'o01_cont.imd': {
+    wrapS: THREE.MirroredRepeatWrapping,
+    wrapT: THREE.MirroredRepeatWrapping,
+    repeatX: 2,
+    repeatY: 2,
+  },
+  'o0c_bombcont.imd': {
+    wrapS: THREE.MirroredRepeatWrapping,
+    wrapT: THREE.MirroredRepeatWrapping,
+    repeatX: 2,
+    repeatY: 2,
+  },
+  'o0c_recont.imd': {
+    wrapS: THREE.MirroredRepeatWrapping,
+    wrapT: THREE.MirroredRepeatWrapping,
+    repeatX: 2,
+    repeatY: 2,
+  },
+};
+
+function getDefaultsForObject(objectName: string): TextureControls {
+  const objectDefaults = OBJECT_DEFAULTS[objectName] || {};
+  return { ...DEFAULT_CONTROLS, ...objectDefaults };
+}
+
 const WRAP_LABELS: Record<number, string> = {
   [THREE.RepeatWrapping]: 'Repeat',
   [THREE.ClampToEdgeWrapping]: 'Clamp',
@@ -153,7 +180,7 @@ function loadFromStorage(areaId: string, objectName: string): TextureControls {
   } catch {
     // Ignore parse errors
   }
-  return { ...DEFAULT_CONTROLS };
+  return getDefaultsForObject(objectName);
 }
 
 function saveToStorage(areaId: string, objectName: string, controls: TextureControls) {
@@ -208,8 +235,10 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
   const handleReset = () => {
     if (selectedObject) {
       clearFromStorage(areaId, selectedObject);
+      setTextureControls(getDefaultsForObject(selectedObject));
+    } else {
+      setTextureControls({ ...DEFAULT_CONTROLS });
     }
-    setTextureControls({ ...DEFAULT_CONTROLS });
   };
 
   const handleExport = () => {
