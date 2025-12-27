@@ -209,15 +209,11 @@ export default function SporeSparkParticles({ intensity = 'light' }: SporeSparkP
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={sporeConfig.count}
-            array={sporeData.positions}
-            itemSize={3}
+            args={[sporeData.positions, 3]}
           />
           <bufferAttribute
             attach="attributes-color"
-            count={sporeConfig.count}
-            array={sporeData.colors}
-            itemSize={3}
+            args={[sporeData.colors, 3]}
           />
         </bufferGeometry>
         <pointsMaterial
@@ -236,15 +232,11 @@ export default function SporeSparkParticles({ intensity = 'light' }: SporeSparkP
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={sparkConfig.count}
-            array={sparkData.positions}
-            itemSize={3}
+            args={[sparkData.positions, 3]}
           />
           <bufferAttribute
             attach="attributes-color"
-            count={sparkConfig.count}
-            array={sparkData.colors.slice()}
-            itemSize={3}
+            args={[sparkData.colors.slice(), 3]}
           />
         </bufferGeometry>
         <pointsMaterial

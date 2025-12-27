@@ -5,20 +5,12 @@ import ValleyArea from '../../components/valley/ValleyArea';
 export const prerender = false;
 ---
 
-<Layout title="Gurhacia Valley - South Area 1 (Night)">
+<Layout title="Gurhacia Valley - Night">
   <ValleyArea
     mapId="s01a_sa1"
-    mapName="Gurhacia Valley - South Area 1 (Night)"
-    spawnPosition={[0, 5, 0]}
+    mapName="Gurhacia Valley - Night"
     timeOfDay="night"
     weather="clear"
-    triggers={[
-      {
-        position: [-1.72, 1.00, 29.46],
-        targetUrl: "/stage/valley",
-        label: "South Exit"
-      }
-    ]}
     client:load
   />
 </Layout>

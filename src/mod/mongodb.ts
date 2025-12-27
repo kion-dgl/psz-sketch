@@ -4,7 +4,7 @@
  * Automatically initializes collections on first connection
  */
 
-import { MongoClient, type Db } from 'mongodb';
+import { MongoClient, type Db, type Document } from 'mongodb';
 import { initializeCollections } from './collections';
 
 const MONGODB_URI = import.meta.env.MONGODB_URI || process.env.MONGODB_URI || 'mongodb://localhost:27017';
@@ -97,7 +97,7 @@ export async function connectToDatabase(): Promise<Db> {
 /**
  * Gets a collection from the database
  */
-export async function getCollection<T = any>(collectionName: string) {
+export async function getCollection<T extends Document = Document>(collectionName: string) {
   const db = await connectToDatabase();
   return db.collection<T>(collectionName);
 }

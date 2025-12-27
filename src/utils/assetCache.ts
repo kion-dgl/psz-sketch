@@ -14,7 +14,7 @@ const textureCache = localforage.createInstance({
   description: 'Cache for texture image files'
 });
 
-export interface CachedAsset {
+interface CachedAsset {
   url: string;
   blob: Blob;
   cachedAt: number;

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
 // Define interactive trigger zones that require 'e' key to activate
-interface InteractiveTrigger {
+export interface InteractiveTrigger {
   position: [number, number, number];
   radius: number;
   height: number;
@@ -11,23 +11,13 @@ interface InteractiveTrigger {
   name: string;
 }
 
-const TRIGGERS: InteractiveTrigger[] = [
-  // Exit to City at X: 0.04, Y: 1.00, Z: -3.91
-  {
-    position: [0.04, 1, -3.91],
-    radius: 2,
-    height: 3,
-    targetArea: '/stage/city',
-    name: 'Exit to City'
-  }
-];
-
 interface InteractiveTriggersProps {
+  triggers: InteractiveTrigger[];
   visible?: boolean;
   onPlayerInZone?: (zone: string | null) => void;
 }
 
-export default function InteractiveTriggers({ visible = true, onPlayerInZone }: InteractiveTriggersProps) {
+export default function InteractiveTriggers({ triggers, visible = true, onPlayerInZone }: InteractiveTriggersProps) {
   const [playerInZone, setPlayerInZone] = useState<string | null>(null);
   const [activated, setActivated] = useState<Set<string>>(new Set());
 
@@ -41,7 +31,7 @@ export default function InteractiveTriggers({ visible = true, onPlayerInZone }: 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === 'e' && playerInZone && !activated.has(playerInZone)) {
         // Find the trigger
-        const trigger = TRIGGERS.find(t => t.name === playerInZone);
+        const trigger = triggers.find(t => t.name === playerInZone);
         if (trigger) {
           setActivated(prev => new Set(prev).add(playerInZone));
           window.location.href = trigger.targetArea;
@@ -51,7 +41,7 @@ export default function InteractiveTriggers({ visible = true, onPlayerInZone }: 
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [playerInZone, activated]);
+  }, [playerInZone, activated, triggers]);
 
   const handleEnter = (triggerName: string) => {
     setPlayerInZone(triggerName);
@@ -63,7 +53,7 @@ export default function InteractiveTriggers({ visible = true, onPlayerInZone }: 
 
   return (
     <>
-      {TRIGGERS.map((trigger, index) => (
+      {triggers.map((trigger, index) => (
         <RigidBody
           key={index}
           type="fixed"

@@ -105,8 +105,8 @@ function TexturePreview({ texture }: { texture: THREE.Texture | null }) {
     if (!ctx) return;
 
     // Get the image from the texture
-    const image = texture.image;
-    if (!image) return;
+    const image = texture.image as HTMLImageElement | undefined;
+    if (!image || !image.width || !image.height) return;
 
     // Set canvas size to match image aspect ratio
     const maxSize = 256;

@@ -15,11 +15,12 @@ interface PlayerCharacterProps {
 
 export default function PlayerCharacter({ character, onPositionChange, spawnPosition = [0.98, 10, 62.79], spawnRotation = 0, onInteraction }: PlayerCharacterProps) {
   const rigidBodyRef = useRef<RapierRigidBody>(null);
-  const { world } = useRapier();
+  const { world, rapier } = useRapier();
   const [rotation, setRotation] = useState(spawnRotation); // Tank control rotation
   const [npcDetected, setNpcDetected] = useState(false); // Track if NPC is in range
   const hasErrored = useRef(false); // Prevent error spam
   const debugLineRef = useRef<THREE.Line | null>(null);
+  const lastReportedPosition = useRef({ x: 0, y: 0, z: 0, rotation: 0 });
 
   // Keyboard state
   const keys = useRef({
@@ -85,8 +86,12 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
       const rayDown = { x: 0, y: -1, z: 0 };
 
       // Test 1: Ray filtered to GROUND GROUP ONLY (0x00030003)
+      const debugRayOrigin = new rapier.Ray(
+        { x: position.x, y: position.y + 0.5, z: position.z },
+        rayDown
+      );
       const groundOnlyRay = world.castRay(
-        { origin: { x: position.x, y: position.y + 0.5, z: position.z }, dir: rayDown },
+        debugRayOrigin,
         20,
         true,
         undefined,
@@ -97,7 +102,7 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
 
       // Test 2: Ray that hits EVERYTHING (except player)
       const allRay = world.castRay(
-        { origin: { x: position.x, y: position.y + 0.5, z: position.z }, dir: rayDown },
+        debugRayOrigin,
         20,
         true,
         undefined,
@@ -143,7 +148,10 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
     if (keys.current.right) {
       newRotation -= rotationSpeed * delta;
     }
-    setRotation(newRotation);
+    // Only update state if rotation actually changed to avoid re-renders every frame
+    if (newRotation !== rotation) {
+      setRotation(newRotation);
+    }
 
     // Calculate movement based on rotation
     // Red line points in -Z direction, so negate to move forward
@@ -174,8 +182,12 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
         const rayLength = 10; // Check 10 units down
 
         // Also raycast from current position to see what we're standing on
+        const currentPosRayObj = new rapier.Ray(
+          { x: position.x, y: position.y + 1, z: position.z },
+          rayDirection
+        );
         const currentPosRay = world.castRay(
-          { origin: { x: position.x, y: position.y + 1, z: position.z }, dir: rayDirection },
+          currentPosRayObj,
           rayLength,
           true,
           undefined,
@@ -184,8 +196,9 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
           rigidBodyRef.current // EXCLUDE PLAYER
         );
 
+        const groundCheckRayObj = new rapier.Ray(rayOrigin, rayDirection);
         const groundCheck = world.castRay(
-          { origin: rayOrigin, dir: rayDirection },
+          groundCheckRayObj,
           rayLength,
           true,
           undefined,
@@ -229,16 +242,28 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
       true
     );
 
-    // Update position display
+    // Update position display (throttled to reduce re-renders)
     const position = rigidBodyRef.current.translation();
     if (!position) return; // Guard against undefined position in early frames
 
-    onPositionChange({
-      x: position.x,
-      y: position.y,
-      z: position.z,
-      rotation: newRotation
-    });
+    // Only report position changes if they exceed threshold (reduces parent re-renders)
+    const threshold = 0.01;
+    const last = lastReportedPosition.current;
+    const posChanged =
+      Math.abs(position.x - last.x) > threshold ||
+      Math.abs(position.y - last.y) > threshold ||
+      Math.abs(position.z - last.z) > threshold ||
+      Math.abs(newRotation - last.rotation) > threshold;
+
+    if (posChanged) {
+      lastReportedPosition.current = { x: position.x, y: position.y, z: position.z, rotation: newRotation };
+      onPositionChange({
+        x: position.x,
+        y: position.y,
+        z: position.z,
+        rotation: newRotation
+      });
+    }
 
     // Raycast to detect NPCs in front of player
     try {
@@ -289,8 +314,9 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
 
       // Cast ray with filter to exclude the player's own collider and walls
       // Only hit collision group 1 (NPCs), not group 0 (walls)
+      const npcRayObj = new rapier.Ray(rayOrigin, rayDirection);
       const ray = world.castRay(
-        { origin: rayOrigin, dir: rayDirection },
+        npcRayObj,
         rayLength,
         true,
         undefined, // filterFlags
@@ -299,14 +325,14 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
         rigidBodyRef.current // filterExcludeRigidBody - exclude player
       );
 
-      // Update NPC detection state
+      // Update NPC detection state (only when changed to avoid re-renders)
       if (ray) {
         const hit = ray.collider;
         const parent = hit.parent();
         const userData = parent?.userData as { npcName?: string } | undefined;
 
         if (userData?.npcName) {
-          setNpcDetected(true);
+          if (!npcDetected) setNpcDetected(true);
 
           // Handle interaction when E is pressed
           if (keys.current.interact) {
@@ -316,16 +342,16 @@ export default function PlayerCharacter({ character, onPositionChange, spawnPosi
             keys.current.interact = false;
           }
         } else {
-          setNpcDetected(false);
+          if (npcDetected) setNpcDetected(false);
         }
       } else {
-        setNpcDetected(false);
+        if (npcDetected) setNpcDetected(false);
       }
     } catch (error) {
       if (!hasErrored.current) {
         hasErrored.current = true;
       }
-      setNpcDetected(false);
+      if (npcDetected) setNpcDetected(false);
     }
 
     // Debounce interaction if pressed but nothing hit
