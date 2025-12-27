@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import StageLayoutEditor from '../../components/debug/StageLayoutEditor';
+
+export const prerender = false;
+---
+
+<Layout title="Stage Layout Editor">
+  <StageLayoutEditor client:load />
+</Layout>
