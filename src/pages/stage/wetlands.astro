@@ -1,9 +1,8 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import StageHubPage from '../../components/shared/StageHubPage.astro';
 
 export const prerender = false;
 
-// Wetlands A - First set of stages
 const wetlandsASections = [
   { id: 's02a_ga1', name: 'Gateway', category: 'Gateway' },
   { id: 's02a_ib1', name: 'Inner Bridge 1', category: 'Inner' },
@@ -25,12 +24,10 @@ const wetlandsASections = [
   { id: 's02a_xb2', name: 'East Bridge 2', category: 'East' },
 ];
 
-// Wetlands E - Midpoint
 const wetlandsESections = [
   { id: 's02e_ia1', name: 'Inner Area 1', category: 'Midpoint' },
 ];
 
-// Wetlands B - Second set of stages
 const wetlandsBSections = [
   { id: 's02b_ga1', name: 'Gateway', category: 'Gateway' },
   { id: 's02b_ib1', name: 'Inner Bridge 1', category: 'Inner' },
@@ -52,141 +49,28 @@ const wetlandsBSections = [
   { id: 's02b_xb2', name: 'East Bridge 2', category: 'East' },
 ];
 
-// Wetlands Z - Boss area
 const wetlandsZSections = [
   { id: 's02z_na1', name: 'North Area 1', category: 'Boss' },
 ];
 
-const wetlandsTypes = [
+const stageTypes = [
   { key: 'a', name: 'Wetlands A - First Set', sections: wetlandsASections, color: '#2d5016' },
   { key: 'e', name: 'Wetlands E - Midpoint', sections: wetlandsESections, color: '#165050' },
   { key: 'b', name: 'Wetlands B - Second Set', sections: wetlandsBSections, color: '#50162d' },
   { key: 'z', name: 'Wetlands Z - Boss Area', sections: wetlandsZSections, color: '#501616' },
 ];
+
+const navLinks = [
+  { href: '/stage/wetlands-debug', label: 'Texture Debug Tool', color: 'rgba(200, 100, 50, 0.9)' },
+  { href: '/stage/wetlands-trigger-debug', label: 'Trigger Debug Tool', color: 'rgba(50, 150, 200, 0.9)' },
+  { href: '/stage/valley', label: 'Back to Valley', color: 'rgba(100, 100, 200, 0.9)' },
+];
 ---
 
-<Layout title="Ozette Wetlands - All Sections">
-  <style>
-    body { overflow: auto !important; }
-  </style>
-  <div style="min-height: 100vh; background: linear-gradient(135deg, #2d5016 0%, #4a7023 100%); padding: 2rem; padding-bottom: 4rem;">
-    <div style="max-width: 1200px; margin: 0 auto;">
-      <h1 style="color: white; font-family: monospace; margin-bottom: 2rem; text-align: center;">
-        Ozette Wetlands - All Sections
-      </h1>
-
-      <div style="margin-bottom: 2rem; text-align: center;">
-        <a
-          href="/stage/wetlands-debug"
-          style="
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background: rgba(200, 100, 50, 0.9);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-family: monospace;
-            margin: 0 0.5rem;
-          "
-        >
-          Texture Debug Tool
-        </a>
-        <a
-          href="/stage/wetlands-trigger-debug"
-          style="
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background: rgba(50, 150, 200, 0.9);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-family: monospace;
-            margin: 0 0.5rem;
-          "
-        >
-          Trigger Debug Tool
-        </a>
-        <a
-          href="/stage/valley"
-          style="
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background: rgba(100, 100, 200, 0.9);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-family: monospace;
-            margin: 0 0.5rem;
-          "
-        >
-          Back to Valley
-        </a>
-      </div>
-
-      {wetlandsTypes.map(wetlandsType => (
-        <div key={wetlandsType.key} style="margin-bottom: 3rem;">
-          <h2 style={`
-            color: white;
-            font-family: monospace;
-            font-size: 1.4rem;
-            margin-bottom: 1.5rem;
-            padding: 0.75rem 1rem;
-            background: ${wetlandsType.color};
-            border-radius: 8px;
-          `}>
-            {wetlandsType.name}
-          </h2>
-          <div style="
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1rem;
-          ">
-            {wetlandsType.sections.map(section => (
-              <a
-                key={section.id}
-                href={`/stage/wetlands-${section.id}`}
-                style="
-                  display: block;
-                  padding: 1rem;
-                  background: rgba(255, 255, 255, 0.1);
-                  color: white;
-                  text-decoration: none;
-                  border-radius: 8px;
-                  font-family: monospace;
-                  transition: all 0.3s ease;
-                  border: 2px solid transparent;
-                "
-                onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.borderColor='rgba(255, 255, 255, 0.5)';"
-                onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.borderColor='transparent';"
-              >
-                <div style="font-weight: bold; margin-bottom: 0.25rem;">
-                  {section.name}
-                </div>
-                <div style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.7);">
-                  {section.id}
-                </div>
-              </a>
-            ))}
-          </div>
-        </div>
-      ))}
-
-      <div style="text-align: center; margin-top: 3rem;">
-        <a
-          href="/"
-          style="
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background: rgba(200, 50, 50, 0.9);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-family: monospace;
-          "
-        >
-          Back to Home
-        </a>
-      </div>
-    </div>
-  </div>
-</Layout>
+<StageHubPage
+  title="Ozette Wetlands - All Sections"
+  urlPrefix="wetlands"
+  stageTypes={stageTypes}
+  navLinks={navLinks}
+  backgroundGradient="linear-gradient(135deg, #2d5016 0%, #4a7023 100%)"
+/>
