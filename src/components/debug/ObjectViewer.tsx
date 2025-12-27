@@ -24,6 +24,7 @@ interface MeshInfo {
   geometry: string;
   material: string;
   textures: string[];
+  mesh?: THREE.Object3D;
 }
 
 interface AnimationConfig {
@@ -69,6 +70,7 @@ function ObjectModel({
     clonedScene.traverse((child) => {
       // Check if this is the animated mesh
       if (animationConfig && child.name === animationConfig.meshName) {
+        console.log('Found animated mesh:', child.name, child);
         animatedMeshRef.current = child;
       }
 
@@ -116,9 +118,15 @@ function ObjectModel({
           geometry: `${child.geometry.attributes.position?.count || 0} vertices`,
           material: materials.map(m => m.type).join(', '),
           textures: textureNames,
+          mesh: child,
         });
       }
     });
+
+    console.log('All meshes found:', meshes.map(m => m.name));
+    if (animationConfig) {
+      console.log('Looking for mesh:', animationConfig.meshName, 'Found:', !!animatedMeshRef.current);
+    }
 
     texturesRef.current = textures;
     onMeshesFound(meshes);
@@ -240,12 +248,22 @@ const ANIMATED_OBJECTS: Record<string, { meshName: string }> = {
 export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
   const [selectedObject, setSelectedObject] = useState<string | null>(null);
   const [meshes, setMeshes] = useState<MeshInfo[]>([]);
+  const [meshVisibility, setMeshVisibility] = useState<Record<string, boolean>>({});
   const [texturePreviews, setTexturePreviews] = useState<TextureInfo[]>([]);
   const [textureControls, setTextureControls] = useState<TextureControls>({ ...DEFAULT_CONTROLS });
   const [animationEnabled, setAnimationEnabled] = useState(false);
   const [animationSpeed, setAnimationSpeed] = useState(0.5);
   const [animationStartY, setAnimationStartY] = useState(0);
   const [animationMaxY, setAnimationMaxY] = useState(1.0);
+
+  const toggleMeshVisibility = (meshName: string) => {
+    const mesh = meshes.find(m => m.name === meshName)?.mesh;
+    if (mesh) {
+      const newVisible = !mesh.visible;
+      mesh.visible = newVisible;
+      setMeshVisibility(prev => ({ ...prev, [meshName]: newVisible }));
+    }
+  };
 
   const hasAnimation = selectedObject ? !!ANIMATED_OBJECTS[selectedObject] : false;
   const animationConfig: AnimationConfig | undefined = hasAnimation && selectedObject
@@ -265,6 +283,8 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
       setTextureControls(saved);
       // Reset animation state when switching objects
       setAnimationEnabled(false);
+      // Reset mesh visibility
+      setMeshVisibility({});
     }
   }, [areaId, selectedObject]);
 
@@ -402,24 +422,44 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
         <h3 style={{ marginTop: 0, color: '#88aaff' }}>Mesh Parts</h3>
         {meshes.length > 0 ? (
           <div style={{ marginBottom: '1.5rem' }}>
-            {meshes.map((mesh, i) => (
-              <div key={i} style={{
-                background: '#2a2a4a',
-                padding: '8px',
-                borderRadius: '4px',
-                marginBottom: '8px',
-                fontSize: '11px'
-              }}>
-                <div style={{ fontWeight: 'bold', color: '#aaccff' }}>{mesh.name}</div>
-                <div style={{ color: '#888' }}>{mesh.geometry}</div>
-                <div style={{ color: '#888' }}>{mesh.material}</div>
-                {mesh.textures.length > 0 && (
-                  <div style={{ color: '#88ff88', marginTop: '4px' }}>
-                    Textures: {mesh.textures.join(', ')}
+            {meshes.map((mesh, i) => {
+              const isVisible = meshVisibility[mesh.name] !== false;
+              return (
+                <div key={i} style={{
+                  background: isVisible ? '#2a2a4a' : '#1a1a2a',
+                  padding: '8px',
+                  borderRadius: '4px',
+                  marginBottom: '8px',
+                  fontSize: '11px',
+                  opacity: isVisible ? 1 : 0.5,
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontWeight: 'bold', color: '#aaccff' }}>{mesh.name}</div>
+                    <button
+                      onClick={() => toggleMeshVisibility(mesh.name)}
+                      style={{
+                        padding: '2px 8px',
+                        background: isVisible ? '#3a6a3a' : '#6a3a3a',
+                        border: 'none',
+                        borderRadius: '3px',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontSize: '10px',
+                      }}
+                    >
+                      {isVisible ? 'Hide' : 'Show'}
+                    </button>
                   </div>
-                )}
-              </div>
-            ))}
+                  <div style={{ color: '#888' }}>{mesh.geometry}</div>
+                  <div style={{ color: '#888' }}>{mesh.material}</div>
+                  {mesh.textures.length > 0 && (
+                    <div style={{ color: '#88ff88', marginTop: '4px' }}>
+                      Textures: {mesh.textures.join(', ')}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div style={{ color: '#666', marginBottom: '1.5rem' }}>No object selected</div>
