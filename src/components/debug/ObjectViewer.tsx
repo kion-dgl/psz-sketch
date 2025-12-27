@@ -158,15 +158,19 @@ function ObjectModel({
 
   // Animation loop for the beam mesh position
   const animLoggedRef = useRef(false);
+  const initialPositionRef = useRef<THREE.Vector3 | null>(null);
+
   useFrame((_, delta) => {
     if (!animationConfig?.enabled || !animatedMeshRef.current) {
       animLoggedRef.current = false;
+      initialPositionRef.current = null;
       return;
     }
 
-    // Log once when animation starts
+    // Store initial position and log once when animation starts
     if (!animLoggedRef.current) {
-      console.log('Animation started for mesh:', animatedMeshRef.current.name);
+      initialPositionRef.current = animatedMeshRef.current.position.clone();
+      console.log('Animation started for mesh:', animatedMeshRef.current.name, 'Initial Y:', initialPositionRef.current.y);
       animLoggedRef.current = true;
     }
 
@@ -177,7 +181,20 @@ function ObjectModel({
 
     // Interpolate Y position from startY to maxY
     const currentY = animationConfig.startY + (animationConfig.maxY - animationConfig.startY) * animationProgressRef.current;
-    animatedMeshRef.current.position.y = currentY;
+
+    // For SkinnedMesh, we need to modify the position and update matrices
+    const mesh = animatedMeshRef.current;
+    mesh.position.y = currentY;
+    mesh.updateMatrix();
+    mesh.updateMatrixWorld(true);
+
+    // If it's a SkinnedMesh, also update the skeleton
+    if ((mesh as THREE.SkinnedMesh).isSkinnedMesh) {
+      const skinnedMesh = mesh as THREE.SkinnedMesh;
+      if (skinnedMesh.skeleton) {
+        skinnedMesh.skeleton.update();
+      }
+    }
   });
 
   return <primitive object={clonedScene} />;
