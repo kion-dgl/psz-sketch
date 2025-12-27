@@ -29,9 +29,9 @@ interface MeshInfo {
 interface AnimationConfig {
   enabled: boolean;
   speed: number;
+  startY: number;
   maxY: number;
   meshName: string;
-  textureName: string;
 }
 
 const WRAP_OPTIONS: { label: string; value: THREE.Wrapping }[] = [
@@ -56,17 +56,22 @@ function ObjectModel({
   const { scene } = useGLTF(modelPath);
   const clonedScene = useMemo(() => scene.clone(), [scene]);
   const texturesRef = useRef<THREE.Texture[]>([]);
-  const animatedTextureRef = useRef<THREE.Texture | null>(null);
-  const animationOffsetRef = useRef(0);
+  const animatedMeshRef = useRef<THREE.Object3D | null>(null);
+  const animationProgressRef = useRef(0);
 
   useEffect(() => {
     const meshes: MeshInfo[] = [];
     const textures: THREE.Texture[] = [];
     const textureInfos: TextureInfo[] = [];
     const seenTextures = new Set<string>();
-    animatedTextureRef.current = null;
+    animatedMeshRef.current = null;
 
     clonedScene.traverse((child) => {
+      // Check if this is the animated mesh
+      if (animationConfig && child.name === animationConfig.meshName) {
+        animatedMeshRef.current = child;
+      }
+
       if (child instanceof THREE.Mesh) {
         const materials = Array.isArray(child.material) ? child.material : [child.material];
         const textureNames: string[] = [];
@@ -77,11 +82,6 @@ function ObjectModel({
               textures.push(mat.map);
               const texName = mat.map.name || `texture_${textures.length}`;
               textureNames.push(texName);
-
-              // Check if this is the animated texture
-              if (animationConfig && child.name === animationConfig.meshName) {
-                animatedTextureRef.current = mat.map;
-              }
 
               // Extract texture preview (avoid duplicates)
               if (!seenTextures.has(texName)) {
@@ -127,32 +127,26 @@ function ObjectModel({
 
   useEffect(() => {
     texturesRef.current.forEach((texture) => {
-      // Skip animated texture - it manages its own offset
-      if (animationConfig?.enabled && texture === animatedTextureRef.current) {
-        texture.wrapS = textureControls.wrapS;
-        texture.wrapT = textureControls.wrapT;
-        texture.repeat.set(textureControls.repeatX, textureControls.repeatY);
-        texture.needsUpdate = true;
-        return;
-      }
       texture.wrapS = textureControls.wrapS;
       texture.wrapT = textureControls.wrapT;
       texture.offset.set(textureControls.offsetX, textureControls.offsetY);
       texture.repeat.set(textureControls.repeatX, textureControls.repeatY);
       texture.needsUpdate = true;
     });
-  }, [textureControls, animationConfig]);
+  }, [textureControls]);
 
-  // Animation loop for the beam texture
+  // Animation loop for the beam mesh position
   useFrame((_, delta) => {
-    if (!animationConfig?.enabled || !animatedTextureRef.current) return;
+    if (!animationConfig?.enabled || !animatedMeshRef.current) return;
 
-    animationOffsetRef.current += delta * animationConfig.speed;
-    if (animationOffsetRef.current >= animationConfig.maxY) {
-      animationOffsetRef.current = 0;
+    animationProgressRef.current += delta * animationConfig.speed;
+    if (animationProgressRef.current >= 1) {
+      animationProgressRef.current = 0;
     }
 
-    animatedTextureRef.current.offset.setY(animationOffsetRef.current);
+    // Interpolate Y position from startY to maxY
+    const currentY = animationConfig.startY + (animationConfig.maxY - animationConfig.startY) * animationProgressRef.current;
+    animatedMeshRef.current.position.y = currentY;
   });
 
   return <primitive object={clonedScene} />;
@@ -238,9 +232,9 @@ function clearFromStorage(areaId: string, objectName: string) {
 }
 
 // Objects with animation support
-const ANIMATED_OBJECTS: Record<string, { meshName: string; textureName: string }> = {
-  'o0c_gate.imd': { meshName: 'o0c_gate_4', textureName: 'o0c_0_gatet.png' },
-  'o0c_gatet.imd': { meshName: 'o0c_gatet_4', textureName: 'o0c_0_gatet.png' },
+const ANIMATED_OBJECTS: Record<string, { meshName: string }> = {
+  'o0c_gate.imd': { meshName: 'o0c_gate_4' },
+  'o0c_gatet.imd': { meshName: 'o0c_gatet_4' },
 };
 
 export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
@@ -250,6 +244,7 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
   const [textureControls, setTextureControls] = useState<TextureControls>({ ...DEFAULT_CONTROLS });
   const [animationEnabled, setAnimationEnabled] = useState(false);
   const [animationSpeed, setAnimationSpeed] = useState(0.5);
+  const [animationStartY, setAnimationStartY] = useState(0);
   const [animationMaxY, setAnimationMaxY] = useState(1.0);
 
   const hasAnimation = selectedObject ? !!ANIMATED_OBJECTS[selectedObject] : false;
@@ -257,9 +252,9 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
     ? {
         enabled: animationEnabled,
         speed: animationSpeed,
+        startY: animationStartY,
         maxY: animationMaxY,
         meshName: ANIMATED_OBJECTS[selectedObject].meshName,
-        textureName: ANIMATED_OBJECTS[selectedObject].textureName,
       }
     : undefined;
 
@@ -317,8 +312,8 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
     if (hasAnimation) {
       exportData.animation = {
         meshName: ANIMATED_OBJECTS[selectedObject!].meshName,
-        textureName: ANIMATED_OBJECTS[selectedObject!].textureName,
         speed: animationSpeed,
+        startY: animationStartY,
         maxY: animationMaxY,
       };
     }
@@ -503,15 +498,31 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
                 />
               </div>
 
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}>
+                  Start Y: {animationStartY.toFixed(2)}
+                </label>
+                <input
+                  type="range"
+                  min="-2"
+                  max="2"
+                  step="0.05"
+                  value={animationStartY}
+                  onChange={(e) => setAnimationStartY(parseFloat(e.target.value))}
+                  style={{ width: '100%' }}
+                  disabled={!animationEnabled}
+                />
+              </div>
+
               <div style={{ marginBottom: '0.5rem' }}>
                 <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}>
                   Max Y: {animationMaxY.toFixed(2)}
                 </label>
                 <input
                   type="range"
-                  min="0.1"
+                  min="-2"
                   max="5"
-                  step="0.1"
+                  step="0.05"
                   value={animationMaxY}
                   onChange={(e) => setAnimationMaxY(parseFloat(e.target.value))}
                   style={{ width: '100%' }}
