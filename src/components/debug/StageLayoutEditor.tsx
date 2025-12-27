@@ -595,6 +595,15 @@ export default function StageLayoutEditor() {
     }
   };
 
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const zoomSpeed = 3;
+    setZoom(prev => {
+      const newZoom = prev + (e.deltaY > 0 ? -zoomSpeed : zoomSpeed);
+      return Math.max(5, Math.min(100, newZoom));
+    });
+  };
+
   const selectedGateData = gates.find(g => g.id === selectedGate);
   const selectedBoxData = boxes.find(b => b.id === selectedBox);
   const hasCurrentConfig = !!allConfigs[selectedMap];
@@ -605,6 +614,7 @@ export default function StageLayoutEditor() {
       style={{ width: '100vw', height: '100vh', position: 'relative' }}
       tabIndex={0}
       onKeyDown={handleKeyDown}
+      onWheel={handleWheel}
     >
       {/* Left Panel */}
       <div style={{
@@ -698,7 +708,7 @@ export default function StageLayoutEditor() {
           <input
             type="range"
             min="4"
-            max="30"
+            max="80"
             value={gridSize}
             onChange={(e) => setGridSize(Number(e.target.value))}
             style={{ width: '100%' }}
