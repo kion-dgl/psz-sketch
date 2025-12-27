@@ -14,11 +14,14 @@ interface GateData {
   label: string;
 }
 
+type BoxType = 'o01_cont' | 'o0c_recont';
+
 interface BoxData {
   id: string;
   position: [number, number]; // World position
   size: [number, number];
   label: string;
+  boxType: BoxType;
 }
 
 interface StageLayout {
@@ -68,6 +71,125 @@ function loadAllConfigs(): Record<string, StageLayout> {
 
 function saveAllConfigs(configs: Record<string, StageLayout>) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(configs));
+}
+
+// Model paths
+const GATE_MODEL_PATH = '/objects/01_o01a/o0c_gate.imd/o0c_gate.glb';
+const BOX_MODEL_PATHS: Record<BoxType, string> = {
+  'o01_cont': '/objects/01_o01a/o01_cont.imd/o01_cont.glb',
+  'o0c_recont': '/objects/01_o01z/o0c_recont.imd/o0c_recont.glb',
+};
+
+function GateModel({
+  position,
+  rotation,
+  selected,
+  onClick
+}: {
+  position: [number, number, number];
+  rotation: [number, number, number];
+  selected: boolean;
+  onClick: () => void;
+}) {
+  const [model, setModel] = useState<THREE.Group | null>(null);
+  const modelRef = useRef<THREE.Group>(null);
+
+  useEffect(() => {
+    const loader = new GLTFLoader();
+    loader.load(GATE_MODEL_PATH, (gltf) => {
+      const clone = gltf.scene.clone();
+      // Set materials
+      clone.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+          const mesh = child as THREE.Mesh;
+          if (mesh.material) {
+            const mat = mesh.material as THREE.MeshStandardMaterial;
+            mat.transparent = true;
+            mat.opacity = selected ? 0.9 : 0.7;
+            if (selected) {
+              mat.emissive = new THREE.Color(0x00ffff);
+              mat.emissiveIntensity = 0.3;
+            }
+          }
+        }
+      });
+      setModel(clone);
+    });
+  }, [selected]);
+
+  if (!model) {
+    // Fallback box while loading
+    return (
+      <group position={position} rotation={rotation} onClick={(e) => { e.stopPropagation(); onClick(); }}>
+        <mesh>
+          <boxGeometry args={[2, 2, 1]} />
+          <meshBasicMaterial color={selected ? '#00ffff' : '#00ff00'} transparent opacity={0.4} />
+        </mesh>
+      </group>
+    );
+  }
+
+  return (
+    <group ref={modelRef} position={position} rotation={rotation} onClick={(e) => { e.stopPropagation(); onClick(); }}>
+      <primitive object={model} />
+    </group>
+  );
+}
+
+function BoxModel({
+  position,
+  boxType,
+  selected,
+  onClick
+}: {
+  position: [number, number];
+  boxType: BoxType;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  const [model, setModel] = useState<THREE.Group | null>(null);
+  const modelRef = useRef<THREE.Group>(null);
+
+  useEffect(() => {
+    const loader = new GLTFLoader();
+    loader.load(BOX_MODEL_PATHS[boxType], (gltf) => {
+      const clone = gltf.scene.clone();
+      // Adjust materials for selection visibility
+      clone.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+          const mesh = child as THREE.Mesh;
+          if (mesh.material) {
+            const mat = mesh.material as THREE.MeshStandardMaterial;
+            mat.transparent = true;
+            mat.opacity = selected ? 0.9 : 0.7;
+            if (selected) {
+              mat.emissive = new THREE.Color(0xff00ff);
+              mat.emissiveIntensity = 0.3;
+            }
+          }
+        }
+      });
+      setModel(clone);
+    });
+  }, [boxType, selected]);
+
+  if (!model) {
+    // Fallback box while loading
+    return (
+      <group position={[position[0], 0, position[1]]} onClick={(e) => { e.stopPropagation(); onClick(); }}>
+        <mesh position={[0, 0.75, 0]}>
+          <boxGeometry args={[1, 1.5, 1]} />
+          <meshBasicMaterial color={selected ? '#ff00ff' : '#ff6600'} transparent opacity={0.4} />
+        </mesh>
+      </group>
+    );
+  }
+
+  return (
+    <group ref={modelRef} position={[position[0], 0, position[1]]} onClick={(e) => { e.stopPropagation(); onClick(); }}>
+      <primitive object={model} />
+    </group>
+  );
 }
 
 function SquareGrid({ size, offset }: { size: number; offset: [number, number] }) {
@@ -122,7 +244,6 @@ function SquareGrid({ size, offset }: { size: number; offset: [number, number] }
 function Gate({
   edge,
   position,
-  width,
   gridSize,
   gridOffset,
   selected,
@@ -130,88 +251,65 @@ function Gate({
 }: {
   edge: GateEdge;
   position: number;
-  width: number;
   gridSize: number;
   gridOffset: [number, number];
   selected: boolean;
   onClick: () => void;
 }) {
   const halfSize = gridSize / 2;
-  const gateDepth = 1;
-  const gateHeight = 2;
 
-  let pos: [number, number, number] = [0, gateHeight / 2, 0];
+  let pos: [number, number, number] = [0, 0, 0];
   let rotation: [number, number, number] = [0, 0, 0];
-  let scale: [number, number, number] = [width, gateHeight, gateDepth];
 
   const edgePosition = (position - 0.5) * gridSize;
 
   switch (edge) {
     case 'north':
-      pos = [gridOffset[0] + edgePosition, gateHeight / 2, gridOffset[1] - halfSize];
+      pos = [gridOffset[0] + edgePosition, 0, gridOffset[1] - halfSize];
+      rotation = [0, Math.PI, 0]; // Face south
       break;
     case 'south':
-      pos = [gridOffset[0] + edgePosition, gateHeight / 2, gridOffset[1] + halfSize];
+      pos = [gridOffset[0] + edgePosition, 0, gridOffset[1] + halfSize];
+      rotation = [0, 0, 0]; // Face north
       break;
     case 'east':
-      pos = [gridOffset[0] + halfSize, gateHeight / 2, gridOffset[1] + edgePosition];
-      rotation = [0, Math.PI / 2, 0];
+      pos = [gridOffset[0] + halfSize, 0, gridOffset[1] + edgePosition];
+      rotation = [0, -Math.PI / 2, 0]; // Face west
       break;
     case 'west':
-      pos = [gridOffset[0] - halfSize, gateHeight / 2, gridOffset[1] + edgePosition];
-      rotation = [0, Math.PI / 2, 0];
+      pos = [gridOffset[0] - halfSize, 0, gridOffset[1] + edgePosition];
+      rotation = [0, Math.PI / 2, 0]; // Face east
       break;
   }
 
   return (
-    <group position={pos} rotation={rotation} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-      <mesh>
-        <boxGeometry args={scale} />
-        <meshBasicMaterial
-          color={selected ? '#00ffff' : '#00ff00'}
-          transparent
-          opacity={0.6}
-        />
-      </mesh>
-      <lineSegments>
-        <edgesGeometry args={[new THREE.BoxGeometry(...scale)]} />
-        <lineBasicMaterial color={selected ? '#00ffff' : '#00ff00'} />
-      </lineSegments>
-    </group>
+    <GateModel
+      position={pos}
+      rotation={rotation}
+      selected={selected}
+      onClick={onClick}
+    />
   );
 }
 
 function Box({
   position,
-  size,
+  boxType,
   selected,
   onClick
 }: {
   position: [number, number];
-  size: [number, number];
+  boxType: BoxType;
   selected: boolean;
   onClick: () => void;
 }) {
-  const boxHeight = 1.5;
-
   return (
-    <group
-      position={[position[0], boxHeight / 2, position[1]]}
-      onClick={(e) => { e.stopPropagation(); onClick(); }}
-    >
-      <mesh>
-        <boxGeometry args={[size[0], boxHeight, size[1]]} />
-        <meshBasicMaterial
-          color={selected ? '#ff00ff' : '#ff6600'}
-          transparent
-          opacity={0.5}
-        />
-      </mesh>
-      <lineSegments>
-        <edgesGeometry args={[new THREE.BoxGeometry(size[0], boxHeight, size[1])]} />
-        <lineBasicMaterial color={selected ? '#ff00ff' : '#ff8800'} />
-      </lineSegments>
-    </group>
+    <BoxModel
+      position={position}
+      boxType={boxType}
+      selected={selected}
+      onClick={onClick}
+    />
   );
 }
 
@@ -300,8 +398,7 @@ function LayoutScene({
   onAddBox,
   placementMode,
   showFloor,
-  showGrid,
-  newBoxSize
+  showGrid
 }: {
   selectedMap: string;
   gridSize: number;
@@ -316,7 +413,6 @@ function LayoutScene({
   placementMode: 'gate' | 'box' | 'select';
   showFloor: boolean;
   showGrid: boolean;
-  newBoxSize: [number, number];
 }) {
   const planeRef = useRef<THREE.Mesh>(null);
 
@@ -355,7 +451,6 @@ function LayoutScene({
           key={gate.id}
           edge={gate.edge}
           position={gate.position}
-          width={gate.width}
           gridSize={gridSize}
           gridOffset={gridOffset}
           selected={selectedGate === gate.id}
@@ -368,7 +463,7 @@ function LayoutScene({
         <Box
           key={box.id}
           position={box.position}
-          size={box.size}
+          boxType={box.boxType}
           selected={selectedBox === box.id}
           onClick={() => onSelectBox(box.id)}
         />
@@ -412,8 +507,7 @@ export default function StageLayoutEditor() {
   const [newGateWidth, setNewGateWidth] = useState(3);
 
   // New box defaults
-  const [newBoxWidth, setNewBoxWidth] = useState(2);
-  const [newBoxDepth, setNewBoxDepth] = useState(2);
+  const [newBoxType, setNewBoxType] = useState<BoxType>('o01_cont');
 
   // Load all configs on mount
   useEffect(() => {
@@ -467,8 +561,9 @@ export default function StageLayoutEditor() {
     const newBox: BoxData = {
       id: `box_${Date.now()}`,
       position,
-      size: [newBoxWidth, newBoxDepth],
-      label: `Box ${boxes.length + 1}`
+      size: [1, 1], // Size now determined by model
+      label: `${newBoxType} ${boxes.length + 1}`,
+      boxType: newBoxType
     };
     setBoxes(prev => [...prev, newBox]);
     setSelectedBox(newBox.id);
@@ -529,7 +624,7 @@ export default function StageLayoutEditor() {
     if (boxes.length > 0) {
       code += `  obstacles: [\n`;
       boxes.forEach((box, i) => {
-        code += `    { position: [${box.position[0].toFixed(2)}, 0, ${box.position[1].toFixed(2)}], size: [${box.size[0]}, ${box.size[1]}], label: '${box.label}' }${i < boxes.length - 1 ? ',' : ''}\n`;
+        code += `    { position: [${box.position[0].toFixed(2)}, 0, ${box.position[1].toFixed(2)}], type: '${box.boxType}', label: '${box.label}' }${i < boxes.length - 1 ? ',' : ''}\n`;
       });
       code += `  ]\n`;
     }
@@ -902,33 +997,33 @@ export default function StageLayoutEditor() {
             </div>
 
             <div style={{ marginBottom: '10px' }}>
-              <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>
-                Width (X): {newBoxWidth}
+              <label style={{ display: 'block', marginBottom: '5px', fontSize: '11px' }}>
+                Object Type:
               </label>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                step="0.5"
-                value={newBoxWidth}
-                onChange={(e) => setNewBoxWidth(Number(e.target.value))}
-                style={{ width: '100%' }}
-              />
-            </div>
-
-            <div style={{ marginBottom: '10px' }}>
-              <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>
-                Depth (Z): {newBoxDepth}
-              </label>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                step="0.5"
-                value={newBoxDepth}
-                onChange={(e) => setNewBoxDepth(Number(e.target.value))}
-                style={{ width: '100%' }}
-              />
+              <div style={{ display: 'flex', gap: '5px' }}>
+                {(['o01_cont', 'o0c_recont'] as BoxType[]).map(type => (
+                  <button
+                    key={type}
+                    onClick={() => setNewBoxType(type)}
+                    style={{
+                      flex: 1,
+                      padding: '8px 4px',
+                      background: newBoxType === type ? '#aa6600' : '#333',
+                      color: 'white',
+                      border: newBoxType === type ? '2px solid #ffaa00' : '1px solid #555',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontFamily: 'monospace',
+                      fontSize: '10px'
+                    }}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+              <div style={{ fontSize: '10px', color: '#888', marginTop: '5px' }}>
+                {newBoxType === 'o01_cont' ? 'Container box' : 'Recovery container'}
+              </div>
             </div>
           </div>
         )}
@@ -1057,11 +1152,33 @@ export default function StageLayoutEditor() {
               />
             </div>
 
+            <div style={{ marginBottom: '8px' }}>
+              <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>Type:</label>
+              <div style={{ display: 'flex', gap: '5px' }}>
+                {(['o01_cont', 'o0c_recont'] as BoxType[]).map(type => (
+                  <button
+                    key={type}
+                    onClick={() => handleUpdateBox(selectedBoxData.id, { boxType: type })}
+                    style={{
+                      flex: 1,
+                      padding: '6px 4px',
+                      background: selectedBoxData.boxType === type ? '#a06' : '#333',
+                      color: 'white',
+                      border: selectedBoxData.boxType === type ? '2px solid #f0f' : '1px solid #555',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontFamily: 'monospace',
+                      fontSize: '9px'
+                    }}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div style={{ fontSize: '11px', color: '#aaa' }}>
               Position: [{selectedBoxData.position[0].toFixed(2)}, {selectedBoxData.position[1].toFixed(2)}]
-            </div>
-            <div style={{ fontSize: '11px', color: '#aaa' }}>
-              Size: {selectedBoxData.size[0]}x{selectedBoxData.size[1]}
             </div>
           </div>
         )}
@@ -1128,7 +1245,7 @@ export default function StageLayoutEditor() {
                   fontSize: '11px'
                 }}
               >
-                {box.label} ({box.size[0]}x{box.size[1]})
+                {box.label} ({box.boxType})
               </div>
             ))
           )}
@@ -1261,7 +1378,6 @@ export default function StageLayoutEditor() {
             placementMode={placementMode}
             showFloor={showFloor}
             showGrid={showGrid}
-            newBoxSize={[newBoxWidth, newBoxDepth]}
           />
         </Suspense>
       </Canvas>
