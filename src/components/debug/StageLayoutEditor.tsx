@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber';
-import { OrthographicCamera } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import { Suspense, useState, useEffect, useRef } from 'react';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
@@ -313,76 +313,33 @@ function Box({
   );
 }
 
-function FloorCollisionMesh({
+function StageModel({
   selectedMap,
-  showFloor
+  showStage
 }: {
   selectedMap: string;
-  showFloor: boolean;
+  showStage: boolean;
 }) {
-  const [floorGeometry, setFloorGeometry] = useState<THREE.BufferGeometry | null>(null);
+  const [model, setModel] = useState<THREE.Group | null>(null);
 
   useEffect(() => {
-    setFloorGeometry(null);
+    setModel(null);
 
     const loader = new GLTFLoader();
     const valleyDir = getValleyDir(selectedMap);
-    const glbPath = `/${valleyDir}/${selectedMap}/lndmd/${selectedMap}_m.glb`;
+    const glbPath = `/${valleyDir}/${selectedMap}/lndmd/${selectedMap}.glb`;
 
     loader.load(glbPath, (gltf) => {
-      const floorVertices: number[] = [];
-
-      gltf.scene.traverse((object) => {
-        if ((object as THREE.Mesh).isMesh) {
-          const mesh = object as THREE.Mesh;
-          const geometry = mesh.geometry;
-
-          if (geometry.attributes.position) {
-            const positions = geometry.attributes.position;
-            const index = geometry.index;
-
-            if (index) {
-              for (let i = 0; i < index.count; i += 3) {
-                const i0 = index.getX(i);
-                const i1 = index.getX(i + 1);
-                const i2 = index.getX(i + 2);
-
-                const v0 = new THREE.Vector3(positions.getX(i0), positions.getY(i0), positions.getZ(i0));
-                const v1 = new THREE.Vector3(positions.getX(i1), positions.getY(i1), positions.getZ(i1));
-                const v2 = new THREE.Vector3(positions.getX(i2), positions.getY(i2), positions.getZ(i2));
-
-                v0.applyMatrix4(mesh.matrixWorld);
-                v1.applyMatrix4(mesh.matrixWorld);
-                v2.applyMatrix4(mesh.matrixWorld);
-
-                const tolerance = 0.25;
-                if (Math.abs(v0.y) < tolerance && Math.abs(v1.y) < tolerance && Math.abs(v2.y) < tolerance) {
-                  floorVertices.push(v0.x, 0.1, v0.z);
-                  floorVertices.push(v1.x, 0.1, v1.z);
-                  floorVertices.push(v2.x, 0.1, v2.z);
-                }
-              }
-            }
-          }
-        }
-      });
-
-      if (floorVertices.length > 0) {
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(floorVertices, 3));
-        geometry.computeVertexNormals();
-        setFloorGeometry(geometry);
-      }
+      const scene = gltf.scene.clone();
+      setModel(scene);
+    }, undefined, (error) => {
+      console.error('Error loading stage model:', error);
     });
   }, [selectedMap]);
 
-  if (!showFloor || !floorGeometry) return null;
+  if (!showStage || !model) return null;
 
-  return (
-    <mesh geometry={floorGeometry}>
-      <meshBasicMaterial color="#00ff00" transparent opacity={0.3} side={THREE.DoubleSide} />
-    </mesh>
-  );
+  return <primitive object={model} />;
 }
 
 function LayoutScene({
@@ -397,7 +354,7 @@ function LayoutScene({
   onSelectBox,
   onAddBox,
   placementMode,
-  showFloor,
+  showStage,
   showGrid
 }: {
   selectedMap: string;
@@ -411,7 +368,7 @@ function LayoutScene({
   onSelectBox: (id: string | null) => void;
   onAddBox: (position: [number, number]) => void;
   placementMode: 'gate' | 'box' | 'select';
-  showFloor: boolean;
+  showStage: boolean;
   showGrid: boolean;
 }) {
   const planeRef = useRef<THREE.Mesh>(null);
@@ -430,7 +387,7 @@ function LayoutScene({
 
   return (
     <>
-      <FloorCollisionMesh selectedMap={selectedMap} showFloor={showFloor} />
+      <StageModel selectedMap={selectedMap} showStage={showStage} />
 
       {showGrid && <SquareGrid size={gridSize} offset={gridOffset} />}
 
@@ -495,10 +452,8 @@ export default function StageLayoutEditor() {
   const [selectedGate, setSelectedGate] = useState<string | null>(null);
   const [selectedBox, setSelectedBox] = useState<string | null>(null);
   const [placementMode, setPlacementMode] = useState<'gate' | 'box' | 'select'>('select');
-  const [zoom, setZoom] = useState(30);
-  const [cameraPosition, setCameraPosition] = useState({ x: 0, z: 0 });
   const [allConfigs, setAllConfigs] = useState<Record<string, StageLayout>>({});
-  const [showFloor, setShowFloor] = useState(true);
+  const [showStage, setShowStage] = useState(true);
   const [showGrid, setShowGrid] = useState(true);
 
   // New gate defaults
@@ -664,39 +619,10 @@ export default function StageLayoutEditor() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    const panSpeed = 2;
-    switch(e.key) {
-      case 'w':
-      case 'ArrowUp':
-        setCameraPosition(prev => ({ ...prev, z: prev.z - panSpeed }));
-        break;
-      case 's':
-      case 'ArrowDown':
-        setCameraPosition(prev => ({ ...prev, z: prev.z + panSpeed }));
-        break;
-      case 'a':
-      case 'ArrowLeft':
-        setCameraPosition(prev => ({ ...prev, x: prev.x - panSpeed }));
-        break;
-      case 'd':
-      case 'ArrowRight':
-        setCameraPosition(prev => ({ ...prev, x: prev.x + panSpeed }));
-        break;
-      case 'Delete':
-      case 'Backspace':
-        if (selectedGate) handleRemoveGate(selectedGate);
-        if (selectedBox) handleRemoveBox(selectedBox);
-        break;
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      if (selectedGate) handleRemoveGate(selectedGate);
+      if (selectedBox) handleRemoveBox(selectedBox);
     }
-  };
-
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const zoomSpeed = 3;
-    setZoom(prev => {
-      const newZoom = prev + (e.deltaY > 0 ? -zoomSpeed : zoomSpeed);
-      return Math.max(5, Math.min(100, newZoom));
-    });
   };
 
   const selectedGateData = gates.find(g => g.id === selectedGate);
@@ -709,7 +635,6 @@ export default function StageLayoutEditor() {
       style={{ width: '100vw', height: '100vh', position: 'relative' }}
       tabIndex={0}
       onKeyDown={handleKeyDown}
-      onWheel={handleWheel}
     >
       {/* Left Panel */}
       <div style={{
@@ -856,10 +781,10 @@ export default function StageLayoutEditor() {
           <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
             <input
               type="checkbox"
-              checked={showFloor}
-              onChange={(e) => setShowFloor(e.target.checked)}
+              checked={showStage}
+              onChange={(e) => setShowStage(e.target.checked)}
             />
-            Floor
+            Stage
           </label>
           <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
             <input
@@ -1183,21 +1108,6 @@ export default function StageLayoutEditor() {
           </div>
         )}
 
-        {/* Zoom */}
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-            Zoom: {zoom}
-          </label>
-          <input
-            type="range"
-            min="10"
-            max="80"
-            value={zoom}
-            onChange={(e) => setZoom(Number(e.target.value))}
-            style={{ width: '100%' }}
-          />
-        </div>
-
         {/* Items List */}
         <div style={{ marginBottom: '15px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
@@ -1319,9 +1229,11 @@ export default function StageLayoutEditor() {
           color: '#888'
         }}>
           <div><b>Controls:</b></div>
-          <div>WASD / Arrows: Pan camera</div>
+          <div>Left-drag: Rotate view</div>
+          <div>Right-drag: Pan view</div>
+          <div>Scroll: Zoom in/out</div>
           <div>Delete: Remove selected</div>
-          <div>Click: Select / Place box</div>
+          <div>Click ground: Place box</div>
           <div style={{ marginTop: '5px', color: '#8f8' }}>
             <b>Auto-saves to localStorage</b>
           </div>
@@ -1350,18 +1262,16 @@ export default function StageLayoutEditor() {
       </a>
 
       {/* 3D Scene */}
-      <Canvas>
-        <OrthographicCamera
-          makeDefault
-          position={[cameraPosition.x, 50, cameraPosition.z]}
-          zoom={zoom}
-          near={0.1}
-          far={500}
-          rotation={[-Math.PI / 2, 0, 0]}
+      <Canvas camera={{ position: [10, 15, 10], fov: 60, near: 0.1, far: 500 }}>
+        <OrbitControls
+          target={[gridOffset[0], 0, gridOffset[1]]}
+          enableDamping
+          dampingFactor={0.1}
         />
 
-        <ambientLight intensity={0.8} />
-        <directionalLight position={[0, 30, 0]} intensity={0.5} />
+        <ambientLight intensity={0.6} />
+        <directionalLight position={[20, 30, 10]} intensity={0.8} castShadow />
+        <directionalLight position={[-10, 20, -10]} intensity={0.3} />
 
         <Suspense fallback={null}>
           <LayoutScene
@@ -1376,7 +1286,7 @@ export default function StageLayoutEditor() {
             onSelectBox={setSelectedBox}
             onAddBox={handleAddBox}
             placementMode={placementMode}
-            showFloor={showFloor}
+            showStage={showStage}
             showGrid={showGrid}
           />
         </Suspense>
