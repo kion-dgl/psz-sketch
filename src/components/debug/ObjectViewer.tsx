@@ -330,9 +330,41 @@ const OBJECT_DEFAULTS: Record<string, Partial<TextureControls>> = {
   },
 };
 
+// Per-texture defaults for specific objects
+const TEXTURE_DEFAULTS: Record<string, Record<string, Partial<TextureControls>>> = {
+  'o0c_gate.imd': {
+    'o0c_0_gatet.png': {
+      wrapS: THREE.RepeatWrapping,
+      wrapT: THREE.RepeatWrapping,
+      offsetX: 0.56,
+      offsetY: 0.8,
+      repeatX: 1,
+      repeatY: 2,
+    },
+  },
+  'o0c_gatet.imd': {
+    'o0c_0_gatet.png': {
+      wrapS: THREE.RepeatWrapping,
+      wrapT: THREE.RepeatWrapping,
+      offsetX: 0.56,
+      offsetY: 0.8,
+      repeatX: 1,
+      repeatY: 2,
+    },
+  },
+};
+
 function getDefaultsForObject(objectName: string): TextureControls {
   const objectDefaults = OBJECT_DEFAULTS[objectName] || {};
   return { ...DEFAULT_CONTROLS, ...objectDefaults };
+}
+
+function getDefaultsForTexture(objectName: string, textureName: string): TextureControls {
+  const textureDefaults = TEXTURE_DEFAULTS[objectName]?.[textureName];
+  if (textureDefaults) {
+    return { ...DEFAULT_CONTROLS, ...textureDefaults };
+  }
+  return getDefaultsForObject(objectName);
 }
 
 const WRAP_LABELS: Record<number, string> = {
@@ -374,9 +406,9 @@ function clearFromStorage(areaId: string, objectName: string) {
 }
 
 // Objects with animation support
-const ANIMATED_OBJECTS: Record<string, { meshName: string }> = {
-  'o0c_gate.imd': { meshName: 'o0c_gate_3' },
-  'o0c_gatet.imd': { meshName: 'o0c_gatet_3' },
+const ANIMATED_OBJECTS: Record<string, { meshName: string; speed: number; startY: number; maxY: number }> = {
+  'o0c_gate.imd': { meshName: 'o0c_gate_3', speed: 0.8, startY: -0.55, maxY: 0.25 },
+  'o0c_gatet.imd': { meshName: 'o0c_gatet_3', speed: 0.8, startY: -0.55, maxY: 0.25 },
 };
 
 export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
@@ -436,6 +468,17 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
       setPerTextureControls(saved);
       // Reset animation state when switching objects
       setAnimationEnabled(false);
+      // Load animation defaults if this object has animation support
+      const animDefaults = ANIMATED_OBJECTS[selectedObject];
+      if (animDefaults) {
+        setAnimationSpeed(animDefaults.speed);
+        setAnimationStartY(animDefaults.startY);
+        setAnimationMaxY(animDefaults.maxY);
+      } else {
+        setAnimationSpeed(0.5);
+        setAnimationStartY(0);
+        setAnimationMaxY(1.0);
+      }
       // Reset mesh visibility
       setMeshVisibility({});
       // Reset selected texture
@@ -446,12 +489,12 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
   // Initialize per-texture controls with defaults when textures are found
   useEffect(() => {
     if (texturePreviews.length > 0 && selectedObject) {
-      const objectDefaults = getDefaultsForObject(selectedObject);
       setPerTextureControls(prev => {
         const updated = { ...prev };
         texturePreviews.forEach(tex => {
           if (!updated[tex.name]) {
-            updated[tex.name] = { ...objectDefaults };
+            // Use per-texture defaults if available, otherwise object defaults
+            updated[tex.name] = getDefaultsForTexture(selectedObject, tex.name);
           }
         });
         return updated;
@@ -485,10 +528,9 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
   const handleReset = () => {
     if (selectedObject && selectedTexture) {
       // Reset just the selected texture to defaults
-      const objectDefaults = getDefaultsForObject(selectedObject);
       setPerTextureControls(prev => ({
         ...prev,
-        [selectedTexture]: { ...objectDefaults }
+        [selectedTexture]: getDefaultsForTexture(selectedObject, selectedTexture)
       }));
     }
   };
@@ -496,10 +538,9 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
   const handleResetAll = () => {
     if (selectedObject) {
       clearFromStorage(areaId, selectedObject);
-      const objectDefaults = getDefaultsForObject(selectedObject);
       const resetControls: Record<string, TextureControls> = {};
       texturePreviews.forEach(tex => {
-        resetControls[tex.name] = { ...objectDefaults };
+        resetControls[tex.name] = getDefaultsForTexture(selectedObject, tex.name);
       });
       setPerTextureControls(resetControls);
     }
