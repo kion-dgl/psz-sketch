@@ -37,13 +37,13 @@ export default function CounterNPCs() {
     <>
       <NPCModel
         position={[-10.66, 1, -7.93]}
-        rotation={4.06}
+        rotation={4.06 + Math.PI}
         name="Item Storage"
         modelPath={NPC_MODELS.itemStorage}
       />
       <NPCModel
         position={[-8.31, 1, -10.37]}
-        rotation={3.86}
+        rotation={3.86 + Math.PI}
         name="Quest Counter"
         modelPath={NPC_MODELS.questCounter}
       />
