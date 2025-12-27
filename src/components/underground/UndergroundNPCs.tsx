@@ -28,8 +28,8 @@ function NPCModel({ position, rotation = 0, name, modelPath }: NPCModelProps) {
 }
 
 const NPC_MODELS = {
-  enemyCollector: '/objects/special_c2/np_017_00_0.imd/np_017_00_0.glb',
-  photonCollector: '/objects/special_c2/np_018_00_0.imd/np_018_00_0.glb',
+  enemyCollector: '/objects/special_c4/np_017_00_0.imd/np_017_00_0.glb',
+  photonCollector: '/objects/special_c4/np_018_00_0.imd/np_018_00_0.glb',
 };
 
 export default function UndergroundNPCs() {
