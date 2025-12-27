@@ -352,6 +352,15 @@ const TEXTURE_DEFAULTS: Record<string, Record<string, Partial<TextureControls>>>
       repeatY: 2,
     },
   },
+  // o0c_point_1 navigation indicator states:
+  // offsetX: 0.00 = new area (not visited before)
+  // offsetX: 0.12 = unvisited (current default)
+  // offsetX: 0.40 = return to visited area
+  'o0c_point.imd': {
+    'o0c_0_point.png': {
+      offsetX: 0.12,
+    },
+  },
 };
 
 function getDefaultsForObject(objectName: string): TextureControls {
