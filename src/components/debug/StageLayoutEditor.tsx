@@ -1,6 +1,7 @@
 import { Canvas } from '@react-three/fiber';
 import { OrthographicCamera } from '@react-three/drei';
 import { Suspense, useState, useEffect, useRef } from 'react';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 
 type GateEdge = 'north' | 'south' | 'east' | 'west';
@@ -15,7 +16,7 @@ interface GateData {
 
 interface BoxData {
   id: string;
-  position: [number, number];
+  position: [number, number]; // World position
   size: [number, number];
   label: string;
 }
@@ -27,6 +28,34 @@ interface StageLayout {
 }
 
 const STORAGE_KEY = 'stage-layout-configs';
+
+// Stage lists (same as ValleyTriggerDebug)
+const VALLEY_A_MAPS = [
+  's01a_ga1', 's01a_ib1', 's01a_ib2', 's01a_ic1', 's01a_ic3',
+  's01a_lb1', 's01a_lb3', 's01a_lc1', 's01a_lc2', 's01a_na1',
+  's01a_nb2', 's01a_nc2', 's01a_sa1', 's01a_tb3', 's01a_tc3',
+  's01a_td1', 's01a_td2', 's01a_xb2'
+];
+
+const VALLEY_B_MAPS = [
+  's01b_ga1', 's01b_ib1', 's01b_ib2', 's01b_ic1', 's01b_ic3',
+  's01b_lb1', 's01b_lb3', 's01b_lc1', 's01b_lc2', 's01b_na1',
+  's01b_nb2', 's01b_nc2', 's01b_sa1', 's01b_tb3', 's01b_tc3',
+  's01b_td1', 's01b_td2', 's01b_xb2'
+];
+
+const VALLEY_E_MAPS = ['s01e_ia1'];
+const VALLEY_Z_MAPS = ['s01z_na1'];
+
+const ALL_MAPS = [...VALLEY_A_MAPS, ...VALLEY_B_MAPS, ...VALLEY_E_MAPS, ...VALLEY_Z_MAPS];
+
+function getValleyDir(mapId: string): string {
+  const match = mapId.match(/^s01([a-z])_/);
+  if (match) {
+    return `stages/valley_${match[1]}`;
+  }
+  return 'stages/valley_a';
+}
 
 function loadAllConfigs(): Record<string, StageLayout> {
   try {
@@ -41,15 +70,14 @@ function saveAllConfigs(configs: Record<string, StageLayout>) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(configs));
 }
 
-function SquareGrid({ size }: { size: number }) {
+function SquareGrid({ size, offset }: { size: number; offset: [number, number] }) {
   const halfSize = size / 2;
   const lines: JSX.Element[] = [];
 
-  // Grid lines
+  // Grid lines centered on offset
   for (let i = -halfSize; i <= halfSize; i++) {
     const isEdge = Math.abs(i) === halfSize;
     const color = isEdge ? '#ffff00' : (i === 0 ? '#666666' : '#333333');
-    const lineWidth = isEdge ? 2 : 1;
 
     // Horizontal lines (Z direction)
     lines.push(
@@ -58,11 +86,14 @@ function SquareGrid({ size }: { size: number }) {
           <bufferAttribute
             attach="attributes-position"
             count={2}
-            array={new Float32Array([-halfSize, 0.05, i, halfSize, 0.05, i])}
+            array={new Float32Array([
+              offset[0] - halfSize, 0.15, offset[1] + i,
+              offset[0] + halfSize, 0.15, offset[1] + i
+            ])}
             itemSize={3}
           />
         </bufferGeometry>
-        <lineBasicMaterial color={color} linewidth={lineWidth} />
+        <lineBasicMaterial color={color} />
       </line>
     );
 
@@ -73,11 +104,14 @@ function SquareGrid({ size }: { size: number }) {
           <bufferAttribute
             attach="attributes-position"
             count={2}
-            array={new Float32Array([i, 0.05, -halfSize, i, 0.05, halfSize])}
+            array={new Float32Array([
+              offset[0] + i, 0.15, offset[1] - halfSize,
+              offset[0] + i, 0.15, offset[1] + halfSize
+            ])}
             itemSize={3}
           />
         </bufferGeometry>
-        <lineBasicMaterial color={color} linewidth={lineWidth} />
+        <lineBasicMaterial color={color} />
       </line>
     );
   }
@@ -90,6 +124,7 @@ function Gate({
   position,
   width,
   gridSize,
+  gridOffset,
   selected,
   onClick
 }: {
@@ -97,6 +132,7 @@ function Gate({
   position: number;
   width: number;
   gridSize: number;
+  gridOffset: [number, number];
   selected: boolean;
   onClick: () => void;
 }) {
@@ -112,19 +148,17 @@ function Gate({
 
   switch (edge) {
     case 'north':
-      pos = [edgePosition, gateHeight / 2, -halfSize];
-      rotation = [0, 0, 0];
+      pos = [gridOffset[0] + edgePosition, gateHeight / 2, gridOffset[1] - halfSize];
       break;
     case 'south':
-      pos = [edgePosition, gateHeight / 2, halfSize];
-      rotation = [0, 0, 0];
+      pos = [gridOffset[0] + edgePosition, gateHeight / 2, gridOffset[1] + halfSize];
       break;
     case 'east':
-      pos = [halfSize, gateHeight / 2, edgePosition];
+      pos = [gridOffset[0] + halfSize, gateHeight / 2, gridOffset[1] + edgePosition];
       rotation = [0, Math.PI / 2, 0];
       break;
     case 'west':
-      pos = [-halfSize, gateHeight / 2, edgePosition];
+      pos = [gridOffset[0] - halfSize, gateHeight / 2, gridOffset[1] + edgePosition];
       rotation = [0, Math.PI / 2, 0];
       break;
   }
@@ -150,26 +184,19 @@ function Gate({
 function Box({
   position,
   size,
-  gridSize,
   selected,
   onClick
 }: {
   position: [number, number];
   size: [number, number];
-  gridSize: number;
   selected: boolean;
   onClick: () => void;
 }) {
-  const halfSize = gridSize / 2;
   const boxHeight = 1.5;
-
-  // Convert grid-relative position to world position
-  const worldX = position[0] - halfSize + size[0] / 2;
-  const worldZ = position[1] - halfSize + size[1] / 2;
 
   return (
     <group
-      position={[worldX, boxHeight / 2, worldZ]}
+      position={[position[0], boxHeight / 2, position[1]]}
       onClick={(e) => { e.stopPropagation(); onClick(); }}
     >
       <mesh>
@@ -188,8 +215,82 @@ function Box({
   );
 }
 
+function FloorCollisionMesh({
+  selectedMap,
+  showFloor
+}: {
+  selectedMap: string;
+  showFloor: boolean;
+}) {
+  const [floorGeometry, setFloorGeometry] = useState<THREE.BufferGeometry | null>(null);
+
+  useEffect(() => {
+    setFloorGeometry(null);
+
+    const loader = new GLTFLoader();
+    const valleyDir = getValleyDir(selectedMap);
+    const glbPath = `/${valleyDir}/${selectedMap}/lndmd/${selectedMap}_m.glb`;
+
+    loader.load(glbPath, (gltf) => {
+      const floorVertices: number[] = [];
+
+      gltf.scene.traverse((object) => {
+        if ((object as THREE.Mesh).isMesh) {
+          const mesh = object as THREE.Mesh;
+          const geometry = mesh.geometry;
+
+          if (geometry.attributes.position) {
+            const positions = geometry.attributes.position;
+            const index = geometry.index;
+
+            if (index) {
+              for (let i = 0; i < index.count; i += 3) {
+                const i0 = index.getX(i);
+                const i1 = index.getX(i + 1);
+                const i2 = index.getX(i + 2);
+
+                const v0 = new THREE.Vector3(positions.getX(i0), positions.getY(i0), positions.getZ(i0));
+                const v1 = new THREE.Vector3(positions.getX(i1), positions.getY(i1), positions.getZ(i1));
+                const v2 = new THREE.Vector3(positions.getX(i2), positions.getY(i2), positions.getZ(i2));
+
+                v0.applyMatrix4(mesh.matrixWorld);
+                v1.applyMatrix4(mesh.matrixWorld);
+                v2.applyMatrix4(mesh.matrixWorld);
+
+                const tolerance = 0.25;
+                if (Math.abs(v0.y) < tolerance && Math.abs(v1.y) < tolerance && Math.abs(v2.y) < tolerance) {
+                  floorVertices.push(v0.x, 0.1, v0.z);
+                  floorVertices.push(v1.x, 0.1, v1.z);
+                  floorVertices.push(v2.x, 0.1, v2.z);
+                }
+              }
+            }
+          }
+        }
+      });
+
+      if (floorVertices.length > 0) {
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(floorVertices, 3));
+        geometry.computeVertexNormals();
+        setFloorGeometry(geometry);
+      }
+    });
+  }, [selectedMap]);
+
+  if (!showFloor || !floorGeometry) return null;
+
+  return (
+    <mesh geometry={floorGeometry}>
+      <meshBasicMaterial color="#00ff00" transparent opacity={0.3} side={THREE.DoubleSide} />
+    </mesh>
+  );
+}
+
 function LayoutScene({
+  selectedMap,
   gridSize,
+  gridOffset,
   gates,
   boxes,
   selectedGate,
@@ -197,9 +298,14 @@ function LayoutScene({
   onSelectGate,
   onSelectBox,
   onAddBox,
-  placementMode
+  placementMode,
+  showFloor,
+  showGrid,
+  newBoxSize
 }: {
+  selectedMap: string;
   gridSize: number;
+  gridOffset: [number, number];
   gates: GateData[];
   boxes: BoxData[];
   selectedGate: string | null;
@@ -208,9 +314,11 @@ function LayoutScene({
   onSelectBox: (id: string | null) => void;
   onAddBox: (position: [number, number]) => void;
   placementMode: 'gate' | 'box' | 'select';
+  showFloor: boolean;
+  showGrid: boolean;
+  newBoxSize: [number, number];
 }) {
   const planeRef = useRef<THREE.Mesh>(null);
-  const halfSize = gridSize / 2;
 
   const handleClick = (event: any) => {
     if (placementMode !== 'box') return;
@@ -218,17 +326,17 @@ function LayoutScene({
     const point = event.point;
     if (point) {
       // Snap to grid
-      const gridX = Math.floor(point.x + halfSize);
-      const gridZ = Math.floor(point.z + halfSize);
-      if (gridX >= 0 && gridX < gridSize && gridZ >= 0 && gridZ < gridSize) {
-        onAddBox([gridX, gridZ]);
-      }
+      const snappedX = Math.round(point.x * 2) / 2;
+      const snappedZ = Math.round(point.z * 2) / 2;
+      onAddBox([snappedX, snappedZ]);
     }
   };
 
   return (
     <>
-      <SquareGrid size={gridSize} />
+      <FloorCollisionMesh selectedMap={selectedMap} showFloor={showFloor} />
+
+      {showGrid && <SquareGrid size={gridSize} offset={gridOffset} />}
 
       {/* Click plane */}
       <mesh
@@ -237,7 +345,7 @@ function LayoutScene({
         position={[0, 0.01, 0]}
         onClick={handleClick}
       >
-        <planeGeometry args={[gridSize + 10, gridSize + 10]} />
+        <planeGeometry args={[200, 200]} />
         <meshBasicMaterial visible={false} />
       </mesh>
 
@@ -249,6 +357,7 @@ function LayoutScene({
           position={gate.position}
           width={gate.width}
           gridSize={gridSize}
+          gridOffset={gridOffset}
           selected={selectedGate === gate.id}
           onClick={() => onSelectGate(gate.id)}
         />
@@ -260,24 +369,32 @@ function LayoutScene({
           key={box.id}
           position={box.position}
           size={box.size}
-          gridSize={gridSize}
           selected={selectedBox === box.id}
           onClick={() => onSelectBox(box.id)}
         />
       ))}
 
       {/* Origin marker */}
-      <mesh position={[0, 0.1, 0]}>
+      <mesh position={[0, 0.2, 0]}>
         <sphereGeometry args={[0.3, 16, 16]} />
         <meshBasicMaterial color="#ff0000" />
       </mesh>
+
+      {/* Grid center marker */}
+      {showGrid && (
+        <mesh position={[gridOffset[0], 0.25, gridOffset[1]]}>
+          <sphereGeometry args={[0.2, 16, 16]} />
+          <meshBasicMaterial color="#ffff00" />
+        </mesh>
+      )}
     </>
   );
 }
 
 export default function StageLayoutEditor() {
-  const [stageName, setStageName] = useState('new_stage');
+  const [selectedMap, setSelectedMap] = useState('s01a_ga1');
   const [gridSize, setGridSize] = useState(10);
+  const [gridOffset, setGridOffset] = useState<[number, number]>([0, 0]);
   const [gates, setGates] = useState<GateData[]>([]);
   const [boxes, setBoxes] = useState<BoxData[]>([]);
   const [selectedGate, setSelectedGate] = useState<string | null>(null);
@@ -286,6 +403,8 @@ export default function StageLayoutEditor() {
   const [zoom, setZoom] = useState(30);
   const [cameraPosition, setCameraPosition] = useState({ x: 0, z: 0 });
   const [allConfigs, setAllConfigs] = useState<Record<string, StageLayout>>({});
+  const [showFloor, setShowFloor] = useState(true);
+  const [showGrid, setShowGrid] = useState(true);
 
   // New gate defaults
   const [newGateEdge, setNewGateEdge] = useState<GateEdge>('north');
@@ -296,36 +415,41 @@ export default function StageLayoutEditor() {
   const [newBoxWidth, setNewBoxWidth] = useState(2);
   const [newBoxDepth, setNewBoxDepth] = useState(2);
 
+  // Load all configs on mount
   useEffect(() => {
     const configs = loadAllConfigs();
     setAllConfigs(configs);
   }, []);
 
+  // Load config when map changes
   useEffect(() => {
-    if (allConfigs[stageName]) {
-      const config = allConfigs[stageName];
+    const configs = loadAllConfigs();
+    if (configs[selectedMap]) {
+      const config = configs[selectedMap];
       setGridSize(config.gridSize);
       setGates(config.gates);
       setBoxes(config.boxes);
     } else {
+      // Reset to defaults for new map
+      setGridSize(10);
       setGates([]);
       setBoxes([]);
     }
-  }, [stageName, allConfigs]);
+    setSelectedGate(null);
+    setSelectedBox(null);
+  }, [selectedMap]);
 
-  const saveLayout = () => {
+  // Save config when layout changes
+  useEffect(() => {
     const configs = loadAllConfigs();
-    configs[stageName] = { gridSize, gates, boxes };
+    if (gates.length > 0 || boxes.length > 0 || gridSize !== 10) {
+      configs[selectedMap] = { gridSize, gates, boxes };
+    } else {
+      delete configs[selectedMap];
+    }
     saveAllConfigs(configs);
     setAllConfigs(configs);
-  };
-
-  useEffect(() => {
-    // Auto-save on changes
-    if (gates.length > 0 || boxes.length > 0) {
-      saveLayout();
-    }
-  }, [gates, boxes, gridSize]);
+  }, [gates, boxes, gridSize, selectedMap]);
 
   const handleAddGate = () => {
     const newGate: GateData = {
@@ -368,20 +492,23 @@ export default function StageLayoutEditor() {
     setBoxes(prev => prev.map(b => b.id === id ? { ...b, ...updates } : b));
   };
 
+  const handleClearMap = () => {
+    if (confirm(`Clear all layout data for ${selectedMap}?`)) {
+      setGates([]);
+      setBoxes([]);
+      setGridSize(10);
+    }
+  };
+
   const handleExport = () => {
     const halfSize = gridSize / 2;
 
-    let code = `// Stage Layout: ${stageName}\n`;
-    code += `// Grid Size: ${gridSize}x${gridSize}\n\n`;
+    let code = `// Stage Layout: ${selectedMap}\n`;
+    code += `// Grid Size: ${gridSize}x${gridSize}, Offset: [${gridOffset[0]}, ${gridOffset[1]}]\n\n`;
 
     code += `const stageConfig = {\n`;
     code += `  gridSize: ${gridSize},\n`;
-    code += `  bounds: {\n`;
-    code += `    minX: ${-halfSize},\n`;
-    code += `    maxX: ${halfSize},\n`;
-    code += `    minZ: ${-halfSize},\n`;
-    code += `    maxZ: ${halfSize}\n`;
-    code += `  },\n`;
+    code += `  gridOffset: [${gridOffset[0]}, ${gridOffset[1]}],\n`;
 
     if (gates.length > 0) {
       code += `  gates: [\n`;
@@ -389,10 +516,10 @@ export default function StageLayoutEditor() {
         const edgePos = (gate.position - 0.5) * gridSize;
         let worldPos: string;
         switch (gate.edge) {
-          case 'north': worldPos = `[${edgePos.toFixed(2)}, 0, ${-halfSize}]`; break;
-          case 'south': worldPos = `[${edgePos.toFixed(2)}, 0, ${halfSize}]`; break;
-          case 'east': worldPos = `[${halfSize}, 0, ${edgePos.toFixed(2)}]`; break;
-          case 'west': worldPos = `[${-halfSize}, 0, ${edgePos.toFixed(2)}]`; break;
+          case 'north': worldPos = `[${(gridOffset[0] + edgePos).toFixed(2)}, 0, ${(gridOffset[1] - halfSize).toFixed(2)}]`; break;
+          case 'south': worldPos = `[${(gridOffset[0] + edgePos).toFixed(2)}, 0, ${(gridOffset[1] + halfSize).toFixed(2)}]`; break;
+          case 'east': worldPos = `[${(gridOffset[0] + halfSize).toFixed(2)}, 0, ${(gridOffset[1] + edgePos).toFixed(2)}]`; break;
+          case 'west': worldPos = `[${(gridOffset[0] - halfSize).toFixed(2)}, 0, ${(gridOffset[1] + edgePos).toFixed(2)}]`; break;
         }
         code += `    { edge: '${gate.edge}', position: ${worldPos}, width: ${gate.width}, label: '${gate.label}' }${i < gates.length - 1 ? ',' : ''}\n`;
       });
@@ -402,9 +529,7 @@ export default function StageLayoutEditor() {
     if (boxes.length > 0) {
       code += `  obstacles: [\n`;
       boxes.forEach((box, i) => {
-        const worldX = box.position[0] - halfSize + box.size[0] / 2;
-        const worldZ = box.position[1] - halfSize + box.size[1] / 2;
-        code += `    { position: [${worldX.toFixed(2)}, 0, ${worldZ.toFixed(2)}], size: [${box.size[0]}, ${box.size[1]}], label: '${box.label}' }${i < boxes.length - 1 ? ',' : ''}\n`;
+        code += `    { position: [${box.position[0].toFixed(2)}, 0, ${box.position[1].toFixed(2)}], size: [${box.size[0]}, ${box.size[1]}], label: '${box.label}' }${i < boxes.length - 1 ? ',' : ''}\n`;
       });
       code += `  ]\n`;
     }
@@ -413,6 +538,34 @@ export default function StageLayoutEditor() {
 
     navigator.clipboard.writeText(code);
     alert('Layout exported to clipboard!');
+  };
+
+  const handleExportAll = () => {
+    const configs = loadAllConfigs();
+    const configuredMaps = Object.keys(configs).sort();
+
+    if (configuredMaps.length === 0) {
+      alert('No stages configured yet!');
+      return;
+    }
+
+    let code = `// Stage Layout configurations - Generated from layout editor\n`;
+    code += `// Configured stages: ${configuredMaps.length}\n\n`;
+    code += `export const STAGE_LAYOUTS: Record<string, StageLayout> = {\n`;
+
+    configuredMaps.forEach((mapId, mapIndex) => {
+      const config = configs[mapId];
+      code += `  '${mapId}': {\n`;
+      code += `    gridSize: ${config.gridSize},\n`;
+      code += `    gates: ${JSON.stringify(config.gates, null, 6).replace(/\n/g, '\n    ')},\n`;
+      code += `    boxes: ${JSON.stringify(config.boxes, null, 6).replace(/\n/g, '\n    ')}\n`;
+      code += `  }${mapIndex < configuredMaps.length - 1 ? ',' : ''}\n`;
+    });
+
+    code += `};\n`;
+
+    navigator.clipboard.writeText(code);
+    alert(`Exported ${configuredMaps.length} stage configs to clipboard!`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -444,7 +597,8 @@ export default function StageLayoutEditor() {
 
   const selectedGateData = gates.find(g => g.id === selectedGate);
   const selectedBoxData = boxes.find(b => b.id === selectedBox);
-  const configuredStages = Object.keys(allConfigs);
+  const hasCurrentConfig = !!allConfigs[selectedMap];
+  const configuredCount = Object.keys(allConfigs).length;
 
   return (
     <div
@@ -472,15 +626,14 @@ export default function StageLayoutEditor() {
           Stage Layout Editor
         </div>
 
-        {/* Stage Name */}
+        {/* Stage Selector */}
         <div style={{ marginBottom: '15px' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-            Stage Name:
+            Select Stage:
           </label>
-          <input
-            type="text"
-            value={stageName}
-            onChange={(e) => setStageName(e.target.value)}
+          <select
+            value={selectedMap}
+            onChange={(e) => setSelectedMap(e.target.value)}
             style={{
               width: '100%',
               padding: '8px',
@@ -489,33 +642,55 @@ export default function StageLayoutEditor() {
               border: '1px solid #555',
               borderRadius: '4px',
               fontFamily: 'monospace',
-              boxSizing: 'border-box'
+              cursor: 'pointer'
             }}
-          />
-          {configuredStages.length > 0 && (
-            <select
-              value=""
-              onChange={(e) => { if (e.target.value) setStageName(e.target.value); }}
-              style={{
-                width: '100%',
-                marginTop: '5px',
-                padding: '6px',
-                background: '#333',
-                color: '#888',
-                border: '1px solid #555',
-                borderRadius: '4px',
-                fontFamily: 'monospace'
-              }}
-            >
-              <option value="">Load existing...</option>
-              {configuredStages.map(name => (
-                <option key={name} value={name}>{name}</option>
+          >
+            <optgroup label="Valley A">
+              {VALLEY_A_MAPS.map((map) => (
+                <option key={map} value={map}>{allConfigs[map] ? '✓ ' : '  '}{map}</option>
               ))}
-            </select>
-          )}
+            </optgroup>
+            <optgroup label="Valley B">
+              {VALLEY_B_MAPS.map((map) => (
+                <option key={map} value={map}>{allConfigs[map] ? '✓ ' : '  '}{map}</option>
+              ))}
+            </optgroup>
+            <optgroup label="Valley E">
+              {VALLEY_E_MAPS.map((map) => (
+                <option key={map} value={map}>{allConfigs[map] ? '✓ ' : '  '}{map}</option>
+              ))}
+            </optgroup>
+            <optgroup label="Valley Z">
+              {VALLEY_Z_MAPS.map((map) => (
+                <option key={map} value={map}>{allConfigs[map] ? '✓ ' : '  '}{map}</option>
+              ))}
+            </optgroup>
+          </select>
         </div>
 
-        {/* Grid Size */}
+        {/* Config Status */}
+        <div style={{
+          marginBottom: '15px',
+          padding: '10px',
+          background: hasCurrentConfig ? 'rgba(0,150,0,0.3)' : 'rgba(150,100,0,0.3)',
+          borderRadius: '4px',
+          border: hasCurrentConfig ? '1px solid #0a0' : '1px solid #a80'
+        }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
+            {hasCurrentConfig ? '✓ Layout saved' : '⚠ No layout yet'}
+          </div>
+          {hasCurrentConfig && (
+            <div style={{ fontSize: '11px', color: '#aaa' }}>
+              <div>Gates: {gates.length}</div>
+              <div>Boxes: {boxes.length}</div>
+            </div>
+          )}
+          <div style={{ fontSize: '11px', color: '#888', marginTop: '5px' }}>
+            Configured: {configuredCount} / {ALL_MAPS.length} stages
+          </div>
+        </div>
+
+        {/* Grid Controls */}
         <div style={{ marginBottom: '15px' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
             Grid Size: {gridSize}x{gridSize}
@@ -528,6 +703,67 @@ export default function StageLayoutEditor() {
             onChange={(e) => setGridSize(Number(e.target.value))}
             style={{ width: '100%' }}
           />
+        </div>
+
+        <div style={{ marginBottom: '15px', display: 'flex', gap: '10px' }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>Grid X:</label>
+            <input
+              type="number"
+              step="0.5"
+              value={gridOffset[0]}
+              onChange={(e) => setGridOffset([Number(e.target.value), gridOffset[1]])}
+              style={{
+                width: '100%',
+                padding: '6px',
+                background: '#333',
+                color: 'white',
+                border: '1px solid #555',
+                borderRadius: '4px',
+                fontFamily: 'monospace',
+                boxSizing: 'border-box'
+              }}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>Grid Z:</label>
+            <input
+              type="number"
+              step="0.5"
+              value={gridOffset[1]}
+              onChange={(e) => setGridOffset([gridOffset[0], Number(e.target.value)])}
+              style={{
+                width: '100%',
+                padding: '6px',
+                background: '#333',
+                color: 'white',
+                border: '1px solid #555',
+                borderRadius: '4px',
+                fontFamily: 'monospace',
+                boxSizing: 'border-box'
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Toggle visibility */}
+        <div style={{ marginBottom: '15px', display: 'flex', gap: '15px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={showFloor}
+              onChange={(e) => setShowFloor(e.target.checked)}
+            />
+            Floor
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={showGrid}
+              onChange={(e) => setShowGrid(e.target.checked)}
+            />
+            Grid
+          </label>
         </div>
 
         {/* Placement Mode */}
@@ -595,7 +831,7 @@ export default function StageLayoutEditor() {
 
             <div style={{ marginBottom: '10px' }}>
               <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>
-                Position along edge: {(newGatePosition * 100).toFixed(0)}%
+                Position: {(newGatePosition * 100).toFixed(0)}%
               </label>
               <input
                 type="range"
@@ -663,7 +899,7 @@ export default function StageLayoutEditor() {
                 type="range"
                 min="1"
                 max="10"
-                step="1"
+                step="0.5"
                 value={newBoxWidth}
                 onChange={(e) => setNewBoxWidth(Number(e.target.value))}
                 style={{ width: '100%' }}
@@ -678,7 +914,7 @@ export default function StageLayoutEditor() {
                 type="range"
                 min="1"
                 max="10"
-                step="1"
+                step="0.5"
                 value={newBoxDepth}
                 onChange={(e) => setNewBoxDepth(Number(e.target.value))}
                 style={{ width: '100%' }}
@@ -812,7 +1048,7 @@ export default function StageLayoutEditor() {
             </div>
 
             <div style={{ fontSize: '11px', color: '#aaa' }}>
-              Position: [{selectedBoxData.position[0]}, {selectedBoxData.position[1]}]
+              Position: [{selectedBoxData.position[0].toFixed(2)}, {selectedBoxData.position[1].toFixed(2)}]
             </div>
             <div style={{ fontSize: '11px', color: '#aaa' }}>
               Size: {selectedBoxData.size[0]}x{selectedBoxData.size[1]}
@@ -837,8 +1073,8 @@ export default function StageLayoutEditor() {
 
         {/* Items List */}
         <div style={{ marginBottom: '15px' }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
-            Gates ({gates.length}):
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+            <span style={{ fontWeight: 'bold' }}>Gates ({gates.length}):</span>
           </div>
           {gates.length === 0 ? (
             <div style={{ color: '#666', fontSize: '11px' }}>No gates</div>
@@ -888,27 +1124,67 @@ export default function StageLayoutEditor() {
           )}
         </div>
 
-        {/* Export */}
-        <button
-          onClick={handleExport}
-          style={{
-            width: '100%',
-            padding: '10px',
-            background: '#006644',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontFamily: 'monospace',
-            fontWeight: 'bold'
-          }}
-        >
-          Export Layout
-        </button>
+        {/* Buttons */}
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+          <button
+            onClick={handleExport}
+            style={{
+              flex: 1,
+              padding: '10px',
+              background: '#0066aa',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontFamily: 'monospace',
+              fontWeight: 'bold',
+              fontSize: '11px'
+            }}
+          >
+            Copy This
+          </button>
+          <button
+            onClick={handleExportAll}
+            disabled={configuredCount === 0}
+            style={{
+              flex: 1,
+              padding: '10px',
+              background: configuredCount === 0 ? '#333' : '#006644',
+              color: configuredCount === 0 ? '#666' : 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: configuredCount === 0 ? 'not-allowed' : 'pointer',
+              fontFamily: 'monospace',
+              fontWeight: 'bold',
+              fontSize: '11px'
+            }}
+          >
+            Export All ({configuredCount})
+          </button>
+        </div>
+
+        {hasCurrentConfig && (
+          <button
+            onClick={handleClearMap}
+            style={{
+              width: '100%',
+              padding: '8px',
+              background: '#660000',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontFamily: 'monospace',
+              fontSize: '11px',
+              marginBottom: '10px'
+            }}
+          >
+            Clear This Stage
+          </button>
+        )}
 
         {/* Instructions */}
         <div style={{
-          marginTop: '15px',
           padding: '10px',
           background: '#222',
           borderRadius: '4px',
@@ -962,7 +1238,9 @@ export default function StageLayoutEditor() {
 
         <Suspense fallback={null}>
           <LayoutScene
+            selectedMap={selectedMap}
             gridSize={gridSize}
+            gridOffset={gridOffset}
             gates={gates}
             boxes={boxes}
             selectedGate={selectedGate}
@@ -971,6 +1249,9 @@ export default function StageLayoutEditor() {
             onSelectBox={setSelectedBox}
             onAddBox={handleAddBox}
             placementMode={placementMode}
+            showFloor={showFloor}
+            showGrid={showGrid}
+            newBoxSize={[newBoxWidth, newBoxDepth]}
           />
         </Suspense>
       </Canvas>
