@@ -327,7 +327,8 @@ function StageModel({
 
     const loader = new GLTFLoader();
     const valleyDir = getValleyDir(selectedMap);
-    const glbPath = `/${valleyDir}/${selectedMap}/lndmd/${selectedMap}.glb`;
+    // Stage files use _m suffix for the mesh
+    const glbPath = `/${valleyDir}/${selectedMap}/lndmd/${selectedMap}_m.glb`;
 
     loader.load(glbPath, (gltf) => {
       const scene = gltf.scene.clone();
@@ -340,6 +341,47 @@ function StageModel({
   if (!showStage || !model) return null;
 
   return <primitive object={model} />;
+}
+
+// Visual ground plane for placement feedback
+function GroundPlane({
+  gridSize,
+  gridOffset,
+  placementMode,
+  onClick
+}: {
+  gridSize: number;
+  gridOffset: [number, number];
+  placementMode: 'gate' | 'box' | 'select';
+  onClick: (position: [number, number]) => void;
+}) {
+  const handleClick = (event: any) => {
+    if (placementMode !== 'box') return;
+    event.stopPropagation();
+    const point = event.point;
+    if (point) {
+      // Snap to 0.5 grid
+      const snappedX = Math.round(point.x * 2) / 2;
+      const snappedZ = Math.round(point.z * 2) / 2;
+      onClick([snappedX, snappedZ]);
+    }
+  };
+
+  return (
+    <mesh
+      rotation={[-Math.PI / 2, 0, 0]}
+      position={[gridOffset[0], 0.02, gridOffset[1]]}
+      onClick={handleClick}
+    >
+      <planeGeometry args={[gridSize, gridSize]} />
+      <meshBasicMaterial
+        color={placementMode === 'box' ? '#004400' : '#222222'}
+        transparent
+        opacity={placementMode === 'box' ? 0.3 : 0.15}
+        side={THREE.DoubleSide}
+      />
+    </mesh>
+  );
 }
 
 function LayoutScene({
@@ -371,36 +413,19 @@ function LayoutScene({
   showStage: boolean;
   showGrid: boolean;
 }) {
-  const planeRef = useRef<THREE.Mesh>(null);
-
-  const handleClick = (event: any) => {
-    if (placementMode !== 'box') return;
-    event.stopPropagation();
-    const point = event.point;
-    if (point) {
-      // Snap to grid
-      const snappedX = Math.round(point.x * 2) / 2;
-      const snappedZ = Math.round(point.z * 2) / 2;
-      onAddBox([snappedX, snappedZ]);
-    }
-  };
-
   return (
     <>
       <StageModel selectedMap={selectedMap} showStage={showStage} />
 
       {showGrid && <SquareGrid size={gridSize} offset={gridOffset} />}
 
-      {/* Click plane */}
-      <mesh
-        ref={planeRef}
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, 0.01, 0]}
-        onClick={handleClick}
-      >
-        <planeGeometry args={[200, 200]} />
-        <meshBasicMaterial visible={false} />
-      </mesh>
+      {/* Visual ground plane for placement */}
+      <GroundPlane
+        gridSize={gridSize}
+        gridOffset={gridOffset}
+        placementMode={placementMode}
+        onClick={onAddBox}
+      />
 
       {/* Gates */}
       {gates.map((gate) => (
