@@ -55,8 +55,8 @@ function getWeatherAdjustedLighting(lighting: LightingConfig, weather: Weather):
     // Rain uses darker fog
     fogColor: weather === 'rain' ? '#3a4a3a' : weather === 'rain-heavy' ? '#2a3a2a' : weather === 'foggy' ? '#6a8a6a' : lighting.fogColor,
     // Rain darkens the scene - heavy rain is very dark to emphasize lamp posts
-    ambientIntensity: weather === 'rain' ? lighting.ambientIntensity * 0.7 : weather === 'rain-heavy' ? lighting.ambientIntensity * 0.15 : lighting.ambientIntensity,
-    directionalIntensity: weather === 'rain' ? lighting.directionalIntensity * 0.5 : weather === 'rain-heavy' ? lighting.directionalIntensity * 0.1 : lighting.directionalIntensity,
+    ambientIntensity: weather === 'rain' ? (lighting.ambientIntensity ?? 0.5) * 0.7 : weather === 'rain-heavy' ? (lighting.ambientIntensity ?? 0.5) * 0.15 : lighting.ambientIntensity,
+    directionalIntensity: weather === 'rain' ? (lighting.directionalIntensity ?? 0.7) * 0.5 : weather === 'rain-heavy' ? (lighting.directionalIntensity ?? 0.7) * 0.1 : lighting.directionalIntensity,
   };
 }
 

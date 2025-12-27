@@ -52,8 +52,8 @@ function getWeatherAdjustedLighting(lighting: LightingConfig, weather: Weather):
     fogNear: weather === 'humid' ? 15 : weather === 'rain' ? 10 : lighting.fogNear,
     fogFar: weather === 'humid' ? 80 : weather === 'rain' ? 50 : lighting.fogFar,
     fogColor: weather === 'humid' ? '#7a9a6a' : weather === 'rain' ? '#4a5a4a' : lighting.fogColor,
-    ambientIntensity: weather === 'rain' ? lighting.ambientIntensity * 0.6 : lighting.ambientIntensity,
-    directionalIntensity: weather === 'rain' ? lighting.directionalIntensity * 0.4 : lighting.directionalIntensity,
+    ambientIntensity: weather === 'rain' ? (lighting.ambientIntensity ?? 0.25) * 0.6 : lighting.ambientIntensity,
+    directionalIntensity: weather === 'rain' ? (lighting.directionalIntensity ?? 0.3) * 0.4 : lighting.directionalIntensity,
   };
 }
 

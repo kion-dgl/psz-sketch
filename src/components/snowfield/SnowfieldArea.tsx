@@ -55,8 +55,8 @@ function getWeatherAdjustedLighting(lighting: LightingConfig, weather: Weather):
     // Snow uses whiter fog
     fogColor: weather === 'snowing' ? '#d8e8f0' : weather === 'blizzard' ? '#e8f0f8' : lighting.fogColor,
     // Blizzard darkens the scene slightly
-    ambientIntensity: weather === 'blizzard' ? lighting.ambientIntensity * 0.7 : lighting.ambientIntensity,
-    directionalIntensity: weather === 'blizzard' ? lighting.directionalIntensity * 0.5 : lighting.directionalIntensity,
+    ambientIntensity: weather === 'blizzard' ? (lighting.ambientIntensity ?? 0.6) * 0.7 : lighting.ambientIntensity,
+    directionalIntensity: weather === 'blizzard' ? (lighting.directionalIntensity ?? 0.8) * 0.5 : lighting.directionalIntensity,
   };
 }
 

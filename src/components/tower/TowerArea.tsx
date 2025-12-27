@@ -51,8 +51,8 @@ function getWeatherAdjustedLighting(lighting: LightingConfig, weather: Weather):
     ...lighting,
     // Tower keeps distant fog regardless of weather
     fogColor: weather === 'humid' ? '#252018' : weather === 'rain' ? '#1a1510' : lighting.fogColor,
-    ambientIntensity: weather === 'rain' ? lighting.ambientIntensity * 0.7 : lighting.ambientIntensity,
-    directionalIntensity: weather === 'rain' ? lighting.directionalIntensity * 0.5 : lighting.directionalIntensity,
+    ambientIntensity: weather === 'rain' ? (lighting.ambientIntensity ?? 0.4) * 0.7 : lighting.ambientIntensity,
+    directionalIntensity: weather === 'rain' ? (lighting.directionalIntensity ?? 0.5) * 0.5 : lighting.directionalIntensity,
   };
 }
 

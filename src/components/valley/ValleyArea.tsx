@@ -54,8 +54,8 @@ function getWeatherAdjustedLighting(lighting: LightingConfig, weather: Weather):
     // Rain uses dark blue fog
     fogColor: weather === 'rain' ? '#2a3a5a' : weather === 'rain-heavy' ? '#1a2a4a' : lighting.fogColor,
     // Rain darkens the scene
-    ambientIntensity: weather === 'rain' ? lighting.ambientIntensity * 0.7 : weather === 'rain-heavy' ? lighting.ambientIntensity * 0.5 : lighting.ambientIntensity,
-    directionalIntensity: weather === 'rain' ? lighting.directionalIntensity * 0.5 : weather === 'rain-heavy' ? lighting.directionalIntensity * 0.3 : lighting.directionalIntensity,
+    ambientIntensity: weather === 'rain' ? (lighting.ambientIntensity ?? 0.6) * 0.7 : weather === 'rain-heavy' ? (lighting.ambientIntensity ?? 0.6) * 0.5 : lighting.ambientIntensity,
+    directionalIntensity: weather === 'rain' ? (lighting.directionalIntensity ?? 0.8) * 0.5 : weather === 'rain-heavy' ? (lighting.directionalIntensity ?? 0.8) * 0.3 : lighting.directionalIntensity,
   };
 }
 
