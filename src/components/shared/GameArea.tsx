@@ -121,14 +121,14 @@ export default function GameArea({
     openShop(npcName);
   };
 
-  // Load character and handle spawn config
+  // Load character and handle spawn config (runs once on mount)
   useEffect(() => {
     // Check URL parameters for spawn
     const urlParams = new URLSearchParams(window.location.search);
 
     // Check for named spawn config (lobby style)
     const spawnName = urlParams.get('spawn');
-    if (spawnName) {
+    if (spawnName && spawnConfigs.length > 0) {
       const config = spawnConfigs.find(c => c.condition === spawnName);
       if (config) {
         setSpawnPosition(config.position);
@@ -167,7 +167,8 @@ export default function GameArea({
     } catch {
       setLoading(false);
     }
-  }, [setSelectedCharacter, spawnConfigs, defaultSpawnPosition, defaultSpawnRotation]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setSelectedCharacter]); // Only run on mount - spawn configs are read once
 
   // Debug position logging
   useEffect(() => {
