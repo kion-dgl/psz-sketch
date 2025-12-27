@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Grid } from '@react-three/drei';
-import { Suspense, useState, useEffect, useRef, useMemo } from 'react';
+import { Suspense, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import * as THREE from 'three';
 
 interface TextureControls {
@@ -144,6 +144,7 @@ function ObjectModel({
   }, [textureControls]);
 
   // Animation loop for the beam mesh position
+  const frameCountRef = useRef(0);
   useFrame((_, delta) => {
     if (!animationConfig?.enabled || !animatedMeshRef.current) return;
 
@@ -155,6 +156,16 @@ function ObjectModel({
     // Interpolate Y position from startY to maxY
     const currentY = animationConfig.startY + (animationConfig.maxY - animationConfig.startY) * animationProgressRef.current;
     animatedMeshRef.current.position.y = currentY;
+
+    // Debug log every 60 frames
+    frameCountRef.current++;
+    if (frameCountRef.current % 60 === 0) {
+      console.log('Animation frame:', {
+        progress: animationProgressRef.current.toFixed(2),
+        currentY: currentY.toFixed(2),
+        meshPosition: animatedMeshRef.current.position.y.toFixed(2),
+      });
+    }
   });
 
   return <primitive object={clonedScene} />;
@@ -299,13 +310,13 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
     ? `/objects/${areaId}/${selectedObject}/${selectedObject.replace('.imd', '.glb')}`
     : null;
 
-  const handleMeshesFound = (newMeshes: MeshInfo[]) => {
+  const handleMeshesFound = useCallback((newMeshes: MeshInfo[]) => {
     setMeshes(newMeshes);
-  };
+  }, []);
 
-  const handleTexturesFound = (newTextures: TextureInfo[]) => {
+  const handleTexturesFound = useCallback((newTextures: TextureInfo[]) => {
     setTexturePreviews(newTextures);
-  };
+  }, []);
 
   const handleReset = () => {
     if (selectedObject) {
