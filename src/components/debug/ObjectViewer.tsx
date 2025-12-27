@@ -233,8 +233,8 @@ function clearFromStorage(areaId: string, objectName: string) {
 
 // Objects with animation support
 const ANIMATED_OBJECTS: Record<string, { meshName: string }> = {
-  'o0c_gate.imd': { meshName: 'o0c_gate_4' },
-  'o0c_gatet.imd': { meshName: 'o0c_gatet_4' },
+  'o0c_gate.imd': { meshName: 'o0c_1_gate' },
+  'o0c_gatet.imd': { meshName: 'o0c_1_gate' },
 };
 
 export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
