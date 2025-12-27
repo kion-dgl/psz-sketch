@@ -158,48 +158,113 @@ function ObjectModel({
 
   // Animation loop for the beam mesh position
   const animLoggedRef = useRef(false);
-  const wrapperGroupRef = useRef<THREE.Group | null>(null);
+  const animMeshCloneRef = useRef<THREE.Mesh | null>(null);
+  const originalMeshRef = useRef<THREE.Object3D | null>(null);
 
   useFrame((_, delta) => {
     if (!animationConfig?.enabled || !animatedMeshRef.current) {
-      // When animation stops, remove wrapper group
-      if (wrapperGroupRef.current && animatedMeshRef.current) {
-        const wrapper = wrapperGroupRef.current;
-        const mesh = animatedMeshRef.current;
-        const parent = wrapper.parent;
-        if (parent) {
-          parent.add(mesh);
-          parent.remove(wrapper);
-        }
-        wrapperGroupRef.current = null;
+      // Reset: restore original mesh visibility, remove clone
+      if (originalMeshRef.current) {
+        originalMeshRef.current.visible = true;
+        originalMeshRef.current = null;
+      }
+      if (animMeshCloneRef.current && animMeshCloneRef.current.parent) {
+        animMeshCloneRef.current.parent.remove(animMeshCloneRef.current);
+        animMeshCloneRef.current = null;
       }
       animLoggedRef.current = false;
+      animationProgressRef.current = 0;
       return;
     }
 
-    // Create wrapper group on first animation frame
+    const mesh = animatedMeshRef.current as THREE.SkinnedMesh;
+
+    // Create a regular mesh clone on first animation frame
     if (!animLoggedRef.current) {
-      const mesh = animatedMeshRef.current;
-      const parent = mesh.parent;
+      console.log('Animation started for mesh:', mesh.name);
+      console.log('Is SkinnedMesh:', mesh.isSkinnedMesh);
+      console.log('Mesh type:', mesh.type);
 
-      if (parent && !wrapperGroupRef.current) {
-        // Create a wrapper group
-        const wrapper = new THREE.Group();
-        wrapper.name = 'animation_wrapper';
+      // Create a non-skinned clone for animation
+      if (mesh.isSkinnedMesh) {
+        // Bake the current pose into a new geometry
+        const bakedGeometry = mesh.geometry.clone();
 
-        // Store mesh's world position
-        const worldPos = new THREE.Vector3();
-        mesh.getWorldPosition(worldPos);
+        // Apply bind matrix to get proper world-space geometry
+        const positionAttribute = bakedGeometry.attributes.position;
+        const skinIndexAttribute = bakedGeometry.attributes.skinIndex;
+        const skinWeightAttribute = bakedGeometry.attributes.skinWeight;
 
-        // Insert wrapper between parent and mesh
-        parent.add(wrapper);
-        wrapper.add(mesh);
+        if (positionAttribute && skinIndexAttribute && skinWeightAttribute) {
+          const boneMatrices = mesh.skeleton.boneMatrices;
+          const bindMatrix = mesh.bindMatrix;
+          const bindMatrixInverse = mesh.bindMatrixInverse;
 
-        wrapperGroupRef.current = wrapper;
-        console.log('Created animation wrapper for:', mesh.name, 'Parent:', parent.name || parent.type);
+          const vertex = new THREE.Vector3();
+          const temp = new THREE.Vector3();
+          const skinned = new THREE.Vector3();
+          const skinIndices = new THREE.Vector4();
+          const skinWeights = new THREE.Vector4();
+          const boneMatrix = new THREE.Matrix4();
+
+          for (let i = 0; i < positionAttribute.count; i++) {
+            vertex.fromBufferAttribute(positionAttribute, i);
+            skinIndices.fromBufferAttribute(skinIndexAttribute, i);
+            skinWeights.fromBufferAttribute(skinWeightAttribute, i);
+
+            // Apply bind matrix
+            vertex.applyMatrix4(bindMatrix);
+
+            skinned.set(0, 0, 0);
+
+            for (let j = 0; j < 4; j++) {
+              const weight = skinWeights.getComponent(j);
+              if (weight !== 0) {
+                const boneIndex = skinIndices.getComponent(j);
+                boneMatrix.fromArray(boneMatrices, boneIndex * 16);
+                temp.copy(vertex).applyMatrix4(boneMatrix).multiplyScalar(weight);
+                skinned.add(temp);
+              }
+            }
+
+            // Apply inverse bind matrix
+            skinned.applyMatrix4(bindMatrixInverse);
+
+            positionAttribute.setXYZ(i, skinned.x, skinned.y, skinned.z);
+          }
+          positionAttribute.needsUpdate = true;
+        }
+
+        // Create regular mesh with the baked geometry
+        const clonedMaterial = Array.isArray(mesh.material)
+          ? mesh.material.map(m => m.clone())
+          : mesh.material.clone();
+        const regularMesh = new THREE.Mesh(bakedGeometry, clonedMaterial);
+        regularMesh.name = mesh.name + '_animated';
+
+        // Copy transform from original
+        regularMesh.position.copy(mesh.position);
+        regularMesh.rotation.copy(mesh.rotation);
+        regularMesh.scale.copy(mesh.scale);
+
+        // Add to parent
+        if (mesh.parent) {
+          mesh.parent.add(regularMesh);
+          console.log('Created animated clone, added to parent:', mesh.parent.name);
+        }
+
+        // Hide original, store references
+        originalMeshRef.current = mesh;
+        mesh.visible = false;
+        animMeshCloneRef.current = regularMesh;
+
+        console.log('Clone created at position:', regularMesh.position);
+      } else {
+        // Not a skinned mesh, just animate directly
+        animMeshCloneRef.current = mesh as THREE.Mesh;
+        console.log('Using mesh directly (not skinned)');
       }
 
-      console.log('Animation started for mesh:', mesh.name);
       animLoggedRef.current = true;
     }
 
@@ -211,9 +276,9 @@ function ObjectModel({
     // Interpolate Y position from startY to maxY
     const currentY = animationConfig.startY + (animationConfig.maxY - animationConfig.startY) * animationProgressRef.current;
 
-    // Animate the wrapper group's Y position
-    if (wrapperGroupRef.current) {
-      wrapperGroupRef.current.position.y = currentY;
+    // Animate the clone
+    if (animMeshCloneRef.current) {
+      animMeshCloneRef.current.position.y = currentY;
     }
   });
 
