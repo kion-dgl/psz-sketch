@@ -12,6 +12,13 @@ interface TextureControls {
   repeatY: number;
 }
 
+interface TextureInfo {
+  name: string;
+  dataUrl: string;
+  width: number;
+  height: number;
+}
+
 interface MeshInfo {
   name: string;
   geometry: string;
@@ -28,11 +35,13 @@ const WRAP_OPTIONS: { label: string; value: THREE.Wrapping }[] = [
 function ObjectModel({
   modelPath,
   textureControls,
-  onMeshesFound
+  onMeshesFound,
+  onTexturesFound
 }: {
   modelPath: string;
   textureControls: TextureControls;
   onMeshesFound: (meshes: MeshInfo[]) => void;
+  onTexturesFound: (textures: TextureInfo[]) => void;
 }) {
   const { scene } = useGLTF(modelPath);
   const clonedScene = useMemo(() => scene.clone(), [scene]);
@@ -41,6 +50,8 @@ function ObjectModel({
   useEffect(() => {
     const meshes: MeshInfo[] = [];
     const textures: THREE.Texture[] = [];
+    const textureInfos: TextureInfo[] = [];
+    const seenTextures = new Set<string>();
 
     clonedScene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
@@ -51,7 +62,33 @@ function ObjectModel({
           if (mat instanceof THREE.MeshStandardMaterial || mat instanceof THREE.MeshBasicMaterial) {
             if (mat.map) {
               textures.push(mat.map);
-              textureNames.push(mat.map.name || 'unnamed');
+              const texName = mat.map.name || `texture_${textures.length}`;
+              textureNames.push(texName);
+
+              // Extract texture preview (avoid duplicates)
+              if (!seenTextures.has(texName)) {
+                seenTextures.add(texName);
+                const image = mat.map.image;
+                if (image) {
+                  try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = image.width || 64;
+                    canvas.height = image.height || 64;
+                    const ctx = canvas.getContext('2d');
+                    if (ctx) {
+                      ctx.drawImage(image, 0, 0);
+                      textureInfos.push({
+                        name: texName,
+                        dataUrl: canvas.toDataURL(),
+                        width: canvas.width,
+                        height: canvas.height,
+                      });
+                    }
+                  } catch {
+                    // Cross-origin or other error, skip preview
+                  }
+                }
+              }
             }
           }
         });
@@ -67,7 +104,8 @@ function ObjectModel({
 
     texturesRef.current = textures;
     onMeshesFound(meshes);
-  }, [clonedScene, onMeshesFound]);
+    onTexturesFound(textureInfos);
+  }, [clonedScene, onMeshesFound, onTexturesFound]);
 
   useEffect(() => {
     texturesRef.current.forEach((texture) => {
@@ -90,6 +128,7 @@ interface ObjectViewerProps {
 export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
   const [selectedObject, setSelectedObject] = useState<string | null>(null);
   const [meshes, setMeshes] = useState<MeshInfo[]>([]);
+  const [texturePreviews, setTexturePreviews] = useState<TextureInfo[]>([]);
   const [textureControls, setTextureControls] = useState<TextureControls>({
     wrapS: THREE.RepeatWrapping,
     wrapT: THREE.RepeatWrapping,
@@ -105,6 +144,10 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
 
   const handleMeshesFound = (newMeshes: MeshInfo[]) => {
     setMeshes(newMeshes);
+  };
+
+  const handleTexturesFound = (newTextures: TextureInfo[]) => {
+    setTexturePreviews(newTextures);
   };
 
   return (
@@ -145,6 +188,7 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
                 modelPath={modelPath}
                 textureControls={textureControls}
                 onMeshesFound={handleMeshesFound}
+                onTexturesFound={handleTexturesFound}
               />
             </Suspense>
             <OrbitControls />
@@ -202,6 +246,41 @@ export default function ObjectViewer({ areaId, objects }: ObjectViewerProps) {
           </div>
         ) : (
           <div style={{ color: '#666', marginBottom: '1.5rem' }}>No object selected</div>
+        )}
+
+        <h3 style={{ color: '#88aaff' }}>Texture Previews</h3>
+        {texturePreviews.length > 0 ? (
+          <div style={{ marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {texturePreviews.map((tex, i) => (
+              <div key={i} style={{
+                background: '#2a2a4a',
+                padding: '8px',
+                borderRadius: '4px',
+                textAlign: 'center',
+              }}>
+                <img
+                  src={tex.dataUrl}
+                  alt={tex.name}
+                  style={{
+                    width: '80px',
+                    height: '80px',
+                    objectFit: 'contain',
+                    imageRendering: 'pixelated',
+                    background: '#111',
+                    borderRadius: '4px',
+                  }}
+                />
+                <div style={{ fontSize: '9px', color: '#888', marginTop: '4px', wordBreak: 'break-all' }}>
+                  {tex.name}
+                </div>
+                <div style={{ fontSize: '8px', color: '#666' }}>
+                  {tex.width}x{tex.height}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ color: '#666', marginBottom: '1.5rem', fontSize: '12px' }}>No textures found</div>
         )}
 
         <h3 style={{ color: '#88aaff' }}>Texture Controls</h3>
