@@ -1,19 +1,23 @@
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { useMemo, useRef, useEffect } from 'react';
+import { RigidBody, CuboidCollider } from '@react-three/rapier';
+import { useMemo, useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 
 type GateEdge = 'north' | 'south' | 'east' | 'west';
 type BoxType = 'valley_cont' | 'valley_recont';
+type SwitchType = 'valley_switchf';
 
 export interface GateConfig {
+  id?: string; // Unique identifier for switch targeting
   edge: GateEdge;
   x: number;
   z: number;
   scale: number;
   label?: string;
   animated?: boolean;
+  blocked?: boolean; // Adds collision - player can't pass through
 }
 
 export interface TextureConfig {
@@ -33,9 +37,19 @@ export interface BoxConfig {
   texture?: TextureConfig;
 }
 
+export interface SwitchConfig {
+  x: number;
+  z: number;
+  switchType: SwitchType;
+  targetGateId: string; // ID of the gate this switch controls
+  label?: string;
+}
+
 export interface StageObjectsConfig {
   gates?: GateConfig[];
   boxes?: BoxConfig[];
+  switches?: SwitchConfig[];
+  onGateUnlocked?: (gateId: string) => void; // Callback when a gate is unlocked
 }
 
 const GATE_MODEL_PATH = '/objects/01_o01a/o0c_gate.imd/o0c_gate.glb';
@@ -43,6 +57,12 @@ const BOX_MODEL_PATHS: Record<BoxType, string> = {
   'valley_cont': '/objects/01_o01a/o01_cont.imd/o01_cont.glb',
   'valley_recont': '/objects/01_o01z/o0c_recont.imd/o0c_recont.glb',
 };
+const SWITCH_MODEL_PATHS: Record<SwitchType, string> = {
+  'valley_switchf': '/objects/01_o01a/o0c_switchf.imd/o0c_switchf.glb',
+};
+
+// Laser texture name in gate model (hide when gate is deactivated)
+const GATE_LASER_TEXTURE = 'o0c_1_gate';
 
 function getGateRotation(edge: GateEdge): number {
   switch (edge) {
@@ -61,25 +81,55 @@ const GATE_ANIMATION = {
   maxY: 0.25,
 };
 
-function GateModel({ x, z, edge, scale, animated = false }: GateConfig) {
+// Gate collision dimensions
+const GATE_COLLISION = {
+  width: 6.0,
+  height: 3.0,
+  depth: 0.5,
+};
+
+interface GateModelProps extends GateConfig {
+  active?: boolean; // When false, gate is unlocked (no collision, lasers hidden)
+}
+
+function GateModel({ x, z, edge, scale, animated = false, blocked = false, active = true }: GateModelProps) {
   const { scene } = useGLTF(GATE_MODEL_PATH);
   const rotation = getGateRotation(edge);
   const animationProgress = useRef(0);
   const animatedMeshRef = useRef<THREE.Object3D | null>(null);
+  const laserMeshesRef = useRef<THREE.Mesh[]>([]);
 
   const clonedScene = useMemo(() => {
     return SkeletonUtils.clone(scene);
   }, [scene]);
 
-  // Find the animated mesh after clone is created
+  // Find the animated mesh and laser meshes after clone is created
   useEffect(() => {
     if (!clonedScene) return;
+    const laserMeshes: THREE.Mesh[] = [];
     clonedScene.traverse((child) => {
       if (child.name === GATE_ANIMATION.meshName) {
         animatedMeshRef.current = child;
       }
+      // Find laser meshes by checking texture name
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        const material = mesh.material as THREE.MeshStandardMaterial;
+        if (material.map?.name?.includes(GATE_LASER_TEXTURE) ||
+            material.name?.includes(GATE_LASER_TEXTURE)) {
+          laserMeshes.push(mesh);
+        }
+      }
     });
+    laserMeshesRef.current = laserMeshes;
   }, [clonedScene]);
+
+  // Update laser visibility based on active state
+  useEffect(() => {
+    laserMeshesRef.current.forEach(mesh => {
+      mesh.visible = active;
+    });
+  }, [active]);
 
   // Animate the gate mesh
   useFrame((_, delta) => {
@@ -95,11 +145,35 @@ function GateModel({ x, z, edge, scale, animated = false }: GateConfig) {
     animatedMeshRef.current.position.y = currentY;
   });
 
-  return (
+  const gateContent = (
     <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
       <primitive object={clonedScene} scale={[scale, scale, scale]} />
     </group>
   );
+
+  // If blocked AND active, add collision (when deactivated, no collision)
+  if (blocked && active) {
+    return (
+      <>
+        {gateContent}
+        <RigidBody
+          type="fixed"
+          position={[x, GATE_COLLISION.height / 2, z]}
+          rotation={[0, rotation, 0]}
+          collisionGroups={0x00010001}
+          userData={{ type: 'gate-wall' }}
+        >
+          <CuboidCollider args={[
+            GATE_COLLISION.width / 2,
+            GATE_COLLISION.height / 2,
+            GATE_COLLISION.depth / 2
+          ]} />
+        </RigidBody>
+      </>
+    );
+  }
+
+  return gateContent;
 }
 
 function getWrapMode(mode?: 'repeat' | 'mirror' | 'clamp'): THREE.Wrapping {
@@ -138,15 +212,149 @@ function BoxModel({ x, z, boxType, texture }: BoxConfig) {
   );
 }
 
-export default function StageObjects({ gates = [], boxes = [] }: StageObjectsConfig) {
+// Floor switch collision dimensions
+const SWITCH_COLLISION = {
+  width: 1.5,
+  height: 0.3,
+  depth: 1.5,
+};
+
+interface FloorSwitchProps extends SwitchConfig {
+  activated: boolean;
+  onActivate: () => void;
+}
+
+function FloorSwitch({ x, z, switchType, activated, onActivate }: FloorSwitchProps) {
+  const { scene } = useGLTF(SWITCH_MODEL_PATHS[switchType]);
+  const [isPlayerOn, setIsPlayerOn] = useState(false);
+
+  const clonedScene = useMemo(() => {
+    const clone = SkeletonUtils.clone(scene);
+    // Set initial texture offset based on activated state
+    clone.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        const material = mesh.material as THREE.MeshStandardMaterial;
+        if (material.map) {
+          // Off state: offsetX 0.5, On state: offsetX 0.0
+          material.map.offset.x = activated ? 0.0 : 0.5;
+          material.map.needsUpdate = true;
+        }
+      }
+    });
+    return clone;
+  }, [scene, activated]);
+
+  // Update texture when activation state changes
+  useEffect(() => {
+    if (!clonedScene) return;
+    clonedScene.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        const material = mesh.material as THREE.MeshStandardMaterial;
+        if (material.map) {
+          material.map.offset.x = activated ? 0.0 : 0.5;
+          material.map.needsUpdate = true;
+        }
+      }
+    });
+  }, [clonedScene, activated]);
+
+  const handleIntersectionEnter = () => {
+    setIsPlayerOn(true);
+    if (!activated) {
+      onActivate();
+    }
+  };
+
+  const handleIntersectionExit = () => {
+    setIsPlayerOn(false);
+  };
+
   return (
     <>
-      {gates.map((gate, i) => (
-        <GateModel key={`gate-${i}`} {...gate} />
-      ))}
+      {/* Visual switch model */}
+      <group position={[x, 0, z]}>
+        <primitive object={clonedScene} />
+      </group>
+
+      {/* Collision sensor to detect player */}
+      <RigidBody
+        type="fixed"
+        sensor
+        position={[x, SWITCH_COLLISION.height / 2, z]}
+        collisionGroups={0x00040004}
+        onIntersectionEnter={handleIntersectionEnter}
+        onIntersectionExit={handleIntersectionExit}
+        userData={{ type: 'floor-switch' }}
+      >
+        <CuboidCollider args={[
+          SWITCH_COLLISION.width / 2,
+          SWITCH_COLLISION.height / 2,
+          SWITCH_COLLISION.depth / 2
+        ]} />
+      </RigidBody>
+
+      {/* Debug indicator */}
+      <mesh position={[x, 0.5, z]}>
+        <sphereGeometry args={[0.2, 8, 8]} />
+        <meshBasicMaterial
+          color={activated ? 0x00ff00 : isPlayerOn ? 0xffff00 : 0xff0000}
+          transparent
+          opacity={0.7}
+        />
+      </mesh>
+    </>
+  );
+}
+
+export default function StageObjects({
+  gates = [],
+  boxes = [],
+  switches = [],
+  onGateUnlocked
+}: StageObjectsConfig) {
+  // Track which gates have been unlocked by switches
+  const [unlockedGates, setUnlockedGates] = useState<Set<string>>(new Set());
+
+  const handleSwitchActivate = (targetGateId: string) => {
+    setUnlockedGates(prev => {
+      const next = new Set(prev);
+      next.add(targetGateId);
+      return next;
+    });
+    // Notify parent that gate was unlocked (for trigger activation)
+    if (onGateUnlocked) {
+      onGateUnlocked(targetGateId);
+    }
+  };
+
+  return (
+    <>
+      {gates.map((gate, i) => {
+        const isUnlocked = gate.id ? unlockedGates.has(gate.id) : false;
+        return (
+          <GateModel
+            key={`gate-${i}`}
+            {...gate}
+            active={!isUnlocked} // Gate is active (blocking) when NOT unlocked
+          />
+        );
+      })}
       {boxes.map((box, i) => (
         <BoxModel key={`box-${i}`} {...box} />
       ))}
+      {switches.map((sw, i) => {
+        const isActivated = unlockedGates.has(sw.targetGateId);
+        return (
+          <FloorSwitch
+            key={`switch-${i}`}
+            {...sw}
+            activated={isActivated}
+            onActivate={() => handleSwitchActivate(sw.targetGateId)}
+          />
+        );
+      })}
     </>
   );
 }

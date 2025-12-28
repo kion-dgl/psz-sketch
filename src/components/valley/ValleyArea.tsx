@@ -1,10 +1,16 @@
-import { Suspense } from 'react';
+import { Suspense, useState, useCallback } from 'react';
 import ValleyEnv, { ValleyFloorCollision } from './environments/ValleyEnv';
 import SandParticles from './SandParticles';
 import RainParticles from './RainParticles';
 import StageArea, { type LightingConfig, type ThemeConfig } from '../shared/StageArea';
 import StageObjects, { type StageObjectsConfig } from '../shared/StageObjects';
-import { getMapConfig, getDefaultSpawn, type TriggerConfig } from './valleyConfig';
+import { getMapConfig, getDefaultSpawn, type TriggerConfig, type SpawnPoint } from './valleyConfig';
+
+// Triggers that only activate when a specific gate is unlocked
+export interface LockedTrigger {
+  gateId: string;
+  trigger: TriggerConfig;
+}
 
 type TimeOfDay = 'day' | 'dusk' | 'night';
 type Weather = 'clear' | 'sandstorm' | 'rain' | 'rain-heavy';
@@ -77,6 +83,8 @@ interface ValleyAreaProps {
   spawnPosition?: [number, number, number];
   spawnRotation?: number;
   triggers?: TriggerConfig[];
+  lockedTriggers?: LockedTrigger[]; // Triggers that activate when gate is unlocked
+  spawnPoints?: SpawnPoint[];
   timeOfDay?: TimeOfDay;
   weather?: Weather;
   debugMode?: boolean;
@@ -90,6 +98,8 @@ export default function ValleyArea({
   spawnPosition,
   spawnRotation,
   triggers,
+  lockedTriggers = [],
+  spawnPoints,
   timeOfDay = 'day',
   weather = 'clear',
   debugMode = true,
@@ -98,6 +108,26 @@ export default function ValleyArea({
 }: ValleyAreaProps) {
   const baseLighting = LIGHTING_CONFIGS[timeOfDay];
   const lighting = getWeatherAdjustedLighting(baseLighting, weather);
+
+  // Track which gates have been unlocked
+  const [unlockedGates, setUnlockedGates] = useState<Set<string>>(new Set());
+
+  // Handle gate unlock from switch
+  const handleGateUnlocked = useCallback((gateId: string) => {
+    setUnlockedGates(prev => {
+      const next = new Set(prev);
+      next.add(gateId);
+      return next;
+    });
+  }, []);
+
+  // Combine base triggers with unlocked triggers
+  const activeTriggers = [
+    ...(triggers || []),
+    ...lockedTriggers
+      .filter(lt => unlockedGates.has(lt.gateId))
+      .map(lt => lt.trigger)
+  ];
 
   return (
     <StageArea
@@ -110,14 +140,20 @@ export default function ValleyArea({
       theme={THEME}
       spawnPosition={spawnPosition}
       spawnRotation={spawnRotation}
-      triggers={triggers}
+      triggers={activeTriggers}
+      spawnPoints={spawnPoints}
       getMapConfig={getMapConfig}
       getDefaultSpawn={getDefaultSpawn}
       debugMode={debugMode}
       addPiToSpawnRotation={true}
     >
       {objects && (
-        <StageObjects gates={objects.gates} boxes={objects.boxes} />
+        <StageObjects
+          gates={objects.gates}
+          boxes={objects.boxes}
+          switches={objects.switches}
+          onGateUnlocked={handleGateUnlocked}
+        />
       )}
       {children}
     </StageArea>
