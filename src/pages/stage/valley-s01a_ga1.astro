@@ -3,12 +3,20 @@ import Layout from '../../layouts/Layout.astro';
 import ValleyArea from '../../components/valley/ValleyArea';
 
 export const prerender = false;
+
+const objects = {
+  boxes: [
+    { x: 12.84, z: 6.86, boxType: "o01_cont" as const },
+    { x: 10.49, z: 6.97, boxType: "o01_cont" as const },
+  ],
+};
 ---
 
 <Layout title="Gurhacia Valley - s01a_ga1">
   <ValleyArea
     mapId="s01a_ga1"
     mapName="Gurhacia Valley - s01a_ga1"
+    objects={objects}
     client:load
   />
 </Layout>

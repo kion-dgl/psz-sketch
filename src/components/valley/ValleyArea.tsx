@@ -1,7 +1,9 @@
+import { Suspense } from 'react';
 import ValleyEnv, { ValleyFloorCollision } from './environments/ValleyEnv';
 import SandParticles from './SandParticles';
 import RainParticles from './RainParticles';
 import StageArea, { type LightingConfig, type ThemeConfig } from '../shared/StageArea';
+import StageObjects, { type StageObjectsConfig } from '../shared/StageObjects';
 import { getMapConfig, getDefaultSpawn, type TriggerConfig } from './valleyConfig';
 
 type TimeOfDay = 'day' | 'dusk' | 'night';
@@ -78,6 +80,7 @@ interface ValleyAreaProps {
   timeOfDay?: TimeOfDay;
   weather?: Weather;
   debugMode?: boolean;
+  objects?: StageObjectsConfig;
   children?: React.ReactNode;
 }
 
@@ -90,6 +93,7 @@ export default function ValleyArea({
   timeOfDay = 'day',
   weather = 'clear',
   debugMode = true,
+  objects,
   children
 }: ValleyAreaProps) {
   const baseLighting = LIGHTING_CONFIGS[timeOfDay];
@@ -112,6 +116,9 @@ export default function ValleyArea({
       debugMode={debugMode}
       addPiToSpawnRotation={true}
     >
+      {objects && (
+        <StageObjects gates={objects.gates} boxes={objects.boxes} />
+      )}
       {children}
     </StageArea>
   );

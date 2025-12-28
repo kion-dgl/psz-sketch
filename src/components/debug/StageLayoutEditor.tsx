@@ -1,6 +1,6 @@
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useLoader } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import React, { Suspense, useState, useEffect, useRef } from 'react';
+import React, { Suspense, useState, useEffect, useMemo } from 'react';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 
@@ -9,7 +9,8 @@ type GateEdge = 'north' | 'south' | 'east' | 'west';
 interface GateData {
   id: string;
   edge: GateEdge;
-  position: number; // Units offset from center of edge
+  x: number;
+  z: number;
   scale: number;
   label: string;
 }
@@ -18,8 +19,8 @@ type BoxType = 'o01_cont' | 'o0c_recont';
 
 interface BoxData {
   id: string;
-  position: [number, number]; // World position
-  size: [number, number];
+  x: number;
+  z: number;
   label: string;
   boxType: BoxType;
 }
@@ -32,7 +33,6 @@ interface StageLayout {
 
 const STORAGE_KEY = 'stage-layout-configs';
 
-// Stage lists (same as ValleyTriggerDebug)
 const VALLEY_A_MAPS = [
   's01a_ga1', 's01a_ib1', 's01a_ib2', 's01a_ic1', 's01a_ic3',
   's01a_lb1', 's01a_lb3', 's01a_lc1', 's01a_lc2', 's01a_na1',
@@ -49,21 +49,37 @@ const VALLEY_B_MAPS = [
 
 const VALLEY_E_MAPS = ['s01e_ia1'];
 const VALLEY_Z_MAPS = ['s01z_na1'];
-
 const ALL_MAPS = [...VALLEY_A_MAPS, ...VALLEY_B_MAPS, ...VALLEY_E_MAPS, ...VALLEY_Z_MAPS];
 
 function getValleyDir(mapId: string): string {
   const match = mapId.match(/^s01([a-z])_/);
-  if (match) {
-    return `stages/valley_${match[1]}`;
-  }
-  return 'stages/valley_a';
+  return match ? `stages/valley_${match[1]}` : 'stages/valley_a';
 }
 
 function loadAllConfigs(): Record<string, StageLayout> {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : {};
+    if (!stored) return {};
+    const configs = JSON.parse(stored);
+    // Migrate old format (worldPosition) to new format (x, z)
+    for (const key of Object.keys(configs)) {
+      const config = configs[key];
+      if (config.gates) {
+        config.gates = config.gates.map((g: any) => ({
+          ...g,
+          x: g.x ?? g.worldPosition?.[0] ?? 0,
+          z: g.z ?? g.worldPosition?.[1] ?? 0,
+        }));
+      }
+      if (config.boxes) {
+        config.boxes = config.boxes.map((b: any) => ({
+          ...b,
+          x: b.x ?? b.position?.[0] ?? 0,
+          z: b.z ?? b.position?.[1] ?? 0,
+        }));
+      }
+    }
+    return configs;
   } catch {
     return {};
   }
@@ -73,129 +89,122 @@ function saveAllConfigs(configs: Record<string, StageLayout>) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(configs));
 }
 
-// Model paths
 const GATE_MODEL_PATH = '/objects/01_o01a/o0c_gate.imd/o0c_gate.glb';
 const BOX_MODEL_PATHS: Record<BoxType, string> = {
   'o01_cont': '/objects/01_o01a/o01_cont.imd/o01_cont.glb',
   'o0c_recont': '/objects/01_o01z/o0c_recont.imd/o0c_recont.glb',
 };
 
-function GateModel({
-  position,
-  rotation,
+function getGateRotation(edge: GateEdge): number {
+  switch (edge) {
+    case 'north': return Math.PI;
+    case 'south': return 0;
+    case 'east': return -Math.PI / 2;
+    case 'west': return Math.PI / 2;
+  }
+}
+
+// Gate model using useLoader for reliable loading
+function GateObject({
+  x,
+  z,
+  edge,
+  scale,
   selected,
-  onClick,
-  scale = 1
+  isPreview,
+  onClick
 }: {
-  position: [number, number, number];
-  rotation: [number, number, number];
+  x: number;
+  z: number;
+  edge: GateEdge;
+  scale: number;
   selected: boolean;
-  onClick: () => void;
-  scale?: number;
+  isPreview?: boolean;
+  onClick?: () => void;
 }) {
-  const [model, setModel] = useState<THREE.Group | null>(null);
-  const modelRef = useRef<THREE.Group>(null);
+  const gltf = useLoader(GLTFLoader, GATE_MODEL_PATH);
+  const rotation = getGateRotation(edge);
 
-  useEffect(() => {
-    const loader = new GLTFLoader();
-    loader.load(GATE_MODEL_PATH, (gltf) => {
-      const clone = gltf.scene.clone();
-      setModel(clone);
-    }, undefined, (error) => {
-      console.error('Error loading gate model:', error);
-    });
-  }, []);
-
-  // Update material when selection changes
-  useEffect(() => {
-    if (!model) return;
-    model.traverse((child) => {
+  const clonedScene = useMemo(() => {
+    const clone = gltf.scene.clone();
+    clone.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         const mesh = child as THREE.Mesh;
-        if (mesh.material) {
-          // Create new basic material to avoid emissive issues
-          const newMat = new THREE.MeshBasicMaterial({
-            color: selected ? 0x00ffff : 0xcccccc,
-            transparent: true,
-            opacity: selected ? 0.9 : 0.8,
-          });
-          mesh.material = newMat;
-        }
+        const color = isPreview ? 0x00ff00 : (selected ? 0x00ffff : 0xcccccc);
+        const opacity = isPreview ? 0.7 : (selected ? 0.9 : 0.8);
+        mesh.material = new THREE.MeshBasicMaterial({
+          color,
+          transparent: true,
+          opacity,
+        });
       }
     });
-  }, [model, selected]);
-
-  if (!model) {
-    // Fallback box while loading
-    return (
-      <group position={position} rotation={rotation} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-        <mesh scale={[scale, scale, scale]}>
-          <boxGeometry args={[2, 2, 1]} />
-          <meshBasicMaterial color={selected ? '#00ffff' : '#00ff00'} transparent opacity={0.4} />
-        </mesh>
-      </group>
-    );
-  }
+    return clone;
+  }, [gltf, selected, isPreview]);
 
   return (
-    <group ref={modelRef} position={position} rotation={rotation} scale={[scale, scale, scale]} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-      <primitive object={model} />
+    <group
+      position={[x, 0, z]}
+      rotation={[0, rotation, 0]}
+      onClick={onClick ? (e) => { e.stopPropagation(); onClick(); } : undefined}
+    >
+      <primitive object={clonedScene} scale={[scale, scale, scale]} />
+      {/* Bounding box wireframe */}
+      <mesh position={[0, scale, 0]}>
+        <boxGeometry args={[scale * 2.5, scale * 2, scale * 0.5]} />
+        <meshBasicMaterial
+          color={isPreview ? '#00ff00' : (selected ? '#00ffff' : '#888888')}
+          wireframe
+          transparent
+          opacity={0.5}
+        />
+      </mesh>
     </group>
   );
 }
 
-function BoxModel({
-  position,
+// Box model using useLoader
+function BoxObject({
+  x,
+  z,
   boxType,
   selected,
   onClick
 }: {
-  position: [number, number];
+  x: number;
+  z: number;
   boxType: BoxType;
   selected: boolean;
-  onClick: () => void;
+  onClick?: () => void;
 }) {
-  const [model, setModel] = useState<THREE.Group | null>(null);
-  const modelRef = useRef<THREE.Group>(null);
+  const gltf = useLoader(GLTFLoader, BOX_MODEL_PATHS[boxType]);
 
-  useEffect(() => {
-    const loader = new GLTFLoader();
-    loader.load(BOX_MODEL_PATHS[boxType], (gltf) => {
-      const clone = gltf.scene.clone();
-      // Adjust materials for selection visibility
-      clone.traverse((child) => {
-        if ((child as THREE.Mesh).isMesh) {
-          const mesh = child as THREE.Mesh;
-          if (mesh.material) {
-            const mat = mesh.material as THREE.MeshStandardMaterial;
-            mat.transparent = true;
-            mat.opacity = selected ? 0.9 : 0.7;
-            if (selected) {
-              mat.emissive = new THREE.Color(0xff00ff);
-              mat.emissiveIntensity = 0.3;
-            }
-          }
-        }
-      });
-      setModel(clone);
+  const clonedScene = useMemo(() => {
+    const clone = gltf.scene.clone();
+    clone.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        mesh.material = new THREE.MeshBasicMaterial({
+          color: selected ? 0xff00ff : 0xff6600,
+          transparent: true,
+          opacity: selected ? 0.9 : 0.7,
+        });
+      }
     });
-  }, [boxType, selected]);
-
-  if (!model) {
-    // Fallback box while loading
-    return (
-      <group position={[position[0], 0, position[1]]} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-        <mesh position={[0, 0.75, 0]}>
-          <boxGeometry args={[1, 1.5, 1]} />
-          <meshBasicMaterial color={selected ? '#ff00ff' : '#ff6600'} transparent opacity={0.4} />
-        </mesh>
-      </group>
-    );
-  }
+    return clone;
+  }, [gltf, selected]);
 
   return (
-    <group ref={modelRef} position={[position[0], 0, position[1]]} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-      <primitive object={model} />
+    <group
+      position={[x, 0, z]}
+      onClick={onClick ? (e) => { e.stopPropagation(); onClick(); } : undefined}
+    >
+      <primitive object={clonedScene} />
+      {/* Bounding box */}
+      <mesh position={[0, 0.75, 0]}>
+        <boxGeometry args={[1.2, 1.5, 1.2]} />
+        <meshBasicMaterial color={selected ? '#ff00ff' : '#ff6600'} wireframe transparent opacity={0.5} />
+      </mesh>
     </group>
   );
 }
@@ -204,12 +213,10 @@ function SquareGrid({ size, offset }: { size: number; offset: [number, number] }
   const halfSize = size / 2;
   const lines: React.ReactNode[] = [];
 
-  // Grid lines centered on offset
   for (let i = -halfSize; i <= halfSize; i++) {
     const isEdge = Math.abs(i) === halfSize;
     const color = isEdge ? '#ffff00' : (i === 0 ? '#666666' : '#333333');
 
-    // Horizontal lines (Z direction)
     const hPositions = new Float32Array([
       offset[0] - halfSize, 0.15, offset[1] + i,
       offset[0] + halfSize, 0.15, offset[1] + i
@@ -217,16 +224,12 @@ function SquareGrid({ size, offset }: { size: number; offset: [number, number] }
     lines.push(
       <line key={`h${i}`}>
         <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[hPositions, 3]}
-          />
+          <bufferAttribute attach="attributes-position" args={[hPositions, 3]} />
         </bufferGeometry>
         <lineBasicMaterial color={color} />
       </line>
     );
 
-    // Vertical lines (X direction)
     const vPositions = new Float32Array([
       offset[0] + i, 0.15, offset[1] - halfSize,
       offset[0] + i, 0.15, offset[1] + halfSize
@@ -234,10 +237,7 @@ function SquareGrid({ size, offset }: { size: number; offset: [number, number] }
     lines.push(
       <line key={`v${i}`}>
         <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[vPositions, 3]}
-          />
+          <bufferAttribute attach="attributes-position" args={[vPositions, 3]} />
         </bufferGeometry>
         <lineBasicMaterial color={color} />
       </line>
@@ -247,224 +247,60 @@ function SquareGrid({ size, offset }: { size: number; offset: [number, number] }
   return <group>{lines}</group>;
 }
 
-// Helper to calculate gate position and rotation
-// positionOffset is in world units from grid center along the edge
-function getGateTransform(
-  edge: GateEdge,
-  positionOffset: number,
-  gridSize: number,
-  gridOffset: [number, number]
-): { pos: [number, number, number]; rotation: [number, number, number] } {
-  const halfSize = gridSize / 2;
-  let pos: [number, number, number] = [0, 0, 0];
-  let rotation: [number, number, number] = [0, 0, 0];
+function StageModel({ selectedMap, showStage }: { selectedMap: string; showStage: boolean }) {
+  const valleyDir = getValleyDir(selectedMap);
+  const glbPath = `/${valleyDir}/${selectedMap}/lndmd/${selectedMap}_m.glb`;
 
-  switch (edge) {
-    case 'north':
-      pos = [gridOffset[0] + positionOffset, 0, gridOffset[1] - halfSize];
-      rotation = [0, Math.PI, 0];
-      break;
-    case 'south':
-      pos = [gridOffset[0] + positionOffset, 0, gridOffset[1] + halfSize];
-      rotation = [0, 0, 0];
-      break;
-    case 'east':
-      pos = [gridOffset[0] + halfSize, 0, gridOffset[1] + positionOffset];
-      rotation = [0, -Math.PI / 2, 0];
-      break;
-    case 'west':
-      pos = [gridOffset[0] - halfSize, 0, gridOffset[1] + positionOffset];
-      rotation = [0, Math.PI / 2, 0];
-      break;
-  }
-  return { pos, rotation };
+  const gltf = useLoader(GLTFLoader, glbPath);
+
+  if (!showStage) return null;
+
+  return <primitive object={gltf.scene.clone()} />;
 }
 
-function Gate({
-  edge,
-  position,
-  gridSize,
-  gridOffset,
-  scale,
-  selected,
-  onClick
-}: {
-  edge: GateEdge;
-  position: number;
-  gridSize: number;
-  gridOffset: [number, number];
-  scale: number;
-  selected: boolean;
-  onClick: () => void;
-}) {
-  const { pos, rotation } = getGateTransform(edge, position, gridSize, gridOffset);
-
-  return (
-    <GateModel
-      position={pos}
-      rotation={rotation}
-      selected={selected}
-      onClick={onClick}
-      scale={scale}
-    />
-  );
-}
-
-// Preview gate shown when in gate placement mode - shows actual model with green tint
-function GatePreview({
-  edge,
-  position,
-  gridSize,
-  gridOffset,
-  scale,
-  onClick
-}: {
-  edge: GateEdge;
-  position: number;
-  gridSize: number;
-  gridOffset: [number, number];
-  scale: number;
-  onClick: () => void;
-}) {
-  const [model, setModel] = useState<THREE.Group | null>(null);
-  const { pos, rotation } = getGateTransform(edge, position, gridSize, gridOffset);
-
-  useEffect(() => {
-    const loader = new GLTFLoader();
-    loader.load(GATE_MODEL_PATH, (gltf) => {
-      const clone = gltf.scene.clone();
-      // Apply green preview tint using MeshBasicMaterial
-      clone.traverse((child) => {
-        if ((child as THREE.Mesh).isMesh) {
-          const mesh = child as THREE.Mesh;
-          if (mesh.material) {
-            const newMat = new THREE.MeshBasicMaterial({
-              color: 0x00ff00,
-              transparent: true,
-              opacity: 0.6,
-            });
-            mesh.material = newMat;
-          }
-        }
-      });
-      setModel(clone);
-    }, undefined, (error) => {
-      console.error('Error loading gate preview:', error);
-    });
-  }, []);
-
-  const scaledSize = 2 * scale;
-
-  return (
-    <group position={pos} rotation={rotation} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-      {/* Actual gate model with green tint */}
-      {model && <primitive object={model} scale={[scale, scale, scale]} />}
-
-      {/* Wireframe outline box */}
-      <mesh position={[0, scaledSize / 2, 0]}>
-        <boxGeometry args={[scaledSize * 1.2, scaledSize, scaledSize * 0.4]} />
-        <meshBasicMaterial color="#00ff00" transparent opacity={0.3} wireframe />
-      </mesh>
-
-      {/* Ground marker */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
-        <circleGeometry args={[scaledSize * 0.8, 32]} />
-        <meshBasicMaterial color="#00ff00" transparent opacity={0.4} />
-      </mesh>
-    </group>
-  );
-}
-
-function Box({
-  position,
-  boxType,
-  selected,
-  onClick
-}: {
-  position: [number, number];
-  boxType: BoxType;
-  selected: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <BoxModel
-      position={position}
-      boxType={boxType}
-      selected={selected}
-      onClick={onClick}
-    />
-  );
-}
-
-function StageModel({
-  selectedMap,
-  showStage
-}: {
-  selectedMap: string;
-  showStage: boolean;
-}) {
-  const [model, setModel] = useState<THREE.Group | null>(null);
-
-  useEffect(() => {
-    setModel(null);
-
-    const loader = new GLTFLoader();
-    const valleyDir = getValleyDir(selectedMap);
-    // Stage files use _m suffix for the mesh
-    const glbPath = `/${valleyDir}/${selectedMap}/lndmd/${selectedMap}_m.glb`;
-
-    loader.load(glbPath, (gltf) => {
-      const scene = gltf.scene.clone();
-      setModel(scene);
-    }, undefined, (error) => {
-      console.error('Error loading stage model:', error);
-    });
-  }, [selectedMap]);
-
-  if (!showStage || !model) return null;
-
-  return <primitive object={model} />;
-}
-
-// Visual ground plane for box placement - covers entire stage area
 function GroundPlane({
-  placementMode,
+  active,
   onClick
 }: {
-  placementMode: 'gate' | 'box' | 'select';
-  onClick: (position: [number, number]) => void;
+  active: boolean;
+  onClick: (x: number, z: number) => void;
 }) {
   const handleClick = (event: any) => {
-    if (placementMode !== 'box') return;
+    if (!active) return;
     event.stopPropagation();
     const point = event.point;
     if (point) {
-      // Snap to 0.5 grid
       const snappedX = Math.round(point.x * 2) / 2;
       const snappedZ = Math.round(point.z * 2) / 2;
-      onClick([snappedX, snappedZ]);
+      onClick(snappedX, snappedZ);
     }
   };
 
-  // Large plane covering entire stage area (200x200 units)
   return (
-    <mesh
-      rotation={[-Math.PI / 2, 0, 0]}
-      position={[0, 0.01, 0]}
-      onClick={handleClick}
-    >
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} onClick={handleClick}>
       <planeGeometry args={[200, 200]} />
       <meshBasicMaterial
-        color={placementMode === 'box' ? '#003300' : '#111111'}
+        color={active ? '#003300' : '#111111'}
         transparent
-        opacity={placementMode === 'box' ? 0.2 : 0.1}
+        opacity={active ? 0.2 : 0.1}
         side={THREE.DoubleSide}
       />
     </mesh>
   );
 }
 
-function LayoutScene({
+// Calculate world position for gate preview
+function getPreviewPosition(edge: GateEdge, offset: number, gridSize: number, gridOffset: [number, number]): [number, number] {
+  const halfSize = gridSize / 2;
+  switch (edge) {
+    case 'north': return [gridOffset[0] + offset, gridOffset[1] - halfSize];
+    case 'south': return [gridOffset[0] + offset, gridOffset[1] + halfSize];
+    case 'east': return [gridOffset[0] + halfSize, gridOffset[1] + offset];
+    case 'west': return [gridOffset[0] - halfSize, gridOffset[1] + offset];
+  }
+}
+
+function Scene({
   selectedMap,
   gridSize,
   gridOffset,
@@ -479,7 +315,7 @@ function LayoutScene({
   placementMode,
   showStage,
   showGrid,
-  gatePreview
+  previewGate
 }: {
   selectedMap: string;
   gridSize: number;
@@ -490,60 +326,67 @@ function LayoutScene({
   selectedBox: string | null;
   onSelectGate: (id: string | null) => void;
   onSelectBox: (id: string | null) => void;
-  onAddBox: (position: [number, number]) => void;
+  onAddBox: (x: number, z: number) => void;
   onAddGate: () => void;
   placementMode: 'gate' | 'box' | 'select';
   showStage: boolean;
   showGrid: boolean;
-  gatePreview: { edge: GateEdge; position: number; scale: number } | null;
+  previewGate: { edge: GateEdge; offset: number; scale: number } | null;
 }) {
+  const previewPos = previewGate
+    ? getPreviewPosition(previewGate.edge, previewGate.offset, gridSize, gridOffset)
+    : null;
+
   return (
     <>
-      <StageModel selectedMap={selectedMap} showStage={showStage} />
+      <Suspense fallback={null}>
+        <StageModel selectedMap={selectedMap} showStage={showStage} />
+      </Suspense>
 
       {showGrid && <SquareGrid size={gridSize} offset={gridOffset} />}
 
-      {/* Visual ground plane for placement */}
-      <GroundPlane
-        placementMode={placementMode}
-        onClick={onAddBox}
-      />
+      <GroundPlane active={placementMode === 'box'} onClick={onAddBox} />
 
       {/* Gate Preview */}
-      {placementMode === 'gate' && gatePreview && (
-        <GatePreview
-          edge={gatePreview.edge}
-          position={gatePreview.position}
-          gridSize={gridSize}
-          gridOffset={gridOffset}
-          scale={gatePreview.scale}
-          onClick={onAddGate}
-        />
+      {placementMode === 'gate' && previewGate && previewPos && (
+        <Suspense fallback={null}>
+          <GateObject
+            x={previewPos[0]}
+            z={previewPos[1]}
+            edge={previewGate.edge}
+            scale={previewGate.scale}
+            selected={false}
+            isPreview={true}
+            onClick={onAddGate}
+          />
+        </Suspense>
       )}
 
-      {/* Gates */}
+      {/* Placed Gates */}
       {gates.map((gate) => (
-        <Gate
-          key={gate.id}
-          edge={gate.edge}
-          position={gate.position}
-          gridSize={gridSize}
-          gridOffset={gridOffset}
-          scale={gate.scale}
-          selected={selectedGate === gate.id}
-          onClick={() => onSelectGate(gate.id)}
-        />
+        <Suspense key={gate.id} fallback={null}>
+          <GateObject
+            x={gate.x}
+            z={gate.z}
+            edge={gate.edge}
+            scale={gate.scale}
+            selected={selectedGate === gate.id}
+            onClick={() => onSelectGate(gate.id)}
+          />
+        </Suspense>
       ))}
 
-      {/* Boxes */}
+      {/* Placed Boxes */}
       {boxes.map((box) => (
-        <Box
-          key={box.id}
-          position={box.position}
-          boxType={box.boxType}
-          selected={selectedBox === box.id}
-          onClick={() => onSelectBox(box.id)}
-        />
+        <Suspense key={box.id} fallback={null}>
+          <BoxObject
+            x={box.x}
+            z={box.z}
+            boxType={box.boxType}
+            selected={selectedBox === box.id}
+            onClick={() => onSelectBox(box.id)}
+          />
+        </Suspense>
       ))}
 
       {/* Origin marker */}
@@ -551,17 +394,41 @@ function LayoutScene({
         <sphereGeometry args={[0.3, 16, 16]} />
         <meshBasicMaterial color="#ff0000" />
       </mesh>
-
-      {/* Grid center marker */}
-      {showGrid && (
-        <mesh position={[gridOffset[0], 0.25, gridOffset[1]]}>
-          <sphereGeometry args={[0.2, 16, 16]} />
-          <meshBasicMaterial color="#ffff00" />
-        </mesh>
-      )}
     </>
   );
 }
+
+// Styles
+const panelStyle: React.CSSProperties = {
+  background: '#1a1a1a',
+  color: 'white',
+  padding: '15px',
+  fontFamily: 'monospace',
+  fontSize: '13px',
+  overflowY: 'auto',
+  borderRight: '2px solid #333',
+};
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '6px',
+  background: '#333',
+  color: 'white',
+  border: '1px solid #555',
+  borderRadius: '4px',
+  fontFamily: 'monospace',
+  boxSizing: 'border-box',
+};
+
+const buttonStyle: React.CSSProperties = {
+  padding: '8px 12px',
+  background: '#333',
+  color: 'white',
+  border: '1px solid #555',
+  borderRadius: '4px',
+  cursor: 'pointer',
+  fontFamily: 'monospace',
+};
 
 export default function StageLayoutEditor() {
   const [selectedMap, setSelectedMap] = useState('s01a_ga1');
@@ -576,21 +443,15 @@ export default function StageLayoutEditor() {
   const [showStage, setShowStage] = useState(true);
   const [showGrid, setShowGrid] = useState(true);
 
-  // New gate defaults
   const [newGateEdge, setNewGateEdge] = useState<GateEdge>('north');
-  const [newGatePosition, setNewGatePosition] = useState(0); // Units from center of edge
-  const [newGateScale, setNewGateScale] = useState(2.5); // Scale to match ~5 unit paths
-
-  // New box defaults
+  const [newGateOffset, setNewGateOffset] = useState(0);
+  const [newGateScale, setNewGateScale] = useState(2.5);
   const [newBoxType, setNewBoxType] = useState<BoxType>('o01_cont');
 
-  // Load all configs on mount
   useEffect(() => {
-    const configs = loadAllConfigs();
-    setAllConfigs(configs);
+    setAllConfigs(loadAllConfigs());
   }, []);
 
-  // Load config when map changes
   useEffect(() => {
     const configs = loadAllConfigs();
     if (configs[selectedMap]) {
@@ -599,7 +460,6 @@ export default function StageLayoutEditor() {
       setGates(config.gates);
       setBoxes(config.boxes);
     } else {
-      // Reset to defaults for new map
       setGridSize(10);
       setGates([]);
       setBoxes([]);
@@ -608,7 +468,6 @@ export default function StageLayoutEditor() {
     setSelectedBox(null);
   }, [selectedMap]);
 
-  // Save config when layout changes
   useEffect(() => {
     const configs = loadAllConfigs();
     if (gates.length > 0 || boxes.length > 0 || gridSize !== 10) {
@@ -621,10 +480,12 @@ export default function StageLayoutEditor() {
   }, [gates, boxes, gridSize, selectedMap]);
 
   const handleAddGate = () => {
+    const [x, z] = getPreviewPosition(newGateEdge, newGateOffset, gridSize, gridOffset);
     const newGate: GateData = {
       id: `gate_${Date.now()}`,
       edge: newGateEdge,
-      position: newGatePosition,
+      x,
+      z,
       scale: newGateScale,
       label: `Gate ${gates.length + 1}`
     };
@@ -632,11 +493,11 @@ export default function StageLayoutEditor() {
     setSelectedGate(newGate.id);
   };
 
-  const handleAddBox = (position: [number, number]) => {
+  const handleAddBox = (x: number, z: number) => {
     const newBox: BoxData = {
       id: `box_${Date.now()}`,
-      position,
-      size: [1, 1], // Size now determined by model
+      x,
+      z,
       label: `${newBoxType} ${boxes.length + 1}`,
       boxType: newBoxType
     };
@@ -670,72 +531,39 @@ export default function StageLayoutEditor() {
     }
   };
 
-  const handleExport = () => {
-    const halfSize = gridSize / 2;
-
-    let code = `// Stage Layout: ${selectedMap}\n`;
-    code += `// Grid Size: ${gridSize}x${gridSize}, Offset: [${gridOffset[0]}, ${gridOffset[1]}]\n\n`;
-
-    code += `const stageConfig = {\n`;
-    code += `  gridSize: ${gridSize},\n`;
-    code += `  gridOffset: [${gridOffset[0]}, ${gridOffset[1]}],\n`;
-
-    if (gates.length > 0) {
-      code += `  gates: [\n`;
-      gates.forEach((gate, i) => {
-        const edgePos = (gate.position - 0.5) * gridSize;
-        let worldPos: string;
-        switch (gate.edge) {
-          case 'north': worldPos = `[${(gridOffset[0] + edgePos).toFixed(2)}, 0, ${(gridOffset[1] - halfSize).toFixed(2)}]`; break;
-          case 'south': worldPos = `[${(gridOffset[0] + edgePos).toFixed(2)}, 0, ${(gridOffset[1] + halfSize).toFixed(2)}]`; break;
-          case 'east': worldPos = `[${(gridOffset[0] + halfSize).toFixed(2)}, 0, ${(gridOffset[1] + edgePos).toFixed(2)}]`; break;
-          case 'west': worldPos = `[${(gridOffset[0] - halfSize).toFixed(2)}, 0, ${(gridOffset[1] + edgePos).toFixed(2)}]`; break;
-        }
-        code += `    { edge: '${gate.edge}', position: ${worldPos}, scale: ${gate.scale}, label: '${gate.label}' }${i < gates.length - 1 ? ',' : ''}\n`;
-      });
-      code += `  ],\n`;
-    }
-
-    if (boxes.length > 0) {
-      code += `  obstacles: [\n`;
-      boxes.forEach((box, i) => {
-        code += `    { position: [${box.position[0].toFixed(2)}, 0, ${box.position[1].toFixed(2)}], type: '${box.boxType}', label: '${box.label}' }${i < boxes.length - 1 ? ',' : ''}\n`;
-      });
-      code += `  ]\n`;
-    }
-
-    code += `};\n`;
-
-    navigator.clipboard.writeText(code);
-    alert('Layout exported to clipboard!');
+  const handleCopyJSON = () => {
+    const config = {
+      gridSize,
+      gates: gates.map(g => ({
+        edge: g.edge,
+        x: g.x,
+        z: g.z,
+        scale: g.scale,
+        label: g.label
+      })),
+      boxes: boxes.map(b => ({
+        x: b.x,
+        z: b.z,
+        boxType: b.boxType,
+        label: b.label
+      }))
+    };
+    navigator.clipboard.writeText(JSON.stringify(config, null, 2));
+    alert('Copied to clipboard!');
   };
 
   const handleExportAll = () => {
     const configs = loadAllConfigs();
-    const configuredMaps = Object.keys(configs).sort();
-
-    if (configuredMaps.length === 0) {
-      alert('No stages configured yet!');
-      return;
+    const output: Record<string, any> = {};
+    for (const [mapId, config] of Object.entries(configs)) {
+      output[mapId] = {
+        gridSize: config.gridSize,
+        gates: config.gates.map(g => ({ edge: g.edge, x: g.x, z: g.z, scale: g.scale, label: g.label })),
+        boxes: config.boxes.map(b => ({ x: b.x, z: b.z, boxType: b.boxType, label: b.label }))
+      };
     }
-
-    let code = `// Stage Layout configurations - Generated from layout editor\n`;
-    code += `// Configured stages: ${configuredMaps.length}\n\n`;
-    code += `export const STAGE_LAYOUTS: Record<string, StageLayout> = {\n`;
-
-    configuredMaps.forEach((mapId, mapIndex) => {
-      const config = configs[mapId];
-      code += `  '${mapId}': {\n`;
-      code += `    gridSize: ${config.gridSize},\n`;
-      code += `    gates: ${JSON.stringify(config.gates, null, 6).replace(/\n/g, '\n    ')},\n`;
-      code += `    boxes: ${JSON.stringify(config.boxes, null, 6).replace(/\n/g, '\n    ')}\n`;
-      code += `  }${mapIndex < configuredMaps.length - 1 ? ',' : ''}\n`;
-    });
-
-    code += `};\n`;
-
-    navigator.clipboard.writeText(code);
-    alert(`Exported ${configuredMaps.length} stage configs to clipboard!`);
+    navigator.clipboard.writeText(JSON.stringify(output, null, 2));
+    alert(`Exported ${Object.keys(configs).length} stages to clipboard!`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -752,189 +580,87 @@ export default function StageLayoutEditor() {
 
   return (
     <div
-      style={{ width: '100vw', height: '100vh', position: 'relative' }}
+      style={{ display: 'flex', width: '100vw', height: '100vh' }}
       tabIndex={0}
       onKeyDown={handleKeyDown}
     >
-      {/* Left Panel */}
-      <div style={{
-        position: 'absolute',
-        top: '10px',
-        left: '10px',
-        zIndex: 1000,
-        background: 'rgba(0,0,0,0.9)',
-        color: 'white',
-        padding: '15px',
-        borderRadius: '8px',
-        fontFamily: 'monospace',
-        fontSize: '13px',
-        width: '300px',
-        maxHeight: 'calc(100vh - 40px)',
-        overflowY: 'auto'
-      }}>
-        <div style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '16px' }}>
-          Stage Layout Editor
-        </div>
+      {/* Left Panel - Sidebar */}
+      <div style={{ ...panelStyle, width: '320px', flexShrink: 0 }}>
+        <h2 style={{ margin: '0 0 15px 0', fontSize: '16px' }}>Stage Layout Editor</h2>
 
         {/* Stage Selector */}
         <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-            Select Stage:
-          </label>
+          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Stage:</label>
           <select
             value={selectedMap}
             onChange={(e) => setSelectedMap(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '8px',
-              background: '#333',
-              color: 'white',
-              border: '1px solid #555',
-              borderRadius: '4px',
-              fontFamily: 'monospace',
-              cursor: 'pointer'
-            }}
+            style={{ ...inputStyle, cursor: 'pointer' }}
           >
             <optgroup label="Valley A">
               {VALLEY_A_MAPS.map((map) => (
-                <option key={map} value={map}>{allConfigs[map] ? '✓ ' : '  '}{map}</option>
+                <option key={map} value={map}>{allConfigs[map] ? '✓ ' : ''}{map}</option>
               ))}
             </optgroup>
             <optgroup label="Valley B">
               {VALLEY_B_MAPS.map((map) => (
-                <option key={map} value={map}>{allConfigs[map] ? '✓ ' : '  '}{map}</option>
+                <option key={map} value={map}>{allConfigs[map] ? '✓ ' : ''}{map}</option>
               ))}
             </optgroup>
-            <optgroup label="Valley E">
-              {VALLEY_E_MAPS.map((map) => (
-                <option key={map} value={map}>{allConfigs[map] ? '✓ ' : '  '}{map}</option>
-              ))}
-            </optgroup>
-            <optgroup label="Valley Z">
-              {VALLEY_Z_MAPS.map((map) => (
-                <option key={map} value={map}>{allConfigs[map] ? '✓ ' : '  '}{map}</option>
+            <optgroup label="Valley E/Z">
+              {[...VALLEY_E_MAPS, ...VALLEY_Z_MAPS].map((map) => (
+                <option key={map} value={map}>{allConfigs[map] ? '✓ ' : ''}{map}</option>
               ))}
             </optgroup>
           </select>
         </div>
 
-        {/* Config Status */}
+        {/* Status */}
         <div style={{
           marginBottom: '15px',
-          padding: '10px',
-          background: hasCurrentConfig ? 'rgba(0,150,0,0.3)' : 'rgba(150,100,0,0.3)',
+          padding: '8px',
+          background: hasCurrentConfig ? '#1a3a1a' : '#3a3a1a',
           borderRadius: '4px',
-          border: hasCurrentConfig ? '1px solid #0a0' : '1px solid #a80'
+          fontSize: '11px'
         }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
-            {hasCurrentConfig ? '✓ Layout saved' : '⚠ No layout yet'}
-          </div>
-          {hasCurrentConfig && (
-            <div style={{ fontSize: '11px', color: '#aaa' }}>
-              <div>Gates: {gates.length}</div>
-              <div>Boxes: {boxes.length}</div>
-            </div>
-          )}
-          <div style={{ fontSize: '11px', color: '#888', marginTop: '5px' }}>
-            Configured: {configuredCount} / {ALL_MAPS.length} stages
-          </div>
+          {hasCurrentConfig ? `✓ Saved: ${gates.length} gates, ${boxes.length} boxes` : '⚠ No layout'}
+          <div style={{ color: '#888' }}>Configured: {configuredCount}/{ALL_MAPS.length}</div>
         </div>
 
         {/* Grid Controls */}
         <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-            Grid Size: {gridSize}x{gridSize}
-          </label>
-          <input
-            type="range"
-            min="4"
-            max="80"
-            value={gridSize}
-            onChange={(e) => setGridSize(Number(e.target.value))}
-            style={{ width: '100%' }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '15px', display: 'flex', gap: '10px' }}>
-          <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>Grid X:</label>
-            <input
-              type="number"
-              step="0.5"
-              value={gridOffset[0]}
-              onChange={(e) => setGridOffset([Number(e.target.value), gridOffset[1]])}
-              style={{
-                width: '100%',
-                padding: '6px',
-                background: '#333',
-                color: 'white',
-                border: '1px solid #555',
-                borderRadius: '4px',
-                fontFamily: 'monospace',
-                boxSizing: 'border-box'
-              }}
-            />
-          </div>
-          <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>Grid Z:</label>
-            <input
-              type="number"
-              step="0.5"
-              value={gridOffset[1]}
-              onChange={(e) => setGridOffset([gridOffset[0], Number(e.target.value)])}
-              style={{
-                width: '100%',
-                padding: '6px',
-                background: '#333',
-                color: 'white',
-                border: '1px solid #555',
-                borderRadius: '4px',
-                fontFamily: 'monospace',
-                boxSizing: 'border-box'
-              }}
-            />
+          <label style={{ display: 'block', marginBottom: '5px' }}>Grid: {gridSize}x{gridSize}</label>
+          <input type="range" min="4" max="80" value={gridSize} onChange={(e) => setGridSize(Number(e.target.value))} style={{ width: '100%' }} />
+          <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ fontSize: '10px' }}>Offset X:</label>
+              <input type="number" step="0.5" value={gridOffset[0]} onChange={(e) => setGridOffset([Number(e.target.value), gridOffset[1]])} style={inputStyle} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={{ fontSize: '10px' }}>Offset Z:</label>
+              <input type="number" step="0.5" value={gridOffset[1]} onChange={(e) => setGridOffset([gridOffset[0], Number(e.target.value)])} style={inputStyle} />
+            </div>
           </div>
         </div>
 
-        {/* Toggle visibility */}
+        {/* Visibility */}
         <div style={{ marginBottom: '15px', display: 'flex', gap: '15px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={showStage}
-              onChange={(e) => setShowStage(e.target.checked)}
-            />
-            Stage
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={showGrid}
-              onChange={(e) => setShowGrid(e.target.checked)}
-            />
-            Grid
-          </label>
+          <label><input type="checkbox" checked={showStage} onChange={(e) => setShowStage(e.target.checked)} /> Stage</label>
+          <label><input type="checkbox" checked={showGrid} onChange={(e) => setShowGrid(e.target.checked)} /> Grid</label>
         </div>
 
-        {/* Placement Mode */}
+        {/* Mode */}
         <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-            Mode:
-          </label>
+          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Mode:</label>
           <div style={{ display: 'flex', gap: '5px' }}>
             {(['select', 'gate', 'box'] as const).map(mode => (
               <button
                 key={mode}
                 onClick={() => setPlacementMode(mode)}
                 style={{
+                  ...buttonStyle,
                   flex: 1,
-                  padding: '8px',
                   background: placementMode === mode ? '#0066aa' : '#333',
-                  color: 'white',
                   border: placementMode === mode ? '2px solid #00aaff' : '1px solid #555',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontFamily: 'monospace',
                   textTransform: 'capitalize'
                 }}
               >
@@ -944,477 +670,225 @@ export default function StageLayoutEditor() {
           </div>
         </div>
 
-        {/* Gate Controls */}
+        {/* Gate Placement Controls */}
         {placementMode === 'gate' && (
-          <div style={{
-            marginBottom: '15px',
-            padding: '10px',
-            background: 'rgba(0,255,0,0.1)',
-            borderRadius: '4px',
-            border: '1px solid #0a0'
-          }}>
-            <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#0f0' }}>
-              New Gate Settings
-            </div>
-
-            <div style={{ marginBottom: '10px' }}>
-              <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>Edge:</label>
-              <select
-                value={newGateEdge}
-                onChange={(e) => setNewGateEdge(e.target.value as GateEdge)}
-                style={{
-                  width: '100%',
-                  padding: '6px',
-                  background: '#333',
-                  color: 'white',
-                  border: '1px solid #555',
-                  borderRadius: '4px',
-                  fontFamily: 'monospace'
-                }}
-              >
+          <div style={{ marginBottom: '15px', padding: '10px', background: '#1a2a1a', borderRadius: '4px', border: '1px solid #0a0' }}>
+            <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#0f0' }}>Gate Placement</div>
+            <div style={{ marginBottom: '8px' }}>
+              <label style={{ fontSize: '11px' }}>Edge:</label>
+              <select value={newGateEdge} onChange={(e) => setNewGateEdge(e.target.value as GateEdge)} style={inputStyle}>
                 <option value="north">North (-Z)</option>
                 <option value="south">South (+Z)</option>
                 <option value="east">East (+X)</option>
                 <option value="west">West (-X)</option>
               </select>
             </div>
-
-            <div style={{ marginBottom: '10px' }}>
-              <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>
-                Offset from center (units):
-              </label>
-              <input
-                type="number"
-                step="0.5"
-                value={newGatePosition}
-                onChange={(e) => setNewGatePosition(Number(e.target.value))}
-                style={{
-                  width: '100%',
-                  padding: '6px',
-                  background: '#333',
-                  color: 'white',
-                  border: '1px solid #555',
-                  borderRadius: '4px',
-                  fontFamily: 'monospace',
-                  boxSizing: 'border-box'
-                }}
-              />
-              <div style={{ fontSize: '10px', color: '#888', marginTop: '3px' }}>
-                Negative = left/back, Positive = right/front
-              </div>
+            <div style={{ marginBottom: '8px' }}>
+              <label style={{ fontSize: '11px' }}>Offset: {newGateOffset}</label>
+              <input type="number" step="0.5" value={newGateOffset} onChange={(e) => setNewGateOffset(Number(e.target.value))} style={inputStyle} />
             </div>
-
-            <div style={{ marginBottom: '10px' }}>
-              <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>
-                Scale: {newGateScale}
-              </label>
-              <input
-                type="range"
-                min="1"
-                max="5"
-                step="0.5"
-                value={newGateScale}
-                onChange={(e) => setNewGateScale(Number(e.target.value))}
-                style={{ width: '100%' }}
-              />
-              <div style={{ fontSize: '10px', color: '#888', marginTop: '3px' }}>
-                2.5 ≈ 5 unit path width
-              </div>
+            <div style={{ marginBottom: '8px' }}>
+              <label style={{ fontSize: '11px' }}>Scale: {newGateScale}</label>
+              <input type="range" min="1" max="5" step="0.5" value={newGateScale} onChange={(e) => setNewGateScale(Number(e.target.value))} style={{ width: '100%' }} />
             </div>
-
-            <button
-              onClick={handleAddGate}
-              style={{
-                width: '100%',
-                padding: '10px',
-                background: '#00aa00',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontFamily: 'monospace',
-                fontWeight: 'bold'
-              }}
-            >
-              Add Gate
+            <button onClick={handleAddGate} style={{ ...buttonStyle, width: '100%', background: '#00aa00', fontWeight: 'bold' }}>
+              Add Gate (or click preview)
             </button>
           </div>
         )}
 
-        {/* Box Controls */}
+        {/* Box Placement Controls */}
         {placementMode === 'box' && (
-          <div style={{
-            marginBottom: '15px',
-            padding: '10px',
-            background: 'rgba(255,100,0,0.1)',
-            borderRadius: '4px',
-            border: '1px solid #a60'
-          }}>
-            <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#fa0' }}>
-              Box Settings (Click to place)
-            </div>
-
-            <div style={{ marginBottom: '10px' }}>
-              <label style={{ display: 'block', marginBottom: '5px', fontSize: '11px' }}>
-                Object Type:
-              </label>
-              <div style={{ display: 'flex', gap: '5px' }}>
-                {(['o01_cont', 'o0c_recont'] as BoxType[]).map(type => (
-                  <button
-                    key={type}
-                    onClick={() => setNewBoxType(type)}
-                    style={{
-                      flex: 1,
-                      padding: '8px 4px',
-                      background: newBoxType === type ? '#aa6600' : '#333',
-                      color: 'white',
-                      border: newBoxType === type ? '2px solid #ffaa00' : '1px solid #555',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontFamily: 'monospace',
-                      fontSize: '10px'
-                    }}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-              <div style={{ fontSize: '10px', color: '#888', marginTop: '5px' }}>
-                {newBoxType === 'o01_cont' ? 'Container box' : 'Recovery container'}
-              </div>
+          <div style={{ marginBottom: '15px', padding: '10px', background: '#2a1a0a', borderRadius: '4px', border: '1px solid #a60' }}>
+            <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#fa0' }}>Box Placement (click ground)</div>
+            <div style={{ display: 'flex', gap: '5px' }}>
+              {(['o01_cont', 'o0c_recont'] as BoxType[]).map(type => (
+                <button
+                  key={type}
+                  onClick={() => setNewBoxType(type)}
+                  style={{
+                    ...buttonStyle,
+                    flex: 1,
+                    fontSize: '10px',
+                    background: newBoxType === type ? '#aa6600' : '#333',
+                    border: newBoxType === type ? '2px solid #ffaa00' : '1px solid #555',
+                  }}
+                >
+                  {type}
+                </button>
+              ))}
             </div>
           </div>
         )}
 
         {/* Selected Gate Editor */}
         {selectedGateData && (
-          <div style={{
-            marginBottom: '15px',
-            padding: '10px',
-            background: 'rgba(0,255,255,0.1)',
-            borderRadius: '4px',
-            border: '1px solid #0aa'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ fontWeight: 'bold', color: '#0ff' }}>Edit Gate</span>
-              <button
-                onClick={() => handleRemoveGate(selectedGateData.id)}
-                style={{
-                  background: '#aa0000',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  padding: '4px 8px',
-                  cursor: 'pointer',
-                  fontSize: '10px'
-                }}
-              >
-                Delete
-              </button>
+          <div style={{ marginBottom: '15px', padding: '10px', background: '#0a2a2a', borderRadius: '4px', border: '1px solid #0aa' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <span style={{ fontWeight: 'bold', color: '#0ff' }}>Edit: {selectedGateData.label}</span>
+              <button onClick={() => handleRemoveGate(selectedGateData.id)} style={{ ...buttonStyle, background: '#aa0000', padding: '2px 8px', fontSize: '10px' }}>Delete</button>
             </div>
-
             <div style={{ marginBottom: '8px' }}>
-              <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>Label:</label>
-              <input
-                type="text"
-                value={selectedGateData.label}
-                onChange={(e) => handleUpdateGate(selectedGateData.id, { label: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '6px',
-                  background: '#333',
-                  color: 'white',
-                  border: '1px solid #555',
-                  borderRadius: '4px',
-                  fontFamily: 'monospace',
-                  boxSizing: 'border-box'
-                }}
-              />
+              <label style={{ fontSize: '10px' }}>Label:</label>
+              <input type="text" value={selectedGateData.label} onChange={(e) => handleUpdateGate(selectedGateData.id, { label: e.target.value })} style={inputStyle} />
             </div>
-
             <div style={{ marginBottom: '8px' }}>
-              <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>
-                Offset (units):
-              </label>
-              <input
-                type="number"
-                step="0.5"
-                value={selectedGateData.position}
-                onChange={(e) => handleUpdateGate(selectedGateData.id, { position: Number(e.target.value) })}
-                style={{
-                  width: '100%',
-                  padding: '6px',
-                  background: '#333',
-                  color: 'white',
-                  border: '1px solid #555',
-                  borderRadius: '4px',
-                  fontFamily: 'monospace',
-                  boxSizing: 'border-box'
-                }}
-              />
+              <label style={{ fontSize: '10px' }}>Edge:</label>
+              <select value={selectedGateData.edge} onChange={(e) => handleUpdateGate(selectedGateData.id, { edge: e.target.value as GateEdge })} style={inputStyle}>
+                <option value="north">North</option>
+                <option value="south">South</option>
+                <option value="east">East</option>
+                <option value="west">West</option>
+              </select>
             </div>
-
-            <div style={{ marginBottom: '8px' }}>
-              <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>
-                Scale: {selectedGateData.scale}
-              </label>
-              <input
-                type="range"
-                min="1"
-                max="5"
-                step="0.5"
-                value={selectedGateData.scale}
-                onChange={(e) => handleUpdateGate(selectedGateData.id, { scale: Number(e.target.value) })}
-                style={{ width: '100%' }}
-              />
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: '10px' }}>X:</label>
+                <input type="number" step="0.5" value={selectedGateData.x} onChange={(e) => handleUpdateGate(selectedGateData.id, { x: Number(e.target.value) })} style={inputStyle} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: '10px' }}>Z:</label>
+                <input type="number" step="0.5" value={selectedGateData.z} onChange={(e) => handleUpdateGate(selectedGateData.id, { z: Number(e.target.value) })} style={inputStyle} />
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize: '10px' }}>Scale: {selectedGateData.scale}</label>
+              <input type="range" min="1" max="5" step="0.5" value={selectedGateData.scale} onChange={(e) => handleUpdateGate(selectedGateData.id, { scale: Number(e.target.value) })} style={{ width: '100%' }} />
             </div>
           </div>
         )}
 
         {/* Selected Box Editor */}
         {selectedBoxData && (
-          <div style={{
-            marginBottom: '15px',
-            padding: '10px',
-            background: 'rgba(255,0,255,0.1)',
-            borderRadius: '4px',
-            border: '1px solid #a0a'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ fontWeight: 'bold', color: '#f0f' }}>Edit Box</span>
-              <button
-                onClick={() => handleRemoveBox(selectedBoxData.id)}
-                style={{
-                  background: '#aa0000',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  padding: '4px 8px',
-                  cursor: 'pointer',
-                  fontSize: '10px'
-                }}
-              >
-                Delete
-              </button>
+          <div style={{ marginBottom: '15px', padding: '10px', background: '#2a0a2a', borderRadius: '4px', border: '1px solid #a0a' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <span style={{ fontWeight: 'bold', color: '#f0f' }}>Edit: {selectedBoxData.label}</span>
+              <button onClick={() => handleRemoveBox(selectedBoxData.id)} style={{ ...buttonStyle, background: '#aa0000', padding: '2px 8px', fontSize: '10px' }}>Delete</button>
             </div>
-
             <div style={{ marginBottom: '8px' }}>
-              <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>Label:</label>
-              <input
-                type="text"
-                value={selectedBoxData.label}
-                onChange={(e) => handleUpdateBox(selectedBoxData.id, { label: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '6px',
-                  background: '#333',
-                  color: 'white',
-                  border: '1px solid #555',
-                  borderRadius: '4px',
-                  fontFamily: 'monospace',
-                  boxSizing: 'border-box'
-                }}
-              />
+              <label style={{ fontSize: '10px' }}>Label:</label>
+              <input type="text" value={selectedBoxData.label} onChange={(e) => handleUpdateBox(selectedBoxData.id, { label: e.target.value })} style={inputStyle} />
             </div>
-
-            <div style={{ marginBottom: '8px' }}>
-              <label style={{ display: 'block', marginBottom: '3px', fontSize: '11px' }}>Type:</label>
-              <div style={{ display: 'flex', gap: '5px' }}>
-                {(['o01_cont', 'o0c_recont'] as BoxType[]).map(type => (
-                  <button
-                    key={type}
-                    onClick={() => handleUpdateBox(selectedBoxData.id, { boxType: type })}
-                    style={{
-                      flex: 1,
-                      padding: '6px 4px',
-                      background: selectedBoxData.boxType === type ? '#a06' : '#333',
-                      color: 'white',
-                      border: selectedBoxData.boxType === type ? '2px solid #f0f' : '1px solid #555',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontFamily: 'monospace',
-                      fontSize: '9px'
-                    }}
-                  >
-                    {type}
-                  </button>
-                ))}
+            <div style={{ display: 'flex', gap: '5px', marginBottom: '8px' }}>
+              {(['o01_cont', 'o0c_recont'] as BoxType[]).map(type => (
+                <button
+                  key={type}
+                  onClick={() => handleUpdateBox(selectedBoxData.id, { boxType: type })}
+                  style={{
+                    ...buttonStyle,
+                    flex: 1,
+                    fontSize: '9px',
+                    background: selectedBoxData.boxType === type ? '#a06' : '#333',
+                  }}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: '10px' }}>X:</label>
+                <input type="number" step="0.5" value={selectedBoxData.x} onChange={(e) => handleUpdateBox(selectedBoxData.id, { x: Number(e.target.value) })} style={inputStyle} />
               </div>
-            </div>
-
-            <div style={{ fontSize: '11px', color: '#aaa' }}>
-              Position: [{selectedBoxData.position[0].toFixed(2)}, {selectedBoxData.position[1].toFixed(2)}]
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: '10px' }}>Z:</label>
+                <input type="number" step="0.5" value={selectedBoxData.z} onChange={(e) => handleUpdateBox(selectedBoxData.id, { z: Number(e.target.value) })} style={inputStyle} />
+              </div>
             </div>
           </div>
         )}
 
-        {/* Items List */}
-        <div style={{ marginBottom: '15px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
-            <span style={{ fontWeight: 'bold' }}>Gates ({gates.length}):</span>
-          </div>
-          {gates.length === 0 ? (
-            <div style={{ color: '#666', fontSize: '11px' }}>No gates</div>
-          ) : (
-            gates.map(gate => (
-              <div
-                key={gate.id}
-                onClick={() => setSelectedGate(gate.id)}
-                style={{
-                  padding: '6px',
-                  background: selectedGate === gate.id ? 'rgba(0,255,255,0.3)' : 'rgba(0,255,0,0.1)',
-                  borderRadius: '4px',
-                  marginBottom: '4px',
-                  cursor: 'pointer',
-                  fontSize: '11px'
-                }}
-              >
-                {gate.label} ({gate.edge})
-              </div>
-            ))
-          )}
+        {/* Lists */}
+        <div style={{ marginBottom: '10px' }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>Gates ({gates.length}):</div>
+          {gates.map(gate => (
+            <div
+              key={gate.id}
+              onClick={() => setSelectedGate(gate.id)}
+              style={{
+                padding: '4px 6px',
+                background: selectedGate === gate.id ? '#0aa' : '#222',
+                borderRadius: '3px',
+                marginBottom: '2px',
+                cursor: 'pointer',
+                fontSize: '11px'
+              }}
+            >
+              {gate.label} ({gate.edge}) [{gate.x.toFixed(1)}, {gate.z.toFixed(1)}]
+            </div>
+          ))}
         </div>
 
         <div style={{ marginBottom: '15px' }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
-            Boxes ({boxes.length}):
-          </div>
-          {boxes.length === 0 ? (
-            <div style={{ color: '#666', fontSize: '11px' }}>No boxes</div>
-          ) : (
-            boxes.map(box => (
-              <div
-                key={box.id}
-                onClick={() => setSelectedBox(box.id)}
-                style={{
-                  padding: '6px',
-                  background: selectedBox === box.id ? 'rgba(255,0,255,0.3)' : 'rgba(255,100,0,0.1)',
-                  borderRadius: '4px',
-                  marginBottom: '4px',
-                  cursor: 'pointer',
-                  fontSize: '11px'
-                }}
-              >
-                {box.label} ({box.boxType})
-              </div>
-            ))
-          )}
+          <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>Boxes ({boxes.length}):</div>
+          {boxes.map(box => (
+            <div
+              key={box.id}
+              onClick={() => setSelectedBox(box.id)}
+              style={{
+                padding: '4px 6px',
+                background: selectedBox === box.id ? '#a0a' : '#222',
+                borderRadius: '3px',
+                marginBottom: '2px',
+                cursor: 'pointer',
+                fontSize: '11px'
+              }}
+            >
+              {box.label} [{box.x.toFixed(1)}, {box.z.toFixed(1)}]
+            </div>
+          ))}
         </div>
 
-        {/* Buttons */}
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-          <button
-            onClick={handleExport}
-            style={{
-              flex: 1,
-              padding: '10px',
-              background: '#0066aa',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontFamily: 'monospace',
-              fontWeight: 'bold',
-              fontSize: '11px'
-            }}
-          >
-            Copy This
-          </button>
-          <button
-            onClick={handleExportAll}
-            disabled={configuredCount === 0}
-            style={{
-              flex: 1,
-              padding: '10px',
-              background: configuredCount === 0 ? '#333' : '#006644',
-              color: configuredCount === 0 ? '#666' : 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: configuredCount === 0 ? 'not-allowed' : 'pointer',
-              fontFamily: 'monospace',
-              fontWeight: 'bold',
-              fontSize: '11px'
-            }}
-          >
-            Export All ({configuredCount})
-          </button>
-        </div>
-
+        {/* Actions */}
         {hasCurrentConfig && (
-          <button
-            onClick={handleClearMap}
-            style={{
-              width: '100%',
-              padding: '8px',
-              background: '#660000',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontFamily: 'monospace',
-              fontSize: '11px',
-              marginBottom: '10px'
-            }}
-          >
-            Clear This Stage
+          <button onClick={handleClearMap} style={{ ...buttonStyle, width: '100%', background: '#660000', marginBottom: '10px' }}>
+            Clear Stage
           </button>
         )}
 
-        {/* Instructions */}
-        <div style={{
-          padding: '10px',
-          background: '#222',
-          borderRadius: '4px',
-          fontSize: '11px',
-          color: '#888'
-        }}>
-          <div><b>Controls:</b></div>
-          <div>Left-drag: Rotate view</div>
-          <div>Right-drag: Pan view</div>
-          <div>Scroll: Zoom in/out</div>
-          <div>Delete: Remove selected</div>
-          <div>Click ground: Place box</div>
-          <div style={{ marginTop: '5px', color: '#8f8' }}>
-            <b>Auto-saves to localStorage</b>
-          </div>
+        {/* Export */}
+        <div style={{ display: 'flex', gap: '5px', marginBottom: '10px' }}>
+          <button onClick={handleCopyJSON} style={{ ...buttonStyle, flex: 1 }}>
+            Copy JSON
+          </button>
+          <button onClick={handleExportAll} style={{ ...buttonStyle, flex: 1 }}>
+            Export All
+          </button>
+        </div>
+
+        <div style={{ fontSize: '10px', color: '#666', marginTop: '10px' }}>
+          Controls: Drag=rotate, Right-drag=pan, Scroll=zoom, Del=remove
         </div>
       </div>
 
-      {/* Back Button */}
-      <a
-        href="/stage/valley"
-        style={{
-          position: 'absolute',
-          top: '10px',
-          right: '10px',
-          zIndex: 1000,
-          padding: '10px 20px',
-          background: 'rgba(200, 50, 50, 0.9)',
-          color: 'white',
-          textDecoration: 'none',
-          borderRadius: '5px',
-          fontFamily: 'monospace',
-          fontSize: '14px',
-          fontWeight: 'bold'
-        }}
-      >
-        Back to Valley
-      </a>
+      {/* Right Panel - 3D View */}
+      <div style={{ flex: 1, position: 'relative' }}>
+        <a
+          href="/stage/valley"
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            zIndex: 1000,
+            padding: '8px 16px',
+            background: '#c33',
+            color: 'white',
+            textDecoration: 'none',
+            borderRadius: '4px',
+            fontFamily: 'monospace',
+            fontSize: '12px'
+          }}
+        >
+          Back
+        </a>
 
-      {/* 3D Scene */}
-      <Canvas camera={{ position: [10, 15, 10], fov: 60, near: 0.1, far: 500 }}>
-        <OrbitControls
-          target={[gridOffset[0], 0, gridOffset[1]]}
-          enableDamping
-          dampingFactor={0.1}
-        />
+        <Canvas camera={{ position: [10, 15, 10], fov: 60, near: 0.1, far: 500 }}>
+          <OrbitControls target={[gridOffset[0], 0, gridOffset[1]]} enableDamping dampingFactor={0.1} />
+          <ambientLight intensity={0.6} />
+          <directionalLight position={[20, 30, 10]} intensity={0.8} />
+          <directionalLight position={[-10, 20, -10]} intensity={0.3} />
 
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[20, 30, 10]} intensity={0.8} castShadow />
-        <directionalLight position={[-10, 20, -10]} intensity={0.3} />
-
-        <Suspense fallback={null}>
-          <LayoutScene
+          <Scene
             selectedMap={selectedMap}
             gridSize={gridSize}
             gridOffset={gridOffset}
@@ -1429,10 +903,10 @@ export default function StageLayoutEditor() {
             placementMode={placementMode}
             showStage={showStage}
             showGrid={showGrid}
-            gatePreview={placementMode === 'gate' ? { edge: newGateEdge, position: newGatePosition, scale: newGateScale } : null}
+            previewGate={placementMode === 'gate' ? { edge: newGateEdge, offset: newGateOffset, scale: newGateScale } : null}
           />
-        </Suspense>
-      </Canvas>
+        </Canvas>
+      </div>
     </div>
   );
 }
