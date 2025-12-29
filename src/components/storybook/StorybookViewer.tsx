@@ -16,6 +16,9 @@ import {
   DropRare, dropRareMeta,
   DropItem, dropItemMeta,
   Waypoint, waypointMeta,
+  Box, boxMeta,
+  RareBox, rareBoxMeta,
+  Wall, wallMeta,
   type StoryMeta,
 } from '../elements';
 
@@ -74,6 +77,19 @@ const CATEGORIES: CategoryEntry[] = [
     name: 'Indicators',
     elements: [
       { id: 'waypoint', Component: Waypoint as React.ComponentType<{ state?: string }>, meta: waypointMeta },
+    ],
+  },
+  {
+    name: 'Containers',
+    elements: [
+      { id: 'box', Component: Box as React.ComponentType<{ state?: string }>, meta: boxMeta },
+      { id: 'rare-box', Component: RareBox as React.ComponentType<{ state?: string }>, meta: rareBoxMeta },
+    ],
+  },
+  {
+    name: 'Walls',
+    elements: [
+      { id: 'wall', Component: Wall as React.ComponentType<{ state?: string }>, meta: wallMeta },
     ],
   },
 ];
@@ -388,6 +404,12 @@ function getUsageText(elementId: string): string {
       return 'Generic item drops like consumables or materials. Must be picked up manually.';
     case 'waypoint':
       return 'Navigation indicators placed in load triggers. Shows different icons based on whether the destination has been visited.';
+    case 'box':
+      return 'Destructible containers that may drop items when destroyed. Model varies by field.';
+    case 'rare-box':
+      return 'Special containers that drop valuable items when destroyed. Model varies by field.';
+    case 'wall':
+      return 'Destructible walls that block passage until destroyed. Model varies by field.';
     default:
       return '';
   }

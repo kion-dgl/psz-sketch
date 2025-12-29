@@ -26,4 +26,11 @@ export { default as DropItem, dropItemMeta, type DropItemState } from './DropIte
 // Indicators
 export { default as Waypoint, waypointMeta, type WaypointState } from './Waypoint';
 
+// Containers
+export { default as Box, boxMeta, type BoxState } from './Box';
+export { default as RareBox, rareBoxMeta, type RareBoxState } from './RareBox';
+
+// Walls
+export { default as Wall, wallMeta, type WallState } from './Wall';
+
 export type { ElementProps, StoryMeta } from './types';
