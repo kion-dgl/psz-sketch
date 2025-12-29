@@ -3,6 +3,7 @@ import { OrbitControls, Grid } from '@react-three/drei';
 import { Suspense, useState, useMemo } from 'react';
 import {
   Gate, gateMeta,
+  KeyGate, keyGateMeta,
   Fence, fenceMeta,
   Key, keyMeta,
   InteractSwitch, interactSwitchMeta,
@@ -20,6 +21,7 @@ interface ElementEntry {
 
 const ELEMENTS: ElementEntry[] = [
   { id: 'gate', Component: Gate as React.ComponentType<{ state?: string }>, meta: gateMeta },
+  { id: 'key-gate', Component: KeyGate as React.ComponentType<{ state?: string }>, meta: keyGateMeta },
   { id: 'fence', Component: Fence as React.ComponentType<{ state?: string }>, meta: fenceMeta },
   { id: 'key', Component: Key as React.ComponentType<{ state?: string }>, meta: keyMeta },
   { id: 'interact-switch', Component: InteractSwitch as React.ComponentType<{ state?: string }>, meta: interactSwitchMeta },
@@ -304,6 +306,8 @@ function getUsageText(elementId: string): string {
   switch (elementId) {
     case 'gate':
       return 'Gates block passage between stages in the grid. They open automatically when all enemies in the stage are defeated.';
+    case 'key-gate':
+      return 'Key Gates block passage and require a Key pickup to unlock. Unlike regular gates, they do not open by defeating enemies.';
     case 'fence':
       return 'Fences block access to items or keys within a stage. They are disabled by activating an InteractSwitch.';
     case 'key':

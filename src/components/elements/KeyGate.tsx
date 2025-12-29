@@ -3,25 +3,25 @@ import { useGLTF, Box } from '@react-three/drei';
 import * as THREE from 'three';
 import type { ElementProps, StoryMeta } from './types';
 
-export type GateState = 'closed' | 'open';
+export type KeyGateState = 'closed' | 'open';
 
-interface GateProps extends ElementProps {
-  state?: GateState;
+interface KeyGateProps extends ElementProps {
+  state?: KeyGateState;
 }
 
 // Story metadata for the storybook
-export const gateMeta: StoryMeta = {
-  title: 'Gate',
-  description: 'Blocks passage between stages. Opens when all enemies are defeated.',
+export const keyGateMeta: StoryMeta = {
+  title: 'Key Gate',
+  description: 'Blocks passage between stages. Requires a key to unlock.',
   states: [
-    { name: 'closed', label: 'Closed', description: 'Gate is blocking the path (laser visible)' },
-    { name: 'open', label: 'Open', description: 'Gate is open (laser hidden)' },
+    { name: 'closed', label: 'Closed', description: 'Gate is locked (laser visible)' },
+    { name: 'open', label: 'Open', description: 'Gate is unlocked (laser hidden)' },
   ],
   defaultState: 'closed',
 };
 
 // The laser/beam mesh that gets hidden when open
-const LASER_MESH_NAME = 'o0c_gate_3';
+const LASER_MESH_NAME = 'o0c_gatet_3';
 
 // Texture config for proper display
 const TEXTURE_CONFIG = {
@@ -33,13 +33,13 @@ const TEXTURE_CONFIG = {
   },
 };
 
-export default function Gate({
+export default function KeyGate({
   position = [0, 0, 0],
   rotation = [0, 0, 0],
   scale = 1,
   state = 'closed',
-}: GateProps) {
-  const { scene } = useGLTF('/objects/01_o01a/o0c_gate.imd/o0c_gate.glb');
+}: KeyGateProps) {
+  const { scene } = useGLTF('/objects/01_o01a/o0c_gatet.imd/o0c_gatet.glb');
   const clonedScene = useMemo(() => scene.clone(), [scene]);
 
   // Toggle laser mesh visibility and apply texture settings
@@ -96,4 +96,4 @@ export default function Gate({
 }
 
 // Preload the model
-useGLTF.preload('/objects/01_o01a/o0c_gate.imd/o0c_gate.glb');
+useGLTF.preload('/objects/01_o01a/o0c_gatet.imd/o0c_gatet.glb');
