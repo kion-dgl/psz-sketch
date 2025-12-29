@@ -95,14 +95,14 @@ function calculatePortalPositions(
         gate: [gridOffset[0] + halfSize, y, gridOffset[1] + offsetAlongEdge],
         spawn: [gridOffset[0] + halfSize - spawnInset, y, gridOffset[1] + offsetAlongEdge],
         trigger: [gridOffset[0] + halfSize + triggerOutset, y, gridOffset[1] + offsetAlongEdge],
-        rotation: Math.PI / 2 // Facing west (away from gate, into map)
+        rotation: -Math.PI / 2 // Facing west (away from gate, into map)
       };
     case 'west': // -X edge
       return {
         gate: [gridOffset[0] - halfSize, y, gridOffset[1] + offsetAlongEdge],
         spawn: [gridOffset[0] - halfSize + spawnInset, y, gridOffset[1] + offsetAlongEdge],
         trigger: [gridOffset[0] - halfSize - triggerOutset, y, gridOffset[1] + offsetAlongEdge],
-        rotation: -Math.PI / 2 // Facing east (away from gate, into map)
+        rotation: Math.PI / 2 // Facing east (away from gate, into map)
       };
   }
 }
@@ -111,8 +111,8 @@ function getGateRotation(edge: GateEdge): number {
   switch (edge) {
     case 'north': return Math.PI;
     case 'south': return 0;
-    case 'east': return -Math.PI / 2;
-    case 'west': return Math.PI / 2;
+    case 'east': return Math.PI / 2;
+    case 'west': return -Math.PI / 2;
   }
 }
 
@@ -210,7 +210,7 @@ function PortalMarker({
       onPointerDown={(e) => { e.stopPropagation(); onDragStart(); }}
     >
       {/* Gate marker */}
-      <group position={portal.gatePosition} rotation={[0, portal.rotation, 0]}>
+      <group position={portal.gatePosition} rotation={[0, getGateRotation(portal.edge), 0]}>
         <mesh>
           <boxGeometry args={[GATE_WIDTH, GATE_HEIGHT, GATE_DEPTH]} />
           <meshBasicMaterial color={gateColor} transparent opacity={isDragging ? 0.9 : selected ? 0.8 : 0.5} />
@@ -245,7 +245,7 @@ function PortalMarker({
       </group>
 
       {/* Trigger marker (orange box outside) - matches gate width */}
-      <group position={portal.triggerPosition} rotation={[0, portal.rotation, 0]}>
+      <group position={portal.triggerPosition} rotation={[0, getGateRotation(portal.edge), 0]}>
         <mesh position={[0, 1.5, 0]}>
           <boxGeometry args={[GATE_WIDTH, 3, 2]} />
           <meshBasicMaterial color={triggerColor} transparent opacity={0.3} />
@@ -661,6 +661,44 @@ export default function PortalEditor() {
     alert('Copied to clipboard!');
   };
 
+  const handleExportAll = () => {
+    const allConfigs = loadAllConfigs();
+    const exportData: Record<string, any> = {};
+
+    for (const [mapId, config] of Object.entries(allConfigs)) {
+      exportData[mapId] = {
+        gridSize: config.gridSize,
+        gridOffset: config.gridOffset,
+        gates: config.portals.map(p => ({
+          edge: p.edge,
+          x: p.gatePosition[0],
+          z: p.gatePosition[2],
+          scale: 1,
+          animated: true
+        })),
+        spawnPoints: config.portals.map(p => ({
+          position: p.spawnPosition,
+          rotation: p.rotation,
+          label: p.label
+        })),
+        triggers: config.portals.map(p => ({
+          position: p.triggerPosition,
+          rotation: p.rotation,
+          targetUrl: p.targetMap || '/stage/valley',
+          label: p.label
+        }))
+      };
+    }
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'portal-configs.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     const panSpeed = 5;
     switch (e.key) {
@@ -906,9 +944,14 @@ export default function PortalEditor() {
         </div>
 
         {/* Export */}
-        <button onClick={handleCopyJSON} disabled={portals.length === 0} style={{ ...buttonStyle, width: '100%', background: portals.length === 0 ? '#333' : '#0066aa' }}>
-          Copy JSON
-        </button>
+        <div style={{ display: 'flex', gap: '5px', marginBottom: '8px' }}>
+          <button onClick={handleCopyJSON} disabled={portals.length === 0} style={{ ...buttonStyle, flex: 1, background: portals.length === 0 ? '#333' : '#0066aa' }}>
+            Copy JSON
+          </button>
+          <button onClick={handleExportAll} disabled={configuredCount === 0} style={{ ...buttonStyle, flex: 1, background: configuredCount === 0 ? '#333' : '#006644' }}>
+            Export All
+          </button>
+        </div>
 
         <div style={{ fontSize: '10px', color: '#666', marginTop: '10px' }}>
           WASD/Arrows=pan, Del=remove, Esc=cancel
