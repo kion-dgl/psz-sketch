@@ -1,0 +1,320 @@
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Grid } from '@react-three/drei';
+import { Suspense, useState, useMemo } from 'react';
+import {
+  Gate, gateMeta,
+  Fence, fenceMeta,
+  Key, keyMeta,
+  InteractSwitch, interactSwitchMeta,
+  StepSwitch, stepSwitchMeta,
+  Waypoint, waypointMeta,
+  type StoryMeta,
+} from '../elements';
+
+// Registry of all elements with their components and metadata
+interface ElementEntry {
+  id: string;
+  Component: React.ComponentType<{ state?: string }>;
+  meta: StoryMeta;
+}
+
+const ELEMENTS: ElementEntry[] = [
+  { id: 'gate', Component: Gate as React.ComponentType<{ state?: string }>, meta: gateMeta },
+  { id: 'fence', Component: Fence as React.ComponentType<{ state?: string }>, meta: fenceMeta },
+  { id: 'key', Component: Key as React.ComponentType<{ state?: string }>, meta: keyMeta },
+  { id: 'interact-switch', Component: InteractSwitch as React.ComponentType<{ state?: string }>, meta: interactSwitchMeta },
+  { id: 'step-switch', Component: StepSwitch as React.ComponentType<{ state?: string }>, meta: stepSwitchMeta },
+  { id: 'waypoint', Component: Waypoint as React.ComponentType<{ state?: string }>, meta: waypointMeta },
+];
+
+function ElementPreview({ element, state }: { element: ElementEntry; state: string }) {
+  const { Component } = element;
+
+  return (
+    <Suspense fallback={null}>
+      <Component state={state} />
+    </Suspense>
+  );
+}
+
+export default function StorybookViewer() {
+  const [selectedId, setSelectedId] = useState<string>(ELEMENTS[0].id);
+  const [states, setStates] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    ELEMENTS.forEach((el) => {
+      initial[el.id] = el.meta.defaultState;
+    });
+    return initial;
+  });
+
+  const selectedElement = useMemo(() => {
+    return ELEMENTS.find((el) => el.id === selectedId) || ELEMENTS[0];
+  }, [selectedId]);
+
+  const currentState = states[selectedId] || selectedElement.meta.defaultState;
+
+  const handleStateChange = (newState: string) => {
+    setStates((prev) => ({ ...prev, [selectedId]: newState }));
+  };
+
+  return (
+    <div style={{
+      display: 'flex',
+      height: '100vh',
+      background: '#1a1a2e',
+      color: 'white',
+      fontFamily: "'Segoe UI', system-ui, sans-serif",
+    }}>
+      {/* Left Panel - Element List */}
+      <div style={{
+        width: '220px',
+        borderRight: '1px solid #333',
+        overflow: 'auto',
+        padding: '1rem',
+        background: '#151525',
+      }}>
+        <div style={{
+          fontSize: '11px',
+          color: '#666',
+          textTransform: 'uppercase',
+          letterSpacing: '1px',
+          marginBottom: '1rem',
+        }}>
+          Elements
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {ELEMENTS.map((element) => (
+            <button
+              key={element.id}
+              onClick={() => setSelectedId(element.id)}
+              style={{
+                padding: '12px 14px',
+                background: selectedId === element.id ? '#3a3a6a' : 'transparent',
+                border: 'none',
+                borderRadius: '6px',
+                color: selectedId === element.id ? 'white' : '#aaa',
+                cursor: 'pointer',
+                textAlign: 'left',
+                fontSize: '14px',
+                fontWeight: selectedId === element.id ? '600' : '400',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                if (selectedId !== element.id) {
+                  e.currentTarget.style.background = '#2a2a4a';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (selectedId !== element.id) {
+                  e.currentTarget.style.background = 'transparent';
+                }
+              }}
+            >
+              {element.meta.title}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ marginTop: 'auto', paddingTop: '2rem' }}>
+          <a
+            href="/"
+            style={{
+              display: 'block',
+              padding: '10px 14px',
+              color: '#88aaff',
+              textDecoration: 'none',
+              fontSize: '13px',
+              borderRadius: '6px',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#2a2a4a';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+            }}
+          >
+            ← Back to Home
+          </a>
+        </div>
+      </div>
+
+      {/* Center - 3D Viewer */}
+      <div style={{ flex: 1, position: 'relative' }}>
+        <Canvas camera={{ position: [3, 2, 3], fov: 50 }}>
+          <ambientLight intensity={0.6} />
+          <directionalLight position={[5, 10, 5]} intensity={0.8} />
+
+          <ElementPreview element={selectedElement} state={currentState} />
+
+          <OrbitControls />
+          <Grid
+            infiniteGrid
+            fadeDistance={30}
+            fadeStrength={5}
+            cellColor="#333355"
+            sectionColor="#444477"
+          />
+        </Canvas>
+
+        {/* Element title overlay */}
+        <div style={{
+          position: 'absolute',
+          top: '1rem',
+          left: '1rem',
+          background: 'rgba(0, 0, 0, 0.7)',
+          padding: '0.75rem 1rem',
+          borderRadius: '8px',
+          backdropFilter: 'blur(8px)',
+        }}>
+          <div style={{ fontSize: '18px', fontWeight: '600' }}>
+            {selectedElement.meta.title}
+          </div>
+          <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
+            {selectedElement.meta.description}
+          </div>
+        </div>
+      </div>
+
+      {/* Right Panel - State Controls */}
+      <div style={{
+        width: '280px',
+        borderLeft: '1px solid #333',
+        overflow: 'auto',
+        padding: '1.5rem',
+        background: '#151525',
+      }}>
+        <div style={{
+          fontSize: '11px',
+          color: '#666',
+          textTransform: 'uppercase',
+          letterSpacing: '1px',
+          marginBottom: '1rem',
+        }}>
+          State
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {selectedElement.meta.states.map((stateOption) => {
+            const isSelected = currentState === stateOption.name;
+
+            return (
+              <label
+                key={stateOption.name}
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '12px',
+                  padding: '12px',
+                  background: isSelected ? '#3a3a6a' : '#2a2a4a',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  border: isSelected ? '1px solid #5a5a9a' : '1px solid transparent',
+                }}
+              >
+                <input
+                  type="radio"
+                  name="element-state"
+                  value={stateOption.name}
+                  checked={isSelected}
+                  onChange={() => handleStateChange(stateOption.name)}
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    marginTop: '2px',
+                    accentColor: '#88aaff',
+                  }}
+                />
+                <div>
+                  <div style={{
+                    fontWeight: '500',
+                    fontSize: '14px',
+                    color: isSelected ? 'white' : '#ccc',
+                  }}>
+                    {stateOption.label}
+                  </div>
+                  {stateOption.description && (
+                    <div style={{
+                      fontSize: '12px',
+                      color: '#888',
+                      marginTop: '4px',
+                    }}>
+                      {stateOption.description}
+                    </div>
+                  )}
+                </div>
+              </label>
+            );
+          })}
+        </div>
+
+        {/* Props Info */}
+        <div style={{ marginTop: '2rem' }}>
+          <div style={{
+            fontSize: '11px',
+            color: '#666',
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+            marginBottom: '0.75rem',
+          }}>
+            Current Props
+          </div>
+          <pre style={{
+            background: '#1a1a2e',
+            padding: '12px',
+            borderRadius: '6px',
+            fontSize: '12px',
+            color: '#88aaff',
+            overflow: 'auto',
+            margin: 0,
+          }}>
+{`<${selectedElement.meta.title.replace(/\s/g, '')}
+  state="${currentState}"
+/>`}
+          </pre>
+        </div>
+
+        {/* Usage Notes */}
+        <div style={{ marginTop: '2rem' }}>
+          <div style={{
+            fontSize: '11px',
+            color: '#666',
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+            marginBottom: '0.75rem',
+          }}>
+            Usage
+          </div>
+          <div style={{
+            fontSize: '12px',
+            color: '#888',
+            lineHeight: '1.6',
+          }}>
+            {getUsageText(selectedElement.id)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function getUsageText(elementId: string): string {
+  switch (elementId) {
+    case 'gate':
+      return 'Gates block passage between stages in the grid. They open automatically when all enemies in the stage are defeated.';
+    case 'fence':
+      return 'Fences block access to items or keys within a stage. They are disabled by activating an InteractSwitch.';
+    case 'key':
+      return 'Keys are pickup items that unlock KeyGates. They float and rotate when available, disappear when collected.';
+    case 'interact-switch':
+      return 'Players interact with these switches to disable fences. Typically placed near the fence they control.';
+    case 'step-switch':
+      return 'Pressure plates that activate when stepped on. Used for contextual triggers like traps, lights, or debug functions.';
+    case 'waypoint':
+      return 'Navigation indicators placed in load triggers. Shows different icons based on whether the destination has been visited.';
+    default:
+      return '';
+  }
+}

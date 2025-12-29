@@ -1,0 +1,96 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+export const prerender = false;
+
+const links = [
+  { href: '/storybook', label: 'Element Storybook', description: 'Preview and test traversal elements', color: '#8855ff' },
+  { href: '/stage/warp', label: 'Warp Hub', description: 'Teleport to different areas', color: '#5588ff' },
+  { href: '/stage/counter', label: 'Guild Counter', description: 'Start quests and missions', color: '#55aa55' },
+  { href: '/stage/valley', label: 'Gurhacia Valley', description: 'Valley stage hub', color: '#aa8855' },
+  { href: '/stage/wetlands', label: 'Ozette Wetlands', description: 'Wetlands stage hub', color: '#558855' },
+  { href: '/stage/snowfield', label: 'Rioh Snowfield', description: 'Snowfield stage hub', color: '#5588aa' },
+  { href: '/title', label: 'Title Screen', description: 'Game title screen', color: '#aa5555' },
+];
+---
+
+<Layout title="PSZ Sketch - Home">
+  <div class="container">
+    <h1>PSZ Sketch</h1>
+    <p class="subtitle">Development Hub</p>
+
+    <div class="links">
+      {links.map(link => (
+        <a href={link.href} class="link-card" style={`--card-color: ${link.color}`}>
+          <span class="link-label">{link.label}</span>
+          <span class="link-description">{link.description}</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(90deg, #88aaff, #aa88ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: #888;
+    margin-bottom: 3rem;
+  }
+
+  .links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    max-width: 900px;
+    width: 100%;
+  }
+
+  .link-card {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-left: 4px solid var(--card-color);
+  }
+
+  .link-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .link-label {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .link-description {
+    color: #888;
+    font-size: 0.9rem;
+  }
+</style>
