@@ -27,27 +27,128 @@ interface StagePortalConfig {
 
 const STORAGE_KEY = 'stage-portal-configs';
 
-const VALLEY_A_MAPS = [
-  's01a_ga1', 's01a_ib1', 's01a_ib2', 's01a_ic1', 's01a_ic3',
-  's01a_lb1', 's01a_lb3', 's01a_lc1', 's01a_lc2', 's01a_na1',
-  's01a_nb2', 's01a_nc2', 's01a_sa1', 's01a_tb3', 's01a_tc3',
-  's01a_td1', 's01a_td2', 's01a_xb2'
+// Standard map suffixes used across most stages
+const STANDARD_SUFFIXES = [
+  'ga1', 'ib1', 'ib2', 'ic1', 'ic3', 'lb1', 'lb3', 'lc1', 'lc2',
+  'na1', 'nb2', 'nc2', 'sa1', 'tb3', 'tc3', 'td1', 'td2', 'xb2'
 ];
 
-const VALLEY_B_MAPS = [
-  's01b_ga1', 's01b_ib1', 's01b_ib2', 's01b_ic1', 's01b_ic3',
-  's01b_lb1', 's01b_lb3', 's01b_lc1', 's01b_lc2', 's01b_na1',
-  's01b_nb2', 's01b_nc2', 's01b_sa1', 's01b_tb3', 's01b_tc3',
-  's01b_td1', 's01b_td2', 's01b_xb2'
-];
+// Generate maps for a stage prefix (e.g., 's01' for valley)
+function generateStageMaps(prefix: string, variants: string[] = ['a', 'b', 'e', 'z']): Record<string, string[]> {
+  const result: Record<string, string[]> = {};
+  for (const variant of variants) {
+    if (variant === 'e') {
+      result[variant] = [`${prefix}e_ia1`];
+    } else if (variant === 'z') {
+      result[variant] = [`${prefix}z_na1`];
+    } else {
+      result[variant] = STANDARD_SUFFIXES.map(suffix => `${prefix}${variant}_${suffix}`);
+    }
+  }
+  return result;
+}
 
-const VALLEY_E_MAPS = ['s01e_ia1'];
-const VALLEY_Z_MAPS = ['s01z_na1'];
-const ALL_MAPS = [...VALLEY_A_MAPS, ...VALLEY_B_MAPS, ...VALLEY_E_MAPS, ...VALLEY_Z_MAPS];
+// Tower has a different structure
+const TOWER_MAPS: Record<string, string[]> = {
+  '0': ['s080_sa0'],
+  '1': ['s081_ga1', 's081_sa1', 's081_ib1', 's081_lb1'],
+  '2': ['s082_ga1', 's082_sa1', 's082_ib1', 's082_lb1'],
+  '3': ['s083_ga1', 's083_sa1', 's083_ib1', 's083_lb1'],
+  '4': ['s084_ga1', 's084_sa1', 's084_ib1', 's084_lb1'],
+  '5': ['s085_ga1', 's085_sa1', 's085_ib1', 's085_lb1'],
+  '6': ['s086_ga1', 's086_sa1', 's086_ib1', 's086_lb1'],
+  '7': ['s087_na1'],
+  'e': ['s08e_ib1'],
+};
 
-function getValleyDir(mapId: string): string {
-  const match = mapId.match(/^s01([a-z])_/);
-  return match ? `stages/valley_${match[1]}` : 'stages/valley_a';
+// Shrine has extra boss map
+const SHRINE_Z_MAPS = ['s07z_na1', 's07z_na2'];
+
+interface StageAreaConfig {
+  name: string;
+  prefix: string;
+  stageDir: string;
+  maps: Record<string, string[]>;
+  hubUrl: string;
+}
+
+const STAGE_AREAS: Record<string, StageAreaConfig> = {
+  valley: {
+    name: 'Gurhacia Valley',
+    prefix: 's01',
+    stageDir: 'valley',
+    maps: generateStageMaps('s01'),
+    hubUrl: '/stage/valley',
+  },
+  wetlands: {
+    name: 'Ozette Wetlands',
+    prefix: 's02',
+    stageDir: 'wetlands',
+    maps: generateStageMaps('s02'),
+    hubUrl: '/stage/wetlands',
+  },
+  snowfield: {
+    name: 'Rioh Snowfield',
+    prefix: 's03',
+    stageDir: 'snowfield',
+    maps: generateStageMaps('s03'),
+    hubUrl: '/stage/snowfield',
+  },
+  makara: {
+    name: 'Makara Ruins',
+    prefix: 's04',
+    stageDir: 'makara',
+    maps: generateStageMaps('s04'),
+    hubUrl: '/stage/makara',
+  },
+  paru: {
+    name: 'Oblivion City Paru',
+    prefix: 's05',
+    stageDir: 'paru',
+    maps: generateStageMaps('s05'),
+    hubUrl: '/stage/paru',
+  },
+  arca: {
+    name: 'Arca Plant',
+    prefix: 's06',
+    stageDir: 'arca',
+    maps: generateStageMaps('s06'),
+    hubUrl: '/stage/arca',
+  },
+  shrine: {
+    name: 'Dark Shrine',
+    prefix: 's07',
+    stageDir: 'shrine',
+    maps: {
+      ...generateStageMaps('s07', ['a', 'b', 'e']),
+      z: SHRINE_Z_MAPS,
+    },
+    hubUrl: '/stage/shrine',
+  },
+  tower: {
+    name: 'Eternal Tower',
+    prefix: 's08',
+    stageDir: 'tower',
+    maps: TOWER_MAPS,
+    hubUrl: '/stage/tower',
+  },
+};
+
+function getAllMapsForArea(areaKey: string): string[] {
+  const area = STAGE_AREAS[areaKey];
+  if (!area) return [];
+  return Object.values(area.maps).flat();
+}
+
+function getStageDir(areaKey: string, mapId: string): string {
+  const area = STAGE_AREAS[areaKey];
+  if (!area) return 'stages/valley_a';
+
+  // Extract variant letter from mapId (e.g., 's01a_ga1' -> 'a')
+  const match = mapId.match(new RegExp(`^${area.prefix}([a-z0-9])_`));
+  const variant = match ? match[1] : 'a';
+
+  return `stages/${area.stageDir}_${variant}`;
 }
 
 function loadAllConfigs(): Record<string, StagePortalConfig> {
@@ -275,6 +376,7 @@ function PortalMarker({
 }
 
 function TopDownScene({
+  selectedArea,
   selectedMap,
   gridSize,
   gridOffset,
@@ -289,6 +391,7 @@ function TopDownScene({
   snapGrid,
   showFloorMesh
 }: {
+  selectedArea: string;
   selectedMap: string;
   gridSize: number;
   gridOffset: [number, number];
@@ -313,8 +416,8 @@ function TopDownScene({
     setFloorGeometry(null);
 
     const loader = new GLTFLoader();
-    const valleyDir = getValleyDir(selectedMap);
-    const glbPath = `/${valleyDir}/${selectedMap}/lndmd/${selectedMap}_m.glb`;
+    const stageDir = getStageDir(selectedArea, selectedMap);
+    const glbPath = `/${stageDir}/${selectedMap}/lndmd/${selectedMap}_m.glb`;
 
     loader.load(glbPath, (gltf) => {
       setScene(gltf.scene);
@@ -365,7 +468,7 @@ function TopDownScene({
 
       setLoading(false);
     });
-  }, [selectedMap]);
+  }, [selectedArea, selectedMap]);
 
   // Snap value to grid
   const snapValue = (val: number) => {
@@ -507,6 +610,7 @@ function EdgeHighlight({ edge, gridSize, gridOffset }: { edge: GateEdge; gridSiz
 const radToDeg = (rad: number) => Math.round((rad * 180) / Math.PI);
 
 export default function PortalEditor() {
+  const [selectedArea, setSelectedArea] = useState('valley');
   const [selectedMap, setSelectedMap] = useState('s01a_ga1');
   const [gridSize, setGridSize] = useState(54);
   const [gridOffset, setGridOffset] = useState<[number, number]>([0, 0]);
@@ -520,8 +624,20 @@ export default function PortalEditor() {
   const [snapGrid, setSnapGrid] = useState(0.5); // Snap to 0.5 units by default
   const [showFloorMesh, setShowFloorMesh] = useState(false);
 
+  const currentAreaConfig = STAGE_AREAS[selectedArea];
+  const currentAreaMaps = getAllMapsForArea(selectedArea);
+
   // Helper to check which edges have portals
   const getPortalForEdge = (edge: GateEdge) => portals.find(p => p.edge === edge);
+
+  // When area changes, select first map in that area
+  const handleAreaChange = (newArea: string) => {
+    setSelectedArea(newArea);
+    const maps = getAllMapsForArea(newArea);
+    if (maps.length > 0) {
+      setSelectedMap(maps[0]);
+    }
+  };
 
   // Load configs on mount
   useEffect(() => {
@@ -637,6 +753,7 @@ export default function PortalEditor() {
   };
 
   const handleCopyJSON = () => {
+    const hubUrl = currentAreaConfig?.hubUrl || '/stage/valley';
     const config = {
       gates: portals.map(p => ({
         edge: p.edge,
@@ -653,7 +770,7 @@ export default function PortalEditor() {
       triggers: portals.map(p => ({
         position: p.triggerPosition,
         rotation: p.rotation,
-        targetUrl: p.targetMap || '/stage/valley',
+        targetUrl: p.targetMap || hubUrl,
         label: p.label
       }))
     };
@@ -661,11 +778,25 @@ export default function PortalEditor() {
     alert('Copied to clipboard!');
   };
 
+  // Helper to determine area from map ID
+  const getAreaFromMapId = (mapId: string): string => {
+    for (const [areaKey, areaConfig] of Object.entries(STAGE_AREAS)) {
+      if (mapId.startsWith(areaConfig.prefix)) {
+        return areaKey;
+      }
+    }
+    return 'valley';
+  };
+
   const handleExportAll = () => {
     const allConfigs = loadAllConfigs();
     const exportData: Record<string, any> = {};
 
     for (const [mapId, config] of Object.entries(allConfigs)) {
+      const area = getAreaFromMapId(mapId);
+      const areaConfig = STAGE_AREAS[area];
+      const hubUrl = areaConfig?.hubUrl || '/stage/valley';
+
       exportData[mapId] = {
         gridSize: config.gridSize,
         gridOffset: config.gridOffset,
@@ -684,7 +815,7 @@ export default function PortalEditor() {
         triggers: config.portals.map(p => ({
           position: p.triggerPosition,
           rotation: p.rotation,
-          targetUrl: p.targetMap || '/stage/valley',
+          targetUrl: p.targetMap || hubUrl,
           label: p.label
         }))
       };
@@ -694,7 +825,7 @@ export default function PortalEditor() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'portal-configs.json';
+    a.download = `${selectedArea}-configs.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -730,7 +861,8 @@ export default function PortalEditor() {
   };
 
   const selectedPortalData = portals.find(p => p.id === selectedPortal);
-  const configuredCount = Object.keys(allConfigs).length;
+  const configuredInArea = currentAreaMaps.filter(m => allConfigs[m]).length;
+  const totalInArea = currentAreaMaps.length;
   const hasCurrentConfig = !!allConfigs[selectedMap];
 
   const panelStyle: React.CSSProperties = {
@@ -780,6 +912,20 @@ export default function PortalEditor() {
       <div style={panelStyle}>
         <h2 style={{ margin: '0 0 15px 0', fontSize: '16px' }}>Portal Editor</h2>
 
+        {/* Area Selector */}
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Area:</label>
+          <select
+            value={selectedArea}
+            onChange={(e) => handleAreaChange(e.target.value)}
+            style={{ ...inputStyle, cursor: 'pointer' }}
+          >
+            {Object.entries(STAGE_AREAS).map(([key, config]) => (
+              <option key={key} value={key}>{config.name}</option>
+            ))}
+          </select>
+        </div>
+
         {/* Map Selector */}
         <div style={{ marginBottom: '15px' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Stage:</label>
@@ -788,21 +934,13 @@ export default function PortalEditor() {
             onChange={(e) => setSelectedMap(e.target.value)}
             style={{ ...inputStyle, cursor: 'pointer' }}
           >
-            <optgroup label="Valley A">
-              {VALLEY_A_MAPS.map((map) => (
-                <option key={map} value={map}>{allConfigs[map] ? '✓ ' : ''}{map}</option>
-              ))}
-            </optgroup>
-            <optgroup label="Valley B">
-              {VALLEY_B_MAPS.map((map) => (
-                <option key={map} value={map}>{allConfigs[map] ? '✓ ' : ''}{map}</option>
-              ))}
-            </optgroup>
-            <optgroup label="Valley E/Z">
-              {[...VALLEY_E_MAPS, ...VALLEY_Z_MAPS].map((map) => (
-                <option key={map} value={map}>{allConfigs[map] ? '✓ ' : ''}{map}</option>
-              ))}
-            </optgroup>
+            {Object.entries(currentAreaConfig?.maps || {}).map(([variant, maps]) => (
+              <optgroup key={variant} label={`${currentAreaConfig?.name} ${variant.toUpperCase()}`}>
+                {maps.map((map) => (
+                  <option key={map} value={map}>{allConfigs[map] ? '✓ ' : ''}{map}</option>
+                ))}
+              </optgroup>
+            ))}
           </select>
         </div>
 
@@ -815,7 +953,7 @@ export default function PortalEditor() {
           fontSize: '11px'
         }}>
           {hasCurrentConfig ? `✓ ${portals.length} portals configured` : '⚠ No portals'}
-          <div style={{ color: '#888' }}>Configured: {configuredCount}/{ALL_MAPS.length}</div>
+          <div style={{ color: '#888' }}>Configured: {configuredInArea}/{totalInArea}</div>
         </div>
 
         {/* Grid Controls */}
@@ -948,7 +1086,7 @@ export default function PortalEditor() {
           <button onClick={handleCopyJSON} disabled={portals.length === 0} style={{ ...buttonStyle, flex: 1, background: portals.length === 0 ? '#333' : '#0066aa' }}>
             Copy JSON
           </button>
-          <button onClick={handleExportAll} disabled={configuredCount === 0} style={{ ...buttonStyle, flex: 1, background: configuredCount === 0 ? '#333' : '#006644' }}>
+          <button onClick={handleExportAll} disabled={configuredInArea === 0} style={{ ...buttonStyle, flex: 1, background: configuredInArea === 0 ? '#333' : '#006644' }}>
             Export All
           </button>
         </div>
@@ -960,7 +1098,7 @@ export default function PortalEditor() {
 
       {/* Back Button */}
       <a
-        href="/stage/valley"
+        href={currentAreaConfig?.hubUrl || '/stage/valley'}
         style={{
           position: 'absolute',
           top: '10px',
@@ -975,7 +1113,7 @@ export default function PortalEditor() {
           fontSize: '12px'
         }}
       >
-        Back
+        Back to {currentAreaConfig?.name || 'Valley'}
       </a>
 
       {/* Canvas */}
@@ -993,6 +1131,7 @@ export default function PortalEditor() {
 
         <Suspense fallback={null}>
           <TopDownScene
+            selectedArea={selectedArea}
             selectedMap={selectedMap}
             gridSize={gridSize}
             gridOffset={gridOffset}
