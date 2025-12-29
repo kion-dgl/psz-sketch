@@ -37,16 +37,69 @@ function getGateDirections(stageName: string): Set<string> {
   return new Set(config.gates.map(g => g.edge));
 }
 
-// Filter stages by required gates
-function getStagesWithGates(area: string, required: { north?: boolean; south?: boolean; east?: boolean; west?: boolean }): string[] {
+// Check if a stage fits at a position without orphan gates
+function stageHasValidGates(
+  stageName: string,
+  row: number,
+  col: number,
+  gridSize: number,
+  grid: GridCell[][],
+  allowedOrphan: 'north' | 'south' | 'east' | 'west' | null
+): boolean {
+  const gates = getGateDirections(stageName);
+
+  for (const gate of gates) {
+    let neighborExists = false;
+    let isOutside = false;
+
+    if (gate === 'north') {
+      isOutside = row === 0;
+      neighborExists = row > 0 && grid[row - 1][col].stageName !== null;
+    } else if (gate === 'south') {
+      isOutside = row === gridSize - 1;
+      neighborExists = row < gridSize - 1 && grid[row + 1][col].stageName !== null;
+    } else if (gate === 'west') {
+      isOutside = col === 0;
+      neighborExists = col > 0 && grid[row][col - 1].stageName !== null;
+    } else if (gate === 'east') {
+      isOutside = col === gridSize - 1;
+      neighborExists = col < gridSize - 1 && grid[row][col + 1].stageName !== null;
+    }
+
+    // Gate must either connect to a neighbor OR be the allowed orphan direction
+    if (!neighborExists && gate !== allowedOrphan) {
+      // Check if pointing outside - that's only ok if it's the allowed orphan
+      if (isOutside) return false;
+      // Check if pointing to empty cell inside grid - not allowed
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// Filter stages by required gates AND no orphan gates
+function getValidStages(
+  area: string,
+  row: number,
+  col: number,
+  gridSize: number,
+  grid: GridCell[][],
+  required: { north?: boolean; south?: boolean; east?: boolean; west?: boolean },
+  allowedOrphan: 'north' | 'south' | 'east' | 'west' | null
+): string[] {
   const stages = stagesByArea[area] || [];
   return stages.filter(stage => {
     const gates = getGateDirections(stage);
+
+    // Must have required gates
     if (required.north && !gates.has('north')) return false;
     if (required.south && !gates.has('south')) return false;
     if (required.east && !gates.has('east')) return false;
     if (required.west && !gates.has('west')) return false;
-    return true;
+
+    // Must not have orphan gates (except allowed one)
+    return stageHasValidGates(stage, row, col, gridSize, grid, allowedOrphan);
   });
 }
 
@@ -55,7 +108,9 @@ interface GridCell {
   stageName: string | null;
   isKeyGate: boolean;
   hasKey: boolean;
-  keyForCell: [number, number] | null; // Which key-gate this key unlocks
+  keyForCell: [number, number] | null;
+  isStart: boolean;
+  isEnd: boolean;
 }
 
 // Generation parameters
@@ -65,10 +120,45 @@ interface GenParams {
   keyGates: number;
 }
 
-// Generate a random grid layout
-function generateGrid(area: string, params: GenParams): GridCell[][] {
+// Generation result
+interface GenerationResult {
+  grid: GridCell[][];
+  startCell: [number, number] | null;
+  endCell: [number, number] | null;
+}
+
+// Generate a random grid layout with constraints
+function generateGrid(area: string, params: GenParams, maxAttempts = 50): GenerationResult {
   const { gridSize, usedCells, keyGates } = params;
 
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const result = tryGenerateGrid(area, gridSize, usedCells, keyGates);
+    if (result) return result;
+  }
+
+  // Fallback: return empty grid
+  return {
+    grid: Array(gridSize).fill(null).map(() =>
+      Array(gridSize).fill(null).map(() => ({
+        stageName: null,
+        isKeyGate: false,
+        hasKey: false,
+        keyForCell: null,
+        isStart: false,
+        isEnd: false,
+      }))
+    ),
+    startCell: null,
+    endCell: null,
+  };
+}
+
+function tryGenerateGrid(
+  area: string,
+  gridSize: number,
+  usedCells: number,
+  keyGates: number
+): GenerationResult | null {
   // Initialize empty grid
   const grid: GridCell[][] = Array(gridSize).fill(null).map(() =>
     Array(gridSize).fill(null).map(() => ({
@@ -76,17 +166,21 @@ function generateGrid(area: string, params: GenParams): GridCell[][] {
       isKeyGate: false,
       hasKey: false,
       keyForCell: null,
+      isStart: false,
+      isEnd: false,
     }))
   );
 
-  // Start from center and expand outward
+  // Start from center
   const center = Math.floor(gridSize / 2);
   const visited = new Set<string>();
   const frontier: [number, number][] = [[center, center]];
   const placedCells: [number, number][] = [];
 
+  // First cell is the start - allow one orphan gate (south = entry from previous area)
+  let isFirstCell = true;
+
   while (placedCells.length < usedCells && frontier.length > 0) {
-    // Pick random cell from frontier
     const idx = Math.floor(Math.random() * frontier.length);
     const [row, col] = frontier.splice(idx, 1)[0];
     const key = `${row},${col}`;
@@ -96,21 +190,35 @@ function generateGrid(area: string, params: GenParams): GridCell[][] {
 
     visited.add(key);
 
-    // Determine required gates based on neighbors
+    // Determine required gates based on placed neighbors
     const required: { north?: boolean; south?: boolean; east?: boolean; west?: boolean } = {};
-
-    // Check if neighbors are placed and need connection
     if (row > 0 && grid[row - 1][col].stageName) required.north = true;
     if (row < gridSize - 1 && grid[row + 1][col].stageName) required.south = true;
     if (col > 0 && grid[row][col - 1].stageName) required.west = true;
     if (col < gridSize - 1 && grid[row][col + 1].stageName) required.east = true;
 
-    // Find matching stages
-    let candidates = getStagesWithGates(area, required);
+    // Determine allowed orphan gate
+    // Start cell: allow south orphan (entry from previous area)
+    // Last cell: will allow north orphan (exit to next area)
+    let allowedOrphan: 'north' | 'south' | 'east' | 'west' | null = null;
+    if (isFirstCell) {
+      allowedOrphan = 'south'; // Entry point
+    } else if (placedCells.length === usedCells - 1) {
+      allowedOrphan = 'north'; // Exit point
+    }
 
-    // If first cell, pick any stage
-    if (placedCells.length === 0) {
-      candidates = stagesByArea[area] || [];
+    // Find valid stages
+    let candidates = getValidStages(area, row, col, gridSize, grid, required, allowedOrphan);
+
+    // If first cell and no candidates with south orphan, try any edge
+    if (isFirstCell && candidates.length === 0) {
+      for (const edge of ['north', 'west', 'east'] as const) {
+        candidates = getValidStages(area, row, col, gridSize, grid, required, edge);
+        if (candidates.length > 0) {
+          allowedOrphan = edge;
+          break;
+        }
+      }
     }
 
     if (candidates.length === 0) continue;
@@ -118,9 +226,15 @@ function generateGrid(area: string, params: GenParams): GridCell[][] {
     // Pick random stage
     const stageName = candidates[Math.floor(Math.random() * candidates.length)];
     grid[row][col].stageName = stageName;
+
+    if (isFirstCell) {
+      grid[row][col].isStart = true;
+      isFirstCell = false;
+    }
+
     placedCells.push([row, col]);
 
-    // Add neighbors to frontier
+    // Add neighbors to frontier based on gates
     const gates = getGateDirections(stageName);
     if (gates.has('north') && row > 0) frontier.push([row - 1, col]);
     if (gates.has('south') && row < gridSize - 1) frontier.push([row + 1, col]);
@@ -128,22 +242,65 @@ function generateGrid(area: string, params: GenParams): GridCell[][] {
     if (gates.has('east') && col < gridSize - 1) frontier.push([row, col + 1]);
   }
 
-  // Place key-gates and keys
-  if (keyGates > 0 && placedCells.length >= keyGates * 2) {
-    // Shuffle placed cells
-    const shuffled = [...placedCells].sort(() => Math.random() - 0.5);
+  if (placedCells.length < 2) return null;
 
+  // Find and validate orphan gates
+  const orphanCells: { cell: [number, number]; direction: string }[] = [];
+
+  for (const [row, col] of placedCells) {
+    const stageName = grid[row][col].stageName;
+    if (!stageName) continue;
+
+    const gates = getGateDirections(stageName);
+
+    for (const gate of gates) {
+      let isOrphan = false;
+
+      if (gate === 'north' && (row === 0 || !grid[row - 1][col].stageName)) isOrphan = true;
+      if (gate === 'south' && (row === gridSize - 1 || !grid[row + 1][col].stageName)) isOrphan = true;
+      if (gate === 'west' && (col === 0 || !grid[row][col - 1].stageName)) isOrphan = true;
+      if (gate === 'east' && (col === gridSize - 1 || !grid[row][col + 1].stageName)) isOrphan = true;
+
+      if (isOrphan) {
+        orphanCells.push({ cell: [row, col], direction: gate });
+      }
+    }
+  }
+
+  // Need exactly 2 orphan gates: one start, one end
+  if (orphanCells.length !== 2) return null;
+
+  // Assign start and end
+  // Prefer south-facing orphan as start (entry), north-facing as end (exit)
+  let startIdx = orphanCells.findIndex(o => o.direction === 'south');
+  if (startIdx === -1) startIdx = 0;
+  const endIdx = startIdx === 0 ? 1 : 0;
+
+  const startCell = orphanCells[startIdx].cell;
+  const endCell = orphanCells[endIdx].cell;
+
+  grid[startCell[0]][startCell[1]].isStart = true;
+  grid[startCell[0]][startCell[1]].isEnd = false;
+  grid[endCell[0]][endCell[1]].isEnd = true;
+  grid[endCell[0]][endCell[1]].isStart = false;
+
+  // Place key-gates and keys (not on start/end cells)
+  const availableCells = placedCells.filter(([r, c]) =>
+    !grid[r][c].isStart && !grid[r][c].isEnd
+  );
+
+  if (keyGates > 0 && availableCells.length >= keyGates * 2) {
+    const shuffled = [...availableCells].sort(() => Math.random() - 0.5);
     for (let i = 0; i < keyGates && i * 2 + 1 < shuffled.length; i++) {
       const [gateRow, gateCol] = shuffled[i * 2];
       const [keyRow, keyCol] = shuffled[i * 2 + 1];
-
       grid[gateRow][gateCol].isKeyGate = true;
       grid[keyRow][keyCol].hasKey = true;
       grid[keyRow][keyCol].keyForCell = [gateRow, gateCol];
     }
   }
 
-  return grid;
+  return { grid, startCell, endCell };
 }
 
 // Cell display component
@@ -169,18 +326,105 @@ function GridCellDisplay({ cell, row, col }: { cell: GridCell; row: number; col:
   const gates = getGateDirections(cell.stageName);
   const config = configs[cell.stageName];
 
+  // Determine background color
+  let bgColor = '#2a2a4a';
+  let borderColor = '#444';
+  let borderWidth = '1px';
+
+  if (cell.isStart) {
+    bgColor = '#2a4a6a';
+    borderColor = '#66aaff';
+    borderWidth = '2px';
+  } else if (cell.isEnd) {
+    bgColor = '#6a4a2a';
+    borderColor = '#ffaa66';
+    borderWidth = '2px';
+  } else if (cell.isKeyGate) {
+    bgColor = '#4a2a4a';
+    borderColor = '#aa66aa';
+    borderWidth = '2px';
+  } else if (cell.hasKey) {
+    bgColor = '#2a4a2a';
+    borderColor = '#66aa66';
+    borderWidth = '2px';
+  }
+
   return (
     <div style={{
       width: '120px',
       height: '120px',
-      background: cell.isKeyGate ? '#4a2a4a' : cell.hasKey ? '#2a4a2a' : '#2a2a4a',
-      border: cell.isKeyGate ? '2px solid #aa66aa' : cell.hasKey ? '2px solid #66aa66' : '1px solid #444',
+      background: bgColor,
+      border: `${borderWidth} solid ${borderColor}`,
       position: 'relative',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
     }}>
+      {/* Start/End label */}
+      {cell.isStart && (
+        <div style={{
+          position: 'absolute',
+          top: '4px',
+          left: '4px',
+          background: '#66aaff',
+          color: '#fff',
+          fontSize: '8px',
+          padding: '2px 4px',
+          borderRadius: '3px',
+          fontWeight: 600,
+        }}>
+          START
+        </div>
+      )}
+      {cell.isEnd && (
+        <div style={{
+          position: 'absolute',
+          top: '4px',
+          left: '4px',
+          background: '#ffaa66',
+          color: '#fff',
+          fontSize: '8px',
+          padding: '2px 4px',
+          borderRadius: '3px',
+          fontWeight: 600,
+        }}>
+          END
+        </div>
+      )}
+
+      {/* Key-gate indicator */}
+      {cell.isKeyGate && !cell.isStart && !cell.isEnd && (
+        <div style={{
+          position: 'absolute',
+          top: '4px',
+          left: '4px',
+          background: '#aa66aa',
+          color: '#fff',
+          fontSize: '8px',
+          padding: '2px 4px',
+          borderRadius: '3px',
+        }}>
+          KEY-GATE
+        </div>
+      )}
+
+      {/* Key indicator */}
+      {cell.hasKey && cell.keyForCell && !cell.isStart && !cell.isEnd && (
+        <div style={{
+          position: 'absolute',
+          top: '4px',
+          left: '4px',
+          background: '#66aa66',
+          color: '#fff',
+          fontSize: '8px',
+          padding: '2px 4px',
+          borderRadius: '3px',
+        }}>
+          KEY→{cell.keyForCell[0]},{cell.keyForCell[1]}
+        </div>
+      )}
+
       {/* Stage name */}
       <div style={{
         color: '#fff',
@@ -199,38 +443,6 @@ function GridCellDisplay({ cell, row, col }: { cell: GridCell; row: number; col:
       }}>
         {config?.gridSize || '?'}
       </div>
-
-      {/* Key-gate indicator */}
-      {cell.isKeyGate && (
-        <div style={{
-          position: 'absolute',
-          top: '4px',
-          left: '4px',
-          background: '#aa66aa',
-          color: '#fff',
-          fontSize: '8px',
-          padding: '2px 4px',
-          borderRadius: '3px',
-        }}>
-          KEY-GATE
-        </div>
-      )}
-
-      {/* Key indicator */}
-      {cell.hasKey && cell.keyForCell && (
-        <div style={{
-          position: 'absolute',
-          top: '4px',
-          left: '4px',
-          background: '#66aa66',
-          color: '#fff',
-          fontSize: '8px',
-          padding: '2px 4px',
-          borderRadius: '3px',
-        }}>
-          KEY→{cell.keyForCell[0]},{cell.keyForCell[1]}
-        </div>
-      )}
 
       {/* North gate */}
       {gates.has('north') && (
@@ -306,10 +518,10 @@ export default function GridViewer() {
   const [area, setArea] = useState<'a' | 'b'>('a');
   const [params, setParams] = useState<GenParams>({
     gridSize: 5,
-    usedCells: 15,
+    usedCells: 12,
     keyGates: 2,
   });
-  const [grid, setGrid] = useState<GridCell[][]>([]);
+  const [result, setResult] = useState<GenerationResult>({ grid: [], startCell: null, endCell: null });
   const [seed, setSeed] = useState(0);
 
   const regenerate = useCallback(() => {
@@ -317,8 +529,10 @@ export default function GridViewer() {
   }, []);
 
   useEffect(() => {
-    setGrid(generateGrid(area, params));
+    setResult(generateGrid(area, params));
   }, [area, params, seed]);
+
+  const placedCount = result.grid.flat().filter(c => c.stageName).length;
 
   return (
     <div style={{
@@ -407,10 +621,10 @@ export default function GridViewer() {
           </div>
           <input
             type="number"
-            min={1}
+            min={2}
             max={params.gridSize * params.gridSize}
             value={params.usedCells}
-            onChange={(e) => setParams(p => ({ ...p, usedCells: parseInt(e.target.value) || 15 }))}
+            onChange={(e) => setParams(p => ({ ...p, usedCells: parseInt(e.target.value) || 12 }))}
             style={{
               width: '100%',
               padding: '10px 12px',
@@ -480,12 +694,24 @@ export default function GridViewer() {
               display: 'inline-block',
               width: '12px',
               height: '12px',
-              background: '#88ff88',
+              background: '#66aaff',
               borderRadius: '2px',
               marginRight: '8px',
               verticalAlign: 'middle',
             }} />
-            Gate
+            Start
+          </div>
+          <div style={{ marginBottom: '8px' }}>
+            <span style={{
+              display: 'inline-block',
+              width: '12px',
+              height: '12px',
+              background: '#ffaa66',
+              borderRadius: '2px',
+              marginRight: '8px',
+              verticalAlign: 'middle',
+            }} />
+            End
           </div>
           <div style={{ marginBottom: '8px' }}>
             <span style={{
@@ -510,6 +736,18 @@ export default function GridViewer() {
               verticalAlign: 'middle',
             }} />
             Key Location
+          </div>
+          <div style={{ marginBottom: '8px' }}>
+            <span style={{
+              display: 'inline-block',
+              width: '12px',
+              height: '12px',
+              background: '#88ff88',
+              borderRadius: '2px',
+              marginRight: '8px',
+              verticalAlign: 'middle',
+            }} />
+            Gate
           </div>
         </div>
 
@@ -576,7 +814,7 @@ export default function GridViewer() {
           padding: '2px',
           borderRadius: '8px',
         }}>
-          {grid.map((row, rowIndex) => (
+          {result.grid.map((row, rowIndex) => (
             <div key={rowIndex} style={{ display: 'flex', gap: '2px' }}>
               {row.map((cell, colIndex) => (
                 <GridCellDisplay key={colIndex} cell={cell} row={rowIndex} col={colIndex} />
@@ -592,7 +830,9 @@ export default function GridViewer() {
           color: '#666',
           textAlign: 'center',
         }}>
-          Placed: {grid.flat().filter(c => c.stageName).length} stages
+          Placed: {placedCount} stages
+          {result.startCell && ` | Start: ${result.startCell[0]},${result.startCell[1]}`}
+          {result.endCell && ` | End: ${result.endCell[0]},${result.endCell[1]}`}
         </div>
       </div>
     </div>
