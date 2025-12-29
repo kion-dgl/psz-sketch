@@ -1,0 +1,21 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+export const prerender = false;
+---
+
+<Layout title="Grid Viewer - PSZ Sketch">
+  <div id="grid-root"></div>
+</Layout>
+
+<script>
+  import { createElement } from 'react';
+  import { createRoot } from 'react-dom/client';
+  import GridViewer from '../components/grid/GridViewer';
+
+  const container = document.getElementById('grid-root');
+  if (container) {
+    const root = createRoot(container);
+    root.render(createElement(GridViewer));
+  }
+</script>

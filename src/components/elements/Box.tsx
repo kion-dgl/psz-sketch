@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
+import * as THREE from 'three';
 import type { ElementProps, StoryMeta } from './types';
 
 export type BoxState = 'intact' | 'destroyed';
@@ -28,6 +29,27 @@ export default function Box({
   // Valley variant (o01_cont)
   const { scene } = useGLTF('/objects/01_o01a/o01_cont.imd/o01_cont.glb');
   const clonedScene = useMemo(() => scene.clone(), [scene]);
+
+  // Apply texture settings
+  useEffect(() => {
+    clonedScene.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+        materials.forEach((mat) => {
+          if (mat instanceof THREE.MeshStandardMaterial || mat instanceof THREE.MeshBasicMaterial) {
+            if (mat.map) {
+              mat.map.wrapS = THREE.MirroredRepeatWrapping;
+              mat.map.wrapT = THREE.MirroredRepeatWrapping;
+              mat.map.repeat.set(2, 2);
+              mat.map.offset.set(0, 0);
+              mat.map.needsUpdate = true;
+            }
+            mat.needsUpdate = true;
+          }
+        });
+      }
+    });
+  }, [clonedScene]);
 
   if (state === 'destroyed') return null;
 
