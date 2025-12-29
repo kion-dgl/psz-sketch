@@ -28,8 +28,8 @@ export default function StepSwitch({
   state = 'off',
   onStep,
 }: StepSwitchProps) {
-  // switchs = step switch
-  const { scene } = useGLTF('/objects/01_o01a/o0c_switchs.imd/o0c_switchs.glb');
+  // switchf = floor pressure plate (player steps on)
+  const { scene } = useGLTF('/objects/01_o01a/o0c_switchf.imd/o0c_switchf.glb');
   const clonedScene = useMemo(() => scene.clone(), [scene]);
 
   // Apply visual state
@@ -38,13 +38,21 @@ export default function StepSwitch({
       if (child instanceof THREE.Mesh) {
         const materials = Array.isArray(child.material) ? child.material : [child.material];
         materials.forEach((mat) => {
-          if (mat instanceof THREE.MeshStandardMaterial) {
-            if (state === 'on') {
-              mat.emissive = new THREE.Color(0x44aaff);
-              mat.emissiveIntensity = 0.5;
-            } else {
-              mat.emissive = new THREE.Color(0x000000);
-              mat.emissiveIntensity = 0;
+          if (mat instanceof THREE.MeshStandardMaterial || mat instanceof THREE.MeshBasicMaterial) {
+            // Apply texture offset based on state
+            if (mat.map) {
+              mat.map.offset.x = state === 'off' ? 0.50 : 0;
+              mat.map.needsUpdate = true;
+            }
+
+            if (mat instanceof THREE.MeshStandardMaterial) {
+              if (state === 'on') {
+                mat.emissive = new THREE.Color(0x44aaff);
+                mat.emissiveIntensity = 0.5;
+              } else {
+                mat.emissive = new THREE.Color(0x000000);
+                mat.emissiveIntensity = 0;
+              }
             }
             mat.needsUpdate = true;
           }
@@ -68,4 +76,4 @@ export default function StepSwitch({
 }
 
 // Preload the model
-useGLTF.preload('/objects/01_o01a/o0c_switchs.imd/o0c_switchs.glb');
+useGLTF.preload('/objects/01_o01a/o0c_switchf.imd/o0c_switchf.glb');

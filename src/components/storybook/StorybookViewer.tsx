@@ -5,9 +5,16 @@ import {
   Gate, gateMeta,
   KeyGate, keyGateMeta,
   Fence, fenceMeta,
+  Fence4, fence4Meta,
   Key, keyMeta,
   InteractSwitch, interactSwitchMeta,
   StepSwitch, stepSwitchMeta,
+  RemoteSwitch, remoteSwitchMeta,
+  DropMeseta, dropMesetaMeta,
+  DropWeapon, dropWeaponMeta,
+  DropArmor, dropArmorMeta,
+  DropRare, dropRareMeta,
+  DropItem, dropItemMeta,
   Waypoint, waypointMeta,
   type StoryMeta,
 } from '../elements';
@@ -19,15 +26,60 @@ interface ElementEntry {
   meta: StoryMeta;
 }
 
-const ELEMENTS: ElementEntry[] = [
-  { id: 'gate', Component: Gate as React.ComponentType<{ state?: string }>, meta: gateMeta },
-  { id: 'key-gate', Component: KeyGate as React.ComponentType<{ state?: string }>, meta: keyGateMeta },
-  { id: 'fence', Component: Fence as React.ComponentType<{ state?: string }>, meta: fenceMeta },
-  { id: 'key', Component: Key as React.ComponentType<{ state?: string }>, meta: keyMeta },
-  { id: 'interact-switch', Component: InteractSwitch as React.ComponentType<{ state?: string }>, meta: interactSwitchMeta },
-  { id: 'step-switch', Component: StepSwitch as React.ComponentType<{ state?: string }>, meta: stepSwitchMeta },
-  { id: 'waypoint', Component: Waypoint as React.ComponentType<{ state?: string }>, meta: waypointMeta },
+interface CategoryEntry {
+  name: string;
+  elements: ElementEntry[];
+}
+
+const CATEGORIES: CategoryEntry[] = [
+  {
+    name: 'Gates',
+    elements: [
+      { id: 'gate', Component: Gate as React.ComponentType<{ state?: string }>, meta: gateMeta },
+      { id: 'key-gate', Component: KeyGate as React.ComponentType<{ state?: string }>, meta: keyGateMeta },
+    ],
+  },
+  {
+    name: 'Fences',
+    elements: [
+      { id: 'fence', Component: Fence as React.ComponentType<{ state?: string }>, meta: fenceMeta },
+      { id: 'fence-4', Component: Fence4 as React.ComponentType<{ state?: string }>, meta: fence4Meta },
+    ],
+  },
+  {
+    name: 'Switches',
+    elements: [
+      { id: 'interact-switch', Component: InteractSwitch as React.ComponentType<{ state?: string }>, meta: interactSwitchMeta },
+      { id: 'step-switch', Component: StepSwitch as React.ComponentType<{ state?: string }>, meta: stepSwitchMeta },
+      { id: 'remote-switch', Component: RemoteSwitch as React.ComponentType<{ state?: string }>, meta: remoteSwitchMeta },
+    ],
+  },
+  {
+    name: 'Pickups',
+    elements: [
+      { id: 'key', Component: Key as React.ComponentType<{ state?: string }>, meta: keyMeta },
+    ],
+  },
+  {
+    name: 'Drops',
+    elements: [
+      { id: 'drop-meseta', Component: DropMeseta as React.ComponentType<{ state?: string }>, meta: dropMesetaMeta },
+      { id: 'drop-weapon', Component: DropWeapon as React.ComponentType<{ state?: string }>, meta: dropWeaponMeta },
+      { id: 'drop-armor', Component: DropArmor as React.ComponentType<{ state?: string }>, meta: dropArmorMeta },
+      { id: 'drop-rare', Component: DropRare as React.ComponentType<{ state?: string }>, meta: dropRareMeta },
+      { id: 'drop-item', Component: DropItem as React.ComponentType<{ state?: string }>, meta: dropItemMeta },
+    ],
+  },
+  {
+    name: 'Indicators',
+    elements: [
+      { id: 'waypoint', Component: Waypoint as React.ComponentType<{ state?: string }>, meta: waypointMeta },
+    ],
+  },
 ];
+
+// Flatten for lookup
+const ALL_ELEMENTS = CATEGORIES.flatMap((cat) => cat.elements);
 
 function ElementPreview({ element, state }: { element: ElementEntry; state: string }) {
   const { Component } = element;
@@ -40,17 +92,17 @@ function ElementPreview({ element, state }: { element: ElementEntry; state: stri
 }
 
 export default function StorybookViewer() {
-  const [selectedId, setSelectedId] = useState<string>(ELEMENTS[0].id);
+  const [selectedId, setSelectedId] = useState<string>(ALL_ELEMENTS[0].id);
   const [states, setStates] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
-    ELEMENTS.forEach((el) => {
+    ALL_ELEMENTS.forEach((el) => {
       initial[el.id] = el.meta.defaultState;
     });
     return initial;
   });
 
   const selectedElement = useMemo(() => {
-    return ELEMENTS.find((el) => el.id === selectedId) || ELEMENTS[0];
+    return ALL_ELEMENTS.find((el) => el.id === selectedId) || ALL_ELEMENTS[0];
   }, [selectedId]);
 
   const currentState = states[selectedId] || selectedElement.meta.defaultState;
@@ -75,50 +127,54 @@ export default function StorybookViewer() {
         padding: '1rem',
         background: '#151525',
       }}>
-        <div style={{
-          fontSize: '11px',
-          color: '#666',
-          textTransform: 'uppercase',
-          letterSpacing: '1px',
-          marginBottom: '1rem',
-        }}>
-          Elements
-        </div>
+        {CATEGORIES.map((category) => (
+          <div key={category.name} style={{ marginBottom: '1.5rem' }}>
+            <div style={{
+              fontSize: '11px',
+              color: '#666',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              marginBottom: '0.5rem',
+            }}>
+              {category.name}
+            </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {ELEMENTS.map((element) => (
-            <button
-              key={element.id}
-              onClick={() => setSelectedId(element.id)}
-              style={{
-                padding: '12px 14px',
-                background: selectedId === element.id ? '#3a3a6a' : 'transparent',
-                border: 'none',
-                borderRadius: '6px',
-                color: selectedId === element.id ? 'white' : '#aaa',
-                cursor: 'pointer',
-                textAlign: 'left',
-                fontSize: '14px',
-                fontWeight: selectedId === element.id ? '600' : '400',
-                transition: 'all 0.15s ease',
-              }}
-              onMouseEnter={(e) => {
-                if (selectedId !== element.id) {
-                  e.currentTarget.style.background = '#2a2a4a';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (selectedId !== element.id) {
-                  e.currentTarget.style.background = 'transparent';
-                }
-              }}
-            >
-              {element.meta.title}
-            </button>
-          ))}
-        </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              {category.elements.map((element) => (
+                <button
+                  key={element.id}
+                  onClick={() => setSelectedId(element.id)}
+                  style={{
+                    padding: '10px 12px',
+                    background: selectedId === element.id ? '#3a3a6a' : 'transparent',
+                    border: 'none',
+                    borderRadius: '6px',
+                    color: selectedId === element.id ? 'white' : '#aaa',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    fontSize: '13px',
+                    fontWeight: selectedId === element.id ? '600' : '400',
+                    transition: 'all 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedId !== element.id) {
+                      e.currentTarget.style.background = '#2a2a4a';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedId !== element.id) {
+                      e.currentTarget.style.background = 'transparent';
+                    }
+                  }}
+                >
+                  {element.meta.title}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
 
-        <div style={{ marginTop: 'auto', paddingTop: '2rem' }}>
+        <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid #333' }}>
           <a
             href="/"
             style={{
@@ -272,7 +328,7 @@ export default function StorybookViewer() {
             overflow: 'auto',
             margin: 0,
           }}>
-{`<${selectedElement.meta.title.replace(/\s/g, '')}
+{`<${selectedElement.meta.title.replace(/[:\s]/g, '')}
   state="${currentState}"
 />`}
           </pre>
@@ -310,12 +366,26 @@ function getUsageText(elementId: string): string {
       return 'Key Gates block passage and require a Key pickup to unlock. Unlike regular gates, they do not open by defeating enemies.';
     case 'fence':
       return 'Fences block access to items or keys within a stage. They are disabled by activating an InteractSwitch.';
+    case 'fence-4':
+      return 'Four-sided fence that blocks access from all directions. Works the same as regular fences but provides 360-degree coverage.';
     case 'key':
       return 'Keys are pickup items that unlock KeyGates. They float and rotate when available, disappear when collected.';
     case 'interact-switch':
       return 'Players interact with these switches to disable fences. Typically placed near the fence they control.';
     case 'step-switch':
       return 'Pressure plates that activate when stepped on. Used for contextual triggers like traps, lights, or debug functions.';
+    case 'remote-switch':
+      return 'Interactive switch used to disarm traps or trigger remote mechanisms. Player must interact to activate.';
+    case 'drop-meseta':
+      return 'Currency drops from defeated enemies. Auto-collected when the player walks near.';
+    case 'drop-weapon':
+      return 'Weapon drops from defeated enemies or containers. Must be picked up manually.';
+    case 'drop-armor':
+      return 'Armor/protector drops from defeated enemies or containers. Must be picked up manually.';
+    case 'drop-rare':
+      return 'Rare item drops. These have a distinct appearance to indicate their rarity.';
+    case 'drop-item':
+      return 'Generic item drops like consumables or materials. Must be picked up manually.';
     case 'waypoint':
       return 'Navigation indicators placed in load triggers. Shows different icons based on whether the destination has been visited.';
     default:
