@@ -1,7 +1,4 @@
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Grid } from '@react-three/drei';
-import { Suspense, useState, useMemo } from 'react';
-import { Gate } from '../elements';
+import { useState } from 'react';
 
 // Area configurations
 const AREAS = [
@@ -9,148 +6,224 @@ const AREAS = [
   { id: 'valley-b', label: 'Valley B', field: 'valley', area: 'b' },
 ];
 
-// Grid cell size (matches stage tile size)
-const CELL_SIZE = 10;
-const GRID_SIZE = 5;
-
-// Gate positions on edges between cells
-// Format: { row, col, direction: 'north' | 'south' | 'east' | 'west' }
-interface GatePosition {
-  row: number;
-  col: number;
-  direction: 'north' | 'south' | 'east' | 'west';
+// Stage data type
+interface StageCell {
+  name: string;
+  north: boolean;
+  south: boolean;
+  east: boolean;
+  west: boolean;
 }
 
-// Sample gate positions for testing alignment
-const SAMPLE_GATES: GatePosition[] = [
-  // Center cell gates
-  { row: 2, col: 2, direction: 'north' },
-  { row: 2, col: 2, direction: 'south' },
-  { row: 2, col: 2, direction: 'east' },
-  { row: 2, col: 2, direction: 'west' },
-  // Some edge gates
-  { row: 1, col: 2, direction: 'south' },
-  { row: 3, col: 2, direction: 'north' },
-  { row: 2, col: 1, direction: 'east' },
-  { row: 2, col: 3, direction: 'west' },
+// Sample 5x5 grid data for Valley A
+const VALLEY_A_GRID: (StageCell | null)[][] = [
+  [
+    { name: 's01', north: false, south: true, east: true, west: false },
+    { name: 's02', north: false, south: true, east: true, west: true },
+    { name: 's03', north: false, south: true, east: true, west: true },
+    { name: 's04', north: false, south: true, east: true, west: true },
+    { name: 's05', north: false, south: true, east: false, west: true },
+  ],
+  [
+    { name: 's06', north: true, south: true, east: true, west: false },
+    { name: 's07', north: true, south: true, east: true, west: true },
+    { name: 's08', north: true, south: true, east: true, west: true },
+    { name: 's09', north: true, south: true, east: true, west: true },
+    { name: 's10', north: true, south: true, east: false, west: true },
+  ],
+  [
+    { name: 's11', north: true, south: true, east: true, west: false },
+    { name: 's12', north: true, south: true, east: true, west: true },
+    { name: 's13', north: true, south: true, east: true, west: true },
+    { name: 's14', north: true, south: true, east: true, west: true },
+    { name: 's15', north: true, south: true, east: false, west: true },
+  ],
+  [
+    { name: 's16', north: true, south: true, east: true, west: false },
+    { name: 's17', north: true, south: true, east: true, west: true },
+    { name: 's18', north: true, south: true, east: true, west: true },
+    { name: 's19', north: true, south: true, east: true, west: true },
+    { name: 's20', north: true, south: true, east: false, west: true },
+  ],
+  [
+    { name: 's21', north: true, south: false, east: true, west: false },
+    { name: 's22', north: true, south: false, east: true, west: true },
+    { name: 's23', north: true, south: false, east: true, west: true },
+    { name: 's24', north: true, south: false, east: true, west: true },
+    { name: 's25', north: true, south: false, east: false, west: true },
+  ],
 ];
 
-function GridGate({ row, col, direction }: GatePosition) {
-  // Calculate position based on cell and direction
-  const position = useMemo(() => {
-    const baseX = (col - 2) * CELL_SIZE;
-    const baseZ = (row - 2) * CELL_SIZE;
+// Sample 5x5 grid data for Valley B
+const VALLEY_B_GRID: (StageCell | null)[][] = [
+  [
+    { name: 's01', north: false, south: true, east: true, west: false },
+    { name: 's02', north: false, south: false, east: true, west: true },
+    { name: 's03', north: false, south: true, east: true, west: true },
+    { name: 's04', north: false, south: false, east: true, west: true },
+    { name: 's05', north: false, south: true, east: false, west: true },
+  ],
+  [
+    { name: 's06', north: true, south: true, east: false, west: false },
+    { name: 's07', north: false, south: true, east: true, west: false },
+    { name: 's08', north: true, south: false, east: false, west: true },
+    { name: 's09', north: false, south: true, east: true, west: false },
+    { name: 's10', north: true, south: true, east: false, west: true },
+  ],
+  [
+    { name: 's11', north: true, south: true, east: true, west: false },
+    { name: 's12', north: true, south: true, east: true, west: true },
+    { name: 's13', north: false, south: true, east: true, west: true },
+    { name: 's14', north: true, south: true, east: true, west: true },
+    { name: 's15', north: true, south: true, east: false, west: true },
+  ],
+  [
+    { name: 's16', north: true, south: false, east: false, west: false },
+    { name: 's17', north: true, south: true, east: true, west: false },
+    { name: 's18', north: true, south: false, east: false, west: true },
+    { name: 's19', north: true, south: true, east: true, west: false },
+    { name: 's20', north: true, south: false, east: false, west: true },
+  ],
+  [
+    { name: 's21', north: false, south: false, east: true, west: false },
+    { name: 's22', north: true, south: false, east: true, west: true },
+    { name: 's23', north: false, south: false, east: true, west: true },
+    { name: 's24', north: true, south: false, east: true, west: true },
+    { name: 's25', north: false, south: false, east: false, west: true },
+  ],
+];
 
-    switch (direction) {
-      case 'north':
-        return [baseX, 0, baseZ - CELL_SIZE / 2] as [number, number, number];
-      case 'south':
-        return [baseX, 0, baseZ + CELL_SIZE / 2] as [number, number, number];
-      case 'east':
-        return [baseX + CELL_SIZE / 2, 0, baseZ] as [number, number, number];
-      case 'west':
-        return [baseX - CELL_SIZE / 2, 0, baseZ] as [number, number, number];
-    }
-  }, [row, col, direction]);
+const GRIDS: Record<string, (StageCell | null)[][]> = {
+  'valley-a': VALLEY_A_GRID,
+  'valley-b': VALLEY_B_GRID,
+};
 
-  // Calculate rotation based on direction
-  const rotation = useMemo(() => {
-    switch (direction) {
-      case 'north':
-      case 'south':
-        return [0, 0, 0] as [number, number, number];
-      case 'east':
-      case 'west':
-        return [0, Math.PI / 2, 0] as [number, number, number];
-    }
-  }, [direction]);
-
-  return (
-    <Suspense fallback={null}>
-      <Gate position={position} rotation={rotation} state="closed" />
-    </Suspense>
-  );
-}
-
-function GridFloor() {
-  const cells = [];
-
-  for (let row = 0; row < GRID_SIZE; row++) {
-    for (let col = 0; col < GRID_SIZE; col++) {
-      const x = (col - 2) * CELL_SIZE;
-      const z = (row - 2) * CELL_SIZE;
-
-      cells.push(
-        <mesh key={`${row}-${col}`} position={[x, -0.01, z]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[CELL_SIZE - 0.2, CELL_SIZE - 0.2]} />
-          <meshStandardMaterial
-            color={(row + col) % 2 === 0 ? '#2a2a4a' : '#3a3a5a'}
-            transparent
-            opacity={0.5}
-          />
-        </mesh>
-      );
-
-      // Cell label
-      cells.push(
-        <mesh key={`label-${row}-${col}`} position={[x, 0.01, z]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[1, 1]} />
-          <meshBasicMaterial color="#555" transparent opacity={0.3} />
-        </mesh>
-      );
-    }
+function StageCell({ cell, row, col }: { cell: StageCell | null; row: number; col: number }) {
+  if (!cell) {
+    return (
+      <div style={{
+        width: '100px',
+        height: '100px',
+        background: '#1a1a2e',
+        border: '1px solid #333',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#444',
+        fontSize: '12px',
+      }}>
+        empty
+      </div>
+    );
   }
 
-  return <>{cells}</>;
-}
-
-function Scene({ gates }: { gates: GatePosition[] }) {
   return (
-    <>
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[10, 20, 10]} intensity={0.8} />
+    <div style={{
+      width: '100px',
+      height: '100px',
+      background: '#2a2a4a',
+      border: '1px solid #444',
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      {/* Stage name */}
+      <div style={{
+        color: '#fff',
+        fontSize: '14px',
+        fontWeight: 600,
+        zIndex: 1,
+      }}>
+        {cell.name}
+      </div>
 
-      <GridFloor />
+      {/* North gate */}
+      {cell.north && (
+        <div style={{
+          position: 'absolute',
+          top: '0',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '30px',
+          height: '8px',
+          background: '#88ff88',
+          borderRadius: '0 0 4px 4px',
+        }} title="North Gate" />
+      )}
 
-      {gates.map((gate, i) => (
-        <GridGate key={i} {...gate} />
-      ))}
+      {/* South gate */}
+      {cell.south && (
+        <div style={{
+          position: 'absolute',
+          bottom: '0',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '30px',
+          height: '8px',
+          background: '#88ff88',
+          borderRadius: '4px 4px 0 0',
+        }} title="South Gate" />
+      )}
 
-      <Grid
-        infiniteGrid
-        fadeDistance={60}
-        fadeStrength={5}
-        cellSize={CELL_SIZE}
-        sectionSize={CELL_SIZE}
-        cellColor="#333355"
-        sectionColor="#444477"
-      />
+      {/* East gate */}
+      {cell.east && (
+        <div style={{
+          position: 'absolute',
+          right: '0',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: '8px',
+          height: '30px',
+          background: '#88ff88',
+          borderRadius: '4px 0 0 4px',
+        }} title="East Gate" />
+      )}
 
-      <OrbitControls
-        target={[0, 0, 0]}
-        maxPolarAngle={Math.PI / 2.2}
-      />
-    </>
+      {/* West gate */}
+      {cell.west && (
+        <div style={{
+          position: 'absolute',
+          left: '0',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: '8px',
+          height: '30px',
+          background: '#88ff88',
+          borderRadius: '0 4px 4px 0',
+        }} title="West Gate" />
+      )}
+
+      {/* Coordinate label */}
+      <div style={{
+        position: 'absolute',
+        bottom: '4px',
+        right: '4px',
+        fontSize: '10px',
+        color: '#666',
+      }}>
+        {row},{col}
+      </div>
+    </div>
   );
 }
 
 export default function GridViewer() {
   const [selectedArea, setSelectedArea] = useState(AREAS[0].id);
-  const [showAllGates, setShowAllGates] = useState(true);
 
-  const gates = showAllGates ? SAMPLE_GATES : [];
+  const grid = GRIDS[selectedArea] || VALLEY_A_GRID;
 
   return (
     <div style={{
       display: 'flex',
-      height: '100vh',
+      minHeight: '100vh',
       background: '#1a1a2e',
       color: 'white',
       fontFamily: "'Segoe UI', system-ui, sans-serif",
     }}>
       {/* Left Panel - Controls */}
       <div style={{
-        width: '240px',
+        width: '200px',
         borderRight: '1px solid #333',
         padding: '1.5rem',
         background: '#151525',
@@ -188,42 +261,24 @@ export default function GridViewer() {
           </select>
         </div>
 
-        <div>
-          <div style={{
-            fontSize: '11px',
-            color: '#666',
-            textTransform: 'uppercase',
-            letterSpacing: '1px',
-            marginBottom: '0.5rem',
-          }}>
-            Display
-          </div>
-          <label style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            padding: '10px 12px',
-            background: '#2a2a4a',
-            borderRadius: '6px',
-            cursor: 'pointer',
-          }}>
-            <input
-              type="checkbox"
-              checked={showAllGates}
-              onChange={(e) => setShowAllGates(e.target.checked)}
-              style={{ accentColor: '#88aaff' }}
-            />
-            <span style={{ fontSize: '14px' }}>Show Gates</span>
-          </label>
-        </div>
-
         <div style={{
           fontSize: '12px',
-          color: '#666',
+          color: '#888',
           lineHeight: 1.6,
         }}>
-          <p>5x5 grid showing gate alignment.</p>
-          <p style={{ marginTop: '0.5rem' }}>Cell size: {CELL_SIZE} units</p>
+          <div style={{ marginBottom: '8px' }}>
+            <span style={{
+              display: 'inline-block',
+              width: '12px',
+              height: '12px',
+              background: '#88ff88',
+              borderRadius: '2px',
+              marginRight: '8px',
+              verticalAlign: 'middle',
+            }} />
+            Gate (open direction)
+          </div>
+          <p>Green bars show which directions have gates connecting to adjacent stages.</p>
         </div>
 
         <div style={{ marginTop: 'auto' }}>
@@ -250,45 +305,64 @@ export default function GridViewer() {
         </div>
       </div>
 
-      {/* Main Canvas */}
-      <div style={{ flex: 1, position: 'relative' }}>
-        <Canvas camera={{ position: [30, 40, 30], fov: 50 }}>
-          <Scene gates={gates} />
-        </Canvas>
-
-        {/* Grid legend */}
-        <div style={{
-          position: 'absolute',
-          top: '1rem',
-          left: '1rem',
-          background: 'rgba(0, 0, 0, 0.7)',
-          padding: '0.75rem 1rem',
-          borderRadius: '8px',
-          backdropFilter: 'blur(8px)',
+      {/* Main Content */}
+      <div style={{
+        flex: 1,
+        padding: '2rem',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}>
+        <h1 style={{
+          fontSize: '1.5rem',
+          marginBottom: '0.5rem',
         }}>
-          <div style={{ fontSize: '16px', fontWeight: '600' }}>
-            Grid Viewer
-          </div>
-          <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
-            {AREAS.find(a => a.id === selectedArea)?.label} - {GRID_SIZE}x{GRID_SIZE} grid
-          </div>
+          Grid Viewer
+        </h1>
+        <p style={{
+          color: '#888',
+          marginBottom: '2rem',
+        }}>
+          {AREAS.find(a => a.id === selectedArea)?.label} - 5x5 Stage Layout
+        </p>
+
+        {/* Compass */}
+        <div style={{
+          marginBottom: '1rem',
+          fontSize: '12px',
+          color: '#666',
+          textAlign: 'center',
+        }}>
+          <div>N</div>
+          <div>W ← → E</div>
+          <div>S</div>
         </div>
 
-        {/* Coordinate guide */}
+        {/* Grid */}
         <div style={{
-          position: 'absolute',
-          bottom: '1rem',
-          left: '1rem',
-          background: 'rgba(0, 0, 0, 0.7)',
-          padding: '0.75rem 1rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2px',
+          background: '#111',
+          padding: '2px',
           borderRadius: '8px',
-          backdropFilter: 'blur(8px)',
-          fontSize: '12px',
-          color: '#888',
         }}>
-          <div>Row 0-4 (North → South)</div>
-          <div>Col 0-4 (West → East)</div>
-          <div style={{ marginTop: '4px', color: '#666' }}>Center: (2,2)</div>
+          {grid.map((row, rowIndex) => (
+            <div key={rowIndex} style={{ display: 'flex', gap: '2px' }}>
+              {row.map((cell, colIndex) => (
+                <StageCell key={colIndex} cell={cell} row={rowIndex} col={colIndex} />
+              ))}
+            </div>
+          ))}
+        </div>
+
+        {/* Row/Col labels */}
+        <div style={{
+          marginTop: '1rem',
+          fontSize: '12px',
+          color: '#666',
+        }}>
+          Row 0 = North, Row 4 = South | Col 0 = West, Col 4 = East
         </div>
       </div>
     </div>
