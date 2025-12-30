@@ -19,6 +19,8 @@ import {
   Box, boxMeta,
   RareBox, rareBoxMeta,
   Wall, wallMeta,
+  StartWarp, startWarpMeta,
+  AreaWarp, areaWarpMeta,
   type StoryMeta,
 } from '../elements';
 
@@ -90,6 +92,13 @@ const CATEGORIES: CategoryEntry[] = [
     name: 'Walls',
     elements: [
       { id: 'wall', Component: Wall as React.ComponentType<{ state?: string }>, meta: wallMeta },
+    ],
+  },
+  {
+    name: 'Warps',
+    elements: [
+      { id: 'start-warp', Component: StartWarp as React.ComponentType<{ state?: string }>, meta: startWarpMeta },
+      { id: 'area-warp', Component: AreaWarp as React.ComponentType<{ state?: string }>, meta: areaWarpMeta },
     ],
   },
 ];
@@ -410,6 +419,10 @@ function getUsageText(elementId: string): string {
       return 'Special containers that drop valuable items when destroyed. Model varies by field.';
     case 'wall':
       return 'Destructible walls that block passage until destroyed. Model varies by field.';
+    case 'start-warp':
+      return 'Warp point at the start of an area. Players spawn here when entering the area. Model varies by field.';
+    case 'area-warp':
+      return 'Warp gate to the next area. Players pass through this to advance to the next section. Model varies by field.';
     default:
       return '';
   }

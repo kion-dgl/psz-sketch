@@ -33,4 +33,8 @@ export { default as RareBox, rareBoxMeta, type RareBoxState } from './RareBox';
 // Walls
 export { default as Wall, wallMeta, type WallState } from './Wall';
 
+// Warps
+export { default as StartWarp, startWarpMeta, type StartWarpState } from './StartWarp';
+export { default as AreaWarp, areaWarpMeta, type AreaWarpState } from './AreaWarp';
+
 export type { ElementProps, StoryMeta } from './types';
