@@ -79,6 +79,7 @@ interface GridCell {
   keyForCell: [number, number] | null;
   isStart: boolean;
   isEnd: boolean;
+  isBranch: boolean; // Dead-end branch off main path
   pathOrder: number; // Order in traversal path
 }
 
@@ -87,6 +88,7 @@ interface GenParams {
   gridSize: number;
   usedCells: number;
   keyGates: number;
+  branches: number; // Number of dead-end branches
 }
 
 // Generation result
@@ -154,16 +156,17 @@ function emptyCell(): GridCell {
     keyForCell: null,
     isStart: false,
     isEnd: false,
+    isBranch: false,
     pathOrder: -1,
   };
 }
 
 // Generate a random grid layout with constraints
 function generateGrid(area: string, params: GenParams, maxAttempts = 100): GenerationResult {
-  const { gridSize, usedCells, keyGates } = params;
+  const { gridSize, usedCells, keyGates, branches } = params;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const result = tryGenerateGrid(area, gridSize, usedCells, keyGates);
+    const result = tryGenerateGrid(area, gridSize, usedCells, keyGates, branches);
     if (result) return result;
   }
 
@@ -180,7 +183,8 @@ function tryGenerateGrid(
   area: string,
   gridSize: number,
   usedCells: number,
-  keyGates: number
+  keyGates: number,
+  branches: number
 ): GenerationResult | null {
   // Initialize empty grid
   const grid: GridCell[][] = Array(gridSize).fill(null).map(() =>
@@ -228,6 +232,7 @@ function tryGenerateGrid(
     keyForCell: null,
     isStart: true,
     isEnd: false,
+    isBranch: false,
     pathOrder: 0,
   };
   path.push([sa1Row, sa1Col]);
@@ -318,6 +323,7 @@ function tryGenerateGrid(
                 keyForCell: null,
                 isStart: false,
                 isEnd: true,
+                isBranch: false,
                 pathOrder: path.length,
               };
               path.push([nextRow, nextCol]);
@@ -344,6 +350,7 @@ function tryGenerateGrid(
       keyForCell: null,
       isStart: false,
       isEnd: isLastCell,
+      isBranch: false,
       pathOrder: path.length,
     };
     path.push([nextRow, nextCol]);
@@ -361,6 +368,90 @@ function tryGenerateGrid(
   // Ensure last cell is marked as end
   const [endRow, endCol] = path[path.length - 1];
   grid[endRow][endCol].isEnd = true;
+
+  // Add dead-end branches off the main path
+  const branchCells: [number, number][] = [];
+  if (branches > 0) {
+    // Find cells on main path that could have branches
+    // (not start, not end, have adjacent empty cells)
+    const branchCandidates: { pathCell: [number, number]; branchDir: Direction; branchPos: [number, number] }[] = [];
+
+    for (const [pr, pc] of path) {
+      const cell = grid[pr][pc];
+      if (cell.isStart || cell.isEnd) continue;
+
+      // Check all 4 directions for potential branch spots
+      const directions: Direction[] = ['north', 'south', 'east', 'west'];
+      for (const dir of directions) {
+        // Skip entry direction (that's how we got here)
+        if (dir === cell.entryDirection) continue;
+
+        const [br, bc] = getNeighbor(pr, pc, dir);
+        // Must be inside grid and empty
+        if (!isValidPos(br, bc, gridSize)) continue;
+        if (grid[br][bc].stageName) continue;
+
+        branchCandidates.push({
+          pathCell: [pr, pc],
+          branchDir: dir,
+          branchPos: [br, bc],
+        });
+      }
+    }
+
+    // Shuffle and pick branches
+    const shuffledCandidates = [...branchCandidates].sort(() => Math.random() - 0.5);
+    let placedBranches = 0;
+
+    for (const candidate of shuffledCandidates) {
+      if (placedBranches >= branches) break;
+
+      const { pathCell, branchDir, branchPos } = candidate;
+      const [pr, pc] = pathCell;
+      const [br, bc] = branchPos;
+
+      // Check the cell is still empty (might have been used by another branch)
+      if (grid[br][bc].stageName) continue;
+
+      // Entry direction for the branch cell is opposite of branch direction
+      const branchEntry = oppositeDirection(branchDir);
+
+      // Find a stage with exactly 1 gate that can serve as a dead end
+      // The gate should be at the entry direction
+      let foundBranch = false;
+      const shuffledStages = [...candidateStages].sort(() => Math.random() - 0.5);
+
+      for (const stage of shuffledStages) {
+        if (foundBranch) break;
+        for (const rotation of [0, 90, 180, 270] as Rotation[]) {
+          const rotatedGates = getRotatedGates(stage, rotation);
+
+          // Dead end: exactly 1 gate at the entry direction
+          if (rotatedGates.size !== 1) continue;
+          if (!rotatedGates.has(branchEntry)) continue;
+
+          // Place the dead-end branch cell
+          grid[br][bc] = {
+            stageName: stage,
+            rotation: rotation,
+            entryDirection: branchEntry,
+            isKeyGate: false,
+            keyGateDirection: null,
+            hasKey: false,
+            keyForCell: null,
+            isStart: false,
+            isEnd: false,
+            isBranch: true,
+            pathOrder: -1, // Not part of main path
+          };
+          branchCells.push([br, bc]);
+          foundBranch = true;
+          placedBranches++;
+          break;
+        }
+      }
+    }
+  }
 
   // Place key-gates and keys with reachability constraint
   if (keyGates > 0) {
@@ -470,6 +561,10 @@ function GridCellDisplay({
   } else if (cell.isEnd) {
     bgColor = '#6a4a2a';
     borderColor = '#ffaa66';
+    borderWidth = '2px';
+  } else if (cell.isBranch) {
+    bgColor = '#2a4a4a';
+    borderColor = '#66aaaa';
     borderWidth = '2px';
   }
 
@@ -643,6 +738,7 @@ export default function GridViewer() {
     gridSize: 5,
     usedCells: 8,
     keyGates: 1,
+    branches: 2,
   });
   const [result, setResult] = useState<GenerationResult>({
     grid: [],
@@ -846,6 +942,34 @@ export default function GridViewer() {
           />
         </div>
 
+        <div>
+          <div style={{
+            fontSize: '11px',
+            color: '#666',
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+            marginBottom: '0.5rem',
+          }}>
+            Dead Ends
+          </div>
+          <input
+            type="number"
+            min={0}
+            max={5}
+            value={params.branches}
+            onChange={(e) => setParams(p => ({ ...p, branches: parseInt(e.target.value) || 0 }))}
+            style={{
+              width: '100%',
+              padding: '10px 12px',
+              background: '#2a2a4a',
+              border: '1px solid #444',
+              borderRadius: '6px',
+              color: 'white',
+              fontSize: '14px',
+            }}
+          />
+        </div>
+
         <button
           onClick={regenerate}
           style={{
@@ -912,6 +1036,18 @@ export default function GridViewer() {
               verticalAlign: 'middle',
             }} />
             End Cell
+          </div>
+          <div style={{ marginBottom: '8px' }}>
+            <span style={{
+              display: 'inline-block',
+              width: '12px',
+              height: '12px',
+              background: '#66aaaa',
+              borderRadius: '2px',
+              marginRight: '8px',
+              verticalAlign: 'middle',
+            }} />
+            Dead End
           </div>
           <div style={{ marginBottom: '8px' }}>
             <span style={{
@@ -1014,7 +1150,7 @@ export default function GridViewer() {
           color: '#888',
           marginBottom: '2rem',
         }}>
-          Valley {area.toUpperCase()} - {params.gridSize}x{params.gridSize} grid, {params.usedCells} cells, {params.keyGates} key-gates
+          Valley {area.toUpperCase()} - {params.gridSize}x{params.gridSize} grid, {params.usedCells} cells, {params.keyGates} key-gates, {params.branches} dead ends
         </p>
 
         {/* Compass */}
