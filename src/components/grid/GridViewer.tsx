@@ -196,54 +196,32 @@ function tryGenerateGrid(
     return null;
   }
 
-  // Start position: bottom center of grid, entering from south (outside)
-  const startRow = gridSize - 1;
-  const startCol = Math.floor(gridSize / 2);
-
-  // sa1 has only a south gate, we enter from "outside" (south)
-  // So the exit is south, but wait - that doesn't make sense for grid layout
-  // Actually: sa1's south gate leads to the next area
-  // In grid terms: we're at bottom, exit north into the grid
-  // But sa1 only has south gate... let me think about this differently
-
-  // sa1 is the START - you spawn there and exit through its gate
-  // If sa1 has a south gate, that means you exit to the south
-  // So in the grid, sa1 should be at top, and you go down (south)
-
-  // Let's place sa1 at top-center, exiting south
+  // Place sa1 at top-center, exiting south
   const sa1Row = 0;
   const sa1Col = Math.floor(gridSize / 2);
 
-  // Get sa1's gates
+  // Get sa1's gates (should have exactly 1)
   const sa1Gates = getOriginalGates(startStageName);
-  if (sa1Gates.size !== 1) {
-    // sa1 should have exactly 1 gate
-    return null;
-  }
+  if (sa1Gates.size !== 1) return null;
+
   const sa1ExitDir = [...sa1Gates][0];
 
-  // Find rotation to make sa1's exit point in a useful direction
-  // We want to build the grid going down (south) ideally
-  // So find rotation that puts the exit south
+  // Find rotation to make sa1's exit point south (into the grid)
   let sa1Rotation: Rotation = 0;
   for (const rot of [0, 90, 180, 270] as Rotation[]) {
-    const rotatedExit = rotateDirection(sa1ExitDir, rot);
-    // Prefer south, but accept any direction that stays in grid
-    const [nr, nc] = getNeighbor(sa1Row, sa1Col, rotatedExit);
-    if (isValidPos(nr, nc, gridSize)) {
+    if (rotateDirection(sa1ExitDir, rot) === 'south') {
       sa1Rotation = rot;
-      if (rotatedExit === 'south') break; // Prefer south
+      break;
     }
   }
 
-  const sa1RotatedGates = getRotatedGates(startStageName, sa1Rotation);
-  const sa1Exit = [...sa1RotatedGates][0];
+  const sa1Exit = rotateDirection(sa1ExitDir, sa1Rotation);
 
   // Place start cell
   grid[sa1Row][sa1Col] = {
     stageName: startStageName,
     rotation: sa1Rotation,
-    entryDirection: null, // No entry - this is where you spawn
+    entryDirection: null,
     isKeyGate: false,
     keyGateDirection: null,
     hasKey: false,
@@ -254,133 +232,135 @@ function tryGenerateGrid(
   };
   path.push([sa1Row, sa1Col]);
 
-  // BFS to build the path
-  // Each step: we have a current position and entry direction
-  // We need to find the exit directions and pick one to continue
-  interface FrontierItem {
-    row: number;
-    col: number;
-    entryDir: Direction; // Direction we're entering FROM
-  }
-
-  const [nextRow, nextCol] = getNeighbor(sa1Row, sa1Col, sa1Exit);
-  if (!isValidPos(nextRow, nextCol, gridSize)) {
-    return null;
-  }
-
-  const frontier: FrontierItem[] = [{
-    row: nextRow,
-    col: nextCol,
-    entryDir: oppositeDirection(sa1Exit), // If we exited south, we enter from north
-  }];
+  // Build LINEAR path - each step picks exactly one exit
+  let currentRow = sa1Row;
+  let currentCol = sa1Col;
+  let lastExitDir = sa1Exit;
 
   const allStages = stagesByArea[area] || [];
-  // Exclude sa1 from candidates for other cells
   const candidateStages = allStages.filter(s => !s.endsWith('_sa1'));
 
-  while (path.length < usedCells && frontier.length > 0) {
-    // Pick from frontier (prefer first for more linear paths)
-    const idx = Math.floor(Math.random() * Math.min(3, frontier.length));
-    const { row, col, entryDir } = frontier.splice(idx, 1)[0];
+  while (path.length < usedCells) {
+    // Move to next cell
+    const [nextRow, nextCol] = getNeighbor(currentRow, currentCol, lastExitDir);
+    const entryDir = oppositeDirection(lastExitDir);
 
-    if (grid[row][col].stageName) continue; // Already placed
-
-    // Determine which directions we CAN exit to (adjacent empty cells in grid)
-    const possibleExits: Direction[] = [];
-    for (const dir of ['north', 'south', 'east', 'west'] as Direction[]) {
-      if (dir === entryDir) continue; // Can't exit back where we came from
-      const [nr, nc] = getNeighbor(row, col, dir);
-      if (isValidPos(nr, nc, gridSize) && !grid[nr][nc].stageName) {
-        possibleExits.push(dir);
-      }
+    if (!isValidPos(nextRow, nextCol, gridSize)) {
+      // Can't continue - we've hit the edge
+      break;
     }
 
-    // If this is potentially the last cell, we don't need exits
-    const needsExit = path.length < usedCells - 1;
+    if (grid[nextRow][nextCol].stageName) {
+      // Cell already occupied - can't continue this direction
+      break;
+    }
 
-    // Find stages that can fit here
-    const validCandidates: { stage: string; rotation: Rotation; exits: Direction[] }[] = [];
+    const isLastCell = path.length === usedCells - 1;
+
+    // Find valid stages for this position
+    // For linear path: prefer stages with exactly 2 gates (entry + 1 exit)
+    // For end cell: need exactly 2 gates where one exits outside grid
+    const validCandidates: { stage: string; rotation: Rotation; exitDir: Direction | null }[] = [];
 
     for (const stage of candidateStages) {
       for (const rotation of [0, 90, 180, 270] as Rotation[]) {
         const rotatedGates = getRotatedGates(stage, rotation);
 
-        // Must HAVE gate at entry direction (that's how we connect to previous cell)
+        // Must have gate at entry direction
         if (!rotatedGates.has(entryDir)) continue;
 
-        // Collect which exits this stage+rotation would have (gates other than entry)
-        const stageExits: Direction[] = [];
-        for (const gate of rotatedGates) {
-          if (gate === entryDir) continue; // Entry gate doesn't count as exit
-          const [nr, nc] = getNeighbor(row, col, gate);
-          if (isValidPos(nr, nc, gridSize) && !grid[nr][nc].stageName) {
-            stageExits.push(gate);
-          } else if (!isValidPos(nr, nc, gridSize) && path.length >= usedCells - 1) {
-            // Gate outside grid is OK as end exit
-            stageExits.push(gate);
-          }
+        // Get other gates (potential exits)
+        const otherGates = [...rotatedGates].filter(g => g !== entryDir);
+
+        if (isLastCell) {
+          // End cell: need exactly 1 other gate that goes OUTSIDE the grid
+          if (otherGates.length !== 1) continue;
+          const exitGate = otherGates[0];
+          const [er, ec] = getNeighbor(nextRow, nextCol, exitGate);
+          if (isValidPos(er, ec, gridSize)) continue; // Must exit outside
+          validCandidates.push({ stage, rotation, exitDir: exitGate });
+        } else {
+          // Middle cell: need exactly 1 other gate that goes to empty cell inside grid
+          // (this ensures linear path with no orphan gates)
+          if (otherGates.length !== 1) continue;
+          const exitGate = otherGates[0];
+          const [er, ec] = getNeighbor(nextRow, nextCol, exitGate);
+          if (!isValidPos(er, ec, gridSize)) continue; // Must stay in grid
+          if (grid[er][ec].stageName) continue; // Must be empty
+          validCandidates.push({ stage, rotation, exitDir: exitGate });
         }
-
-        if (needsExit && stageExits.length === 0) continue;
-
-        validCandidates.push({ stage, rotation, exits: stageExits });
       }
     }
 
-    if (validCandidates.length === 0) continue;
+    if (validCandidates.length === 0) {
+      // No valid stage found - try to end here if we have enough cells
+      if (path.length >= 3) {
+        let foundEnd = false;
+        // Try to find an end cell stage
+        for (const stage of candidateStages) {
+          if (foundEnd) break;
+          for (const rotation of [0, 90, 180, 270] as Rotation[]) {
+            const rotatedGates = getRotatedGates(stage, rotation);
+            if (!rotatedGates.has(entryDir)) continue;
+            const otherGates = [...rotatedGates].filter(g => g !== entryDir);
+            if (otherGates.length !== 1) continue;
+            const exitGate = otherGates[0];
+            const [er, ec] = getNeighbor(nextRow, nextCol, exitGate);
+            if (!isValidPos(er, ec, gridSize)) {
+              // Found end cell - mark exit as warp
+              grid[nextRow][nextCol] = {
+                stageName: stage,
+                rotation: rotation,
+                entryDirection: entryDir,
+                isKeyGate: false,
+                keyGateDirection: exitGate, // Reuse for warp direction
+                hasKey: false,
+                keyForCell: null,
+                isStart: false,
+                isEnd: true,
+                pathOrder: path.length,
+              };
+              path.push([nextRow, nextCol]);
+              foundEnd = true;
+              break;
+            }
+          }
+        }
+      }
+      break;
+    }
 
-    // Pick a random valid candidate
+    // Pick random valid candidate
     const chosen = validCandidates[Math.floor(Math.random() * validCandidates.length)];
 
     // Place the cell
-    grid[row][col] = {
+    grid[nextRow][nextCol] = {
       stageName: chosen.stage,
       rotation: chosen.rotation,
       entryDirection: entryDir,
       isKeyGate: false,
-      keyGateDirection: null,
+      keyGateDirection: isLastCell ? chosen.exitDir : null, // Warp direction for end cell
       hasKey: false,
       keyForCell: null,
       isStart: false,
-      isEnd: false,
+      isEnd: isLastCell,
       pathOrder: path.length,
     };
-    path.push([row, col]);
+    path.push([nextRow, nextCol]);
 
-    // Add exits to frontier
-    for (const exitDir of chosen.exits) {
-      const [nr, nc] = getNeighbor(row, col, exitDir);
-      if (isValidPos(nr, nc, gridSize) && !grid[nr][nc].stageName) {
-        frontier.push({
-          row: nr,
-          col: nc,
-          entryDir: oppositeDirection(exitDir),
-        });
-      }
-    }
+    if (isLastCell || !chosen.exitDir) break;
+
+    // Move to next
+    currentRow = nextRow;
+    currentCol = nextCol;
+    lastExitDir = chosen.exitDir;
   }
 
-  if (path.length < 2) return null;
+  if (path.length < 3) return null;
 
-  // Find end cell (last in path)
+  // Ensure last cell is marked as end
   const [endRow, endCol] = path[path.length - 1];
   grid[endRow][endCol].isEnd = true;
-
-  // Validate: only reject gates leading OUTSIDE the grid (except for end cell)
-  // Gates leading to empty cells within the grid are allowed for now
-  for (const [row, col] of path) {
-    const cell = grid[row][col];
-    if (!cell.stageName) continue;
-
-    const gates = getRotatedGates(cell.stageName, cell.rotation);
-    for (const gate of gates) {
-      const [nr, nc] = getNeighbor(row, col, gate);
-      // Gates outside grid are only OK for end cell
-      if (!isValidPos(nr, nc, gridSize) && !cell.isEnd) {
-        return null;
-      }
-    }
-  }
 
   // Place key-gates and keys with reachability constraint
   if (keyGates > 0) {
@@ -442,7 +422,8 @@ function getGateColor(
   isEntry: boolean
 ): string {
   if (isEntry) return '#ffffff'; // White for entry (open)
-  if (cell.isKeyGate && cell.keyGateDirection === direction) return '#ff66ff'; // Purple for key-gate
+  if (cell.isKeyGate && cell.keyGateDirection === direction) return '#ff66ff'; // Pink for key-gate
+  if (cell.isEnd && cell.keyGateDirection === direction) return '#aa66ff'; // Purple for warp exit
   return '#88ff88'; // Green for normal gate
 }
 
@@ -967,6 +948,18 @@ export default function GridViewer() {
               verticalAlign: 'middle',
             }} />
             Key-Gate
+          </div>
+          <div style={{ marginBottom: '8px' }}>
+            <span style={{
+              display: 'inline-block',
+              width: '20px',
+              height: '6px',
+              background: '#aa66ff',
+              borderRadius: '2px',
+              marginRight: '8px',
+              verticalAlign: 'middle',
+            }} />
+            Warp Exit
           </div>
           <div style={{ marginBottom: '8px' }}>
             <span style={{
