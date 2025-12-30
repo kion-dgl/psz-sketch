@@ -204,22 +204,41 @@ function tryGenerateGrid(
   const sa1Row = 0;
   const sa1Col = Math.floor(gridSize / 2);
 
-  // Get sa1's gates (should have exactly 1)
+  // Get sa1's gates and find a rotation where one gate points south
   const sa1Gates = getOriginalGates(startStageName);
-  if (sa1Gates.size !== 1) return null;
+  if (sa1Gates.size === 0) return null;
 
-  const sa1ExitDir = [...sa1Gates][0];
-
-  // Find rotation to make sa1's exit point south (into the grid)
+  // Find rotation where at least one gate points south (into the grid)
+  // and other gates don't point to occupied cells
   let sa1Rotation: Rotation = 0;
+  let foundValidRotation = false;
   for (const rot of [0, 90, 180, 270] as Rotation[]) {
-    if (rotateDirection(sa1ExitDir, rot) === 'south') {
+    const rotatedGates = getRotatedGates(startStageName, rot);
+    if (!rotatedGates.has('south')) continue;
+
+    // Check other gates don't create problems (they should point outside grid from row 0)
+    let valid = true;
+    for (const gate of rotatedGates) {
+      if (gate === 'south') continue;
+      const [nr, nc] = getNeighbor(sa1Row, sa1Col, gate);
+      // From top-center, north goes outside grid (-1), east/west may be inside
+      if (isValidPos(nr, nc, gridSize)) {
+        // Gate points inside grid - would be orphan since we haven't placed anything yet
+        // This is only ok if we're on an edge
+        valid = false;
+        break;
+      }
+    }
+    if (valid) {
       sa1Rotation = rot;
+      foundValidRotation = true;
       break;
     }
   }
 
-  const sa1Exit = rotateDirection(sa1ExitDir, sa1Rotation);
+  if (!foundValidRotation) return null;
+
+  const sa1Exit = 'south' as Direction;
 
   // Place start cell
   grid[sa1Row][sa1Col] = {
