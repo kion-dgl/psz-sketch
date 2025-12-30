@@ -302,52 +302,24 @@ function tryGenerateGrid(
     const validCandidates: { stage: string; rotation: Rotation; exits: Direction[] }[] = [];
 
     for (const stage of candidateStages) {
-      const originalGates = getOriginalGates(stage);
-
       for (const rotation of [0, 90, 180, 270] as Rotation[]) {
         const rotatedGates = getRotatedGates(stage, rotation);
 
-        // Must NOT have gate at entry direction (entry is open)
-        if (rotatedGates.has(entryDir)) continue;
+        // Must HAVE gate at entry direction (that's how we connect to previous cell)
+        if (!rotatedGates.has(entryDir)) continue;
 
-        // Collect which exits this stage+rotation would have
+        // Collect which exits this stage+rotation would have (gates other than entry)
         const stageExits: Direction[] = [];
         for (const gate of rotatedGates) {
+          if (gate === entryDir) continue; // Entry gate doesn't count as exit
           const [nr, nc] = getNeighbor(row, col, gate);
-          // Gate must lead to valid empty cell or be the end exit
-          if (isValidPos(nr, nc, gridSize)) {
-            if (!grid[nr][nc].stageName) {
-              stageExits.push(gate);
-            }
-            // If gate leads to occupied cell, that's bad (orphan gate to wrong place)
-            else {
-              // Check if occupied cell has matching entry
-              // This would require bidirectional gates which is complex
-              // For now, reject stages with gates to occupied cells
-              continue;
-            }
-          } else {
-            // Gate leads outside grid - only OK as the final exit (end)
-            if (path.length >= usedCells - 1) {
-              stageExits.push(gate); // This will be the exit to next area
-            }
+          if (isValidPos(nr, nc, gridSize) && !grid[nr][nc].stageName) {
+            stageExits.push(gate);
+          } else if (!isValidPos(nr, nc, gridSize) && path.length >= usedCells - 1) {
+            // Gate outside grid is OK as end exit
+            stageExits.push(gate);
           }
         }
-
-        // Check all rotated gates lead somewhere valid
-        let allGatesValid = true;
-        for (const gate of rotatedGates) {
-          const [nr, nc] = getNeighbor(row, col, gate);
-          if (isValidPos(nr, nc, gridSize)) {
-            // Must lead to empty cell
-            if (grid[nr][nc].stageName) {
-              allGatesValid = false;
-              break;
-            }
-          }
-          // Gates outside grid are OK only for end cell
-        }
-        if (!allGatesValid) continue;
 
         if (needsExit && stageExits.length === 0) continue;
 
@@ -394,7 +366,8 @@ function tryGenerateGrid(
   const [endRow, endCol] = path[path.length - 1];
   grid[endRow][endCol].isEnd = true;
 
-  // Validate: check for orphan gates (gates that don't lead anywhere valid)
+  // Validate: only reject gates leading OUTSIDE the grid (except for end cell)
+  // Gates leading to empty cells within the grid are allowed for now
   for (const [row, col] of path) {
     const cell = grid[row][col];
     if (!cell.stageName) continue;
@@ -402,15 +375,8 @@ function tryGenerateGrid(
     const gates = getRotatedGates(cell.stageName, cell.rotation);
     for (const gate of gates) {
       const [nr, nc] = getNeighbor(row, col, gate);
-      if (isValidPos(nr, nc, gridSize)) {
-        // Gate inside grid must lead to another path cell
-        if (!grid[nr][nc].stageName) {
-          // Orphan gate to empty cell - invalid
-          return null;
-        }
-      }
       // Gates outside grid are only OK for end cell
-      else if (!cell.isEnd) {
+      if (!isValidPos(nr, nc, gridSize) && !cell.isEnd) {
         return null;
       }
     }
@@ -704,14 +670,67 @@ export default function GridViewer() {
     path: [],
   });
   const [seed, setSeed] = useState(0);
+  const [debugInfo, setDebugInfo] = useState<string>('');
+  const [copyStatus, setCopyStatus] = useState<string>('');
 
   const regenerate = useCallback(() => {
     setSeed(s => s + 1);
   }, []);
 
   useEffect(() => {
-    setResult(generateGrid(area, params));
+    const genResult = generateGrid(area, params);
+    setResult(genResult);
+    // Debug info
+    const info = `Area: ${area}, Params: ${JSON.stringify(params)}, Path length: ${genResult.path.length}, Start: ${genResult.startCell}, End: ${genResult.endCell}`;
+    setDebugInfo(info);
+    console.log('Generation result:', genResult);
   }, [area, params, seed]);
+
+  const copyJSON = useCallback(() => {
+    const exportData = {
+      area,
+      params,
+      result: {
+        path: result.path,
+        startCell: result.startCell,
+        endCell: result.endCell,
+        cells: result.path.map(([r, c]) => {
+          const cell = result.grid[r]?.[c];
+          return cell ? {
+            position: [r, c],
+            stageName: cell.stageName,
+            rotation: cell.rotation,
+            entryDirection: cell.entryDirection,
+            isKeyGate: cell.isKeyGate,
+            keyGateDirection: cell.keyGateDirection,
+            hasKey: cell.hasKey,
+            keyForCell: cell.keyForCell,
+            isStart: cell.isStart,
+            isEnd: cell.isEnd,
+            pathOrder: cell.pathOrder,
+          } : null;
+        }),
+      },
+      stageConfigs: Object.fromEntries(
+        result.path.map(([r, c]) => {
+          const cell = result.grid[r]?.[c];
+          if (cell?.stageName) {
+            return [cell.stageName, configs[cell.stageName]];
+          }
+          return [null, null];
+        }).filter(([k]) => k !== null)
+      ),
+    };
+    navigator.clipboard.writeText(JSON.stringify(exportData, null, 2))
+      .then(() => {
+        setCopyStatus('Copied!');
+        setTimeout(() => setCopyStatus(''), 2000);
+      })
+      .catch(() => {
+        setCopyStatus('Failed to copy');
+        setTimeout(() => setCopyStatus(''), 2000);
+      });
+  }, [area, params, result]);
 
   const placedCount = result.path.length;
 
@@ -863,6 +882,25 @@ export default function GridViewer() {
           onMouseLeave={(e) => e.currentTarget.style.background = '#5588ff'}
         >
           Regenerate
+        </button>
+
+        <button
+          onClick={copyJSON}
+          style={{
+            padding: '12px 16px',
+            background: '#555588',
+            border: 'none',
+            borderRadius: '6px',
+            color: 'white',
+            fontSize: '14px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'background 0.15s',
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = '#666699'}
+          onMouseLeave={(e) => e.currentTarget.style.background = '#555588'}
+        >
+          {copyStatus || 'Copy JSON'}
         </button>
 
         <div style={{
@@ -1046,6 +1084,35 @@ export default function GridViewer() {
               const cell = result.grid[r][c];
               return cell.stageName?.replace('s01a_', '').replace('s01b_', '').replace('s01e_', '');
             }).join(' → ')}
+          </div>
+        )}
+
+        {/* Debug info */}
+        <div style={{
+          marginTop: '1rem',
+          padding: '0.75rem',
+          background: '#222',
+          borderRadius: '4px',
+          fontSize: '10px',
+          color: '#888',
+          fontFamily: 'monospace',
+          maxWidth: '600px',
+          wordBreak: 'break-all',
+        }}>
+          {debugInfo}
+        </div>
+
+        {/* Empty grid message */}
+        {result.path.length === 0 && (
+          <div style={{
+            marginTop: '2rem',
+            padding: '1rem',
+            background: '#442222',
+            borderRadius: '8px',
+            color: '#ff8888',
+            fontSize: '14px',
+          }}>
+            Generation failed after 100 attempts. Try different parameters or check console for errors.
           </div>
         )}
       </div>
