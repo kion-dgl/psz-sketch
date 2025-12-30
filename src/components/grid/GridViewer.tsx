@@ -522,10 +522,23 @@ function tryGenerateGrid(
   }
 
   // Place key-gates and keys with reachability constraint
+  // Prefer placing keys on branch cells to incentivize exploration
   if (keyGates > 0) {
+    // Map branch cells to the main path cell they connect to
+    const branchToPathOrder: Map<string, number> = new Map();
+    for (const [br, bc] of branchCells) {
+      const branchCell = grid[br][bc];
+      // Find which main path cell this branch connects to
+      const entryDir = branchCell.entryDirection;
+      if (!entryDir) continue;
+      const [pr, pc] = getNeighbor(br, bc, entryDir);
+      if (isValidPos(pr, pc, gridSize) && grid[pr][pc].stageName) {
+        branchToPathOrder.set(`${br},${bc}`, grid[pr][pc].pathOrder);
+      }
+    }
+
     // Available cells for key-gates (not start, not first few cells)
     const keyGateCandidates = path.slice(3).filter(([r, c]) => !grid[r][c].isEnd);
-    // Available cells for keys (cells before the key-gate)
 
     const shuffledGateCells = [...keyGateCandidates].sort(() => Math.random() - 0.5);
 
@@ -536,8 +549,8 @@ function tryGenerateGrid(
       const gateCell = grid[gateRow][gateCol];
       const gatePathOrder = gateCell.pathOrder;
 
-      // Find cells before this one that can have the key
-      const keyCandidates = path.filter(([r, c]) => {
+      // Find main path cells before this one that can have the key
+      const mainPathCandidates: [number, number][] = path.filter(([r, c]) => {
         const cell = grid[r][c];
         return cell.pathOrder < gatePathOrder &&
                cell.pathOrder > 0 && // Not start
@@ -545,7 +558,26 @@ function tryGenerateGrid(
                !cell.isKeyGate;
       });
 
-      if (keyCandidates.length === 0) continue;
+      // Find branch cells that are reachable before the key-gate
+      const branchKeyCandidates: [number, number][] = branchCells.filter(([br, bc]) => {
+        const cell = grid[br][bc];
+        if (cell.hasKey) return false; // Already has a key
+        const connectedPathOrder = branchToPathOrder.get(`${br},${bc}`);
+        // Branch is reachable if the path cell it connects to is before the key-gate
+        return connectedPathOrder !== undefined && connectedPathOrder < gatePathOrder;
+      });
+
+      // Prefer branch cells (80% chance if available)
+      let keyCandidates: [number, number][];
+      if (branchKeyCandidates.length > 0 && Math.random() < 0.8) {
+        keyCandidates = branchKeyCandidates;
+      } else if (mainPathCandidates.length > 0) {
+        keyCandidates = mainPathCandidates;
+      } else if (branchKeyCandidates.length > 0) {
+        keyCandidates = branchKeyCandidates;
+      } else {
+        continue; // No valid candidates
+      }
 
       // Pick random key location
       const [keyRow, keyCol] = keyCandidates[Math.floor(Math.random() * keyCandidates.length)];
