@@ -384,9 +384,57 @@ function tryGenerateGrid(
 
   if (path.length < 3) return null;
 
-  // Ensure last cell is marked as end
+  // Verify last cell is a proper end cell with warp exit
   const [endRow, endCol] = path[path.length - 1];
-  grid[endRow][endCol].isEnd = true;
+  const endCell = grid[endRow][endCol];
+
+  // If last cell doesn't have a warp exit, try to replace it with a valid end cell
+  if (!endCell.isEnd || !endCell.keyGateDirection) {
+    const entryDir = endCell.entryDirection;
+    if (!entryDir) return null;
+
+    let foundValidEnd = false;
+    for (const stage of candidateStages) {
+      if (foundValidEnd) break;
+      for (const rotation of [0, 90, 180, 270] as Rotation[]) {
+        const rotatedGates = getRotatedGates(stage, rotation);
+        if (!rotatedGates.has(entryDir)) continue;
+
+        // Find a gate that exits outside the grid (warp)
+        let warpDir: Direction | null = null;
+        let hasOrphan = false;
+        for (const gate of rotatedGates) {
+          if (gate === entryDir) continue;
+          const [nr, nc] = getNeighbor(endRow, endCol, gate);
+          if (!isValidPos(nr, nc, gridSize)) {
+            warpDir = gate;
+          } else if (grid[nr][nc].stageName) {
+            // Gate points to occupied cell without matching gate - orphan
+            const neighborGates = getRotatedGates(grid[nr][nc].stageName!, grid[nr][nc].rotation);
+            if (!neighborGates.has(oppositeDirection(gate))) {
+              hasOrphan = true;
+              break;
+            }
+          }
+        }
+
+        if (hasOrphan || !warpDir) continue;
+
+        // Replace end cell with valid end stage
+        grid[endRow][endCol] = {
+          ...endCell,
+          stageName: stage,
+          rotation: rotation,
+          isEnd: true,
+          keyGateDirection: warpDir,
+        };
+        foundValidEnd = true;
+        break;
+      }
+    }
+
+    if (!foundValidEnd) return null; // Couldn't create valid end cell
+  }
 
   // Add dead-end branches off the main path
   const branchCells: [number, number][] = [];
@@ -642,10 +690,16 @@ function GridCellDisplay({
   cell,
   row,
   col,
+  isCurrent,
+  isVisited,
+  keyCollected,
 }: {
   cell: GridCell;
   row: number;
   col: number;
+  isCurrent?: boolean;
+  isVisited?: boolean;
+  keyCollected?: boolean;
 }) {
   if (!cell.stageName) {
     return (
@@ -673,7 +727,15 @@ function GridCellDisplay({
   let borderColor = '#444';
   let borderWidth = '1px';
 
-  if (cell.isStart) {
+  if (isCurrent) {
+    bgColor = '#4a6a2a';
+    borderColor = '#88ff44';
+    borderWidth = '3px';
+  } else if (isVisited) {
+    bgColor = '#3a3a5a';
+    borderColor = '#668866';
+    borderWidth = '2px';
+  } else if (cell.isStart) {
     bgColor = '#2a4a6a';
     borderColor = '#66aaff';
     borderWidth = '2px';
@@ -737,7 +799,7 @@ function GridCellDisplay({
         </div>
       )}
 
-      {/* Key indicator - pink circle */}
+      {/* Key indicator - pink circle (grayed out if collected) */}
       {cell.hasKey && (
         <div style={{
           position: 'absolute',
@@ -745,10 +807,11 @@ function GridCellDisplay({
           right: '4px',
           width: '16px',
           height: '16px',
-          background: '#ff66aa',
+          background: keyCollected ? '#666' : '#ff66aa',
           borderRadius: '50%',
-          border: '2px solid #fff',
-        }} title={`Key for ${cell.keyForCell?.[0]},${cell.keyForCell?.[1]}`} />
+          border: `2px solid ${keyCollected ? '#888' : '#fff'}`,
+          opacity: keyCollected ? 0.5 : 1,
+        }} title={`Key for ${cell.keyForCell?.[0]},${cell.keyForCell?.[1]}${keyCollected ? ' (collected)' : ''}`} />
       )}
 
       {/* Stage name */}
@@ -851,6 +914,17 @@ function GridCellDisplay({
   );
 }
 
+// Simulation state type
+interface SimState {
+  running: boolean;
+  currentCell: [number, number] | null;
+  visitedCells: Set<string>;
+  keysCollected: Set<string>;
+  gatesUnlocked: Set<string>;
+  status: 'idle' | 'running' | 'success' | 'failed';
+  message: string;
+}
+
 export default function GridViewer() {
   const [area, setArea] = useState<'a' | 'b'>('a');
   const [params, setParams] = useState<GenParams>({
@@ -869,8 +943,20 @@ export default function GridViewer() {
   const [debugInfo, setDebugInfo] = useState<string>('');
   const [copyStatus, setCopyStatus] = useState<string>('');
 
+  // Simulation state
+  const [sim, setSim] = useState<SimState>({
+    running: false,
+    currentCell: null,
+    visitedCells: new Set(),
+    keysCollected: new Set(),
+    gatesUnlocked: new Set(),
+    status: 'idle',
+    message: '',
+  });
+
   const regenerate = useCallback(() => {
     setSeed(s => s + 1);
+    setSim({ running: false, currentCell: null, visitedCells: new Set(), keysCollected: new Set(), gatesUnlocked: new Set(), status: 'idle', message: '' });
   }, []);
 
   useEffect(() => {
@@ -967,6 +1053,116 @@ export default function GridViewer() {
         setTimeout(() => setCopyStatus(''), 2000);
       });
   }, [result]);
+
+  // Simulation logic - animated traversal
+  const runSimulation = useCallback(() => {
+    if (!result.startCell || result.grid.length === 0) return;
+
+    const visited = new Set<string>();
+    const keysCollected = new Set<string>();
+    const gatesUnlocked = new Set<string>();
+    const toVisit: [number, number][] = [result.startCell];
+    const visitOrder: [number, number][] = [];
+
+    // BFS to find all reachable cells, collecting keys and unlocking gates
+    while (toVisit.length > 0) {
+      const [r, c] = toVisit.shift()!;
+      const key = `${r},${c}`;
+      if (visited.has(key)) continue;
+      visited.add(key);
+      visitOrder.push([r, c]);
+
+      const cell = result.grid[r]?.[c];
+      if (!cell?.stageName) continue;
+
+      // Collect key if present
+      if (cell.hasKey && cell.keyForCell) {
+        keysCollected.add(`${cell.keyForCell[0]},${cell.keyForCell[1]}`);
+        // Unlock the corresponding gate
+        gatesUnlocked.add(`${cell.keyForCell[0]},${cell.keyForCell[1]}`);
+      }
+
+      // Find adjacent cells we can move to
+      const gates = getRotatedGates(cell.stageName, cell.rotation);
+      for (const dir of gates) {
+        const [nr, nc] = getNeighbor(r, c, dir);
+        if (!isValidPos(nr, nc, params.gridSize)) continue;
+        const neighborKey = `${nr},${nc}`;
+        if (visited.has(neighborKey)) continue;
+
+        const neighbor = result.grid[nr]?.[nc];
+        if (!neighbor?.stageName) continue;
+
+        // Check if neighbor has a gate back to us
+        const neighborGates = getRotatedGates(neighbor.stageName, neighbor.rotation);
+        if (!neighborGates.has(oppositeDirection(dir))) continue;
+
+        // Check if this is a key-gate that we haven't unlocked
+        if (cell.isKeyGate && cell.keyGateDirection === dir && !gatesUnlocked.has(key)) {
+          continue; // Can't pass through locked gate
+        }
+
+        toVisit.push([nr, nc]);
+      }
+    }
+
+    // Check if we reached the end
+    const reachedEnd = result.endCell ? visited.has(`${result.endCell[0]},${result.endCell[1]}`) : false;
+
+    // Animate the traversal
+    let step = 0;
+    setSim({
+      running: true,
+      currentCell: visitOrder[0] || null,
+      visitedCells: new Set(),
+      keysCollected: new Set(),
+      gatesUnlocked: new Set(),
+      status: 'running',
+      message: 'Simulating...',
+    });
+
+    const interval = setInterval(() => {
+      if (step >= visitOrder.length) {
+        clearInterval(interval);
+        setSim(prev => ({
+          ...prev,
+          running: false,
+          currentCell: null,
+          status: reachedEnd ? 'success' : 'failed',
+          message: reachedEnd ? 'Reached the end!' : 'Could not reach the end!',
+        }));
+        return;
+      }
+
+      const [r, c] = visitOrder[step];
+      const cell = result.grid[r]?.[c];
+
+      setSim(prev => {
+        const newVisited = new Set(prev.visitedCells);
+        newVisited.add(`${r},${c}`);
+
+        const newKeys = new Set(prev.keysCollected);
+        const newGates = new Set(prev.gatesUnlocked);
+        if (cell?.hasKey && cell.keyForCell) {
+          newKeys.add(`${cell.keyForCell[0]},${cell.keyForCell[1]}`);
+          newGates.add(`${cell.keyForCell[0]},${cell.keyForCell[1]}`);
+        }
+
+        return {
+          ...prev,
+          currentCell: [r, c],
+          visitedCells: newVisited,
+          keysCollected: newKeys,
+          gatesUnlocked: newGates,
+          message: `Step ${step + 1}/${visitOrder.length}`,
+        };
+      });
+
+      step++;
+    }, 400);
+
+    return () => clearInterval(interval);
+  }, [result, params.gridSize]);
 
   const placedCount = result.path.length;
 
@@ -1147,6 +1343,41 @@ export default function GridViewer() {
         >
           Regenerate
         </button>
+
+        <button
+          onClick={runSimulation}
+          disabled={sim.running}
+          style={{
+            padding: '12px 16px',
+            background: sim.running ? '#444' : '#55aa55',
+            border: 'none',
+            borderRadius: '6px',
+            color: 'white',
+            fontSize: '14px',
+            fontWeight: 600,
+            cursor: sim.running ? 'not-allowed' : 'pointer',
+            transition: 'background 0.15s',
+          }}
+          onMouseEnter={(e) => !sim.running && (e.currentTarget.style.background = '#66bb66')}
+          onMouseLeave={(e) => !sim.running && (e.currentTarget.style.background = '#55aa55')}
+        >
+          {sim.running ? 'Simulating...' : 'Simulate'}
+        </button>
+
+        {/* Simulation status */}
+        {sim.status !== 'idle' && (
+          <div style={{
+            padding: '8px 12px',
+            background: sim.status === 'success' ? '#2a4a2a' : sim.status === 'failed' ? '#4a2a2a' : '#2a2a4a',
+            border: `1px solid ${sim.status === 'success' ? '#66aa66' : sim.status === 'failed' ? '#aa6666' : '#6666aa'}`,
+            borderRadius: '6px',
+            fontSize: '12px',
+            color: sim.status === 'success' ? '#88ff88' : sim.status === 'failed' ? '#ff8888' : '#8888ff',
+            textAlign: 'center',
+          }}>
+            {sim.message}
+          </div>
+        )}
 
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
@@ -1362,14 +1593,23 @@ export default function GridViewer() {
         }}>
           {result.grid.map((row, rowIndex) => (
             <div key={rowIndex} style={{ display: 'flex', gap: '2px' }}>
-              {row.map((cell, colIndex) => (
-                <GridCellDisplay
-                  key={colIndex}
-                  cell={cell}
-                  row={rowIndex}
-                  col={colIndex}
-                />
-              ))}
+              {row.map((cell, colIndex) => {
+                const cellKey = `${rowIndex},${colIndex}`;
+                const isCurrent = sim.currentCell?.[0] === rowIndex && sim.currentCell?.[1] === colIndex;
+                const isVisited = sim.visitedCells.has(cellKey);
+                const keyCollected = !!(cell.hasKey && cell.keyForCell && sim.keysCollected.has(`${cell.keyForCell[0]},${cell.keyForCell[1]}`));
+                return (
+                  <GridCellDisplay
+                    key={colIndex}
+                    cell={cell}
+                    row={rowIndex}
+                    col={colIndex}
+                    isCurrent={isCurrent}
+                    isVisited={isVisited}
+                    keyCollected={keyCollected}
+                  />
+                );
+              })}
             </div>
           ))}
         </div>
