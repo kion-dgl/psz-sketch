@@ -162,7 +162,7 @@ function emptyCell(): GridCell {
 }
 
 // Generate a random grid layout with constraints
-function generateGrid(area: string, params: GenParams, maxAttempts = 100): GenerationResult {
+function generateGrid(area: string, params: GenParams, maxAttempts = 200): GenerationResult {
   const { gridSize, usedCells, keyGates, branches } = params;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -663,6 +663,82 @@ function tryGenerateGrid(
 
       placed++;
     }
+  }
+
+  // Validate all gate connections - every gate must have a matching gate on the neighbor
+  for (let r = 0; r < gridSize; r++) {
+    for (let c = 0; c < gridSize; c++) {
+      const cell = grid[r][c];
+      if (!cell.stageName) continue;
+
+      const gates = getRotatedGates(cell.stageName, cell.rotation);
+      for (const dir of gates) {
+        const [nr, nc] = getNeighbor(r, c, dir);
+
+        // Gates pointing outside grid are OK (warp exits)
+        if (!isValidPos(nr, nc, gridSize)) continue;
+
+        const neighbor = grid[nr][nc];
+        if (!neighbor.stageName) {
+          // Gate points to empty cell - orphan!
+          return null;
+        }
+
+        // Check neighbor has a gate back
+        const neighborGates = getRotatedGates(neighbor.stageName, neighbor.rotation);
+        if (!neighborGates.has(oppositeDirection(dir))) {
+          // No matching gate - orphan!
+          return null;
+        }
+      }
+    }
+  }
+
+  // Simulate traversal to verify the grid is completable
+  const simVisited = new Set<string>();
+  const simKeys = new Set<string>();
+  const simQueue: [number, number][] = [[sa1Row, sa1Col]];
+
+  while (simQueue.length > 0) {
+    const [r, c] = simQueue.shift()!;
+    const key = `${r},${c}`;
+    if (simVisited.has(key)) continue;
+    simVisited.add(key);
+
+    const cell = grid[r][c];
+    if (!cell.stageName) continue;
+
+    // Collect key
+    if (cell.hasKey && cell.keyForCell) {
+      simKeys.add(`${cell.keyForCell[0]},${cell.keyForCell[1]}`);
+    }
+
+    // Explore neighbors
+    const gates = getRotatedGates(cell.stageName, cell.rotation);
+    for (const dir of gates) {
+      // Check if this is a locked key-gate
+      if (cell.isKeyGate && cell.keyGateDirection === dir && !simKeys.has(key)) {
+        continue; // Can't pass without key
+      }
+
+      const [nr, nc] = getNeighbor(r, c, dir);
+      if (!isValidPos(nr, nc, gridSize)) continue;
+
+      const neighbor = grid[nr][nc];
+      if (!neighbor.stageName) continue;
+      if (simVisited.has(`${nr},${nc}`)) continue;
+
+      // Verify neighbor has gate back (already validated above, but double-check)
+      const neighborGates = getRotatedGates(neighbor.stageName, neighbor.rotation);
+      if (!neighborGates.has(oppositeDirection(dir))) continue;
+
+      simQueue.push([nr, nc]);
+    }
+  }
+
+  // Check if we reached the end
+  if (!simVisited.has(`${endRow},${endCol}`)) {
+    return null; // Can't reach the end - invalid grid
   }
 
   return {
