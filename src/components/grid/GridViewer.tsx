@@ -373,29 +373,88 @@ function tryGenerateGrid(
   const branchCells: [number, number][] = [];
   if (branches > 0) {
     // Find cells on main path that could have branches
-    // (not start, not end, have adjacent empty cells)
-    const branchCandidates: { pathCell: [number, number]; branchDir: Direction; branchPos: [number, number] }[] = [];
+    // We need to find path cells where we can:
+    // 1. The cell already has a gate in a direction with an empty adjacent cell, OR
+    // 2. We can replace the cell with a 3-gate stage that maintains entry/exit + adds branch
+    const branchCandidates: {
+      pathCell: [number, number];
+      branchDir: Direction;
+      branchPos: [number, number];
+      needsReplacement: boolean;
+      replacementStage?: string;
+      replacementRotation?: Rotation;
+    }[] = [];
 
     for (const [pr, pc] of path) {
       const cell = grid[pr][pc];
       if (cell.isStart || cell.isEnd) continue;
 
+      const currentGates = getRotatedGates(cell.stageName!, cell.rotation);
+
+      // Find the exit direction (gate that's not entry)
+      const exitDir = [...currentGates].find(g => g !== cell.entryDirection);
+      if (!exitDir) continue;
+
       // Check all 4 directions for potential branch spots
       const directions: Direction[] = ['north', 'south', 'east', 'west'];
       for (const dir of directions) {
-        // Skip entry direction (that's how we got here)
+        // Skip entry and exit directions
         if (dir === cell.entryDirection) continue;
+        if (dir === exitDir) continue;
 
         const [br, bc] = getNeighbor(pr, pc, dir);
         // Must be inside grid and empty
         if (!isValidPos(br, bc, gridSize)) continue;
         if (grid[br][bc].stageName) continue;
 
-        branchCandidates.push({
-          pathCell: [pr, pc],
-          branchDir: dir,
-          branchPos: [br, bc],
-        });
+        // Check if current cell already has a gate in this direction
+        if (currentGates.has(dir)) {
+          // Great! Can branch without replacement
+          branchCandidates.push({
+            pathCell: [pr, pc],
+            branchDir: dir,
+            branchPos: [br, bc],
+            needsReplacement: false,
+          });
+        } else {
+          // Need to find a replacement stage with 3 gates: entry + exit + branch
+          for (const stage of candidateStages) {
+            let found = false;
+            for (const rotation of [0, 90, 180, 270] as Rotation[]) {
+              const rotatedGates = getRotatedGates(stage, rotation);
+
+              // Must have gates at entry, exit, AND branch direction
+              if (!rotatedGates.has(cell.entryDirection!)) continue;
+              if (!rotatedGates.has(exitDir)) continue;
+              if (!rotatedGates.has(dir)) continue;
+
+              // Check that any other gates don't create orphans
+              let valid = true;
+              for (const gate of rotatedGates) {
+                if (gate === cell.entryDirection || gate === exitDir || gate === dir) continue;
+                const [nr, nc] = getNeighbor(pr, pc, gate);
+                // Extra gate must go outside grid or to empty cell
+                if (isValidPos(nr, nc, gridSize) && grid[nr][nc].stageName) {
+                  valid = false;
+                  break;
+                }
+              }
+              if (!valid) continue;
+
+              branchCandidates.push({
+                pathCell: [pr, pc],
+                branchDir: dir,
+                branchPos: [br, bc],
+                needsReplacement: true,
+                replacementStage: stage,
+                replacementRotation: rotation,
+              });
+              found = true;
+              break;
+            }
+            if (found) break; // Only need one replacement option per direction
+          }
+        }
       }
     }
 
@@ -406,18 +465,27 @@ function tryGenerateGrid(
     for (const candidate of shuffledCandidates) {
       if (placedBranches >= branches) break;
 
-      const { pathCell, branchDir, branchPos } = candidate;
+      const { pathCell, branchDir, branchPos, needsReplacement, replacementStage, replacementRotation } = candidate;
       const [pr, pc] = pathCell;
       const [br, bc] = branchPos;
 
       // Check the cell is still empty (might have been used by another branch)
       if (grid[br][bc].stageName) continue;
 
+      // If replacement needed, update the path cell
+      if (needsReplacement && replacementStage && replacementRotation !== undefined) {
+        const oldCell = grid[pr][pc];
+        grid[pr][pc] = {
+          ...oldCell,
+          stageName: replacementStage,
+          rotation: replacementRotation,
+        };
+      }
+
       // Entry direction for the branch cell is opposite of branch direction
       const branchEntry = oppositeDirection(branchDir);
 
       // Find a stage with exactly 1 gate that can serve as a dead end
-      // The gate should be at the entry direction
       let foundBranch = false;
       const shuffledStages = [...candidateStages].sort(() => Math.random() - 0.5);
 
