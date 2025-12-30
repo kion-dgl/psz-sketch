@@ -19,6 +19,8 @@ interface StageConfig {
 }
 
 type ValleyConfigs = Record<string, StageConfig>;
+type Direction = 'north' | 'south' | 'east' | 'west';
+type Rotation = 0 | 90 | 180 | 270;
 
 // Parse stage configs
 const configs = valleyConfigs as unknown as ValleyConfigs;
@@ -30,37 +32,54 @@ const stagesByArea: Record<string, string[]> = {
   e: Object.keys(configs).filter(k => k.startsWith('s01e_')),
 };
 
-// Get gate directions for a stage
-function getGateDirections(stageName: string): Set<string> {
+// Get original gate directions for a stage (before rotation)
+function getOriginalGates(stageName: string): Set<Direction> {
   const config = configs[stageName];
   if (!config) return new Set();
-  return new Set(config.gates.map(g => g.edge));
+  return new Set(config.gates.map(g => g.edge as Direction));
 }
 
-// Filter stages by required gates
-function getStagesWithGates(
-  area: string,
-  required: { north?: boolean; south?: boolean; east?: boolean; west?: boolean }
-): string[] {
-  const stages = stagesByArea[area] || [];
-  return stages.filter(stage => {
-    const gates = getGateDirections(stage);
-    if (required.north && !gates.has('north')) return false;
-    if (required.south && !gates.has('south')) return false;
-    if (required.east && !gates.has('east')) return false;
-    if (required.west && !gates.has('west')) return false;
-    return true;
-  });
+// Rotate a direction by given degrees (clockwise)
+function rotateDirection(dir: Direction, rotation: Rotation): Direction {
+  const dirs: Direction[] = ['north', 'east', 'south', 'west'];
+  const idx = dirs.indexOf(dir);
+  const newIdx = (idx + rotation / 90) % 4;
+  return dirs[newIdx];
+}
+
+// Get opposite direction
+function oppositeDirection(dir: Direction): Direction {
+  const opposites: Record<Direction, Direction> = {
+    north: 'south',
+    south: 'north',
+    east: 'west',
+    west: 'east',
+  };
+  return opposites[dir];
+}
+
+// Get rotated gate directions
+function getRotatedGates(stageName: string, rotation: Rotation): Set<Direction> {
+  const original = getOriginalGates(stageName);
+  const rotated = new Set<Direction>();
+  for (const gate of original) {
+    rotated.add(rotateDirection(gate, rotation));
+  }
+  return rotated;
 }
 
 // Cell in the grid
 interface GridCell {
   stageName: string | null;
+  rotation: Rotation;
+  entryDirection: Direction | null; // Where we came from (open, no gate)
   isKeyGate: boolean;
+  keyGateDirection: Direction | null; // Which exit has the key-gate
   hasKey: boolean;
   keyForCell: [number, number] | null;
   isStart: boolean;
   isEnd: boolean;
+  pathOrder: number; // Order in traversal path
 }
 
 // Generation parameters
@@ -75,10 +94,72 @@ interface GenerationResult {
   grid: GridCell[][];
   startCell: [number, number] | null;
   endCell: [number, number] | null;
+  path: [number, number][]; // Ordered path through the grid
+}
+
+// Get neighbor position in a direction
+function getNeighbor(row: number, col: number, dir: Direction): [number, number] {
+  switch (dir) {
+    case 'north': return [row - 1, col];
+    case 'south': return [row + 1, col];
+    case 'east': return [row, col + 1];
+    case 'west': return [row, col - 1];
+  }
+}
+
+// Check if position is valid in grid
+function isValidPos(row: number, col: number, gridSize: number): boolean {
+  return row >= 0 && row < gridSize && col >= 0 && col < gridSize;
+}
+
+// Find all rotations that make a stage fit requirements
+function findValidRotations(
+  stageName: string,
+  requiredEntry: Direction | null, // Must NOT have a gate here (entry point)
+  requiredExits: Direction[] // Must have gates here
+): Rotation[] {
+  const validRotations: Rotation[] = [];
+
+  for (const rotation of [0, 90, 180, 270] as Rotation[]) {
+    const gates = getRotatedGates(stageName, rotation);
+
+    // Entry direction must NOT have a gate (we came from there)
+    if (requiredEntry && gates.has(requiredEntry)) continue;
+
+    // Must have gates in all required exit directions
+    let hasAllExits = true;
+    for (const exit of requiredExits) {
+      if (!gates.has(exit)) {
+        hasAllExits = false;
+        break;
+      }
+    }
+    if (!hasAllExits) continue;
+
+    validRotations.push(rotation);
+  }
+
+  return validRotations;
+}
+
+// Create empty cell
+function emptyCell(): GridCell {
+  return {
+    stageName: null,
+    rotation: 0,
+    entryDirection: null,
+    isKeyGate: false,
+    keyGateDirection: null,
+    hasKey: false,
+    keyForCell: null,
+    isStart: false,
+    isEnd: false,
+    pathOrder: -1,
+  };
 }
 
 // Generate a random grid layout with constraints
-function generateGrid(area: string, params: GenParams, maxAttempts = 50): GenerationResult {
+function generateGrid(area: string, params: GenParams, maxAttempts = 100): GenerationResult {
   const { gridSize, usedCells, keyGates } = params;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -88,18 +169,10 @@ function generateGrid(area: string, params: GenParams, maxAttempts = 50): Genera
 
   // Fallback: return empty grid
   return {
-    grid: Array(gridSize).fill(null).map(() =>
-      Array(gridSize).fill(null).map(() => ({
-        stageName: null,
-        isKeyGate: false,
-        hasKey: false,
-        keyForCell: null,
-        isStart: false,
-        isEnd: false,
-      }))
-    ),
+    grid: Array(gridSize).fill(null).map(() => Array(gridSize).fill(null).map(emptyCell)),
     startCell: null,
     endCell: null,
+    path: [],
   };
 }
 
@@ -111,127 +184,312 @@ function tryGenerateGrid(
 ): GenerationResult | null {
   // Initialize empty grid
   const grid: GridCell[][] = Array(gridSize).fill(null).map(() =>
-    Array(gridSize).fill(null).map(() => ({
-      stageName: null,
+    Array(gridSize).fill(null).map(emptyCell)
+  );
+
+  const path: [number, number][] = [];
+  const prefix = area === 'a' ? 's01a_' : area === 'b' ? 's01b_' : 's01e_';
+  const startStageName = `${prefix}sa1`;
+
+  // Check if start stage exists
+  if (!configs[startStageName]) {
+    return null;
+  }
+
+  // Start position: bottom center of grid, entering from south (outside)
+  const startRow = gridSize - 1;
+  const startCol = Math.floor(gridSize / 2);
+
+  // sa1 has only a south gate, we enter from "outside" (south)
+  // So the exit is south, but wait - that doesn't make sense for grid layout
+  // Actually: sa1's south gate leads to the next area
+  // In grid terms: we're at bottom, exit north into the grid
+  // But sa1 only has south gate... let me think about this differently
+
+  // sa1 is the START - you spawn there and exit through its gate
+  // If sa1 has a south gate, that means you exit to the south
+  // So in the grid, sa1 should be at top, and you go down (south)
+
+  // Let's place sa1 at top-center, exiting south
+  const sa1Row = 0;
+  const sa1Col = Math.floor(gridSize / 2);
+
+  // Get sa1's gates
+  const sa1Gates = getOriginalGates(startStageName);
+  if (sa1Gates.size !== 1) {
+    // sa1 should have exactly 1 gate
+    return null;
+  }
+  const sa1ExitDir = [...sa1Gates][0];
+
+  // Find rotation to make sa1's exit point in a useful direction
+  // We want to build the grid going down (south) ideally
+  // So find rotation that puts the exit south
+  let sa1Rotation: Rotation = 0;
+  for (const rot of [0, 90, 180, 270] as Rotation[]) {
+    const rotatedExit = rotateDirection(sa1ExitDir, rot);
+    // Prefer south, but accept any direction that stays in grid
+    const [nr, nc] = getNeighbor(sa1Row, sa1Col, rotatedExit);
+    if (isValidPos(nr, nc, gridSize)) {
+      sa1Rotation = rot;
+      if (rotatedExit === 'south') break; // Prefer south
+    }
+  }
+
+  const sa1RotatedGates = getRotatedGates(startStageName, sa1Rotation);
+  const sa1Exit = [...sa1RotatedGates][0];
+
+  // Place start cell
+  grid[sa1Row][sa1Col] = {
+    stageName: startStageName,
+    rotation: sa1Rotation,
+    entryDirection: null, // No entry - this is where you spawn
+    isKeyGate: false,
+    keyGateDirection: null,
+    hasKey: false,
+    keyForCell: null,
+    isStart: true,
+    isEnd: false,
+    pathOrder: 0,
+  };
+  path.push([sa1Row, sa1Col]);
+
+  // BFS to build the path
+  // Each step: we have a current position and entry direction
+  // We need to find the exit directions and pick one to continue
+  interface FrontierItem {
+    row: number;
+    col: number;
+    entryDir: Direction; // Direction we're entering FROM
+  }
+
+  const [nextRow, nextCol] = getNeighbor(sa1Row, sa1Col, sa1Exit);
+  if (!isValidPos(nextRow, nextCol, gridSize)) {
+    return null;
+  }
+
+  const frontier: FrontierItem[] = [{
+    row: nextRow,
+    col: nextCol,
+    entryDir: oppositeDirection(sa1Exit), // If we exited south, we enter from north
+  }];
+
+  const allStages = stagesByArea[area] || [];
+  // Exclude sa1 from candidates for other cells
+  const candidateStages = allStages.filter(s => !s.endsWith('_sa1'));
+
+  while (path.length < usedCells && frontier.length > 0) {
+    // Pick from frontier (prefer first for more linear paths)
+    const idx = Math.floor(Math.random() * Math.min(3, frontier.length));
+    const { row, col, entryDir } = frontier.splice(idx, 1)[0];
+
+    if (grid[row][col].stageName) continue; // Already placed
+
+    // Determine which directions we CAN exit to (adjacent empty cells in grid)
+    const possibleExits: Direction[] = [];
+    for (const dir of ['north', 'south', 'east', 'west'] as Direction[]) {
+      if (dir === entryDir) continue; // Can't exit back where we came from
+      const [nr, nc] = getNeighbor(row, col, dir);
+      if (isValidPos(nr, nc, gridSize) && !grid[nr][nc].stageName) {
+        possibleExits.push(dir);
+      }
+    }
+
+    // If this is potentially the last cell, we don't need exits
+    const needsExit = path.length < usedCells - 1;
+
+    // Find stages that can fit here
+    const validCandidates: { stage: string; rotation: Rotation; exits: Direction[] }[] = [];
+
+    for (const stage of candidateStages) {
+      const originalGates = getOriginalGates(stage);
+
+      for (const rotation of [0, 90, 180, 270] as Rotation[]) {
+        const rotatedGates = getRotatedGates(stage, rotation);
+
+        // Must NOT have gate at entry direction (entry is open)
+        if (rotatedGates.has(entryDir)) continue;
+
+        // Collect which exits this stage+rotation would have
+        const stageExits: Direction[] = [];
+        for (const gate of rotatedGates) {
+          const [nr, nc] = getNeighbor(row, col, gate);
+          // Gate must lead to valid empty cell or be the end exit
+          if (isValidPos(nr, nc, gridSize)) {
+            if (!grid[nr][nc].stageName) {
+              stageExits.push(gate);
+            }
+            // If gate leads to occupied cell, that's bad (orphan gate to wrong place)
+            else {
+              // Check if occupied cell has matching entry
+              // This would require bidirectional gates which is complex
+              // For now, reject stages with gates to occupied cells
+              continue;
+            }
+          } else {
+            // Gate leads outside grid - only OK as the final exit (end)
+            if (path.length >= usedCells - 1) {
+              stageExits.push(gate); // This will be the exit to next area
+            }
+          }
+        }
+
+        // Check all rotated gates lead somewhere valid
+        let allGatesValid = true;
+        for (const gate of rotatedGates) {
+          const [nr, nc] = getNeighbor(row, col, gate);
+          if (isValidPos(nr, nc, gridSize)) {
+            // Must lead to empty cell
+            if (grid[nr][nc].stageName) {
+              allGatesValid = false;
+              break;
+            }
+          }
+          // Gates outside grid are OK only for end cell
+        }
+        if (!allGatesValid) continue;
+
+        if (needsExit && stageExits.length === 0) continue;
+
+        validCandidates.push({ stage, rotation, exits: stageExits });
+      }
+    }
+
+    if (validCandidates.length === 0) continue;
+
+    // Pick a random valid candidate
+    const chosen = validCandidates[Math.floor(Math.random() * validCandidates.length)];
+
+    // Place the cell
+    grid[row][col] = {
+      stageName: chosen.stage,
+      rotation: chosen.rotation,
+      entryDirection: entryDir,
       isKeyGate: false,
+      keyGateDirection: null,
       hasKey: false,
       keyForCell: null,
       isStart: false,
       isEnd: false,
-    }))
-  );
+      pathOrder: path.length,
+    };
+    path.push([row, col]);
 
-  // Start from center
-  const center = Math.floor(gridSize / 2);
-  const visited = new Set<string>();
-  const frontier: [number, number][] = [[center, center]];
-  const placedCells: [number, number][] = [];
-
-  while (placedCells.length < usedCells && frontier.length > 0) {
-    const idx = Math.floor(Math.random() * frontier.length);
-    const [row, col] = frontier.splice(idx, 1)[0];
-    const key = `${row},${col}`;
-
-    if (visited.has(key)) continue;
-    if (row < 0 || row >= gridSize || col < 0 || col >= gridSize) continue;
-
-    visited.add(key);
-
-    // Determine required gates based on placed neighbors
-    const required: { north?: boolean; south?: boolean; east?: boolean; west?: boolean } = {};
-    if (row > 0 && grid[row - 1][col].stageName) required.north = true;
-    if (row < gridSize - 1 && grid[row + 1][col].stageName) required.south = true;
-    if (col > 0 && grid[row][col - 1].stageName) required.west = true;
-    if (col < gridSize - 1 && grid[row][col + 1].stageName) required.east = true;
-
-    // Find valid stages that have the required gates
-    const candidates = getStagesWithGates(area, required);
-
-    if (candidates.length === 0) continue;
-
-    // Pick random stage
-    const stageName = candidates[Math.floor(Math.random() * candidates.length)];
-    grid[row][col].stageName = stageName;
-
-    placedCells.push([row, col]);
-
-    // Add neighbors to frontier based on gates
-    const gates = getGateDirections(stageName);
-    if (gates.has('north') && row > 0) frontier.push([row - 1, col]);
-    if (gates.has('south') && row < gridSize - 1) frontier.push([row + 1, col]);
-    if (gates.has('west') && col > 0) frontier.push([row, col - 1]);
-    if (gates.has('east') && col < gridSize - 1) frontier.push([row, col + 1]);
-  }
-
-  if (placedCells.length < 2) return null;
-
-  // Find orphan gates (gates that don't connect to another cell)
-  const orphanCells: { cell: [number, number]; direction: string }[] = [];
-
-  for (const [row, col] of placedCells) {
-    const stageName = grid[row][col].stageName;
-    if (!stageName) continue;
-
-    const gates = getGateDirections(stageName);
-
-    for (const gate of gates) {
-      let isOrphan = false;
-
-      if (gate === 'north' && (row === 0 || !grid[row - 1][col].stageName)) isOrphan = true;
-      if (gate === 'south' && (row === gridSize - 1 || !grid[row + 1][col].stageName)) isOrphan = true;
-      if (gate === 'west' && (col === 0 || !grid[row][col - 1].stageName)) isOrphan = true;
-      if (gate === 'east' && (col === gridSize - 1 || !grid[row][col + 1].stageName)) isOrphan = true;
-
-      if (isOrphan) {
-        orphanCells.push({ cell: [row, col], direction: gate });
+    // Add exits to frontier
+    for (const exitDir of chosen.exits) {
+      const [nr, nc] = getNeighbor(row, col, exitDir);
+      if (isValidPos(nr, nc, gridSize) && !grid[nr][nc].stageName) {
+        frontier.push({
+          row: nr,
+          col: nc,
+          entryDir: oppositeDirection(exitDir),
+        });
       }
     }
   }
 
-  // Need exactly 2 orphan gates: one start, one end
-  if (orphanCells.length !== 2) return null;
+  if (path.length < 2) return null;
 
-  // Assign start and end
-  // Prefer south-facing orphan as start (entry), north-facing as end (exit)
-  let startIdx = orphanCells.findIndex(o => o.direction === 'south');
-  if (startIdx === -1) startIdx = 0;
-  const endIdx = startIdx === 0 ? 1 : 0;
+  // Find end cell (last in path)
+  const [endRow, endCol] = path[path.length - 1];
+  grid[endRow][endCol].isEnd = true;
 
-  const startCell = orphanCells[startIdx].cell;
-  const endCell = orphanCells[endIdx].cell;
+  // Validate: check for orphan gates (gates that don't lead anywhere valid)
+  for (const [row, col] of path) {
+    const cell = grid[row][col];
+    if (!cell.stageName) continue;
 
-  grid[startCell[0]][startCell[1]].isStart = true;
-  grid[endCell[0]][endCell[1]].isEnd = true;
-
-  // Place key-gates and keys (not on start/end cells)
-  const availableCells = placedCells.filter(([r, c]) =>
-    !grid[r][c].isStart && !grid[r][c].isEnd
-  );
-
-  if (keyGates > 0 && availableCells.length >= keyGates * 2) {
-    const shuffled = [...availableCells].sort(() => Math.random() - 0.5);
-    for (let i = 0; i < keyGates && i * 2 + 1 < shuffled.length; i++) {
-      const [gateRow, gateCol] = shuffled[i * 2];
-      const [keyRow, keyCol] = shuffled[i * 2 + 1];
-      grid[gateRow][gateCol].isKeyGate = true;
-      grid[keyRow][keyCol].hasKey = true;
-      grid[keyRow][keyCol].keyForCell = [gateRow, gateCol];
+    const gates = getRotatedGates(cell.stageName, cell.rotation);
+    for (const gate of gates) {
+      const [nr, nc] = getNeighbor(row, col, gate);
+      if (isValidPos(nr, nc, gridSize)) {
+        // Gate inside grid must lead to another path cell
+        if (!grid[nr][nc].stageName) {
+          // Orphan gate to empty cell - invalid
+          return null;
+        }
+      }
+      // Gates outside grid are only OK for end cell
+      else if (!cell.isEnd) {
+        return null;
+      }
     }
   }
 
-  return { grid, startCell, endCell };
+  // Place key-gates and keys with reachability constraint
+  if (keyGates > 0) {
+    // Available cells for key-gates (not start, not first few cells)
+    const keyGateCandidates = path.slice(3).filter(([r, c]) => !grid[r][c].isEnd);
+    // Available cells for keys (cells before the key-gate)
+
+    const shuffledGateCells = [...keyGateCandidates].sort(() => Math.random() - 0.5);
+
+    let placed = 0;
+    for (const [gateRow, gateCol] of shuffledGateCells) {
+      if (placed >= keyGates) break;
+
+      const gateCell = grid[gateRow][gateCol];
+      const gatePathOrder = gateCell.pathOrder;
+
+      // Find cells before this one that can have the key
+      const keyCandidates = path.filter(([r, c]) => {
+        const cell = grid[r][c];
+        return cell.pathOrder < gatePathOrder &&
+               cell.pathOrder > 0 && // Not start
+               !cell.hasKey && // Doesn't already have a key
+               !cell.isKeyGate;
+      });
+
+      if (keyCandidates.length === 0) continue;
+
+      // Pick random key location
+      const [keyRow, keyCol] = keyCandidates[Math.floor(Math.random() * keyCandidates.length)];
+
+      // Find which gate direction to lock
+      const gates = getRotatedGates(gateCell.stageName!, gateCell.rotation);
+      const exitGates = [...gates].filter(g => g !== gateCell.entryDirection);
+      if (exitGates.length === 0) continue;
+
+      const lockedDir = exitGates[Math.floor(Math.random() * exitGates.length)];
+
+      gateCell.isKeyGate = true;
+      gateCell.keyGateDirection = lockedDir;
+      grid[keyRow][keyCol].hasKey = true;
+      grid[keyRow][keyCol].keyForCell = [gateRow, gateCol];
+
+      placed++;
+    }
+  }
+
+  return {
+    grid,
+    startCell: [sa1Row, sa1Col],
+    endCell: [endRow, endCol],
+    path,
+  };
 }
 
-// Get gate color based on cell state
-function getGateColor(cell: GridCell, direction: string): string {
-  // Key-gates have purple gates
-  if (cell.isKeyGate) return '#ff66ff';
-  // Normal gates are green
-  return '#88ff88';
+// Get gate display color
+function getGateColor(
+  cell: GridCell,
+  direction: Direction,
+  isEntry: boolean
+): string {
+  if (isEntry) return '#ffffff'; // White for entry (open)
+  if (cell.isKeyGate && cell.keyGateDirection === direction) return '#ff66ff'; // Purple for key-gate
+  return '#88ff88'; // Green for normal gate
 }
 
 // Cell display component
-function GridCellDisplay({ cell, row, col }: { cell: GridCell; row: number; col: number }) {
+function GridCellDisplay({
+  cell,
+  row,
+  col,
+}: {
+  cell: GridCell;
+  row: number;
+  col: number;
+}) {
   if (!cell.stageName) {
     return (
       <div style={{
@@ -250,7 +508,7 @@ function GridCellDisplay({ cell, row, col }: { cell: GridCell; row: number; col:
     );
   }
 
-  const gates = getGateDirections(cell.stageName);
+  const gates = getRotatedGates(cell.stageName, cell.rotation);
   const config = configs[cell.stageName];
 
   // Determine background color
@@ -267,6 +525,12 @@ function GridCellDisplay({ cell, row, col }: { cell: GridCell; row: number; col:
     borderColor = '#ffaa66';
     borderWidth = '2px';
   }
+
+  // Directions with openings (entry or gates)
+  const hasNorth = gates.has('north') || cell.entryDirection === 'north';
+  const hasSouth = gates.has('south') || cell.entryDirection === 'south';
+  const hasEast = gates.has('east') || cell.entryDirection === 'east';
+  const hasWest = gates.has('west') || cell.entryDirection === 'west';
 
   return (
     <div style={{
@@ -336,17 +600,28 @@ function GridCellDisplay({ cell, row, col }: { cell: GridCell; row: number; col:
         {cell.stageName.replace('s01a_', '').replace('s01b_', '').replace('s01e_', '')}
       </div>
 
-      {/* Grid size */}
+      {/* Rotation indicator */}
+      {cell.rotation !== 0 && (
+        <div style={{
+          color: '#666',
+          fontSize: '8px',
+          marginTop: '1px',
+        }}>
+          R{cell.rotation}°
+        </div>
+      )}
+
+      {/* Path order */}
       <div style={{
         color: '#888',
         fontSize: '9px',
         marginTop: '2px',
       }}>
-        {config?.gridSize || '?'}
+        #{cell.pathOrder}
       </div>
 
-      {/* North gate */}
-      {gates.has('north') && (
+      {/* North opening */}
+      {hasNorth && (
         <div style={{
           position: 'absolute',
           top: '0',
@@ -354,13 +629,13 @@ function GridCellDisplay({ cell, row, col }: { cell: GridCell; row: number; col:
           transform: 'translateX(-50%)',
           width: '24px',
           height: '6px',
-          background: getGateColor(cell, 'north'),
+          background: getGateColor(cell, 'north', cell.entryDirection === 'north'),
           borderRadius: '0 0 3px 3px',
-        }} title={`North: x=${config?.gates.find(g => g.edge === 'north')?.x}`} />
+        }} title={cell.entryDirection === 'north' ? 'Entry (open)' : 'Gate'} />
       )}
 
-      {/* South gate */}
-      {gates.has('south') && (
+      {/* South opening */}
+      {hasSouth && (
         <div style={{
           position: 'absolute',
           bottom: '0',
@@ -368,13 +643,13 @@ function GridCellDisplay({ cell, row, col }: { cell: GridCell; row: number; col:
           transform: 'translateX(-50%)',
           width: '24px',
           height: '6px',
-          background: getGateColor(cell, 'south'),
+          background: getGateColor(cell, 'south', cell.entryDirection === 'south'),
           borderRadius: '3px 3px 0 0',
-        }} title={`South: x=${config?.gates.find(g => g.edge === 'south')?.x}`} />
+        }} title={cell.entryDirection === 'south' ? 'Entry (open)' : 'Gate'} />
       )}
 
-      {/* East gate */}
-      {gates.has('east') && (
+      {/* East opening */}
+      {hasEast && (
         <div style={{
           position: 'absolute',
           right: '0',
@@ -382,13 +657,13 @@ function GridCellDisplay({ cell, row, col }: { cell: GridCell; row: number; col:
           transform: 'translateY(-50%)',
           width: '6px',
           height: '24px',
-          background: getGateColor(cell, 'east'),
+          background: getGateColor(cell, 'east', cell.entryDirection === 'east'),
           borderRadius: '3px 0 0 3px',
-        }} title={`East: z=${config?.gates.find(g => g.edge === 'east')?.z}`} />
+        }} title={cell.entryDirection === 'east' ? 'Entry (open)' : 'Gate'} />
       )}
 
-      {/* West gate */}
-      {gates.has('west') && (
+      {/* West opening */}
+      {hasWest && (
         <div style={{
           position: 'absolute',
           left: '0',
@@ -396,9 +671,9 @@ function GridCellDisplay({ cell, row, col }: { cell: GridCell; row: number; col:
           transform: 'translateY(-50%)',
           width: '6px',
           height: '24px',
-          background: getGateColor(cell, 'west'),
+          background: getGateColor(cell, 'west', cell.entryDirection === 'west'),
           borderRadius: '0 3px 3px 0',
-        }} title={`West: z=${config?.gates.find(g => g.edge === 'west')?.z}`} />
+        }} title={cell.entryDirection === 'west' ? 'Entry (open)' : 'Gate'} />
       )}
 
       {/* Coordinate label */}
@@ -419,10 +694,15 @@ export default function GridViewer() {
   const [area, setArea] = useState<'a' | 'b'>('a');
   const [params, setParams] = useState<GenParams>({
     gridSize: 5,
-    usedCells: 12,
-    keyGates: 2,
+    usedCells: 8,
+    keyGates: 1,
   });
-  const [result, setResult] = useState<GenerationResult>({ grid: [], startCell: null, endCell: null });
+  const [result, setResult] = useState<GenerationResult>({
+    grid: [],
+    startCell: null,
+    endCell: null,
+    path: [],
+  });
   const [seed, setSeed] = useState(0);
 
   const regenerate = useCallback(() => {
@@ -433,7 +713,7 @@ export default function GridViewer() {
     setResult(generateGrid(area, params));
   }, [area, params, seed]);
 
-  const placedCount = result.grid.flat().filter(c => c.stageName).length;
+  const placedCount = result.path.length;
 
   return (
     <div style={{
@@ -518,14 +798,14 @@ export default function GridViewer() {
             letterSpacing: '1px',
             marginBottom: '0.5rem',
           }}>
-            Used Cells
+            Path Length
           </div>
           <input
             type="number"
             min={2}
             max={params.gridSize * params.gridSize}
             value={params.usedCells}
-            onChange={(e) => setParams(p => ({ ...p, usedCells: parseInt(e.target.value) || 12 }))}
+            onChange={(e) => setParams(p => ({ ...p, usedCells: parseInt(e.target.value) || 8 }))}
             style={{
               width: '100%',
               padding: '10px 12px',
@@ -613,6 +893,18 @@ export default function GridViewer() {
               verticalAlign: 'middle',
             }} />
             End Cell
+          </div>
+          <div style={{ marginBottom: '8px' }}>
+            <span style={{
+              display: 'inline-block',
+              width: '20px',
+              height: '6px',
+              background: '#ffffff',
+              borderRadius: '2px',
+              marginRight: '8px',
+              verticalAlign: 'middle',
+            }} />
+            Entry (open)
           </div>
           <div style={{ marginBottom: '8px' }}>
             <span style={{
@@ -718,7 +1010,12 @@ export default function GridViewer() {
           {result.grid.map((row, rowIndex) => (
             <div key={rowIndex} style={{ display: 'flex', gap: '2px' }}>
               {row.map((cell, colIndex) => (
-                <GridCellDisplay key={colIndex} cell={cell} row={rowIndex} col={colIndex} />
+                <GridCellDisplay
+                  key={colIndex}
+                  cell={cell}
+                  row={rowIndex}
+                  col={colIndex}
+                />
               ))}
             </div>
           ))}
@@ -731,10 +1028,26 @@ export default function GridViewer() {
           color: '#666',
           textAlign: 'center',
         }}>
-          Placed: {placedCount} stages
+          Path: {placedCount} stages
           {result.startCell && ` | Start: ${result.startCell[0]},${result.startCell[1]}`}
           {result.endCell && ` | End: ${result.endCell[0]},${result.endCell[1]}`}
         </div>
+
+        {/* Path display */}
+        {result.path.length > 0 && (
+          <div style={{
+            marginTop: '1rem',
+            fontSize: '11px',
+            color: '#666',
+            textAlign: 'center',
+            maxWidth: '600px',
+          }}>
+            Path: {result.path.map(([r, c]) => {
+              const cell = result.grid[r][c];
+              return cell.stageName?.replace('s01a_', '').replace('s01b_', '').replace('s01e_', '');
+            }).join(' → ')}
+          </div>
+        )}
       </div>
     </div>
   );
