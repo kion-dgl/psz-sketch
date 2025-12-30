@@ -809,6 +809,46 @@ export default function GridViewer() {
       });
   }, [area, params, result]);
 
+  // Short-form copy with minimal info
+  const copyShortJSON = useCallback(() => {
+    // Collect all cells (main path + branches)
+    const allCells: { row: number; col: number; cell: GridCell }[] = [];
+    for (let r = 0; r < result.grid.length; r++) {
+      for (let c = 0; c < result.grid[r].length; c++) {
+        const cell = result.grid[r][c];
+        if (cell.stageName) {
+          allCells.push({ row: r, col: c, cell });
+        }
+      }
+    }
+
+    const shortData = allCells.map(({ row, col, cell }) => {
+      const gates = cell.stageName ? [...getRotatedGates(cell.stageName, cell.rotation)] : [];
+      const entry: Record<string, unknown> = {
+        pos: `${row},${col}`,
+        stage: cell.stageName?.replace(/^s01[abe]_/, ''),
+        gates: gates.map(g => g[0].toUpperCase()).join(''), // N, S, E, W
+      };
+      if (cell.isStart) entry.start = true;
+      if (cell.isEnd) entry.end = true;
+      if (cell.isBranch) entry.branch = true;
+      if (cell.hasKey) entry.key = true;
+      if (cell.isKeyGate) entry.keyGate = cell.keyGateDirection?.[0].toUpperCase();
+      if (cell.isEnd && cell.keyGateDirection) entry.warp = cell.keyGateDirection[0].toUpperCase();
+      return entry;
+    });
+
+    navigator.clipboard.writeText(JSON.stringify(shortData, null, 2))
+      .then(() => {
+        setCopyStatus('Short copied!');
+        setTimeout(() => setCopyStatus(''), 2000);
+      })
+      .catch(() => {
+        setCopyStatus('Failed');
+        setTimeout(() => setCopyStatus(''), 2000);
+      });
+  }, [result]);
+
   const placedCount = result.path.length;
 
   return (
@@ -989,24 +1029,51 @@ export default function GridViewer() {
           Regenerate
         </button>
 
-        <button
-          onClick={copyJSON}
-          style={{
-            padding: '12px 16px',
-            background: '#555588',
-            border: 'none',
-            borderRadius: '6px',
-            color: 'white',
-            fontSize: '14px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'background 0.15s',
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.background = '#666699'}
-          onMouseLeave={(e) => e.currentTarget.style.background = '#555588'}
-        >
-          {copyStatus || 'Copy JSON'}
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            onClick={copyShortJSON}
+            style={{
+              flex: 1,
+              padding: '12px 8px',
+              background: '#555588',
+              border: 'none',
+              borderRadius: '6px',
+              color: 'white',
+              fontSize: '12px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#666699'}
+            onMouseLeave={(e) => e.currentTarget.style.background = '#555588'}
+          >
+            Short
+          </button>
+          <button
+            onClick={copyJSON}
+            style={{
+              flex: 1,
+              padding: '12px 8px',
+              background: '#555588',
+              border: 'none',
+              borderRadius: '6px',
+              color: 'white',
+              fontSize: '12px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#666699'}
+            onMouseLeave={(e) => e.currentTarget.style.background = '#555588'}
+          >
+            Full
+          </button>
+        </div>
+        {copyStatus && (
+          <div style={{ fontSize: '12px', color: '#88ff88', textAlign: 'center' }}>
+            {copyStatus}
+          </div>
+        )}
 
         <div style={{
           fontSize: '12px',
