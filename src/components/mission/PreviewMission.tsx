@@ -7,6 +7,7 @@ import SandParticles from '../valley/SandParticles';
 import PlayerCharacter from '../city/PlayerCharacter';
 import CameraController from '../shared/CameraController';
 import StageObjects from '../shared/StageObjects';
+import { StartWarp, AreaWarp } from '../elements';
 import { useCharacterStore } from '../../stores/characterStore';
 import type { GateConfig } from '../shared/StageObjects';
 
@@ -229,18 +230,35 @@ export default function PreviewMission() {
   // Build gates and triggers from stage config - NO ROTATION
   const gates: GateConfig[] = [];
   const triggers: TriggerZoneProps[] = [];
+  let areaWarpPosition: [number, number, number] | null = null;
+  let areaWarpRotation = 0;
 
   if (stageConfig) {
     // Add all gates from stage config
     for (const gateConfig of stageConfig.gates) {
-      gates.push({
-        edge: gateConfig.edge as 'north' | 'south' | 'east' | 'west',
-        x: gateConfig.x,
-        z: gateConfig.z,
-        scale: gateConfig.scale || 1,
-        animated: gateConfig.animated ?? true,
-        blocked: false,
-      });
+      const isWarpExit = currentCell.end && currentCell.warp === gateConfig.edge;
+
+      if (isWarpExit) {
+        // Don't add a gate for the warp exit - we'll render AreaWarp instead
+        // Calculate position based on edge direction
+        const edgeRotations: Record<string, number> = {
+          north: 0,
+          south: Math.PI,
+          east: Math.PI / 2,
+          west: -Math.PI / 2,
+        };
+        areaWarpPosition = [gateConfig.x, 0, gateConfig.z];
+        areaWarpRotation = edgeRotations[gateConfig.edge] || 0;
+      } else {
+        gates.push({
+          edge: gateConfig.edge as 'north' | 'south' | 'east' | 'west',
+          x: gateConfig.x,
+          z: gateConfig.z,
+          scale: gateConfig.scale || 1,
+          animated: gateConfig.animated ?? true,
+          blocked: false,
+        });
+      }
 
       // Find trigger for this gate
       const triggerConfig = stageConfig.triggers.find(t =>
@@ -250,7 +268,7 @@ export default function PreviewMission() {
       if (triggerConfig) {
         const neighborPos = currentCell.connections[gateConfig.edge];
 
-        if (currentCell.end && currentCell.warp === gateConfig.edge) {
+        if (isWarpExit) {
           // This is the warp exit
           triggers.push({
             position: [...triggerConfig.position],
@@ -320,6 +338,20 @@ export default function PreviewMission() {
 
           {/* Gates */}
           <StageObjects gates={gates} />
+
+          {/* Start Warp - only on start cell */}
+          {currentCell.start && (
+            <StartWarp position={spawnPosition} state="active" />
+          )}
+
+          {/* Area Warp - only on end cell at warp exit */}
+          {areaWarpPosition && (
+            <AreaWarp
+              position={areaWarpPosition}
+              rotation={[0, areaWarpRotation, 0]}
+              state="active"
+            />
+          )}
 
           {/* Triggers */}
           {triggers.map((t, i) => (
