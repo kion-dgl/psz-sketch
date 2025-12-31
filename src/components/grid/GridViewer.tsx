@@ -1191,6 +1191,7 @@ export default function GridViewer() {
       const entry: Record<string, unknown> = {
         pos: `${row},${col}`,
         stage: cell.stageName?.replace(/^s01[abe]_/, ''),
+        fullStageName: cell.stageName, // Full stage name with prefix (e.g., "s01a_ib1")
         connections, // { "north": "0,2", "east": "1,3" } - original gate → neighbor pos
       };
       if (cell.isStart) entry.start = true;

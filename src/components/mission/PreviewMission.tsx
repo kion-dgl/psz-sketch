@@ -41,6 +41,7 @@ interface StageConfig {
 interface MissionCell {
   pos: string;
   stage: string;
+  fullStageName: string; // Full stage name with prefix (e.g., "s01a_ib1")
   connections: Record<string, string>; // original gate → neighbor pos (e.g., "north": "0,2")
   start?: boolean;
   end?: boolean;
@@ -224,7 +225,8 @@ export default function PreviewMission() {
   const currentCell = mission.cells.find(c => c.pos === currentCellPos);
   if (!currentCell) return null;
 
-  const fullStageName = `s01a_${currentCell.stage}`;
+  // Use fullStageName from the cell (preserves original prefix like s01a_, s01b_, etc.)
+  const fullStageName = currentCell.fullStageName || `s01a_${currentCell.stage}`;
   const stageConfig = mission.stageConfigs?.[fullStageName];
 
   // Build gates and triggers from stage config - NO ROTATION
@@ -232,8 +234,15 @@ export default function PreviewMission() {
   const triggers: TriggerZoneProps[] = [];
   let areaWarpPosition: [number, number, number] | null = null;
   let areaWarpRotation = 0;
+  let startWarpPosition: [number, number, number] | null = null;
 
   if (stageConfig) {
+    // For start cell, use the spawn position for the StartWarp
+    if (currentCell.start) {
+      // Use the player's spawn position for the StartWarp
+      startWarpPosition = [spawnPosition[0], 0, spawnPosition[2]];
+    }
+
     // Add all gates from stage config
     for (const gateConfig of stageConfig.gates) {
       const isWarpExit = currentCell.end && currentCell.warp === gateConfig.edge;
@@ -247,6 +256,7 @@ export default function PreviewMission() {
           east: Math.PI / 2,
           west: -Math.PI / 2,
         };
+        // Use Y=0 so the warp sits on the ground (model has its own height)
         areaWarpPosition = [gateConfig.x, 0, gateConfig.z];
         areaWarpRotation = edgeRotations[gateConfig.edge] || 0;
       } else {
@@ -339,18 +349,18 @@ export default function PreviewMission() {
           {/* Gates */}
           <StageObjects gates={gates} />
 
-          {/* Start Warp - only on start cell */}
-          {currentCell.start && (
-            <StartWarp position={spawnPosition} state="active" />
+          {/* Start Warp - only on start cell, positioned at spawn point */}
+          {startWarpPosition && (
+            <group position={startWarpPosition}>
+              <StartWarp state="active" />
+            </group>
           )}
 
-          {/* Area Warp - only on end cell at warp exit */}
+          {/* Area Warp - only on end cell at warp exit gate position */}
           {areaWarpPosition && (
-            <AreaWarp
-              position={areaWarpPosition}
-              rotation={[0, areaWarpRotation, 0]}
-              state="active"
-            />
+            <group position={areaWarpPosition} rotation={[0, areaWarpRotation, 0]}>
+              <AreaWarp state="active" />
+            </group>
           )}
 
           {/* Triggers */}
