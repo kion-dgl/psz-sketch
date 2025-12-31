@@ -1,15 +1,35 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier';
-import { PerspectiveCamera } from '@react-three/drei';
+import { PerspectiveCamera, useGLTF } from '@react-three/drei';
+import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 import ValleyEnv, { ValleyFloorCollision } from '../valley/environments/ValleyEnv';
 import SandParticles from '../valley/SandParticles';
 import PlayerCharacter from '../city/PlayerCharacter';
 import CameraController from '../shared/CameraController';
 import StageObjects from '../shared/StageObjects';
-import { StartWarp, AreaWarp } from '../elements';
 import { useCharacterStore } from '../../stores/characterStore';
 import type { GateConfig } from '../shared/StageObjects';
+
+// Warp model paths
+const START_WARP_PATH = '/objects/special_z/o0s_warps.imd/o0s_warps.glb';
+const AREA_WARP_PATH = '/objects/special_z/o0s_warpm.imd/o0s_warpm.glb';
+
+// Warp model component - follows same pattern as StageObjects
+function WarpModel({ modelPath, position, rotation = 0 }: {
+  modelPath: string;
+  position: [number, number, number];
+  rotation?: number;
+}) {
+  const { scene } = useGLTF(modelPath);
+  const clonedScene = useMemo(() => SkeletonUtils.clone(scene), [scene]);
+
+  return (
+    <group position={position} rotation={[0, rotation, 0]}>
+      <primitive object={clonedScene} />
+    </group>
+  );
+}
 
 // Stage config from valley-configs.json
 interface StageGateConfig {
@@ -351,16 +371,19 @@ export default function PreviewMission() {
 
           {/* Start Warp - only on start cell, positioned at spawn point */}
           {startWarpPosition && (
-            <group position={startWarpPosition}>
-              <StartWarp state="active" />
-            </group>
+            <WarpModel
+              modelPath={START_WARP_PATH}
+              position={startWarpPosition}
+            />
           )}
 
           {/* Area Warp - only on end cell at warp exit gate position */}
           {areaWarpPosition && (
-            <group position={areaWarpPosition} rotation={[0, areaWarpRotation, 0]}>
-              <AreaWarp state="active" />
-            </group>
+            <WarpModel
+              modelPath={AREA_WARP_PATH}
+              position={areaWarpPosition}
+              rotation={areaWarpRotation}
+            />
           )}
 
           {/* Triggers */}
