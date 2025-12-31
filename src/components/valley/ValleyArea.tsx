@@ -1,10 +1,21 @@
-import { Suspense, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import ValleyEnv, { ValleyFloorCollision } from './environments/ValleyEnv';
 import SandParticles from './SandParticles';
 import RainParticles from './RainParticles';
 import StageArea, { type LightingConfig, type ThemeConfig } from '../shared/StageArea';
 import StageObjects, { type StageObjectsConfig } from '../shared/StageObjects';
 import { getMapConfig, getDefaultSpawn, type TriggerConfig, type SpawnPoint } from './valleyConfig';
+
+// Rotate a point around the origin by given radians
+function rotatePoint(x: number, z: number, radians: number): [number, number] {
+  if (radians === 0) return [x, z];
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  return [
+    x * cos - z * sin,
+    x * sin + z * cos
+  ];
+}
 
 // Triggers that only activate when a specific gate is unlocked
 export interface LockedTrigger {
@@ -82,6 +93,7 @@ interface ValleyAreaProps {
   mapName: string;
   spawnPosition?: [number, number, number];
   spawnRotation?: number;
+  stageRotation?: number; // Stage rotation in degrees (0, 90, 180, 270)
   triggers?: TriggerConfig[];
   lockedTriggers?: LockedTrigger[]; // Triggers that activate when gate is unlocked
   spawnPoints?: SpawnPoint[];
@@ -97,6 +109,7 @@ export default function ValleyArea({
   mapName,
   spawnPosition,
   spawnRotation,
+  stageRotation = 0,
   triggers,
   lockedTriggers = [],
   spawnPoints,
@@ -121,41 +134,96 @@ export default function ValleyArea({
     });
   }, []);
 
-  // Combine base triggers with unlocked triggers
-  const activeTriggers = [
-    ...(triggers || []),
-    ...lockedTriggers
-      .filter(lt => unlockedGates.has(lt.gateId))
-      .map(lt => lt.trigger)
-  ];
+  // Convert stage rotation from degrees to radians
+  const stageRotationRad = (stageRotation * Math.PI) / 180;
+
+  // Rotate spawn position and rotation if stage is rotated
+  // (spawn is in stage-local coordinates, needs to be in world-space for player)
+  let finalSpawnPosition = spawnPosition;
+  let finalSpawnRotation = spawnRotation;
+  if (stageRotation !== 0 && spawnPosition) {
+    const [rotX, rotZ] = rotatePoint(spawnPosition[0], spawnPosition[2], stageRotationRad);
+    finalSpawnPosition = [rotX, spawnPosition[1], rotZ];
+    finalSpawnRotation = (spawnRotation || 0) + stageRotationRad;
+  }
+
+  // Rotate trigger positions (stage-local to world-space)
+  const baseTriggers = triggers || [];
+  const unlockedTriggersList = lockedTriggers
+    .filter(lt => unlockedGates.has(lt.gateId))
+    .map(lt => lt.trigger);
+
+  const allTriggers = [...baseTriggers, ...unlockedTriggersList];
+
+  const rotatedTriggers: TriggerConfig[] = stageRotation !== 0
+    ? allTriggers.map(t => {
+        const [rotX, rotZ] = rotatePoint(t.position[0], t.position[2], stageRotationRad);
+        return {
+          ...t,
+          position: [rotX, t.position[1], rotZ] as [number, number, number],
+          rotation: (t.rotation || 0) + stageRotationRad,
+        };
+      })
+    : allTriggers;
+
+  // Wrap environment in rotated group if needed
+  const rotatedEnvironment = stageRotation !== 0 ? (
+    <group rotation={[0, stageRotationRad, 0]}>
+      <ValleyEnv mapId={mapId} />
+    </group>
+  ) : (
+    <ValleyEnv mapId={mapId} />
+  );
+
+  // Pass rotation directly to floor collision (physics RigidBody doesn't inherit group rotation)
+  const rotatedFloorCollision = (
+    <ValleyFloorCollision mapId={mapId} rotation={stageRotationRad} />
+  );
 
   return (
     <StageArea
       mapId={mapId}
       mapName={mapName}
-      environment={<ValleyEnv mapId={mapId} />}
-      floorCollision={<ValleyFloorCollision mapId={mapId} />}
+      environment={rotatedEnvironment}
+      floorCollision={rotatedFloorCollision}
       particles={<WeatherParticles weather={weather} />}
       lighting={lighting}
       theme={THEME}
-      spawnPosition={spawnPosition}
-      spawnRotation={spawnRotation}
-      triggers={activeTriggers}
+      spawnPosition={finalSpawnPosition}
+      spawnRotation={finalSpawnRotation}
+      triggers={rotatedTriggers}
       spawnPoints={spawnPoints}
       getMapConfig={getMapConfig}
       getDefaultSpawn={getDefaultSpawn}
       debugMode={debugMode}
       addPiToSpawnRotation={true}
     >
-      {objects && (
-        <StageObjects
-          gates={objects.gates}
-          boxes={objects.boxes}
-          switches={objects.switches}
-          onGateUnlocked={handleGateUnlocked}
-        />
+      {/* Objects and children are in stage-local coordinates, wrap in rotated group */}
+      {stageRotation !== 0 ? (
+        <group rotation={[0, stageRotationRad, 0]}>
+          {objects && (
+            <StageObjects
+              gates={objects.gates}
+              boxes={objects.boxes}
+              switches={objects.switches}
+              onGateUnlocked={handleGateUnlocked}
+            />
+          )}
+          {children}
+        </group>
+      ) : (
+        <>
+          {objects && (
+            <StageObjects
+              gates={objects.gates}
+              boxes={objects.boxes}
+              switches={objects.switches}
+              onGateUnlocked={handleGateUnlocked}
+            />
+          )}
+          {children}
+        </>
       )}
-      {children}
     </StageArea>
   );
 }

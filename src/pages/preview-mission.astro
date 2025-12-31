@@ -1,0 +1,10 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PreviewMission from '../components/mission/PreviewMission';
+
+export const prerender = false;
+---
+
+<Layout title="Mission Preview - PSZ Sketch">
+  <PreviewMission client:only="react" />
+</Layout>

@@ -1108,6 +1108,7 @@ export default function GridViewer() {
       const entry: Record<string, unknown> = {
         pos: `${row},${col}`,
         stage: cell.stageName?.replace(/^s01[abe]_/, ''),
+        rotation: cell.rotation, // Always include rotation
         gates: gates.map(g => g[0].toUpperCase()).join(''), // N, S, E, W
       };
       if (cell.isStart) entry.start = true;
@@ -1129,6 +1130,97 @@ export default function GridViewer() {
         setTimeout(() => setCopyStatus(''), 2000);
       });
   }, [result]);
+
+  // Test mission - save to localStorage and redirect to preview
+  const testMission = useCallback(() => {
+    // Collect all cells (main path + branches)
+    const allCells: { row: number; col: number; cell: GridCell }[] = [];
+    for (let r = 0; r < result.grid.length; r++) {
+      for (let c = 0; c < result.grid[r].length; c++) {
+        const cell = result.grid[r][c];
+        if (cell.stageName) {
+          allCells.push({ row: r, col: c, cell });
+        }
+      }
+    }
+
+    // Direction offsets for finding neighbors
+    const dirOffsets: Record<Direction, [number, number]> = {
+      north: [-1, 0],
+      south: [1, 0],
+      east: [0, 1],
+      west: [0, -1],
+    };
+
+    // Reverse rotation: get original direction from world direction
+    const reverseRotate = (worldDir: Direction, rotation: Rotation): Direction => {
+      const dirs: Direction[] = ['north', 'east', 'south', 'west'];
+      const idx = dirs.indexOf(worldDir);
+      const steps = (4 - rotation / 90) % 4;
+      return dirs[(idx + steps) % 4];
+    };
+
+    const cells = allCells.map(({ row, col, cell }) => {
+      const originalGates = cell.stageName ? getOriginalGates(cell.stageName) : new Set<Direction>();
+
+      // Build connections: for each original gate, find which neighbor it connects to
+      const connections: Record<string, string> = {};
+
+      for (const originalGate of originalGates) {
+        // What world direction does this original gate face after rotation?
+        const worldDir = rotateDirection(originalGate, cell.rotation);
+        const [dr, dc] = dirOffsets[worldDir];
+        const nr = row + dr;
+        const nc = col + dc;
+        const neighborKey = `${nr},${nc}`;
+
+        // Check if there's a neighbor cell there
+        const neighbor = result.grid[nr]?.[nc];
+        if (neighbor?.stageName) {
+          // This original gate connects to the neighbor
+          connections[originalGate] = neighborKey;
+        }
+      }
+
+      // For warp: find which ORIGINAL gate corresponds to the warp world direction
+      let warpGate: string | undefined;
+      if (cell.isEnd && cell.keyGateDirection) {
+        warpGate = reverseRotate(cell.keyGateDirection, cell.rotation);
+      }
+
+      const entry: Record<string, unknown> = {
+        pos: `${row},${col}`,
+        stage: cell.stageName?.replace(/^s01[abe]_/, ''),
+        connections, // { "north": "0,2", "east": "1,3" } - original gate → neighbor pos
+      };
+      if (cell.isStart) entry.start = true;
+      if (cell.isEnd) entry.end = true;
+      if (cell.isBranch) entry.branch = true;
+      if (cell.hasKey) entry.key = true;
+      if (cell.isKeyGate) entry.keyGate = reverseRotate(cell.keyGateDirection!, cell.rotation);
+      if (warpGate) entry.warp = warpGate; // Original gate that is the warp exit
+      return entry;
+    });
+
+    // Collect stage configs for all used stages
+    const usedStages = new Set(allCells.map(c => c.cell.stageName).filter(Boolean));
+    const stageConfigs: Record<string, typeof configs[keyof typeof configs]> = {};
+    for (const stageName of usedStages) {
+      if (stageName && configs[stageName]) {
+        stageConfigs[stageName] = configs[stageName];
+      }
+    }
+
+    const mission = {
+      area: `valley-${area}`,
+      cells,
+      stageConfigs,
+    };
+
+    localStorage.setItem('mission', JSON.stringify(mission));
+    localStorage.removeItem('missionKeys'); // Clear any previous keys
+    window.location.href = '/preview-mission';
+  }, [result, area]);
 
   // Simulation logic - animated traversal
   const runSimulation = useCallback(() => {
@@ -1438,6 +1530,26 @@ export default function GridViewer() {
           onMouseLeave={(e) => !sim.running && (e.currentTarget.style.background = '#55aa55')}
         >
           {sim.running ? 'Simulating...' : 'Simulate'}
+        </button>
+
+        <button
+          onClick={testMission}
+          disabled={result.path.length === 0}
+          style={{
+            padding: '12px 16px',
+            background: result.path.length === 0 ? '#444' : '#aa5555',
+            border: 'none',
+            borderRadius: '6px',
+            color: 'white',
+            fontSize: '14px',
+            fontWeight: 600,
+            cursor: result.path.length === 0 ? 'not-allowed' : 'pointer',
+            transition: 'background 0.15s',
+          }}
+          onMouseEnter={(e) => result.path.length > 0 && (e.currentTarget.style.background = '#bb6666')}
+          onMouseLeave={(e) => result.path.length > 0 && (e.currentTarget.style.background = '#aa5555')}
+        >
+          Test Mission
         </button>
 
         {/* Simulation status */}
