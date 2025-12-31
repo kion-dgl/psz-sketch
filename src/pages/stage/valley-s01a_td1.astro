@@ -3,12 +3,37 @@ import Layout from '../../layouts/Layout.astro';
 import ValleyArea from '../../components/valley/ValleyArea';
 
 export const prerender = false;
+
+const objects = {
+  gates: [
+    { edge: "east" as const, x: 27, z: 1, scale: 1 },
+    { edge: "south" as const, x: -14, z: 27, scale: 1 },
+    { edge: "west" as const, x: -27, z: -16, scale: 1 },
+  ],
+};
+
+const spawnPoints = [
+  { position: [24, 1, 1] as [number, number, number], rotation: -1.5707963267948966, label: "East Gate" },
+  { position: [-14, 1, 24] as [number, number, number], rotation: 3.141592653589793, label: "South Gate" },
+  { position: [-24, 1, -16] as [number, number, number], rotation: 1.5707963267948966, label: "West Gate" },
+];
+
+const triggers = [
+  { position: [29, 1, 1] as [number, number, number], rotation: -1.5707963267948966, targetUrl: "/stage/valley", label: "East Gate" },
+  { position: [-14, 1, 29] as [number, number, number], rotation: 3.141592653589793, targetUrl: "/stage/valley", label: "South Gate" },
+  { position: [-29, 1, -16] as [number, number, number], rotation: 1.5707963267948966, targetUrl: "/stage/valley", label: "West Gate" },
+];
 ---
 
 <Layout title="Gurhacia Valley - s01a_td1">
   <ValleyArea
     mapId="s01a_td1"
     mapName="Gurhacia Valley - s01a_td1"
+    spawnPosition={spawnPoints[0].position}
+    spawnRotation={spawnPoints[0].rotation}
+    spawnPoints={spawnPoints}
+    triggers={triggers}
+    objects={objects}
     client:load
   />
 </Layout>

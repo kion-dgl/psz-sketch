@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PortalEditor from '../../components/debug/PortalEditor';
+
+export const prerender = false;
+---
+
+<Layout title="Portal Editor">
+  <PortalEditor client:load />
+</Layout>

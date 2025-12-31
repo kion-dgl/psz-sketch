@@ -104,7 +104,7 @@ export default function GameArea({
   const [spawnPosition, setSpawnPosition] = useState<[number, number, number]>(defaultSpawnPosition);
   const [spawnRotation, setSpawnRotation] = useState(defaultSpawnRotation);
   const [playerInInteractiveZone, setPlayerInInteractiveZone] = useState<string | null>(null);
-  const [respawnKey] = useState(0);
+  const [respawnKey, setRespawnKey] = useState(0);
   const { openShop } = useGameState();
   const { selectedCharacter, setSelectedCharacter } = useCharacterStore();
 
@@ -170,6 +170,16 @@ export default function GameArea({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setSelectedCharacter]); // Only run on mount - spawn configs are read once
 
+  // Kill plane - respawn player if they fall below Y=-10
+  useEffect(() => {
+    if (playerPosition.y < -10) {
+      console.log('[Kill Plane] Player fell below Y=-10, respawning to (0, 1, 0)');
+      setSpawnPosition([0, 1, 0]);
+      setSpawnRotation(0);
+      setRespawnKey(k => k + 1);
+    }
+  }, [playerPosition.y]);
+
   // Debug position logging
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -187,6 +197,27 @@ export default function GameArea({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [playerPosition, debugStart, debugLabel]);
+
+  // Copy stats to clipboard
+  const copyStats = () => {
+    const stats = {
+      area: areaId || areaName || 'unknown',
+      position: {
+        x: parseFloat(playerPosition.x.toFixed(2)),
+        y: parseFloat(playerPosition.y.toFixed(2)),
+        z: parseFloat(playerPosition.z.toFixed(2)),
+      },
+      rotation: parseFloat(playerPosition.rotation.toFixed(2)),
+      spawn: {
+        position: spawnPosition,
+        rotation: spawnRotation,
+      },
+    };
+    const text = JSON.stringify(stats, null, 2);
+    navigator.clipboard.writeText(text).then(() => {
+      console.log('Stats copied to clipboard:', stats);
+    });
+  };
 
   if (loading) {
     return (
@@ -271,6 +302,22 @@ export default function GameArea({
           <div style={{ marginTop: '0.5rem', color: debugAccentColor }}>
             Press SPACE: {debugStart ? `${debugLabel} Start` : `${debugLabel} Stop`}
           </div>
+          <button
+            onClick={copyStats}
+            style={{
+              marginTop: '0.5rem',
+              padding: '4px 8px',
+              background: debugAccentColor,
+              color: 'black',
+              border: 'none',
+              borderRadius: '3px',
+              cursor: 'pointer',
+              fontSize: '11px',
+              fontFamily: 'monospace',
+            }}
+          >
+            Copy Stats
+          </button>
         </div>
       )}
 

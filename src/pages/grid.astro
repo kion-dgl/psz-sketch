@@ -1,0 +1,10 @@
+---
+import Layout from '../layouts/Layout.astro';
+import GridViewer from '../components/grid/GridViewer';
+
+export const prerender = false;
+---
+
+<Layout title="Grid Viewer - PSZ Sketch">
+  <GridViewer client:only="react" />
+</Layout>

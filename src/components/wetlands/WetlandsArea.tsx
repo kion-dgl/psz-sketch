@@ -1,7 +1,10 @@
+import { lazy, Suspense } from 'react';
 import WetlandsEnv, { WetlandsFloorCollision } from './environments/WetlandsEnv';
 import RainParticles from '../valley/RainParticles';
 import StageArea, { type LightingConfig, type ThemeConfig } from '../shared/StageArea';
 import { getMapConfig, getDefaultSpawn, type TriggerConfig } from './wetlandsConfig';
+
+const BossSky = lazy(() => import('./BossSky'));
 
 type TimeOfDay = 'day' | 'dusk' | 'night';
 type Weather = 'clear' | 'foggy' | 'rain' | 'rain-heavy';
@@ -93,6 +96,9 @@ export default function WetlandsArea({
   const baseLighting = LIGHTING_CONFIGS[timeOfDay];
   const lighting = getWeatherAdjustedLighting(baseLighting, weather);
 
+  // Boss areas (z suffix) get the boss sky
+  const isBossArea = mapId.includes('z_');
+
   return (
     <StageArea
       mapId={mapId}
@@ -110,6 +116,7 @@ export default function WetlandsArea({
       debugMode={debugMode}
       addPiToSpawnRotation={true}
     >
+      {isBossArea && <Suspense fallback={null}><BossSky /></Suspense>}
       {children}
     </StageArea>
   );

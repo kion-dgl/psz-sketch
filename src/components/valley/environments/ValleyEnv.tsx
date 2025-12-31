@@ -28,7 +28,7 @@ function getValleyDir(mapId: string): string {
   return 'stages/valley_a'; // fallback
 }
 
-export function ValleyFloorCollision({ mapId, showVisual = false }: { mapId: string; showVisual?: boolean }) {
+export function ValleyFloorCollision({ mapId, showVisual = false, rotation = 0 }: { mapId: string; showVisual?: boolean; rotation?: number }) {
   const [floorGeometry, setFloorGeometry] = useState<THREE.BufferGeometry | null>(null);
 
   useEffect(() => {
@@ -109,7 +109,7 @@ export function ValleyFloorCollision({ mapId, showVisual = false }: { mapId: str
   return (
     <>
       {/* Physics collision */}
-      <RigidBody type="fixed" collisionGroups={0x00030003}>
+      <RigidBody type="fixed" collisionGroups={0x00030003} rotation={[0, rotation, 0]}>
         <TrimeshCollider args={[
           floorGeometry.attributes.position.array as Float32Array,
           new Uint32Array(Array.from({ length: floorGeometry.attributes.position.count }, (_, i) => i))
