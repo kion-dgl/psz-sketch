@@ -36,8 +36,8 @@ import SteamParticles from '../arca/SteamParticles';
 import ShadowWispParticles from '../shrine/ShadowWispParticles';
 import EternalMoteParticles from '../tower/EternalMoteParticles';
 
-// Tags for display in panel
-import { Stage, Box, Gate, Switch, Warp, Key, NPC, Fence, KeyGate } from '../tags';
+// Tags for display in panel (note: Fence, KeyGate not yet implemented)
+import { Stage, Box, Gate, Switch, Warp, Key, NPC } from '../tags';
 
 interface FieldEnvironmentProps {
   fieldId: string;
@@ -211,13 +211,13 @@ const TAG_DOCS = [
   },
   {
     name: 'KeyGate',
-    description: 'Key-required barrier',
+    description: 'Key-required barrier (Coming Soon)',
     collision: 'Wall (Circle-Line 2D) when locked',
     props: 'id, keyId, position',
   },
   {
     name: 'Fence',
-    description: 'Switch-controlled barrier',
+    description: 'Switch-controlled barrier (Coming Soon)',
     collision: 'Wall (Circle-Line 2D) when active',
     props: 'id, position, state, variant',
   },
