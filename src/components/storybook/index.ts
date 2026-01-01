@@ -17,3 +17,10 @@ export {
   type StageField,
   type CityArea,
 } from './stageData';
+
+export {
+  FIELD_WEATHER,
+  getDefaultWeather,
+  type WeatherOption,
+  type FieldWeather,
+} from './weatherData';
