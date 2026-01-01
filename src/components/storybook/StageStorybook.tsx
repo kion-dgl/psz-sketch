@@ -36,9 +36,6 @@ import SteamParticles from '../arca/SteamParticles';
 import ShadowWispParticles from '../shrine/ShadowWispParticles';
 import EternalMoteParticles from '../tower/EternalMoteParticles';
 
-// Tags for display in panel (note: Fence, KeyGate not yet implemented)
-import { Stage, Box, Gate, Switch, Warp, Key, NPC } from '../tags';
-
 interface FieldEnvironmentProps {
   fieldId: string;
   mapId: string;
@@ -195,57 +192,26 @@ function LoadingFallback() {
   );
 }
 
-// Tag documentation for right panel
-const TAG_DOCS = [
-  {
-    name: 'Box',
-    description: 'Destructible container',
-    collision: 'Trigger (Sphere-AABB)',
-    props: 'position, state, onDestroy',
-  },
-  {
-    name: 'Gate',
-    description: 'Enemy-activated barrier',
-    collision: 'Wall (Circle-Line 2D) when closed',
-    props: 'id, position, state, blocked',
-  },
-  {
-    name: 'KeyGate',
-    description: 'Key-required barrier (Coming Soon)',
-    collision: 'Wall (Circle-Line 2D) when locked',
-    props: 'id, keyId, position',
-  },
-  {
-    name: 'Fence',
-    description: 'Switch-controlled barrier (Coming Soon)',
-    collision: 'Wall (Circle-Line 2D) when active',
-    props: 'id, position, state, variant',
-  },
-  {
-    name: 'Switch',
-    description: 'Activates gates/fences',
-    collision: 'Trigger (Sphere-AABB)',
-    props: 'type (step/interact/remote), targetId, position',
-  },
-  {
-    name: 'NPC',
-    description: 'Interactable character',
-    collision: 'NPC (Distance+Dot)',
-    props: 'name, model, position, onInteract',
-  },
-  {
-    name: 'Warp',
-    description: 'Area transition point',
-    collision: 'Trigger (Sphere-AABB)',
-    props: 'type (start/area), targetArea, position',
-  },
-  {
-    name: 'Key',
-    description: 'Collectible key item',
-    collision: 'Trigger (Sphere-AABB)',
-    props: 'keyId, position, onCollect',
-  },
-];
+// Styles for controls
+const labelStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.25rem',
+  color: '#aaa',
+  fontSize: '0.75rem',
+  textTransform: 'uppercase',
+  letterSpacing: '0.05em',
+};
+
+const selectStyle: React.CSSProperties = {
+  padding: '0.5rem',
+  borderRadius: '4px',
+  border: '1px solid #444',
+  background: '#1a1a2e',
+  color: 'white',
+  fontSize: '0.9rem',
+  width: '100%',
+};
 
 export default function StageStorybook() {
   // Selection state
@@ -317,87 +283,37 @@ export default function StageStorybook() {
   // Build mapId for field stages
   const mapId = variantId;
 
+  // Generate the Stage component code
+  const stageCode = isCity
+    ? `<CityEnvironment area="${areaId}" />`
+    : `<Stage
+  field="${category}"
+  area="${areaId}"
+  variant="${variantId}"
+  weather="${weatherId}"
+/>`;
+
+  // Get current field label
+  const currentFieldLabel = isCity
+    ? 'City Areas'
+    : FIELD_STAGES.find(f => f.id === category)?.label ?? category;
+
   return (
     <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Controls */}
+      {/* Header */}
       <div style={{
-        padding: '1rem',
+        padding: '0.75rem 1rem',
         background: '#1a1a2e',
         borderBottom: '1px solid #333',
         display: 'flex',
-        gap: '1rem',
         alignItems: 'center',
-        flexWrap: 'wrap',
+        justifyContent: 'space-between',
       }}>
-        <h2 style={{ margin: 0, color: 'white', fontSize: '1.2rem' }}>Stage Storybook</h2>
-
-        {/* Category dropdown */}
-        <label style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          Field:
-          <select
-            value={category}
-            onChange={(e) => handleCategoryChange(e.target.value)}
-            style={{ padding: '0.5rem', borderRadius: '4px', minWidth: '150px' }}
-          >
-            {ALL_CATEGORIES.map(cat => (
-              <option key={cat.id} value={cat.id}>{cat.label}</option>
-            ))}
-          </select>
-        </label>
-
-        {/* Area dropdown */}
-        <label style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          Area:
-          <select
-            value={areaId}
-            onChange={(e) => handleAreaChange(e.target.value)}
-            style={{ padding: '0.5rem', borderRadius: '4px', minWidth: '120px' }}
-          >
-            {availableAreas.map(area => (
-              <option key={area.id} value={area.id}>{area.label}</option>
-            ))}
-          </select>
-        </label>
-
-        {/* Variant dropdown (field stages only) */}
-        {!isCity && availableVariants.length > 0 && (
-          <label style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            Variant:
-            <select
-              value={variantId}
-              onChange={(e) => setVariantId(e.target.value)}
-              style={{ padding: '0.5rem', borderRadius: '4px', minWidth: '100px' }}
-            >
-              {availableVariants.map(v => (
-                <option key={v.id} value={v.id}>{v.label}</option>
-              ))}
-            </select>
-          </label>
-        )}
-
-        {/* Weather dropdown (field stages only) */}
-        {!isCity && availableWeather.length > 0 && (
-          <label style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            Weather:
-            <select
-              value={weatherId}
-              onChange={(e) => setWeatherId(e.target.value)}
-              style={{ padding: '0.5rem', borderRadius: '4px', minWidth: '140px' }}
-            >
-              {availableWeather.map(w => (
-                <option key={w.id} value={w.id}>{w.label}</option>
-              ))}
-            </select>
-          </label>
-        )}
-
-        {/* Info */}
-        <div style={{ marginLeft: 'auto', color: '#888', fontSize: '0.9rem' }}>
-          {isCity ? (
-            <span>City: {currentCityArea?.label}</span>
-          ) : (
-            <span>Map ID: {mapId}</span>
-          )}
+        <h1 style={{ margin: 0, color: 'white', fontSize: '1.1rem', fontWeight: 500 }}>
+          Stage Storybook
+        </h1>
+        <div style={{ color: '#888', fontSize: '0.85rem' }}>
+          {currentFieldLabel} {!isCity && `/ ${currentArea?.label ?? areaId}`}
         </div>
       </div>
 
@@ -436,85 +352,172 @@ export default function StageStorybook() {
           </Canvas>
         </div>
 
-        {/* Right panel - Tags documentation */}
+        {/* Right panel - Controls */}
         <div style={{
-          width: '280px',
+          width: '300px',
           background: '#16213e',
           borderLeft: '1px solid #333',
-          overflowY: 'auto',
-          padding: '1rem',
+          display: 'flex',
+          flexDirection: 'column',
         }}>
-          <h3 style={{ margin: '0 0 1rem 0', color: 'white', fontSize: '1rem' }}>R3F Tags</h3>
+          {/* Controls section */}
+          <div style={{ padding: '1rem', borderBottom: '1px solid #333' }}>
+            <h3 style={{ margin: '0 0 1rem 0', color: '#888', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              Controls
+            </h3>
 
-          {TAG_DOCS.map(tag => (
-            <div
-              key={tag.name}
-              style={{
-                marginBottom: '1rem',
-                padding: '0.75rem',
-                background: 'rgba(255,255,255,0.05)',
-                borderRadius: '6px',
-                borderLeft: '3px solid #6b8afd',
-              }}
-            >
-              <div style={{ color: '#6b8afd', fontWeight: 'bold', marginBottom: '0.25rem' }}>
-                {'<'}{tag.name}{' />'}
-              </div>
-              <div style={{ color: '#ccc', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                {tag.description}
-              </div>
-              <div style={{ color: '#888', fontSize: '0.75rem' }}>
-                <div><strong>Collision:</strong> {tag.collision}</div>
-                <div><strong>Props:</strong> {tag.props}</div>
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {/* Field dropdown */}
+              <label style={labelStyle}>
+                Field
+                <select
+                  value={category}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  style={selectStyle}
+                >
+                  {ALL_CATEGORIES.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.label}</option>
+                  ))}
+                </select>
+              </label>
+
+              {/* Area dropdown */}
+              <label style={labelStyle}>
+                Area
+                <select
+                  value={areaId}
+                  onChange={(e) => handleAreaChange(e.target.value)}
+                  style={selectStyle}
+                >
+                  {availableAreas.map(area => (
+                    <option key={area.id} value={area.id}>{area.label}</option>
+                  ))}
+                </select>
+              </label>
+
+              {/* Variant dropdown (field stages only) */}
+              {!isCity && availableVariants.length > 0 && (
+                <label style={labelStyle}>
+                  Variant
+                  <select
+                    value={variantId}
+                    onChange={(e) => setVariantId(e.target.value)}
+                    style={selectStyle}
+                  >
+                    {availableVariants.map(v => (
+                      <option key={v.id} value={v.id}>{v.label}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
+
+              {/* Weather dropdown (field stages only) */}
+              {!isCity && availableWeather.length > 0 && (
+                <label style={labelStyle}>
+                  Weather
+                  <select
+                    value={weatherId}
+                    onChange={(e) => setWeatherId(e.target.value)}
+                    style={selectStyle}
+                  >
+                    {availableWeather.map(w => (
+                      <option key={w.id} value={w.id}>{w.label}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
             </div>
-          ))}
+          </div>
 
-          <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #333' }}>
-            <h4 style={{ margin: '0 0 0.5rem 0', color: '#888', fontSize: '0.85rem' }}>Usage</h4>
+          {/* Code section */}
+          <div style={{ padding: '1rem', flex: 1, overflow: 'auto' }}>
+            <h3 style={{ margin: '0 0 0.75rem 0', color: '#888', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              Stage Tag
+            </h3>
             <pre style={{
               background: 'rgba(0,0,0,0.3)',
-              padding: '0.5rem',
-              borderRadius: '4px',
-              fontSize: '0.7rem',
-              color: '#aaa',
+              padding: '0.75rem',
+              borderRadius: '6px',
+              fontSize: '0.8rem',
+              color: '#6b8afd',
               overflow: 'auto',
+              margin: 0,
+              lineHeight: 1.5,
             }}>
-{`<Stage id="mission-01">
-  <Box position={[5, 0, 0]} />
-  <Gate id="gate1" />
-  <Switch
-    type="step"
-    targetId="gate1"
-  />
-  <Warp type="area"
-    targetArea="/next"
-  />
-</Stage>`}
+              {stageCode}
             </pre>
+
+            {/* Properties table */}
+            {!isCity && (
+              <div style={{ marginTop: '1rem' }}>
+                <h3 style={{ margin: '0 0 0.75rem 0', color: '#888', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  Properties
+                </h3>
+                <table style={{ width: '100%', fontSize: '0.8rem', color: '#ccc' }}>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: '0.25rem 0', color: '#888' }}>field</td>
+                      <td style={{ padding: '0.25rem 0' }}>{category}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '0.25rem 0', color: '#888' }}>area</td>
+                      <td style={{ padding: '0.25rem 0' }}>{areaId}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '0.25rem 0', color: '#888' }}>variant</td>
+                      <td style={{ padding: '0.25rem 0' }}>{variantId}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '0.25rem 0', color: '#888' }}>weather</td>
+                      <td style={{ padding: '0.25rem 0' }}>{currentWeather.label}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '0.25rem 0', color: '#888' }}>particles</td>
+                      <td style={{ padding: '0.25rem 0' }}>{currentWeather.particles === 'none' ? 'None' : currentWeather.particles}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '0.25rem 0', color: '#888' }}>time</td>
+                      <td style={{ padding: '0.25rem 0', color: currentWeather.isNight ? '#6688cc' : '#ffcc66' }}>
+                        {currentWeather.isNight ? 'Night' : 'Day'}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Asset path */}
+            {!isCity && (
+              <div style={{ marginTop: '1rem' }}>
+                <h3 style={{ margin: '0 0 0.5rem 0', color: '#888', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  Asset Path
+                </h3>
+                <code style={{
+                  display: 'block',
+                  background: 'rgba(0,0,0,0.3)',
+                  padding: '0.5rem',
+                  borderRadius: '4px',
+                  fontSize: '0.75rem',
+                  color: '#aaa',
+                  wordBreak: 'break-all',
+                }}>
+                  {getStageAssetPath(category, areaId, variantId)}
+                </code>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Footer info */}
+      {/* Footer */}
       <div style={{
         padding: '0.5rem 1rem',
         background: '#1a1a2e',
         borderTop: '1px solid #333',
-        color: '#888',
-        fontSize: '0.8rem',
-        display: 'flex',
-        gap: '2rem',
+        color: '#666',
+        fontSize: '0.75rem',
       }}>
-        <span>Controls: Drag to rotate, Scroll to zoom, Right-drag to pan</span>
-        {!isCity && (
-          <>
-            <span>Asset path: {getStageAssetPath(category, areaId, variantId)}</span>
-            <span style={{ color: currentWeather.isNight ? '#6688cc' : '#ffcc66' }}>
-              {currentWeather.isNight ? 'Night' : 'Day'} | Particles: {currentWeather.particles === 'none' ? 'None' : currentWeather.particles}
-            </span>
-          </>
-        )}
+        Drag to rotate, Scroll to zoom, Right-drag to pan
       </div>
     </div>
   );
