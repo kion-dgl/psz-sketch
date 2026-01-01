@@ -1,7 +1,7 @@
 import { useGLTF } from '@react-three/drei';
-import { RigidBody, TrimeshCollider } from '@react-three/rapier';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { useCollision } from '../../collision';
 
 interface TextureConfig {
   name: string;
@@ -100,18 +100,16 @@ export default function WarpEnvironment() {
   );
 }
 
-// Separate ground plane component that goes inside Physics
+// Separate ground plane component
 export function WarpGroundPlane() {
+  const { setFloorMesh } = useCollision();
+  const meshRef = useRef<THREE.Mesh>(null);
   const [collisionHull, setCollisionHull] = useState<any>(null);
 
   useEffect(() => {
     fetch('/stages/city_e/s00e_sa3/lndmd/s00e_sa3_m-collision-hull.json')
       .then(response => response.json())
       .then(data => {
-        // console.log('[Collision Hull] Loaded:', data);
-        // console.log('[Collision Hull] Vertices count:', data.vertices.length / 3);
-        // console.log('[Collision Hull] Indices count:', data.indices.length);
-        // console.log('[Collision Hull] Triangle count:', data.triangleCount);
         setCollisionHull(data);
       })
       .catch(error => console.error('Failed to load collision hull:', error));
@@ -124,52 +122,27 @@ export function WarpGroundPlane() {
     geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(collisionHull.vertices), 3));
     geo.setIndex(new THREE.BufferAttribute(new Uint32Array(collisionHull.indices), 1));
     geo.computeVertexNormals();
-
-    // console.log('[Geometry] Created with', geo.attributes.position.count, 'vertices');
-    // console.log('[Geometry] Bounding box:', geo.boundingBox);
     geo.computeBoundingBox();
-    // console.log('[Geometry] Computed bounding box:', geo.boundingBox);
-
-    // Check for vertices at Y=0 or near Y=0
-    const vertices = collisionHull.vertices;
-    let y0Count = 0;
-    for (let i = 0; i < vertices.length; i += 3) {
-      const y = vertices[i + 1];
-      if (Math.abs(y) < 0.1) { // Y is at or near 0
-        // const x = vertices[i];
-        // const z = vertices[i + 2];
-        // console.log(`Vertex at Y≈0: (${x.toFixed(2)}, ${y.toFixed(4)}, ${z.toFixed(2)})`);
-        y0Count++;
-      }
-    }
-    // console.log(`[Geometry] Found ${y0Count} vertices at Y≈0`);
 
     return geo;
   }, [collisionHull]);
+
+  // Register floor mesh with collision system
+  useEffect(() => {
+    if (meshRef.current && geometry) {
+      const unregister = setFloorMesh('warp-ground', meshRef.current);
+      return unregister;
+    }
+  }, [geometry, setFloorMesh]);
 
   if (!collisionHull || !geometry) {
     return null;
   }
 
   return (
-    <RigidBody
-      type="fixed"
-      position={[0, 0, 0]}
-      collisionGroups={0x00030003}
-      userData={{ type: 'ground' }}
-      onCollisionEnter={(event) => {
-        // console.log('=== Ground Collision ===');
-        // console.log('Something hit the ground hull!');
-      }}
-    >
-      {/* Trimesh collider using the collision hull data */}
-      <TrimeshCollider
-        args={[
-          new Float32Array(collisionHull.vertices),
-          new Uint32Array(collisionHull.indices)
-        ]}
-      />
-    </RigidBody>
+    <mesh ref={meshRef} geometry={geometry} visible={false}>
+      <meshBasicMaterial />
+    </mesh>
   );
 }
 

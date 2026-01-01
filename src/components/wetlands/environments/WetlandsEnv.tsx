@@ -1,7 +1,7 @@
 import { useGLTF } from '@react-three/drei';
-import { RigidBody, TrimeshCollider } from '@react-three/rapier';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { useCollision } from '../../../collision';
 
 // Texture fix settings - keyed by texture image filename
 const TEXTURE_FIXES: Record<string, { repeatX: number; repeatY: number; offsetX: number; offsetY: number }> = {
@@ -24,6 +24,8 @@ function getWetlandsDir(mapId: string): string {
 }
 
 export function WetlandsFloorCollision({ mapId, showVisual = false }: { mapId: string; showVisual?: boolean }) {
+  const { setFloorMesh } = useCollision();
+  const meshRef = useRef<THREE.Mesh>(null);
   const wetlandsDir = getWetlandsDir(mapId);
   const glbPath = `/${wetlandsDir}/${mapId}/lndmd/${mapId}_m.glb`;
   const { scene } = useGLTF(glbPath);
@@ -98,17 +100,26 @@ export function WetlandsFloorCollision({ mapId, showVisual = false }: { mapId: s
     return null;
   }, [scene]);
 
+  // Register floor mesh with collision system when geometry is ready
+  useEffect(() => {
+    if (meshRef.current && floorGeometry) {
+      const unregister = setFloorMesh(`wetlands-floor-${mapId}`, meshRef.current);
+      return unregister;
+    }
+  }, [floorGeometry, mapId, setFloorMesh]);
+
   if (!floorGeometry) return null;
 
   return (
     <>
-      {/* Physics collision */}
-      <RigidBody type="fixed" collisionGroups={0x00030003}>
-        <TrimeshCollider args={[
-          floorGeometry.attributes.position.array as Float32Array,
-          new Uint32Array(Array.from({ length: floorGeometry.attributes.position.count }, (_, i) => i))
-        ]} />
-      </RigidBody>
+      {/* Invisible collision mesh */}
+      <mesh
+        ref={meshRef}
+        geometry={floorGeometry}
+        visible={false}
+      >
+        <meshBasicMaterial />
+      </mesh>
 
       {/* Visual representation (optional) */}
       {showVisual && (

@@ -1,6 +1,6 @@
-import { RigidBody, CuboidCollider } from '@react-three/rapier';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { useCollision } from '../../collision';
 
 interface MapTriggerProps {
   position: [number, number, number];
@@ -23,57 +23,66 @@ export default function MapTrigger({
   spawnRotation,
   label
 }: MapTriggerProps) {
+  const { registerTrigger } = useCollision();
   const [isPlayerInside, setIsPlayerInside] = useState(false);
-  const [hasTriggered, setHasTriggered] = useState(false);
+  const hasTriggeredRef = useRef(false);
 
-  const handleIntersectionEnter = () => {
-    setIsPlayerInside(true);
-    if (!hasTriggered) {
-      setHasTriggered(true);
-      console.log(`[MapTrigger] Transitioning to ${targetUrl || targetMap}`);
+  // Generate unique ID for this trigger
+  const triggerId = useRef(`map-trigger-${position.join('-')}-${Date.now()}`);
 
-      // Build URL with spawn parameters
-      let url = targetUrl || `/stage/valley-${targetMap}`;
-      const params = new URLSearchParams();
+  useEffect(() => {
+    // Calculate rotated bounds
+    // For simplicity, we'll use the axis-aligned bounding box
+    // More accurate would be to use an OBB, but Box3 is sufficient for most cases
+    const center = new THREE.Vector3(position[0], position[1], position[2]);
+    const sizeVec = new THREE.Vector3(size[0], size[1], size[2]);
+    const bounds = new THREE.Box3().setFromCenterAndSize(center, sizeVec);
 
-      if (spawnPosition) {
-        params.set('x', spawnPosition[0].toString());
-        params.set('y', spawnPosition[1].toString());
-        params.set('z', spawnPosition[2].toString());
+    const handleEnter = () => {
+      setIsPlayerInside(true);
+      if (!hasTriggeredRef.current) {
+        hasTriggeredRef.current = true;
+        console.log(`[MapTrigger] Transitioning to ${targetUrl || targetMap}`);
+
+        // Build URL with spawn parameters
+        let url = targetUrl || `/stage/valley-${targetMap}`;
+        const params = new URLSearchParams();
+
+        if (spawnPosition) {
+          params.set('x', spawnPosition[0].toString());
+          params.set('y', spawnPosition[1].toString());
+          params.set('z', spawnPosition[2].toString());
+        }
+        if (spawnRotation !== undefined) {
+          params.set('r', spawnRotation.toString());
+        }
+
+        const queryString = params.toString();
+        if (queryString) {
+          url += `?${queryString}`;
+        }
+
+        // Navigate to new map
+        window.location.href = url;
       }
-      if (spawnRotation !== undefined) {
-        params.set('r', spawnRotation.toString());
-      }
+    };
 
-      const queryString = params.toString();
-      if (queryString) {
-        url += `?${queryString}`;
-      }
+    const handleExit = () => {
+      setIsPlayerInside(false);
+    };
 
-      // Navigate to new map
-      window.location.href = url;
-    }
-  };
+    const unregister = registerTrigger({
+      id: triggerId.current,
+      bounds,
+      onEnter: handleEnter,
+      onExit: handleExit
+    });
 
-  const handleIntersectionExit = () => {
-    setIsPlayerInside(false);
-  };
+    return unregister;
+  }, [position, size, targetMap, targetUrl, spawnPosition, spawnRotation, registerTrigger]);
 
   return (
     <>
-      {/* Trigger collider (invisible) */}
-      <RigidBody
-        type="fixed"
-        sensor
-        collisionGroups={0x00040004}
-        onIntersectionEnter={handleIntersectionEnter}
-        onIntersectionExit={handleIntersectionExit}
-        position={position}
-        rotation={[0, rotation, 0]}
-      >
-        <CuboidCollider args={[size[0] / 2, size[1] / 2, size[2] / 2]} />
-      </RigidBody>
-
       {/* Visual indicator (optional) */}
       {label && (
         <group position={position} rotation={[0, rotation, 0]}>

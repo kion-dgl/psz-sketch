@@ -1,7 +1,7 @@
 import { useGLTF } from '@react-three/drei';
-import { RigidBody, TrimeshCollider } from '@react-three/rapier';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { useCollision } from '../../collision';
 
 interface TextureConfig {
   name: string;
@@ -98,8 +98,10 @@ export default function UndergroundEnvironment() {
   );
 }
 
-// Ground plane component that goes inside Physics
+// Ground plane component
 export function UndergroundGroundPlane() {
+  const { setFloorMesh } = useCollision();
+  const meshRef = useRef<THREE.Mesh>(null);
   const [collisionHull, setCollisionHull] = useState<any>(null);
 
   useEffect(() => {
@@ -125,42 +127,42 @@ export function UndergroundGroundPlane() {
     return geo;
   }, [collisionHull]);
 
+  // Register floor mesh with collision system
+  useEffect(() => {
+    if (meshRef.current && geometry) {
+      const unregister = setFloorMesh('underground-ground', meshRef.current);
+      return unregister;
+    }
+  }, [geometry, setFloorMesh]);
+
   if (!collisionHull || !geometry) {
     return null;
   }
 
   return (
-    <RigidBody
-      type="fixed"
-      position={[0, 0, 0]}
-      collisionGroups={0x00030003}
-      userData={{ type: 'ground' }}
-    >
-      {/* Trimesh collider using the collision hull data */}
-      <TrimeshCollider
-        args={[
-          new Float32Array(collisionHull.vertices),
-          new Uint32Array(collisionHull.indices)
-        ]}
-      />
-    </RigidBody>
+    <mesh ref={meshRef} geometry={geometry} visible={false}>
+      <meshBasicMaterial />
+    </mesh>
   );
 }
 
 // Debug ground plane at Y=0 for testing
 export function DebugGroundPlane() {
+  const { setFloorMesh } = useCollision();
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  useEffect(() => {
+    if (meshRef.current) {
+      const unregister = setFloorMesh('debug-ground', meshRef.current);
+      return unregister;
+    }
+  }, [setFloorMesh]);
+
   return (
-    <RigidBody
-      type="fixed"
-      position={[0, 0, 0]}
-      collisionGroups={0x00030003}
-      userData={{ type: 'debug-ground' }}
-    >
-      <mesh rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[100, 100]} />
-        <meshStandardMaterial color="orange" transparent opacity={0.3} side={THREE.DoubleSide} />
-      </mesh>
-    </RigidBody>
+    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]}>
+      <planeGeometry args={[100, 100]} />
+      <meshStandardMaterial color="orange" transparent opacity={0.3} side={THREE.DoubleSide} />
+    </mesh>
   );
 }
 

@@ -1,7 +1,7 @@
 import { useGLTF } from '@react-three/drei';
-import { RigidBody, CuboidCollider } from '@react-three/rapier';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
+import { useCollision } from '../../collision';
 
 interface TextureConfig {
   name: string;
@@ -94,17 +94,24 @@ export default function CounterEnvironment() {
   );
 }
 
-// Separate ground plane component that goes inside Physics
+// Separate ground plane component
 export function CounterGroundPlane() {
+  const { setFloorMesh } = useCollision();
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  // Register floor mesh with collision system
+  useEffect(() => {
+    if (meshRef.current) {
+      const unregister = setFloorMesh('counter-ground', meshRef.current);
+      return unregister;
+    }
+  }, [setFloorMesh]);
+
   return (
-    <RigidBody type="fixed" position={[0, -0.5, 0]} collisionGroups={0x00030003} userData={{ type: 'ground' }}>
-      {/* Explicit collider to ensure proper collision group */}
-      <CuboidCollider args={[250, 0.5, 250]} />
-      <mesh receiveShadow>
-        <boxGeometry args={[500, 1, 500]} />
-        <meshStandardMaterial transparent opacity={0} />
-      </mesh>
-    </RigidBody>
+    <mesh ref={meshRef} position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} visible={false}>
+      <planeGeometry args={[500, 500]} />
+      <meshBasicMaterial />
+    </mesh>
   );
 }
 

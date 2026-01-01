@@ -1,8 +1,8 @@
 import { useGLTF } from '@react-three/drei';
-import { RigidBody, TrimeshCollider } from '@react-three/rapier';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { useCollision } from '../../../collision';
 
 // Texture fix settings
 const TEXTURE_FIXES: Record<string, { repeatX: number; repeatY: number; offsetX: number; offsetY: number }> = {
@@ -29,7 +29,9 @@ function getValleyDir(mapId: string): string {
 }
 
 export function ValleyFloorCollision({ mapId, showVisual = false, rotation = 0 }: { mapId: string; showVisual?: boolean; rotation?: number }) {
+  const { setFloorMesh } = useCollision();
   const [floorGeometry, setFloorGeometry] = useState<THREE.BufferGeometry | null>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
 
   useEffect(() => {
     const loader = new GLTFLoader();
@@ -104,21 +106,31 @@ export function ValleyFloorCollision({ mapId, showVisual = false, rotation = 0 }
     });
   }, [mapId]);
 
+  // Register floor mesh with collision system when geometry is ready
+  useEffect(() => {
+    if (meshRef.current && floorGeometry) {
+      const unregister = setFloorMesh(`valley-floor-${mapId}`, meshRef.current);
+      return unregister;
+    }
+  }, [floorGeometry, mapId, setFloorMesh]);
+
   if (!floorGeometry) return null;
 
   return (
     <>
-      {/* Physics collision */}
-      <RigidBody type="fixed" collisionGroups={0x00030003} rotation={[0, rotation, 0]}>
-        <TrimeshCollider args={[
-          floorGeometry.attributes.position.array as Float32Array,
-          new Uint32Array(Array.from({ length: floorGeometry.attributes.position.count }, (_, i) => i))
-        ]} />
-      </RigidBody>
+      {/* Invisible collision mesh */}
+      <mesh
+        ref={meshRef}
+        geometry={floorGeometry}
+        rotation={[0, rotation, 0]}
+        visible={false}
+      >
+        <meshBasicMaterial />
+      </mesh>
 
       {/* Visual representation (optional) */}
       {showVisual && (
-        <mesh geometry={floorGeometry} position={[0, 0.05, 0]}>
+        <mesh geometry={floorGeometry} position={[0, 0.05, 0]} rotation={[0, rotation, 0]}>
           <meshBasicMaterial color="green" wireframe={false} transparent opacity={0.3} side={THREE.DoubleSide} />
         </mesh>
       )}

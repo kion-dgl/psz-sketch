@@ -1,8 +1,8 @@
 import { useGLTF } from '@react-three/drei';
-import { RigidBody, TrimeshCollider } from '@react-three/rapier';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { useCollision } from '../../../collision';
 
 // Texture fix settings
 const TEXTURE_FIXES: Record<string, { repeatX: number; repeatY: number; offsetX: number; offsetY: number }> = {
@@ -14,7 +14,9 @@ const TEXTURE_FIXES: Record<string, { repeatX: number; repeatY: number; offsetX:
   "m_12_diffuse": { repeatX: 1, repeatY: 1, offsetX: 0, offsetY: 1.81 },
 };
 
-export function ValleyFloorCollision() {
+export function ValleyFloorCollision({ showVisual = true }: { showVisual?: boolean }) {
+  const { setFloorMesh } = useCollision();
+  const meshRef = useRef<THREE.Mesh>(null);
   const [floorGeometry, setFloorGeometry] = useState<THREE.BufferGeometry | null>(null);
 
   useEffect(() => {
@@ -89,23 +91,20 @@ export function ValleyFloorCollision() {
     });
   }, []);
 
+  // Register floor mesh with collision system
+  useEffect(() => {
+    if (meshRef.current && floorGeometry) {
+      const unregister = setFloorMesh('valley-ga1-floor', meshRef.current);
+      return unregister;
+    }
+  }, [floorGeometry, setFloorMesh]);
+
   if (!floorGeometry) return null;
 
   return (
-    <>
-      {/* Physics collision */}
-      <RigidBody type="fixed" collisionGroups={0x00030003}>
-        <TrimeshCollider args={[
-          floorGeometry.attributes.position.array as Float32Array,
-          new Uint32Array(Array.from({ length: floorGeometry.attributes.position.count }, (_, i) => i))
-        ]} />
-      </RigidBody>
-
-      {/* Visual representation */}
-      <mesh geometry={floorGeometry} position={[0, 0.05, 0]}>
-        <meshBasicMaterial color="green" wireframe={false} transparent opacity={0.3} side={THREE.DoubleSide} />
-      </mesh>
-    </>
+    <mesh ref={meshRef} geometry={floorGeometry} position={[0, 0.05, 0]} visible={showVisual}>
+      <meshBasicMaterial color="green" wireframe={false} transparent opacity={0.3} side={THREE.DoubleSide} />
+    </mesh>
   );
 }
 
