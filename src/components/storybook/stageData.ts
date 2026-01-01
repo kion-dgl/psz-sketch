@@ -165,22 +165,34 @@ export const FIELD_STAGES: StageField[] = [
     label: 'Eternal Tower',
     prefix: 's08',
     areas: [
-      // Tower has floors 0-7 instead of a/b
-      ...Array.from({ length: 8 }, (_, i) => ({
-        id: String(i),
-        label: `Floor ${i + 1}`,
-        variants: COMMON_VARIANTS.map(v => ({
-          id: `s08${i}_${v.id}`,
-          label: v.label,
-        })),
+      // Floor 0 only has sa0
+      {
+        id: '0',
+        label: 'Floor 1',
+        variants: [{ id: 's080_sa0', label: 'SA0' }],
+      },
+      // Floors 1-6 have ga1, ib1, lb1, sa1
+      ...Array.from({ length: 6 }, (_, i) => ({
+        id: String(i + 1),
+        label: `Floor ${i + 2}`,
+        variants: [
+          { id: `s08${i + 1}_ga1`, label: 'GA1' },
+          { id: `s08${i + 1}_ib1`, label: 'IB1' },
+          { id: `s08${i + 1}_lb1`, label: 'LB1' },
+          { id: `s08${i + 1}_sa1`, label: 'SA1' },
+        ],
       })),
+      // Floor 7 only has na1
+      {
+        id: '7',
+        label: 'Floor 8',
+        variants: [{ id: 's087_na1', label: 'NA1' }],
+      },
+      // Boss floor only has ib1
       {
         id: 'e',
         label: 'Boss Floor',
-        variants: E_VARIANTS.map(v => ({
-          id: `s08e_${v.id}`,
-          label: v.label,
-        })),
+        variants: [{ id: 's08e_ib1', label: 'IB1' }],
       },
     ],
     envComponent: 'TowerEnv',
