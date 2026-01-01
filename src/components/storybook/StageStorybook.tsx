@@ -66,14 +66,26 @@ function WeatherParticles({ weather }: { weather: WeatherOption }) {
 }
 
 function WeatherLighting({ weather }: { weather: WeatherOption }) {
+  // Fog color blends with the ambient for atmospheric effect
+  const fogColor = weather.isNight ? '#0a0a15' : '#d4c4a8';
+  const fogNear = weather.isNight ? 30 : 50;
+  const fogFar = weather.isNight ? 80 : 150;
+
   return (
     <>
+      <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
       <ambientLight color={weather.ambientColor} intensity={weather.ambientIntensity} />
       <directionalLight
         position={[10, 20, 10]}
         color={weather.directionalColor}
         intensity={weather.directionalIntensity}
         castShadow
+      />
+      {/* Hemisphere light for more natural outdoor lighting */}
+      <hemisphereLight
+        color={weather.directionalColor}
+        groundColor={weather.ambientColor}
+        intensity={weather.ambientIntensity * 0.5}
       />
     </>
   );
@@ -322,6 +334,9 @@ export default function StageStorybook() {
         {/* 3D Canvas */}
         <div style={{ flex: 1 }}>
           <Canvas shadows>
+            {/* Dynamic background color based on weather */}
+            <color attach="background" args={[isCity ? '#1a1a2e' : (currentWeather.isNight ? '#0a0a15' : '#87CEEB')]} />
+
             <PerspectiveCamera makeDefault position={[0, 10, 20]} />
             <OrbitControls
               enablePan={true}
@@ -347,8 +362,8 @@ export default function StageStorybook() {
               )}
             </Suspense>
 
-            {/* Grid helper */}
-            <gridHelper args={[100, 100, '#444', '#222']} />
+            {/* Grid helper - hide at night for better atmosphere */}
+            {!currentWeather.isNight && <gridHelper args={[100, 100, '#444', '#222']} />}
           </Canvas>
         </div>
 
