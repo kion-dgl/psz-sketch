@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import StageStorybook from '../../components/storybook/StageStorybook';
+
+export const prerender = false;
+---
+
+<Layout title="Stage Storybook - PSZ Sketch">
+  <StageStorybook client:only="react" />
+</Layout>

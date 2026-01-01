@@ -1,0 +1,56 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Storybook - PSZ Sketch">
+  <div style="min-height: 100vh; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 2rem;">
+    <div style="max-width: 800px; margin: 0 auto;">
+      <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Storybook</h1>
+      <p style="color: #888; margin-bottom: 2rem;">Preview and test game components</p>
+
+      <div style="display: grid; gap: 1rem;">
+        <!-- Stages -->
+        <a href="/storybook/stages" style="display: block; padding: 1.5rem; background: rgba(255,255,255,0.05); border-radius: 8px; text-decoration: none; color: white; border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s;">
+          <h2 style="margin: 0 0 0.5rem 0; font-size: 1.3rem;">Stages</h2>
+          <p style="margin: 0; color: #888; font-size: 0.9rem;">
+            Preview all field stages (Valley, Wetlands, Snowfield, etc.) and city areas.
+            Select field, area, and variant to load different maps.
+          </p>
+        </a>
+
+        <!-- Elements -->
+        <a href="/storybook/elements" style="display: block; padding: 1.5rem; background: rgba(255,255,255,0.05); border-radius: 8px; text-decoration: none; color: white; border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s;">
+          <h2 style="margin: 0 0 0.5rem 0; font-size: 1.3rem;">Elements</h2>
+          <p style="margin: 0; color: #888; font-size: 0.9rem;">
+            Interactive gallery of game objects: Box, Gate, Switch, Fence, Key, Warp, etc.
+          </p>
+        </a>
+
+        <!-- Tags (placeholder) -->
+        <div style="display: block; padding: 1.5rem; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); opacity: 0.6;">
+          <h2 style="margin: 0 0 0.5rem 0; font-size: 1.3rem;">Tags (Coming Soon)</h2>
+          <p style="margin: 0; color: #888; font-size: 0.9rem;">
+            R3F Tag components with automatic collision registration.
+          </p>
+        </div>
+      </div>
+
+      <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);">
+        <h3 style="font-size: 1rem; color: #888; margin-bottom: 1rem;">Quick Links</h3>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <a href="/stage/warp" style="color: #6b8afd; text-decoration: none;">Warp Area</a>
+          <a href="/stage/city" style="color: #6b8afd; text-decoration: none;">City Market</a>
+          <a href="/grid" style="color: #6b8afd; text-decoration: none;">Mission Grid</a>
+          <a href="/preview-mission" style="color: #6b8afd; text-decoration: none;">Mission Preview</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  a:hover {
+    background: rgba(255,255,255,0.08) !important;
+    border-color: rgba(255,255,255,0.2) !important;
+  }
+</style>
