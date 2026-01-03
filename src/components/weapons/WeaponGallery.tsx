@@ -183,16 +183,38 @@ export default function WeaponGallery() {
   const selectedWeaponRarity = selectedWeapon ? getWeaponRarity(selectedWeapon) : null;
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#0a0a12', color: 'white' }}>
-      {/* Left Sidebar - Categories */}
+    <div
+      style={{
+        minHeight: '100vh',
+        background: '#0a0a12',
+        color: 'white',
+        display: 'flex',
+        justifyContent: 'center',
+        padding: '16px',
+        boxSizing: 'border-box',
+      }}
+    >
       <div
         style={{
-          width: '200px',
-          borderRight: '1px solid #333',
-          padding: '16px',
-          overflowY: 'auto',
+          display: 'flex',
+          width: '100%',
+          maxWidth: '1400px',
+          height: 'calc(100vh - 32px)',
+          border: '1px solid #333',
+          borderRadius: '8px',
+          overflow: 'hidden',
         }}
       >
+        {/* Left Sidebar - Categories */}
+        <div
+          style={{
+            width: '200px',
+            flexShrink: 0,
+            borderRight: '1px solid #333',
+            padding: '16px',
+            overflowY: 'auto',
+          }}
+        >
         <h2 style={{ margin: '0 0 16px 0', fontSize: '16px', color: '#4a9eff' }}>Categories</h2>
 
         <button
@@ -373,6 +395,7 @@ export default function WeaponGallery() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );
