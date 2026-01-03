@@ -81,10 +81,11 @@ export function getWeaponGlbPath(weaponId: string, variant: string): string {
 
 /**
  * Get texture path for a weapon variant
+ * Textures are stored in: /weapons/{id}/{id}/{variant}/{variant}.png
  */
 export function getWeaponTexturePath(weaponId: string, variant: string): string {
   const id = weaponId.toLowerCase();
-  return `/weapons/${id}/${id}/${variant}.png`;
+  return `/weapons/${id}/${id}/${variant}/${variant}.png`;
 }
 
 /**

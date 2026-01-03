@@ -1,0 +1,186 @@
+{
+  "swords": {
+    "category": "sword",
+    "wikiUrl": "https://phantasystar.fandom.com/wiki/Swords_(Phantasy_Star_Zero)",
+    "weapons": [
+      {
+        "name": "Sword",
+        "rarity": 1,
+        "level": 1,
+        "modelId": "wswh01",
+        "variantId": "wswh01_1_b",
+        "notes": "black center"
+      },
+      {
+        "name": "Chrome Sword",
+        "rarity": 3,
+        "level": 5,
+        "modelId": "wswh01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wswh01_1_b",
+        "notes": "gray center - missing texture"
+      },
+      {
+        "name": "Ein Calibur",
+        "rarity": 2,
+        "level": 2,
+        "modelId": "wswc01",
+        "variantId": "wswc01_1_b",
+        "notes": "orange tip"
+      },
+      {
+        "name": "Deo Calibur",
+        "rarity": 4,
+        "level": 12,
+        "modelId": "wswc01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wswc01_1_b",
+        "notes": "purple tip - missing texture"
+      },
+      {
+        "name": "Claymore",
+        "rarity": 2,
+        "level": 2,
+        "modelId": "wswn01",
+        "variantId": "wswn01_1_b"
+      },
+      {
+        "name": "Ray Claymore",
+        "rarity": 3,
+        "level": 5,
+        "modelId": "wswn01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wswn01_1_b",
+        "notes": "missing texture"
+      },
+      {
+        "name": "Jamshid",
+        "rarity": 4,
+        "level": 12,
+        "modelId": "wswh01",
+        "variantId": "wswh01_3_b"
+      },
+      {
+        "name": "Zahhak",
+        "rarity": 6,
+        "level": 32,
+        "modelId": "wswh01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wswh01_3_b",
+        "notes": "missing texture"
+      },
+      {
+        "name": "Eghesachs",
+        "rarity": 4,
+        "level": 15,
+        "modelId": "wswr01",
+        "variantId": "wswr01_1_b"
+      },
+      {
+        "name": "Gale Bringer",
+        "rarity": 6,
+        "level": 38,
+        "modelId": "wswr01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wswr01_1_b",
+        "notes": "missing texture"
+      },
+      {
+        "name": "Askalon",
+        "rarity": 5,
+        "level": 20,
+        "modelId": "wswc01",
+        "variantId": "wswc01_3_b",
+        "notes": "pink edge"
+      },
+      {
+        "name": "Ainsraiffe",
+        "rarity": 7,
+        "level": 54,
+        "modelId": "wswc01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wswc01_3_b",
+        "notes": "orange edge - missing texture"
+      },
+      {
+        "name": "Ka Vorg",
+        "rarity": 5,
+        "level": 24,
+        "modelId": "wswn01",
+        "variantId": "wswn01_3_b"
+      },
+      {
+        "name": "Klau Solas",
+        "rarity": 6,
+        "level": 36,
+        "modelId": "wswn01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wswn01_3_b",
+        "notes": "missing texture"
+      },
+      {
+        "name": "Yonohate Fu",
+        "rarity": 5,
+        "level": 30,
+        "modelId": "wswr02",
+        "variantId": "wswr02_1_b"
+      },
+      {
+        "name": "Akatsuki Fu",
+        "rarity": 5,
+        "level": 30,
+        "modelId": "wswr02",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wswr02_1_b",
+        "notes": "missing texture"
+      },
+      {
+        "name": "Akatsuki In",
+        "rarity": 7,
+        "level": 80,
+        "modelId": "wswr03",
+        "variantId": "wswr03_1_b"
+      },
+      {
+        "name": "Yonohate In",
+        "rarity": 7,
+        "level": 80,
+        "modelId": "wswr03",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wswr03_1_b",
+        "notes": "missing texture"
+      },
+      {
+        "name": "Milias Sword",
+        "rarity": 6,
+        "level": 42,
+        "modelId": "wswr04",
+        "variantId": "wswr04_1_b"
+      },
+      {
+        "name": "Milias Breaker",
+        "rarity": 7,
+        "level": 58,
+        "modelId": "wswr04",
+        "variantId": "wswr04_2_b",
+        "notes": "texture broken, identified by shape"
+      },
+      {
+        "name": "Hocho",
+        "rarity": 5,
+        "level": 20,
+        "modelId": "wswr05",
+        "variantId": "wswr05_1_b"
+      }
+    ]
+  }
+}
