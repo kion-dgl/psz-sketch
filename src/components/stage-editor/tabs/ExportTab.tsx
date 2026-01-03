@@ -1078,10 +1078,92 @@ export default function ExportTab({ config, stageScene, mapId }: ExportTabProps)
         />
       </div>
 
+      {/* GLB Structure Documentation */}
+      <div
+        style={{
+          padding: '12px',
+          background: '#1a1a2e',
+          borderRadius: '4px',
+          fontSize: '11px',
+          color: '#ccc',
+        }}
+      >
+        <h4 style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#4a9eff' }}>
+          GLB Structure
+        </h4>
+
+        <div style={{ marginBottom: '12px' }}>
+          <div style={{ color: '#888', marginBottom: '4px' }}>Components:</div>
+          <pre style={{ margin: 0, fontSize: '10px', color: '#aaa', lineHeight: '1.6' }}>
+{`terrain_visual     - Stage mesh with Lambert materials
+collision_floor    - Walkable floor triangles
+collision_obstacles - Blocking volumes (boxes/cylinders)
+portals/
+  gate_*           - Gate position + dimensions
+  spawn_*          - Player spawn point + direction
+  trigger_*        - Warp trigger zone`}
+          </pre>
+        </div>
+
+        <div style={{ marginBottom: '12px' }}>
+          <div style={{ color: '#888', marginBottom: '4px' }}>Loading in Three.js:</div>
+          <pre style={{ margin: 0, fontSize: '10px', color: '#aaa', lineHeight: '1.6', overflowX: 'auto' }}>
+{`const { scene } = useGLTF('/path/to/stage.glb');
+
+// Visual mesh (has Lambert materials)
+const terrain = scene.getObjectByName('terrain_visual');
+
+// Floor collision mesh
+const floor = scene.getObjectByName('collision_floor');
+
+// Obstacles group
+const obstacles = scene.getObjectByName('collision_obstacles');
+
+// Find all gates
+const gates = [];
+scene.traverse((obj) => {
+  if (obj.name.startsWith('gate_')) gates.push(obj);
+});
+
+// Find all spawns
+const spawns = [];
+scene.traverse((obj) => {
+  if (obj.name.startsWith('spawn_')) spawns.push(obj);
+});
+
+// Find all triggers
+const triggers = [];
+scene.traverse((obj) => {
+  if (obj.name.startsWith('trigger_')) triggers.push(obj);
+});`}
+          </pre>
+        </div>
+
+        <div style={{ marginBottom: '12px' }}>
+          <div style={{ color: '#888', marginBottom: '4px' }}>Marker Dimensions:</div>
+          <pre style={{ margin: 0, fontSize: '10px', color: '#aaa', lineHeight: '1.6' }}>
+{`gate_*     - Box: 6.0w × 1.5h × 0.2d
+spawn_*    - Sphere r=0.8, Ring r=1.0-1.3
+trigger_*  - Box: 6.0w × 3.0h × 2.0d`}
+          </pre>
+        </div>
+
+        <div>
+          <div style={{ color: '#888', marginBottom: '4px' }}>Position Layout:</div>
+          <pre style={{ margin: 0, fontSize: '10px', color: '#aaa', lineHeight: '1.6' }}>
+{`Outside ←──────────────────────→ Inside
+         trigger (7u)  spawn (3u)  gate
+              ↑           ↑         ↑
+         player      player    visual
+         enters      spawns     gate`}
+          </pre>
+        </div>
+      </div>
+
       {/* Instructions */}
       <div style={{ fontSize: '11px', color: '#666', marginTop: '8px' }}>
         <p style={{ margin: '4px 0' }}>• GLB includes visual mesh, collision, and markers</p>
-        <p style={{ margin: '4px 0' }}>• Lambert materials may improve lighting in-game</p>
+        <p style={{ margin: '4px 0' }}>• Lambert materials respond to scene lighting</p>
         <p style={{ margin: '4px 0' }}>• SVG minimap shows floor outline and gate positions</p>
         <p style={{ margin: '4px 0' }}>• Config JSON saves all editor settings</p>
       </div>
