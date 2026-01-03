@@ -232,7 +232,6 @@ export default function StageStorybook() {
   const isCity = category === 'city';
   const currentField = FIELD_STAGES.find(f => f.id === category);
   const currentArea = currentField?.areas.find(a => a.id === areaId);
-  const currentCityArea = CITY_AREAS.find(c => c.id === areaId);
 
   // Available areas for current category
   const availableAreas = useMemo(() => {

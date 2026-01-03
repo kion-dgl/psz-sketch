@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { STAGE_AREAS, getAllMapsForArea } from '../constants';
 
 interface StageSelectorProps {

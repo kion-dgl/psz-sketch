@@ -140,8 +140,6 @@ export default function PlayerCharacter({
       // No floor at intended position - block movement
       intendedX = position.current.x;
       intendedZ = position.current.z;
-      velocityX = 0;
-      velocityZ = 0;
     } else {
       // Check wall collision and apply slide
       const resolved = resolveWallCollision(

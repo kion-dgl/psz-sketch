@@ -1,6 +1,6 @@
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Grid } from '@react-three/drei';
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 

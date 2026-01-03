@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo, useCallback } from 'react';
+import { useRef, useMemo, useCallback } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -27,7 +27,7 @@ const GATE_WIDTH = 6.0;
 
 // Compute spawn and trigger positions from gate position and direction
 function computeMarkerPositions(position: [number, number, number], direction: GateDirection) {
-  const [x, y, z] = position;
+  const [x, , z] = position;
   const rotation = DIRECTION_ROTATIONS[direction];
   const cos = Math.cos(rotation);
   const sin = Math.sin(rotation);

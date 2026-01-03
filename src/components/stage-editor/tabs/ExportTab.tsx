@@ -3,9 +3,9 @@ import * as THREE from 'three';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import JSZip from 'jszip';
-import type { UnifiedStageConfig, FloorTriangle, PortalData, GateDirection } from '../types';
+import type { UnifiedStageConfig, FloorTriangle, PortalData } from '../types';
 import { STAGE_AREAS, getGlbPath, getAreaFromMapId } from '../constants';
-import { createDefaultConfig, DIRECTION_ROTATIONS } from '../types';
+import { DIRECTION_ROTATIONS } from '../types';
 
 // Helper to compute spawn and trigger positions from portal position and direction
 // Matches PortalEditor's calculatePortalPositions offsets
@@ -15,7 +15,7 @@ function computePortalPositions(portal: PortalData): {
   trigger: [number, number, number];
   rotation: number;
 } {
-  const [x, y, z] = portal.position;
+  const [x, , z] = portal.position;
   const rotation = DIRECTION_ROTATIONS[portal.direction];
 
   // Match PortalOverlay's offsets:
@@ -161,21 +161,6 @@ function stripSkinningData(scene: THREE.Object3D) {
       }
     }
   });
-}
-
-// Create marker mesh
-function createMarker(
-  name: string,
-  position: [number, number, number],
-  color: number,
-  size: number = 0.3
-): THREE.Mesh {
-  const geometry = new THREE.SphereGeometry(size);
-  const material = new THREE.MeshBasicMaterial({ color });
-  const marker = new THREE.Mesh(geometry, material);
-  marker.name = name;
-  marker.position.set(...position);
-  return marker;
 }
 
 // Create gate marker (box shape matching gate dimensions)
@@ -388,17 +373,6 @@ function loadAllConfigs(): Record<string, UnifiedStageConfig> {
   } catch {
     return {};
   }
-}
-
-// Get all map IDs across all areas
-function getAllMapIds(): string[] {
-  const mapIds: string[] = [];
-  for (const area of Object.values(STAGE_AREAS)) {
-    for (const maps of Object.values(area.maps)) {
-      mapIds.push(...maps);
-    }
-  }
-  return mapIds;
 }
 
 // Build export scene from loaded GLB and config

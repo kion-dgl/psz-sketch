@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import type { UnifiedStageConfig, PortalData, GateDirection, PreviewModel } from '../types';
 import { DIRECTION_ROTATIONS } from '../types';
 
@@ -18,10 +17,6 @@ interface PortalTabProps {
 
 const DIRECTIONS: GateDirection[] = ['north', 'south', 'east', 'west'];
 const PREVIEW_MODELS: PreviewModel[] = ['Gate', 'AreaWarp'];
-
-function generatePortalId(): string {
-  return `portal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}
 
 export default function PortalTab({
   config,

@@ -1,6 +1,5 @@
 import { useMemo, useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
-import * as THREE from 'three';
 import type { GateProps, BarrierState } from './types';
 import { useWallCollision } from './useTagCollision';
 import { useStage } from './StageContext';

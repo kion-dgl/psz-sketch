@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import type { UnifiedStageConfig, FloorTriangle, SvgSettings } from '../types';
 import { DEFAULT_SVG_SETTINGS } from '../types';
 

@@ -146,20 +146,6 @@ export default function FloorCollisionTab({
     }));
   };
 
-  // Toggle triangle inclusion
-  const toggleTriangle = (id: string) => {
-    updateConfig((prev) => ({
-      ...prev,
-      floorCollision: {
-        ...prev.floorCollision,
-        triangles: {
-          ...prev.floorCollision.triangles,
-          [id]: !(prev.floorCollision.triangles[id] !== false),
-        },
-      },
-    }));
-  };
-
   // Toggle all triangles for a mesh
   const toggleMesh = (meshName: string, include: boolean) => {
     const meshTriangles = triangles.filter((t) => t.meshName === meshName);

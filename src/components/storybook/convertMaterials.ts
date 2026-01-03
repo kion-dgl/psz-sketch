@@ -21,12 +21,6 @@ export interface MaterialConversionOptions {
   envMapIntensity?: number;
 }
 
-const defaultOptions: MaterialConversionOptions = {
-  roughness: 0.85,
-  metalness: 0.0,
-  envMapIntensity: 0.3,
-};
-
 /**
  * EXPERIMENTAL: Convert MeshBasicMaterial to MeshLambertMaterial
  * WARNING: This currently causes black textures and is not used.

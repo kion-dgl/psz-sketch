@@ -43,8 +43,8 @@ export default function Box({
   // Final state
   const state: ContainerState = propState ?? (destroyed || isDestroyedByStage ? 'destroyed' : 'intact');
 
-  // Handle destruction
-  const handleDestroy = useCallback(() => {
+  // Handle destruction (called by combat system when box is attacked)
+  const _handleDestroy = useCallback(() => {
     if (destroyed) return;
 
     setDestroyed(true);
@@ -69,8 +69,8 @@ export default function Box({
       enabled: collisionEnabled && state === 'intact',
       onEnter: () => {
         // Attack detection would trigger this
-        // For now, trigger on entry (testing)
-        // In real game, combat system would call handleDestroy
+        // Combat system should call _handleDestroy when attack lands
+        void _handleDestroy; // Reference to suppress unused warning
       },
     }
   );
