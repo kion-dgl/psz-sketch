@@ -185,6 +185,7 @@ export default function WeaponGallery() {
   return (
     <div
       style={{
+        width: '100%',
         minHeight: '100vh',
         background: '#0a0a12',
         color: 'white',
@@ -197,8 +198,8 @@ export default function WeaponGallery() {
       <div
         style={{
           display: 'flex',
-          width: '100%',
           maxWidth: '1400px',
+          width: 'calc(100% - 32px)',
           height: 'calc(100vh - 32px)',
           border: '1px solid #333',
           borderRadius: '8px',
