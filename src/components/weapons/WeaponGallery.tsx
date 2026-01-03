@@ -59,10 +59,13 @@ interface WeaponNameInfo {
 // Material mode options
 type MaterialMode = 'textured' | 'normal' | 'wireframe';
 
+// Side rendering options
+type SideMode = 'front' | 'back' | 'double';
+
 // Material settings
 interface MaterialSettings {
   materialMode: MaterialMode;
-  doubleSided: boolean;
+  sideMode: SideMode;
   wrapS: THREE.Wrapping;
   wrapT: THREE.Wrapping;
   offsetX: number;
@@ -73,13 +76,20 @@ interface MaterialSettings {
 
 const DEFAULT_MATERIAL_SETTINGS: MaterialSettings = {
   materialMode: 'textured',
-  doubleSided: true,
+  sideMode: 'double',
   wrapS: THREE.RepeatWrapping,
   wrapT: THREE.RepeatWrapping,
   offsetX: 0,
   offsetY: 0,
   repeatX: 1,
   repeatY: 1,
+};
+
+// Map side mode to THREE.Side
+const SIDE_MAP: Record<SideMode, THREE.Side> = {
+  front: THREE.FrontSide,
+  back: THREE.BackSide,
+  double: THREE.DoubleSide,
 };
 
 // Weapon 3D Preview Component
@@ -116,7 +126,7 @@ function WeaponModel({
   useEffect(() => {
     clonedScene.traverse((obj) => {
       if (obj instanceof THREE.Mesh) {
-        const side = settings.doubleSided ? THREE.DoubleSide : THREE.FrontSide;
+        const side = SIDE_MAP[settings.sideMode];
 
         if (settings.materialMode === 'normal') {
           obj.material = new THREE.MeshNormalMaterial({
@@ -679,11 +689,36 @@ export default function WeaponGallery() {
             Wireframe
           </label>
 
+          <h3 style={{ margin: '12px 0 8px 0', fontSize: '12px', color: '#4a9eff' }}>
+            Face Culling
+          </h3>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', fontSize: '11px', cursor: 'pointer' }}>
+            <input
+              type="radio"
+              name="sideMode"
+              checked={materialSettings.sideMode === 'front'}
+              onChange={() => updateSetting('sideMode', 'front')}
+            />
+            Front Side
+          </label>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', fontSize: '11px', cursor: 'pointer' }}>
+            <input
+              type="radio"
+              name="sideMode"
+              checked={materialSettings.sideMode === 'back'}
+              onChange={() => updateSetting('sideMode', 'back')}
+            />
+            Back Side
+          </label>
+
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', cursor: 'pointer' }}>
             <input
-              type="checkbox"
-              checked={materialSettings.doubleSided}
-              onChange={(e) => updateSetting('doubleSided', e.target.checked)}
+              type="radio"
+              name="sideMode"
+              checked={materialSettings.sideMode === 'double'}
+              onChange={() => updateSetting('sideMode', 'double')}
             />
             Double Sided
           </label>
@@ -847,7 +882,7 @@ export default function WeaponGallery() {
           </button>
         </div>
 
-        {/* Texture Preview - Show all variant textures */}
+        {/* Texture Preview - Show all variant textures + potential extras */}
         {selectedVariant && selectedWeaponInfo && (
           <div style={{ padding: '12px' }}>
             <h3 style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#4a9eff' }}>

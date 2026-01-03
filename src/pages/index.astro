@@ -45,7 +45,7 @@ const sections = [
 ---
 
 <Layout title="PSZ Sketch - Home">
-  <div class="container">
+  <div class="page-wrapper">
     <h1>PSZ Sketch</h1>
     <p class="subtitle">Development Hub</p>
 
@@ -68,16 +68,20 @@ const sections = [
 <style is:global>
   body {
     overflow: auto !important;
+    background: #1a1a2e;
   }
 </style>
 
 <style>
-  .container {
+  .page-wrapper {
+    margin: 0;
+    width: 100vw;
     min-height: 100vh;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     color: white;
     font-family: 'Segoe UI', system-ui, sans-serif;
     padding: 2rem;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
