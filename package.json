@@ -23,6 +23,7 @@
     "daisyui": "^5.5.8",
     "ioredis": "^5.8.2",
     "jsonwebtoken": "^9.0.2",
+    "jszip": "^3.10.1",
     "localforage": "^1.10.0",
     "mermaid": "^11.12.1",
     "mongodb": "^7.0.0",

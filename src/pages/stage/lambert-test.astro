@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import LambertTestScene from '../../components/test/LambertTestScene';
+
+export const prerender = false;
+---
+
+<Layout title="Lambert Material Test - Stage Editor">
+  <LambertTestScene client:load />
+</Layout>

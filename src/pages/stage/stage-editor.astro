@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import UnifiedStageEditor from '../../components/stage-editor/UnifiedStageEditor';
+
+export const prerender = false;
+---
+
+<Layout title="Stage Editor - PSZ">
+  <UnifiedStageEditor client:load />
+</Layout>

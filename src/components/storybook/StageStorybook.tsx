@@ -66,7 +66,7 @@ function WeatherParticles({ weather }: { weather: WeatherOption }) {
 }
 
 function WeatherLighting({ weather }: { weather: WeatherOption }) {
-  // Fog color blends with the ambient for atmospheric effect
+  // Fog color and density vary by time of day
   const fogColor = weather.isNight ? '#0a0a15' : '#d4c4a8';
   const fogNear = weather.isNight ? 30 : 50;
   const fogFar = weather.isNight ? 80 : 150;
@@ -74,18 +74,14 @@ function WeatherLighting({ weather }: { weather: WeatherOption }) {
   return (
     <>
       <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
+      {/* Ambient light provides base illumination - affects scene atmosphere */}
       <ambientLight color={weather.ambientColor} intensity={weather.ambientIntensity} />
+      {/* Directional light for sun/moon shadows */}
       <directionalLight
         position={[10, 20, 10]}
         color={weather.directionalColor}
         intensity={weather.directionalIntensity}
         castShadow
-      />
-      {/* Hemisphere light for more natural outdoor lighting */}
-      <hemisphereLight
-        color={weather.directionalColor}
-        groundColor={weather.ambientColor}
-        intensity={weather.ambientIntensity * 0.5}
       />
     </>
   );
