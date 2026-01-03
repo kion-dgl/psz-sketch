@@ -1,7 +1,7 @@
 import { useGLTF } from '@react-three/drei';
-import { RigidBody } from '@react-three/rapier';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { useCollision } from '../../../collision';
 
 // Texture fix settings
 const TEXTURE_FIXES: Record<string, { repeatX: number; repeatY: number; offsetX: number; offsetY: number }> = {
@@ -62,13 +62,21 @@ export default function ValleyEnvA_GA1() {
 
 // Debug ground plane at Y=0 for testing collision
 export function DebugGroundPlane() {
+  const { setFloorMesh } = useCollision();
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  useEffect(() => {
+    if (meshRef.current) {
+      const unregister = setFloorMesh('debug-ground', meshRef.current);
+      return unregister;
+    }
+  }, [setFloorMesh]);
+
   return (
-    <RigidBody type="fixed" position={[0, 0, 0]} collisionGroups={0x00030003} userData={{ type: 'debug-ground' }}>
-      <mesh rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[100, 100]} />
-        <meshStandardMaterial color="orange" transparent opacity={0.3} side={THREE.DoubleSide} />
-      </mesh>
-    </RigidBody>
+    <mesh ref={meshRef} position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <planeGeometry args={[100, 100]} />
+      <meshStandardMaterial color="orange" transparent opacity={0.3} side={THREE.DoubleSide} />
+    </mesh>
   );
 }
 

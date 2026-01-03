@@ -1,5 +1,6 @@
-import { RigidBody, CuboidCollider } from '@react-three/rapier';
-import { useState } from 'react';
+import { useEffect, useRef } from 'react';
+import * as THREE from 'three';
+import { useCollision } from '../../collision';
 
 // Define trigger zones for area transitions
 interface AreaTrigger {
@@ -24,46 +25,50 @@ interface WarpTriggersProps {
 }
 
 export default function WarpTriggers({ visible = true }: WarpTriggersProps) {
-  const [triggeredAreas, setTriggeredAreas] = useState<Set<string>>(new Set());
+  const { registerTrigger } = useCollision();
+  const triggeredRef = useRef<Set<string>>(new Set());
 
-  const handleTriggerEnter = (trigger: AreaTrigger) => {
-    if (triggeredAreas.has(trigger.name)) return;
+  // Register all triggers with collision system
+  useEffect(() => {
+    const unregisters = TRIGGERS.map((trigger) => {
+      const center = new THREE.Vector3(trigger.position[0], trigger.position[1], trigger.position[2]);
+      const size = new THREE.Vector3(trigger.size[0], trigger.size[1], trigger.size[2]);
+      const bounds = new THREE.Box3().setFromCenterAndSize(center, size);
 
-    // Mark as triggered to prevent repeated triggers
-    setTriggeredAreas(prev => new Set(prev).add(trigger.name));
+      return registerTrigger({
+        id: trigger.name,
+        bounds,
+        onEnter: () => {
+          if (triggeredRef.current.has(trigger.name)) return;
+          triggeredRef.current.add(trigger.name);
+          window.location.href = trigger.targetArea;
+        }
+      });
+    });
 
-    // Navigate to the target area
-    window.location.href = trigger.targetArea;
-  };
+    return () => {
+      unregisters.forEach(unregister => unregister());
+    };
+  }, [registerTrigger]);
+
+  // Visual representation (optional, for debugging)
+  if (!visible) return null;
 
   return (
     <>
       {TRIGGERS.map((trigger, index) => (
-        <RigidBody
+        <mesh
           key={index}
-          type="fixed"
           position={trigger.position}
-          sensor
-          collisionGroups={0x00040004}
-          userData={{ type: 'trigger', name: trigger.name }}
-          onIntersectionEnter={() => handleTriggerEnter(trigger)}
         >
-          {/* Explicit collider for sensor detection */}
-          <CuboidCollider args={[trigger.size[0] / 2, trigger.size[1] / 2, trigger.size[2] / 2]} />
-
-          {/* Visual mesh (only visible when visible prop is true) */}
-          {visible && (
-            <mesh>
-              <boxGeometry args={trigger.size} />
-              <meshStandardMaterial
-                color="cyan"
-                transparent
-                opacity={0.5}
-                wireframe
-              />
-            </mesh>
-          )}
-        </RigidBody>
+          <boxGeometry args={trigger.size} />
+          <meshStandardMaterial
+            color="cyan"
+            transparent
+            opacity={0.5}
+            wireframe
+          />
+        </mesh>
       ))}
     </>
   );

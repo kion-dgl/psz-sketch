@@ -1,10 +1,10 @@
 import { Canvas } from '@react-three/fiber';
-import { Physics } from '@react-three/rapier';
 import { Suspense, useState, useEffect, type ReactNode } from 'react';
 import { PerspectiveCamera } from '@react-three/drei';
 import type { Character } from '../../stores/characterStore';
 import { useCharacterStore } from '../../stores/characterStore';
 import { useGameState } from '../../stores/gameStateStore';
+import { CollisionProvider } from '../../collision';
 import PlayerCharacter from '../city/PlayerCharacter';
 import CameraController from './CameraController';
 import HUD from '../ui/HUD';
@@ -350,7 +350,7 @@ export default function GameArea({
         <Suspense fallback={null}>
           {environmentOutsidePhysics}
 
-          <Physics gravity={[0, -9.81, 0]}>
+          <CollisionProvider>
             {renderPhysicsContent?.(renderProps)}
 
             <PlayerCharacter
@@ -361,7 +361,7 @@ export default function GameArea({
               spawnPosition={spawnPosition}
               spawnRotation={finalSpawnRotation}
             />
-          </Physics>
+          </CollisionProvider>
         </Suspense>
       </Canvas>
     </div>

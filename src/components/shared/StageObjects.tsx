@@ -1,9 +1,9 @@
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { RigidBody, CuboidCollider } from '@react-three/rapier';
 import { useMemo, useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
+import { useCollision } from '../../collision';
 
 type GateEdge = 'north' | 'south' | 'east' | 'west';
 type BoxType = 'valley_cont' | 'valley_recont';
@@ -93,6 +93,7 @@ interface GateModelProps extends GateConfig {
 }
 
 function GateModel({ x, z, edge, scale, animated = false, blocked = false, active = true }: GateModelProps) {
+  const { registerWallFromDefinition } = useCollision();
   const { scene } = useGLTF(GATE_MODEL_PATH);
   const rotation = getGateRotation(edge);
   const animationProgress = useRef(0);
@@ -131,6 +132,18 @@ function GateModel({ x, z, edge, scale, animated = false, blocked = false, activ
     });
   }, [active]);
 
+  // Register wall collision when blocked AND active
+  useEffect(() => {
+    if (blocked && active) {
+      const unregister = registerWallFromDefinition({
+        position: [x, GATE_COLLISION.height / 2, z],
+        length: GATE_COLLISION.width,
+        rotation: rotation
+      }, `gate-wall-${x}-${z}`);
+      return unregister;
+    }
+  }, [blocked, active, x, z, rotation, registerWallFromDefinition]);
+
   // Animate the gate mesh
   useFrame((_, delta) => {
     if (!animated || !animatedMeshRef.current) return;
@@ -145,35 +158,11 @@ function GateModel({ x, z, edge, scale, animated = false, blocked = false, activ
     animatedMeshRef.current.position.y = currentY;
   });
 
-  const gateContent = (
+  return (
     <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
       <primitive object={clonedScene} scale={[scale, scale, scale]} />
     </group>
   );
-
-  // If blocked AND active, add collision (when deactivated, no collision)
-  if (blocked && active) {
-    return (
-      <>
-        {gateContent}
-        <RigidBody
-          type="fixed"
-          position={[x, GATE_COLLISION.height / 2, z]}
-          rotation={[0, rotation, 0]}
-          collisionGroups={0x00010001}
-          userData={{ type: 'gate-wall' }}
-        >
-          <CuboidCollider args={[
-            GATE_COLLISION.width / 2,
-            GATE_COLLISION.height / 2,
-            GATE_COLLISION.depth / 2
-          ]} />
-        </RigidBody>
-      </>
-    );
-  }
-
-  return gateContent;
 }
 
 function getWrapMode(mode?: 'repeat' | 'mirror' | 'clamp'): THREE.Wrapping {
@@ -225,6 +214,7 @@ interface FloorSwitchProps extends SwitchConfig {
 }
 
 function FloorSwitch({ x, z, switchType, activated, onActivate }: FloorSwitchProps) {
+  const { registerTrigger } = useCollision();
   const { scene } = useGLTF(SWITCH_MODEL_PATHS[switchType]);
   const [isPlayerOn, setIsPlayerOn] = useState(false);
 
@@ -260,16 +250,27 @@ function FloorSwitch({ x, z, switchType, activated, onActivate }: FloorSwitchPro
     });
   }, [clonedScene, activated]);
 
-  const handleIntersectionEnter = () => {
-    setIsPlayerOn(true);
-    if (!activated) {
-      onActivate();
-    }
-  };
+  // Register trigger with collision system
+  useEffect(() => {
+    const center = new THREE.Vector3(x, SWITCH_COLLISION.height / 2, z);
+    const size = new THREE.Vector3(SWITCH_COLLISION.width, SWITCH_COLLISION.height, SWITCH_COLLISION.depth);
+    const bounds = new THREE.Box3().setFromCenterAndSize(center, size);
 
-  const handleIntersectionExit = () => {
-    setIsPlayerOn(false);
-  };
+    const unregister = registerTrigger({
+      id: `floor-switch-${x}-${z}`,
+      bounds,
+      onEnter: () => {
+        setIsPlayerOn(true);
+        if (!activated) {
+          onActivate();
+        }
+      },
+      onExit: () => {
+        setIsPlayerOn(false);
+      }
+    });
+    return unregister;
+  }, [x, z, activated, onActivate, registerTrigger]);
 
   return (
     <>
@@ -277,23 +278,6 @@ function FloorSwitch({ x, z, switchType, activated, onActivate }: FloorSwitchPro
       <group position={[x, 0, z]}>
         <primitive object={clonedScene} />
       </group>
-
-      {/* Collision sensor to detect player */}
-      <RigidBody
-        type="fixed"
-        sensor
-        position={[x, SWITCH_COLLISION.height / 2, z]}
-        collisionGroups={0x00040004}
-        onIntersectionEnter={handleIntersectionEnter}
-        onIntersectionExit={handleIntersectionExit}
-        userData={{ type: 'floor-switch' }}
-      >
-        <CuboidCollider args={[
-          SWITCH_COLLISION.width / 2,
-          SWITCH_COLLISION.height / 2,
-          SWITCH_COLLISION.depth / 2
-        ]} />
-      </RigidBody>
 
       {/* Debug indicator */}
       <mesh position={[x, 0.5, z]}>

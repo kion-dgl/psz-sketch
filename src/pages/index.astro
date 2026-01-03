@@ -3,15 +3,43 @@ import Layout from '../layouts/Layout.astro';
 
 export const prerender = false;
 
-const links = [
-  { href: '/storybook', label: 'Element Storybook', description: 'Preview and test traversal elements', color: '#8855ff' },
-  { href: '/grid', label: 'Grid Viewer', description: 'Test gate alignment in 5x5 grid', color: '#55aaaa' },
-  { href: '/stage/warp', label: 'Warp Hub', description: 'Teleport to different areas', color: '#5588ff' },
-  { href: '/stage/counter', label: 'Guild Counter', description: 'Start quests and missions', color: '#55aa55' },
-  { href: '/stage/valley', label: 'Gurhacia Valley', description: 'Valley stage hub', color: '#aa8855' },
-  { href: '/stage/wetlands', label: 'Ozette Wetlands', description: 'Wetlands stage hub', color: '#558855' },
-  { href: '/stage/snowfield', label: 'Rioh Snowfield', description: 'Snowfield stage hub', color: '#5588aa' },
-  { href: '/title', label: 'Title Screen', description: 'Game title screen', color: '#aa5555' },
+const sections = [
+  {
+    title: 'Storybook',
+    links: [
+      { href: '/storybook', label: 'Storybook', description: 'Preview stages and elements', color: '#8855ff' },
+      { href: '/storybook/stages', label: 'Stage Storybook', description: 'Browse all stages with dropdowns', color: '#aa55ff' },
+    ]
+  },
+  {
+    title: 'Editors',
+    links: [
+      { href: '/stage/stage-editor', label: 'Stage Editor', description: 'Edit floor collision, portals, and export GLB', color: '#ff8844' },
+      { href: '/preview-mission', label: 'Mission Preview', description: 'Walk through stage loading', color: '#ff55aa' },
+      { href: '/grid', label: 'Grid Viewer', description: 'Test gate alignment in 5x5 grid', color: '#55aaaa' },
+    ]
+  },
+  {
+    title: 'Stage Views',
+    links: [
+      { href: '/stage/warp', label: 'Warp Hub', description: 'Teleport to different areas', color: '#5588ff' },
+      { href: '/stage/counter', label: 'Guild Counter', description: 'Start quests and missions', color: '#55aa55' },
+      { href: '/stage/valley', label: 'Gurhacia Valley', description: 'Valley stage hub', color: '#aa8855' },
+      { href: '/stage/wetlands', label: 'Ozette Wetlands', description: 'Wetlands stage hub', color: '#558855' },
+      { href: '/stage/snowfield', label: 'Rioh Snowfield', description: 'Snowfield stage hub', color: '#5588aa' },
+      { href: '/stage/makara', label: 'Makara Ruins', description: 'Makara stage hub', color: '#aa5544' },
+      { href: '/stage/paru', label: 'Oblivion City Paru', description: 'Paru stage hub', color: '#55aa44' },
+      { href: '/stage/arca', label: 'Arca Plant', description: 'Arca stage hub', color: '#888888' },
+      { href: '/stage/shrine', label: 'Dark Shrine', description: 'Shrine stage hub', color: '#6644aa' },
+      { href: '/stage/tower', label: 'Eternal Tower', description: 'Tower stage hub', color: '#ffaa44' },
+    ]
+  },
+  {
+    title: 'Title',
+    links: [
+      { href: '/title', label: 'Title Screen', description: 'Game title screen', color: '#aa5555' },
+    ]
+  },
 ];
 ---
 
@@ -20,14 +48,19 @@ const links = [
     <h1>PSZ Sketch</h1>
     <p class="subtitle">Development Hub</p>
 
-    <div class="links">
-      {links.map(link => (
-        <a href={link.href} class="link-card" style={`--card-color: ${link.color}`}>
-          <span class="link-label">{link.label}</span>
-          <span class="link-description">{link.description}</span>
-        </a>
-      ))}
-    </div>
+    {sections.map(section => (
+      <section class="section">
+        <h2 class="section-title">{section.title}</h2>
+        <div class="links">
+          {section.links.map(link => (
+            <a href={link.href} class="link-card" style={`--card-color: ${link.color}`}>
+              <span class="link-label">{link.label}</span>
+              <span class="link-description">{link.description}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    ))}
   </div>
 </Layout>
 
@@ -54,7 +87,23 @@ const links = [
 
   .subtitle {
     color: #888;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
+  }
+
+  .section {
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .links {

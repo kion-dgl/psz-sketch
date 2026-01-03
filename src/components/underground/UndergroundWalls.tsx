@@ -1,16 +1,11 @@
-import { RigidBody, CuboidCollider } from '@react-three/rapier';
+import { useEffect } from 'react';
+import { useCollision, type WallDefinition } from '../../collision';
 
 // Define walls to keep player within underground boundaries
 const WALL_THICKNESS = 0.5;
 const WALL_HEIGHT = 5;
 
-interface WallConfig {
-  position: [number, number, number];
-  rotation: number;
-  length: number;
-}
-
-const WALLS: WallConfig[] = [
+const WALLS: WallDefinition[] = [
   // TODO: Add wall boundaries for underground area
 ];
 
@@ -19,25 +14,33 @@ interface UndergroundWallsProps {
 }
 
 export default function UndergroundWalls({ visible = true }: UndergroundWallsProps) {
+  const { registerWallFromDefinition } = useCollision();
+
+  // Register all walls with collision system
+  useEffect(() => {
+    const unregisters = WALLS.map((wall, index) =>
+      registerWallFromDefinition(wall, `underground-wall-${index}`)
+    );
+
+    return () => {
+      unregisters.forEach(unregister => unregister());
+    };
+  }, [registerWallFromDefinition]);
+
+  // Visual representation (optional, for debugging)
+  if (!visible || WALLS.length === 0) return null;
+
   return (
     <>
       {WALLS.map((wall, index) => (
-        <RigidBody
+        <mesh
           key={index}
-          type="fixed"
           position={wall.position}
           rotation={[0, wall.rotation, 0]}
-          collisionGroups={0x00010001}
-          userData={{ type: 'wall', index }}
         >
-          <CuboidCollider args={[WALL_THICKNESS / 2, WALL_HEIGHT / 2, wall.length / 2]} />
-          {visible && (
-            <mesh>
-              <boxGeometry args={[WALL_THICKNESS, WALL_HEIGHT, wall.length]} />
-              <meshStandardMaterial color="yellow" transparent opacity={0.5} />
-            </mesh>
-          )}
-        </RigidBody>
+          <boxGeometry args={[WALL_THICKNESS, WALL_HEIGHT, wall.length]} />
+          <meshStandardMaterial color="yellow" transparent opacity={0.5} />
+        </mesh>
       ))}
     </>
   );

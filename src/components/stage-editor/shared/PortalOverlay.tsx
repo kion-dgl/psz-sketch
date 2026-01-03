@@ -1,0 +1,460 @@
+import { useRef, useMemo, useCallback } from 'react';
+import { useGLTF } from '@react-three/drei';
+import { useThree, useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
+import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
+import type { PortalData, GateDirection, PreviewModel } from '../types';
+import { DIRECTION_ROTATIONS } from '../types';
+
+// Model paths
+const GATE_MODEL_PATH = '/objects/01_o01a/o0c_gate.imd/o0c_gate.glb';
+const WARP_MODEL_PATH = '/objects/special_z/o0s_warpm.imd/o0s_warpm.glb';
+
+interface PortalModelProps {
+  position: [number, number, number];
+  direction: GateDirection;
+  modelType: PreviewModel;
+  opacity?: number;
+  selected?: boolean;
+  onClick?: () => void;
+}
+
+// Spawn/trigger offset constants (matching ExportTab)
+// Order from outside to inside: trigger → spawn → gate
+const SPAWN_OUTSET = 3;   // Spawn behind the gate (outside)
+const TRIGGER_OUTSET = 7; // Trigger further out, player hits it first
+const GATE_WIDTH = 6.0;
+
+// Compute spawn and trigger positions from gate position and direction
+function computeMarkerPositions(position: [number, number, number], direction: GateDirection) {
+  const [x, , z] = position;
+  const rotation = DIRECTION_ROTATIONS[direction];
+  const cos = Math.cos(rotation);
+  const sin = Math.sin(rotation);
+
+  return {
+    // Spawn is outside the gate (player spawns behind gate)
+    spawn: [x - sin * SPAWN_OUTSET, 1, z - cos * SPAWN_OUTSET] as [number, number, number],
+    // Trigger is even further outside (player hits this first when entering)
+    trigger: [x - sin * TRIGGER_OUTSET, 0, z - cos * TRIGGER_OUTSET] as [number, number, number],
+    rotation,
+  };
+}
+
+// Spawn point marker (green sphere with ring and arrow)
+function SpawnMarker({ position, rotation }: { position: [number, number, number]; rotation: number }) {
+  return (
+    <group position={position}>
+      {/* Green sphere */}
+      <mesh>
+        <sphereGeometry args={[0.8, 16, 16]} />
+        <meshBasicMaterial color="#00ff00" transparent opacity={0.7} />
+      </mesh>
+      {/* Ring on ground */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[1, 1.3, 32]} />
+        <meshBasicMaterial color="#00ff00" side={THREE.DoubleSide} />
+      </mesh>
+      {/* Direction arrow */}
+      <group rotation={[0, rotation, 0]}>
+        <mesh position={[0, 0.3, 1]}>
+          <boxGeometry args={[0.2, 0.2, 1.5]} />
+          <meshBasicMaterial color="#00ff00" />
+        </mesh>
+        <mesh position={[0, 0.3, 2]} rotation={[Math.PI / 2, 0, 0]}>
+          <coneGeometry args={[0.4, 0.6, 8]} />
+          <meshBasicMaterial color="#00ff00" />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+// Trigger zone marker (orange box)
+function TriggerMarker({ position, rotation }: { position: [number, number, number]; rotation: number }) {
+  return (
+    <group position={position} rotation={[0, rotation, 0]}>
+      <mesh position={[0, 1.5, 0]}>
+        <boxGeometry args={[GATE_WIDTH, 3, 2]} />
+        <meshBasicMaterial color="#ff6600" transparent opacity={0.3} />
+      </mesh>
+      <lineSegments position={[0, 1.5, 0]}>
+        <edgesGeometry args={[new THREE.BoxGeometry(GATE_WIDTH, 3, 2)]} />
+        <lineBasicMaterial color="#ff6600" />
+      </lineSegments>
+    </group>
+  );
+}
+
+// Gate bounding box marker (cyan wireframe at gate position)
+function GateBoundingBox({ position, rotation }: { position: [number, number, number]; rotation: number }) {
+  const boxWidth = GATE_WIDTH;
+  const boxHeight = 4;
+  const boxDepth = 1;
+
+  return (
+    <group position={position} rotation={[0, rotation, 0]}>
+      {/* Semi-transparent fill */}
+      <mesh position={[0, boxHeight / 2, 0]}>
+        <boxGeometry args={[boxWidth, boxHeight, boxDepth]} />
+        <meshBasicMaterial color="#00ffff" transparent opacity={0.15} />
+      </mesh>
+      {/* Wireframe outline */}
+      <lineSegments position={[0, boxHeight / 2, 0]}>
+        <edgesGeometry args={[new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth)]} />
+        <lineBasicMaterial color="#00ffff" linewidth={2} />
+      </lineSegments>
+    </group>
+  );
+}
+
+function GatePreview({ position, direction, opacity = 1, selected, onClick }: Omit<PortalModelProps, 'modelType'>) {
+  const { scene } = useGLTF(GATE_MODEL_PATH);
+  const rotation = DIRECTION_ROTATIONS[direction];
+
+  const clonedScene = useMemo(() => {
+    const clone = SkeletonUtils.clone(scene);
+    // Apply opacity to all materials
+    clone.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        materials.forEach((mat) => {
+          const material = mat as THREE.MeshStandardMaterial;
+          material.transparent = true;
+          material.opacity = opacity;
+          material.needsUpdate = true;
+        });
+      }
+    });
+    return clone;
+  }, [scene, opacity]);
+
+  // Compute spawn/trigger positions
+  const markers = useMemo(() => computeMarkerPositions(position, direction), [position, direction]);
+
+  return (
+    <group>
+      {/* Gate model */}
+      <group
+        position={position}
+        rotation={[0, rotation, 0]}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick?.();
+        }}
+      >
+        <primitive object={clonedScene} />
+        {selected && (
+          <mesh position={[0, 2, 0]}>
+            <sphereGeometry args={[0.3]} />
+            <meshBasicMaterial color="#4a9eff" />
+          </mesh>
+        )}
+      </group>
+      {/* Gate bounding box */}
+      <GateBoundingBox position={position} rotation={rotation} />
+      {/* Spawn point marker */}
+      <SpawnMarker position={markers.spawn} rotation={markers.rotation} />
+      {/* Trigger zone marker */}
+      <TriggerMarker position={markers.trigger} rotation={markers.rotation} />
+    </group>
+  );
+}
+
+function WarpPreview({ position, direction, opacity = 1, selected, onClick }: Omit<PortalModelProps, 'modelType'>) {
+  const { scene } = useGLTF(WARP_MODEL_PATH);
+  const rotation = DIRECTION_ROTATIONS[direction];
+
+  const clonedScene = useMemo(() => {
+    const clone = SkeletonUtils.clone(scene);
+    // Apply opacity to all materials
+    clone.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        materials.forEach((mat) => {
+          const material = mat as THREE.MeshStandardMaterial;
+          material.transparent = true;
+          material.opacity = opacity;
+          material.needsUpdate = true;
+        });
+      }
+    });
+    return clone;
+  }, [scene, opacity]);
+
+  // Compute spawn/trigger positions
+  const markers = useMemo(() => computeMarkerPositions(position, direction), [position, direction]);
+
+  return (
+    <group>
+      {/* Warp model */}
+      <group
+        position={position}
+        rotation={[0, rotation, 0]}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick?.();
+        }}
+      >
+        <primitive object={clonedScene} />
+        {selected && (
+          <mesh position={[0, 2, 0]}>
+            <sphereGeometry args={[0.3]} />
+            <meshBasicMaterial color="#4a9eff" />
+          </mesh>
+        )}
+      </group>
+      {/* Gate bounding box */}
+      <GateBoundingBox position={position} rotation={rotation} />
+      {/* Spawn point marker */}
+      <SpawnMarker position={markers.spawn} rotation={markers.rotation} />
+      {/* Trigger zone marker */}
+      <TriggerMarker position={markers.trigger} rotation={markers.rotation} />
+    </group>
+  );
+}
+
+function PortalModel({ modelType, ...props }: PortalModelProps) {
+  if (modelType === 'Gate') {
+    return <GatePreview {...props} />;
+  }
+  return <WarpPreview {...props} />;
+}
+
+interface PortalOverlayProps {
+  portals: PortalData[];
+  selectedPortalId: string | null;
+  placementMode: boolean;
+  placementDirection: GateDirection;
+  previewModel: PreviewModel;
+  onPortalClick: (id: string) => void;
+  onPlacePortal: (position: [number, number, number]) => void;
+  onUpdatePortalPosition?: (id: string, position: [number, number, number]) => void;
+}
+
+// Spawn marker for placement preview (semi-transparent)
+function SpawnMarkerPreview({ localOffset }: { localOffset: [number, number, number] }) {
+  return (
+    <group position={localOffset}>
+      <mesh>
+        <sphereGeometry args={[0.8, 16, 16]} />
+        <meshBasicMaterial color="#00ff00" transparent opacity={0.4} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[1, 1.3, 32]} />
+        <meshBasicMaterial color="#00ff00" transparent opacity={0.4} side={THREE.DoubleSide} />
+      </mesh>
+      {/* Direction arrow pointing forward (local Z) */}
+      <mesh position={[0, 0.3, 1]}>
+        <boxGeometry args={[0.2, 0.2, 1.5]} />
+        <meshBasicMaterial color="#00ff00" transparent opacity={0.5} />
+      </mesh>
+      <mesh position={[0, 0.3, 2]} rotation={[Math.PI / 2, 0, 0]}>
+        <coneGeometry args={[0.4, 0.6, 8]} />
+        <meshBasicMaterial color="#00ff00" transparent opacity={0.5} />
+      </mesh>
+    </group>
+  );
+}
+
+// Trigger marker for placement preview (semi-transparent)
+function TriggerMarkerPreview({ localOffset }: { localOffset: [number, number, number] }) {
+  return (
+    <group position={localOffset}>
+      <mesh position={[0, 1.5, 0]}>
+        <boxGeometry args={[GATE_WIDTH, 3, 2]} />
+        <meshBasicMaterial color="#ff6600" transparent opacity={0.2} />
+      </mesh>
+      <lineSegments position={[0, 1.5, 0]}>
+        <edgesGeometry args={[new THREE.BoxGeometry(GATE_WIDTH, 3, 2)]} />
+        <lineBasicMaterial color="#ff6600" transparent opacity={0.5} />
+      </lineSegments>
+    </group>
+  );
+}
+
+// Gate bounding box for placement preview (semi-transparent)
+function GateBoundingBoxPreview() {
+  const boxWidth = GATE_WIDTH;
+  const boxHeight = 4;
+  const boxDepth = 1;
+
+  return (
+    <group>
+      <mesh position={[0, boxHeight / 2, 0]}>
+        <boxGeometry args={[boxWidth, boxHeight, boxDepth]} />
+        <meshBasicMaterial color="#00ffff" transparent opacity={0.1} />
+      </mesh>
+      <lineSegments position={[0, boxHeight / 2, 0]}>
+        <edgesGeometry args={[new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth)]} />
+        <lineBasicMaterial color="#00ffff" transparent opacity={0.5} />
+      </lineSegments>
+    </group>
+  );
+}
+
+// Separate component for the preview that follows the mouse
+function PlacementPreview({
+  direction,
+  modelType
+}: {
+  direction: GateDirection;
+  modelType: PreviewModel;
+}) {
+  const { camera, raycaster, pointer } = useThree();
+  const groupRef = useRef<THREE.Group>(null);
+  const groundPlane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
+  const intersection = useMemo(() => new THREE.Vector3(), []);
+  const positionRef = useRef<[number, number, number]>([0, 0, 0]);
+
+  // Update position every frame
+  useFrame(() => {
+    if (!groupRef.current) return;
+
+    raycaster.setFromCamera(pointer, camera);
+    if (raycaster.ray.intersectPlane(groundPlane, intersection)) {
+      groupRef.current.position.set(intersection.x, 0, intersection.z);
+      positionRef.current = [intersection.x, 0, intersection.z];
+    }
+  });
+
+  const rotation = DIRECTION_ROTATIONS[direction];
+
+  // Local space offsets for spawn/trigger (in the direction the gate faces)
+  // Order from outside to inside: trigger → spawn → gate
+  // Both are behind the gate (negative Z in local space)
+  const spawnLocalOffset: [number, number, number] = [0, 1, -SPAWN_OUTSET];
+  const triggerLocalOffset: [number, number, number] = [0, 0, -TRIGGER_OUTSET];
+
+  return (
+    <group ref={groupRef} rotation={[0, rotation, 0]}>
+      {/* Gate/Warp model */}
+      {modelType === 'Gate' ? (
+        <GatePreviewStatic opacity={0.5} />
+      ) : (
+        <WarpPreviewStatic opacity={0.5} />
+      )}
+      {/* Gate bounding box */}
+      <GateBoundingBoxPreview />
+      {/* Spawn marker (in local space) */}
+      <SpawnMarkerPreview localOffset={spawnLocalOffset} />
+      {/* Trigger marker (in local space) */}
+      <TriggerMarkerPreview localOffset={triggerLocalOffset} />
+    </group>
+  );
+}
+
+// Static preview components that don't need position (position is on parent group)
+function GatePreviewStatic({ opacity }: { opacity: number }) {
+  const { scene } = useGLTF(GATE_MODEL_PATH);
+
+  const clonedScene = useMemo(() => {
+    const clone = SkeletonUtils.clone(scene);
+    clone.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        materials.forEach((mat) => {
+          const material = mat as THREE.MeshStandardMaterial;
+          material.transparent = true;
+          material.opacity = opacity;
+          material.needsUpdate = true;
+        });
+      }
+    });
+    return clone;
+  }, [scene, opacity]);
+
+  return <primitive object={clonedScene} />;
+}
+
+function WarpPreviewStatic({ opacity }: { opacity: number }) {
+  const { scene } = useGLTF(WARP_MODEL_PATH);
+
+  const clonedScene = useMemo(() => {
+    const clone = SkeletonUtils.clone(scene);
+    clone.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        materials.forEach((mat) => {
+          const material = mat as THREE.MeshStandardMaterial;
+          material.transparent = true;
+          material.opacity = opacity;
+          material.needsUpdate = true;
+        });
+      }
+    });
+    return clone;
+  }, [scene, opacity]);
+
+  return <primitive object={clonedScene} />;
+}
+
+export default function PortalOverlay({
+  portals,
+  selectedPortalId,
+  placementMode,
+  placementDirection,
+  previewModel,
+  onPortalClick,
+  onPlacePortal,
+  onUpdatePortalPosition,
+}: PortalOverlayProps) {
+  const { camera, raycaster, pointer } = useThree();
+  const groundPlane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
+  const intersection = useMemo(() => new THREE.Vector3(), []);
+
+  // Handle click to place - get position from raycaster at click time
+  const handleCanvasClick = useCallback(() => {
+    if (!placementMode) return;
+
+    raycaster.setFromCamera(pointer, camera);
+    if (raycaster.ray.intersectPlane(groundPlane, intersection)) {
+      onPlacePortal([intersection.x, 0, intersection.z]);
+    }
+  }, [placementMode, raycaster, pointer, camera, groundPlane, intersection, onPlacePortal]);
+
+  return (
+    <group>
+      {/* Ground plane for click detection in placement mode */}
+      {placementMode && (
+        <mesh
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[0, 0.01, 0]}
+          onClick={handleCanvasClick}
+        >
+          <planeGeometry args={[200, 200]} />
+          <meshBasicMaterial transparent opacity={0} side={THREE.DoubleSide} />
+        </mesh>
+      )}
+
+      {/* Existing portals */}
+      {portals.map((portal) => (
+        <PortalModel
+          key={portal.id}
+          position={portal.position}
+          direction={portal.direction}
+          modelType={previewModel}
+          opacity={1}
+          selected={portal.id === selectedPortalId}
+          onClick={() => onPortalClick(portal.id)}
+        />
+      ))}
+
+      {/* Preview portal when in placement mode - follows mouse */}
+      {placementMode && (
+        <PlacementPreview
+          direction={placementDirection}
+          modelType={previewModel}
+        />
+      )}
+    </group>
+  );
+}
+
+// Preload models
+useGLTF.preload(GATE_MODEL_PATH);
+useGLTF.preload(WARP_MODEL_PATH);

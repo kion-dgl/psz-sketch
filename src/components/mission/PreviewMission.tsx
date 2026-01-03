@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier';
 import { PerspectiveCamera, useGLTF } from '@react-three/drei';
+import * as THREE from 'three';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 import ValleyEnv, { ValleyFloorCollision } from '../valley/environments/ValleyEnv';
 import SandParticles from '../valley/SandParticles';
@@ -9,6 +9,7 @@ import PlayerCharacter from '../city/PlayerCharacter';
 import CameraController from '../shared/CameraController';
 import StageObjects from '../shared/StageObjects';
 import { useCharacterStore } from '../../stores/characterStore';
+import { CollisionProvider, useCollision } from '../../collision';
 import type { GateConfig } from '../shared/StageObjects';
 
 // Warp model paths
@@ -87,29 +88,29 @@ interface TriggerZoneProps {
 }
 
 function TriggerZone({ position, rotation, targetUrl, label }: TriggerZoneProps) {
-  const handleEnter = useCallback(() => {
-    console.log(`[Trigger] Entering: ${label} → ${targetUrl}`);
-    window.location.href = targetUrl;
-  }, [targetUrl, label]);
+  const { registerTrigger } = useCollision();
+
+  useEffect(() => {
+    const center = new THREE.Vector3(position[0], position[1], position[2]);
+    const size = new THREE.Vector3(6, 3, 2);
+    const bounds = new THREE.Box3().setFromCenterAndSize(center, size);
+
+    const unregister = registerTrigger({
+      id: `trigger-${label}`,
+      bounds,
+      onEnter: () => {
+        console.log(`[Trigger] Entering: ${label} → ${targetUrl}`);
+        window.location.href = targetUrl;
+      }
+    });
+    return unregister;
+  }, [position, targetUrl, label, registerTrigger]);
 
   return (
-    <>
-      <RigidBody
-        type="fixed"
-        sensor
-        position={position}
-        rotation={[0, rotation, 0]}
-        collisionGroups={0x00020002}
-        onIntersectionEnter={handleEnter}
-      >
-        <CuboidCollider args={[3, 1.5, 1]} />
-      </RigidBody>
-      {/* Debug visual */}
-      <mesh position={position} rotation={[0, rotation, 0]}>
-        <boxGeometry args={[6, 3, 2]} />
-        <meshBasicMaterial color="#00ff00" transparent opacity={0.3} wireframe />
-      </mesh>
-    </>
+    <mesh position={position} rotation={[0, rotation, 0]}>
+      <boxGeometry args={[6, 3, 2]} />
+      <meshBasicMaterial color="#00ff00" transparent opacity={0.3} wireframe />
+    </mesh>
   );
 }
 
@@ -362,7 +363,7 @@ export default function PreviewMission() {
 
         <SandParticles intensity="light" />
 
-        <Physics gravity={[0, -9.81, 0]}>
+        <CollisionProvider>
           {/* Floor collision - NO ROTATION */}
           <ValleyFloorCollision mapId={fullStageName} />
 
@@ -398,7 +399,7 @@ export default function PreviewMission() {
             spawnPosition={spawnPosition}
             spawnRotation={spawnRotation + Math.PI}
           />
-        </Physics>
+        </CollisionProvider>
       </Canvas>
     </div>
   );

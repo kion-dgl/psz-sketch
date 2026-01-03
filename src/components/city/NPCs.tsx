@@ -1,7 +1,7 @@
-import { RigidBody, CylinderCollider } from '@react-three/rapier';
 import { useGLTF } from '@react-three/drei';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
+import { useCollision } from '../../collision';
 
 interface NPCModelProps {
   position: [number, number, number];
@@ -10,6 +10,7 @@ interface NPCModelProps {
 }
 
 function NPCModel({ position, name, modelPath }: NPCModelProps) {
+  const { registerNPC } = useCollision();
   const { scene } = useGLTF(modelPath);
 
   // Clone using SkeletonUtils for skinned meshes
@@ -17,12 +18,20 @@ function NPCModel({ position, name, modelPath }: NPCModelProps) {
     return SkeletonUtils.clone(scene);
   }, [scene]);
 
+  // Register NPC with collision system
+  useEffect(() => {
+    const unregister = registerNPC({
+      id: `npc-${name}`,
+      name,
+      position: { x: position[0], z: position[2] },
+      radius: 0.5
+    });
+    return unregister;
+  }, [name, position, registerNPC]);
+
   return (
     <group position={position}>
-      <RigidBody type="fixed" sensor userData={{ npcName: name }} collisionGroups={0x00020002}>
-        <CylinderCollider args={[1, 0.5]} />
-        <primitive object={clonedScene} position={[0, -1, 0]} />
-      </RigidBody>
+      <primitive object={clonedScene} position={[0, -1, 0]} />
     </group>
   );
 }

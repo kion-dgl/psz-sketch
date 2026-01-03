@@ -1,10 +1,10 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Physics } from '@react-three/rapier';
 import { Suspense, useState, useEffect, useRef } from 'react';
 import { PerspectiveCamera } from '@react-three/drei';
 import type { Character } from '../../stores/characterStore';
 import { useCharacterStore } from '../../stores/characterStore';
 import { useGameState } from '../../stores/gameStateStore';
+import { CollisionProvider } from '../../collision';
 import ValleyEnvA_GA1, { DebugGroundPlane } from './environments/ValleyEnvA_GA1';
 import PlayerCharacter from '../city/PlayerCharacter';
 import SandParticles from './SandParticles';
@@ -222,7 +222,7 @@ export default function ValleyAreaA_GA1() {
           {/* Sand particle effect */}
           <SandParticles />
 
-          <Physics gravity={[0, -9.81, 0]}>
+          <CollisionProvider>
             {/* Debug ground plane at Y=0 */}
             <DebugGroundPlane />
 
@@ -233,7 +233,7 @@ export default function ValleyAreaA_GA1() {
               onInteraction={handleNPCInteraction}
               spawnPosition={[0, 10, 0]}
             />
-          </Physics>
+          </CollisionProvider>
         </Suspense>
       </Canvas>
     </div>

@@ -1,7 +1,7 @@
 import { useGLTF } from '@react-three/drei';
-import { RigidBody, TrimeshCollider } from '@react-three/rapier';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { useCollision } from '../../../collision';
 
 // Texture fix settings - keyed by texture image filename (without .png extension)
 // Generated from texture debug tool for Eternal Tower walkable areas
@@ -89,6 +89,8 @@ function getTowerDir(mapId: string): string {
 }
 
 export function TowerFloorCollision({ mapId, showVisual = false }: { mapId: string; showVisual?: boolean }) {
+  const { setFloorMesh } = useCollision();
+  const meshRef = useRef<THREE.Mesh>(null);
   const towerDir = getTowerDir(mapId);
   const glbPath = `/${towerDir}/${mapId}/lndmd/${mapId}_m.glb`;
   const { scene } = useGLTF(glbPath);
@@ -141,16 +143,21 @@ export function TowerFloorCollision({ mapId, showVisual = false }: { mapId: stri
     return null;
   }, [scene]);
 
+  // Register floor mesh with collision system
+  useEffect(() => {
+    if (meshRef.current && floorGeometry) {
+      const unregister = setFloorMesh(`tower-floor-${mapId}`, meshRef.current);
+      return unregister;
+    }
+  }, [floorGeometry, mapId, setFloorMesh]);
+
   if (!floorGeometry) return null;
 
   return (
     <>
-      <RigidBody type="fixed" collisionGroups={0x00030003}>
-        <TrimeshCollider args={[
-          floorGeometry.attributes.position.array as Float32Array,
-          new Uint32Array(Array.from({ length: floorGeometry.attributes.position.count }, (_, i) => i))
-        ]} />
-      </RigidBody>
+      <mesh ref={meshRef} geometry={floorGeometry} visible={false}>
+        <meshBasicMaterial />
+      </mesh>
       {showVisual && (
         <mesh geometry={floorGeometry} position={[0, 0.05, 0]}>
           <meshBasicMaterial color="cyan" wireframe={false} transparent opacity={0.3} side={THREE.DoubleSide} />

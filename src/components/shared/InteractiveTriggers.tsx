@@ -1,6 +1,7 @@
-import { RigidBody, CylinderCollider } from '@react-three/rapier';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import * as THREE from 'three';
+import { useCollision } from '../../collision';
 
 // Define interactive trigger zones that require 'e' key to activate
 export interface InteractiveTrigger {
@@ -18,8 +19,15 @@ interface InteractiveTriggersProps {
 }
 
 export default function InteractiveTriggers({ triggers, visible = true, onPlayerInZone }: InteractiveTriggersProps) {
+  const { registerTrigger } = useCollision();
   const [playerInZone, setPlayerInZone] = useState<string | null>(null);
   const [activated, setActivated] = useState<Set<string>>(new Set());
+  const playerInZoneRef = useRef<string | null>(null);
+
+  // Keep ref in sync with state for use in callbacks
+  useEffect(() => {
+    playerInZoneRef.current = playerInZone;
+  }, [playerInZone]);
 
   useEffect(() => {
     if (onPlayerInZone) {
@@ -29,11 +37,11 @@ export default function InteractiveTriggers({ triggers, visible = true, onPlayer
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === 'e' && playerInZone && !activated.has(playerInZone)) {
+      if (e.key.toLowerCase() === 'e' && playerInZoneRef.current && !activated.has(playerInZoneRef.current)) {
         // Find the trigger
-        const trigger = triggers.find(t => t.name === playerInZone);
+        const trigger = triggers.find(t => t.name === playerInZoneRef.current);
         if (trigger) {
-          setActivated(prev => new Set(prev).add(playerInZone));
+          setActivated(prev => new Set(prev).add(playerInZoneRef.current!));
           window.location.href = trigger.targetArea;
         }
       }
@@ -41,45 +49,48 @@ export default function InteractiveTriggers({ triggers, visible = true, onPlayer
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [playerInZone, activated, triggers]);
+  }, [activated, triggers]);
 
-  const handleEnter = (triggerName: string) => {
-    setPlayerInZone(triggerName);
-  };
+  // Register all triggers with collision system
+  useEffect(() => {
+    const unregisters = triggers.map((trigger) => {
+      // Use a box approximation for the cylinder
+      // Box3 with radius on X/Z and height on Y
+      const center = new THREE.Vector3(trigger.position[0], trigger.position[1], trigger.position[2]);
+      const size = new THREE.Vector3(trigger.radius * 2, trigger.height, trigger.radius * 2);
+      const bounds = new THREE.Box3().setFromCenterAndSize(center, size);
 
-  const handleExit = () => {
-    setPlayerInZone(null);
-  };
+      return registerTrigger({
+        id: trigger.name,
+        bounds,
+        onEnter: () => setPlayerInZone(trigger.name),
+        onExit: () => setPlayerInZone(null)
+      });
+    });
+
+    return () => {
+      unregisters.forEach(unregister => unregister());
+    };
+  }, [triggers, registerTrigger]);
+
+  // Visual representation (optional, for debugging)
+  if (!visible) return null;
 
   return (
     <>
       {triggers.map((trigger, index) => (
-        <RigidBody
+        <mesh
           key={index}
-          type="fixed"
           position={trigger.position}
-          sensor
-          collisionGroups={0x00040004}
-          userData={{ type: 'interactive-trigger', name: trigger.name }}
-          onIntersectionEnter={() => handleEnter(trigger.name)}
-          onIntersectionExit={handleExit}
         >
-          {/* Cylindrical collider for circular trigger */}
-          <CylinderCollider args={[trigger.height / 2, trigger.radius]} />
-
-          {/* Visual mesh (only visible when visible prop is true) */}
-          {visible && (
-            <mesh>
-              <cylinderGeometry args={[trigger.radius, trigger.radius, trigger.height, 16]} />
-              <meshStandardMaterial
-                color={playerInZone === trigger.name ? "green" : "purple"}
-                transparent
-                opacity={0.5}
-                wireframe
-              />
-            </mesh>
-          )}
-        </RigidBody>
+          <cylinderGeometry args={[trigger.radius, trigger.radius, trigger.height, 16]} />
+          <meshStandardMaterial
+            color={playerInZone === trigger.name ? "green" : "purple"}
+            transparent
+            opacity={0.5}
+            wireframe
+          />
+        </mesh>
       ))}
     </>
   );
