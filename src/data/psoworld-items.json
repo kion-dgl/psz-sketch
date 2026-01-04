@@ -1,0 +1,1593 @@
+[
+  {
+    "name": "Common Armor",
+    "japaneseName": "コモンアーマー",
+    "rarity": 1,
+    "maxGrind": 50,
+    "level": 1,
+    "resaleValue": 42,
+    "defenseBase": 33,
+    "defenseMax": 133,
+    "evasionBase": 21,
+    "evasionMax": 121,
+    "psoWorldId": 483
+  },
+  {
+    "name": "Robe",
+    "japaneseName": "ローブ",
+    "rarity": 1,
+    "maxGrind": 35,
+    "level": 1,
+    "resaleValue": 45,
+    "defenseBase": 20,
+    "defenseMax": 90,
+    "evasionBase": 31,
+    "evasionMax": 101,
+    "psoWorldId": 484
+  },
+  {
+    "name": "Normal Frame",
+    "japaneseName": "ノーマルフレーム",
+    "details": "Can have a maximum of 3 slots.",
+    "rarity": 1,
+    "maxGrind": 40,
+    "level": 1,
+    "resaleValue": 44,
+    "defenseBase": 27,
+    "defenseMax": 107,
+    "evasionBase": 26,
+    "evasionMax": 106,
+    "psoWorldId": 485
+  },
+  {
+    "name": "Battle Armor",
+    "japaneseName": "バトルアーマー",
+    "rarity": 2,
+    "maxGrind": 45,
+    "level": 2,
+    "resaleValue": 105,
+    "defenseBase": 49,
+    "defenseMax": 139,
+    "evasionBase": 31,
+    "evasionMax": 121,
+    "psoWorldId": 486
+  },
+  {
+    "name": "Scale Armor",
+    "japaneseName": "スケイルアーマー",
+    "rarity": 3,
+    "maxGrind": 40,
+    "level": 5,
+    "resaleValue": 263,
+    "defenseBase": 73,
+    "defenseMax": 153,
+    "evasionBase": 47,
+    "evasionMax": 127,
+    "psoWorldId": 487
+  },
+  {
+    "name": "Brigandine Armor",
+    "japaneseName": "ブリガンディアーマー",
+    "rarity": 4,
+    "maxGrind": 35,
+    "level": 10,
+    "resaleValue": 656,
+    "defenseBase": 102,
+    "defenseMax": 172,
+    "evasionBase": 66,
+    "evasionMax": 136,
+    "psoWorldId": 488
+  },
+  {
+    "name": "Cuirass Armor",
+    "japaneseName": "キュイラスアーマー",
+    "rarity": 5,
+    "maxGrind": 30,
+    "level": 20,
+    "resaleValue": 1116,
+    "defenseBase": 143,
+    "defenseMax": 203,
+    "evasionBase": 92,
+    "evasionMax": 152,
+    "psoWorldId": 489
+  },
+  {
+    "name": "Arquebus Armor",
+    "japaneseName": "アークイバスアーマー",
+    "rarity": 6,
+    "maxGrind": 25,
+    "level": 35,
+    "resaleValue": 1897,
+    "defenseBase": 193,
+    "defenseMax": 243,
+    "evasionBase": 124,
+    "evasionMax": 174,
+    "psoWorldId": 490
+  },
+  {
+    "name": "Carabinier Armor",
+    "japaneseName": "カラビニエルアーマー",
+    "rarity": 7,
+    "maxGrind": 20,
+    "level": 50,
+    "resaleValue": 5121,
+    "defenseBase": 261,
+    "defenseMax": 301,
+    "evasionBase": 167,
+    "evasionMax": 207,
+    "psoWorldId": 491
+  },
+  {
+    "name": "Hard Frame",
+    "japaneseName": "ハードフレーム",
+    "details": "Can have a maximum of 3 slots.",
+    "rarity": 2,
+    "maxGrind": 35,
+    "level": 2,
+    "resaleValue": 109,
+    "defenseBase": 41,
+    "defenseMax": 111,
+    "evasionBase": 39,
+    "evasionMax": 109,
+    "psoWorldId": 492
+  },
+  {
+    "name": "Shock Frame",
+    "japaneseName": "ショックフレーム",
+    "details": "Can have a maximum of 3 slots.",
+    "rarity": 3,
+    "maxGrind": 30,
+    "level": 5,
+    "resaleValue": 272,
+    "defenseBase": 61,
+    "defenseMax": 121,
+    "evasionBase": 59,
+    "evasionMax": 119,
+    "psoWorldId": 493
+  },
+  {
+    "name": "General Frame",
+    "japaneseName": "ジェネラルフレーム",
+    "details": "Can have a maximum of 3 slots.",
+    "rarity": 4,
+    "maxGrind": 25,
+    "level": 10,
+    "resaleValue": 680,
+    "defenseBase": 86,
+    "defenseMax": 136,
+    "evasionBase": 82,
+    "evasionMax": 132,
+    "psoWorldId": 494
+  },
+  {
+    "name": "Valiant Frame",
+    "japaneseName": "ヴァリアントフレーム",
+    "details": "Can have a maximum of 3 slots.",
+    "rarity": 5,
+    "maxGrind": 20,
+    "level": 20,
+    "resaleValue": 1155,
+    "defenseBase": 120,
+    "defenseMax": 160,
+    "evasionBase": 115,
+    "evasionMax": 155,
+    "psoWorldId": 495
+  },
+  {
+    "name": "Guardian Frame",
+    "japaneseName": "ガーディアンフレーム",
+    "details": "Can have a maximum of 3 slots.",
+    "rarity": 6,
+    "maxGrind": 15,
+    "level": 35,
+    "defenseBase": 163,
+    "defenseMax": 193,
+    "evasionBase": 155,
+    "evasionMax": 185,
+    "psoWorldId": 496
+  },
+  {
+    "name": "Asgard Frame",
+    "japaneseName": "アースガルズフレーム",
+    "details": "Can have a maximum of 3 slots.",
+    "rarity": 7,
+    "maxGrind": 10,
+    "level": 50,
+    "resaleValue": 5304,
+    "defenseBase": 219,
+    "defenseMax": 239,
+    "evasionBase": 209,
+    "evasionMax": 229,
+    "psoWorldId": 497
+  },
+  {
+    "name": "White Robe",
+    "japaneseName": "ホワイトローブ",
+    "rarity": 2,
+    "maxGrind": 30,
+    "level": 2,
+    "resaleValue": 113,
+    "defenseBase": 29,
+    "defenseMax": 89,
+    "evasionBase": 47,
+    "evasionMax": 107,
+    "psoWorldId": 498
+  },
+  {
+    "name": "Shield Robe",
+    "japaneseName": "シールドローブ",
+    "rarity": 3,
+    "maxGrind": 25,
+    "level": 5,
+    "resaleValue": 281,
+    "defenseBase": 44,
+    "defenseMax": 94,
+    "evasionBase": 70,
+    "evasionMax": 120,
+    "psoWorldId": 499
+  },
+  {
+    "name": "Mist Robe",
+    "japaneseName": "ミストローブ",
+    "rarity": 4,
+    "maxGrind": 20,
+    "level": 10,
+    "resaleValue": 703,
+    "defenseBase": 61,
+    "defenseMax": 101,
+    "evasionBase": 98,
+    "evasionMax": 138,
+    "psoWorldId": 500
+  },
+  {
+    "name": "Reflect Robe",
+    "japaneseName": "リフレクトローブ",
+    "rarity": 5,
+    "maxGrind": 15,
+    "level": 20,
+    "resaleValue": 1195,
+    "defenseBase": 86,
+    "defenseMax": 116,
+    "evasionBase": 138,
+    "evasionMax": 168,
+    "psoWorldId": 501
+  },
+  {
+    "name": "Aegir Robe",
+    "japaneseName": "エーギルローブ",
+    "rarity": 6,
+    "maxGrind": 10,
+    "level": 35,
+    "resaleValue": 2032,
+    "defenseBase": 116,
+    "defenseMax": 136,
+    "evasionBase": 186,
+    "evasionMax": 206,
+    "psoWorldId": 502
+  },
+  {
+    "name": "Ancient Robe",
+    "japaneseName": "エインシェントローブ",
+    "rarity": 7,
+    "maxGrind": 5,
+    "level": 50,
+    "resaleValue": 5486,
+    "defenseBase": 157,
+    "defenseMax": 167,
+    "evasionBase": 251,
+    "evasionMax": 261,
+    "psoWorldId": 503
+  },
+  {
+    "name": "Gardening Wear",
+    "japaneseName": "ガーデニングウェア",
+    "rarity": 4,
+    "maxGrind": 50,
+    "level": 10,
+    "resaleValue": 10,
+    "defenseBase": 68,
+    "defenseMax": 168,
+    "evasionBase": 80,
+    "evasionMax": 180,
+    "psoWorldId": 504
+  },
+  {
+    "name": "Octopus Suit",
+    "japaneseName": "オクトパスーツ",
+    "rarity": 4,
+    "maxGrind": 45,
+    "level": 10,
+    "resaleValue": 10,
+    "defenseBase": 82,
+    "defenseMax": 172,
+    "evasionBase": 94,
+    "evasionMax": 184,
+    "psoWorldId": 505
+  },
+  {
+    "name": "Pizza Box",
+    "japaneseName": "ピッツァボックス",
+    "rarity": 4,
+    "maxGrind": 99,
+    "level": 14,
+    "resaleValue": 10,
+    "defenseBase": 47,
+    "defenseMax": 245,
+    "evasionBase": 82,
+    "evasionMax": 280,
+    "psoWorldId": 506
+  },
+  {
+    "name": "Chef Apron",
+    "japaneseName": "パティシエプロン",
+    "rarity": 4,
+    "maxGrind": 40,
+    "level": 16,
+    "resaleValue": 10,
+    "defenseBase": 66,
+    "defenseMax": 146,
+    "evasionBase": 82,
+    "evasionMax": 162,
+    "psoWorldId": 507
+  },
+  {
+    "name": "Mascot Suit",
+    "japaneseName": "アニマルインナー",
+    "rarity": 4,
+    "maxGrind": 45,
+    "level": 10,
+    "resaleValue": 10,
+    "defenseBase": 70,
+    "defenseMax": 160,
+    "evasionBase": 78,
+    "evasionMax": 168,
+    "psoWorldId": 508
+  },
+  {
+    "name": "Star Cloak",
+    "japaneseName": "スタークローク",
+    "rarity": 4,
+    "maxGrind": 35,
+    "level": 12,
+    "resaleValue": 10,
+    "defenseBase": 78,
+    "defenseMax": 148,
+    "evasionBase": 98,
+    "evasionMax": 168,
+    "psoWorldId": 509
+  },
+  {
+    "name": "Mobius Guarder",
+    "japaneseName": "メビウスガーダー",
+    "rarity": 4,
+    "maxGrind": 45,
+    "defenseBase": 98,
+    "defenseMax": 188,
+    "evasionBase": 61,
+    "evasionMax": 151,
+    "psoWorldId": 510
+  },
+  {
+    "name": "Miyabi Hakama",
+    "japaneseName": "ミヤビハカマ",
+    "rarity": 4,
+    "maxGrind": 35,
+    "level": 18,
+    "resaleValue": 10,
+    "defenseBase": 85,
+    "defenseMax": 155,
+    "evasionBase": 90,
+    "evasionMax": 160,
+    "psoWorldId": 511
+  },
+  {
+    "name": "Keplar Suit",
+    "japaneseName": "ケプラースーツ",
+    "details": "Can only be used by Male characters",
+    "rarity": 7,
+    "maxGrind": 50,
+    "level": 72,
+    "resaleValue": 10,
+    "defenseBase": 252,
+    "defenseMax": 352,
+    "evasionBase": 178,
+    "evasionMax": 278,
+    "psoWorldId": 512
+  },
+  {
+    "name": "Mobius Plate",
+    "japaneseName": "メビウスプレート",
+    "rarity": 7,
+    "maxGrind": 30,
+    "level": 64,
+    "resaleValue": 10,
+    "defenseBase": 251,
+    "defenseMax": 311,
+    "evasionBase": 157,
+    "evasionMax": 217,
+    "psoWorldId": 513
+  },
+  {
+    "name": "Rika's Suit",
+    "japaneseName": "ファルスーツ",
+    "details": "Can only be used by female characters.",
+    "rarity": 7,
+    "maxGrind": 40,
+    "level": 76,
+    "resaleValue": 10,
+    "defenseBase": 209,
+    "defenseMax": 289,
+    "evasionBase": 240,
+    "evasionMax": 320,
+    "psoWorldId": 514
+  },
+  {
+    "name": "Noble Cloak",
+    "japaneseName": "ジンバオリ",
+    "rarity": 7,
+    "maxGrind": 40,
+    "level": 66,
+    "resaleValue": 10,
+    "defenseBase": 178,
+    "defenseMax": 258,
+    "evasionBase": 239,
+    "evasionMax": 319,
+    "psoWorldId": 515
+  },
+  {
+    "name": "Milias Frame",
+    "japaneseName": "ミリアスフレーム",
+    "rarity": 6,
+    "maxGrind": 35,
+    "level": 48,
+    "resaleValue": 10,
+    "defenseBase": 186,
+    "defenseMax": 256,
+    "evasionBase": 116,
+    "evasionMax": 186,
+    "psoWorldId": 516
+  },
+  {
+    "name": "Shinobi Suit",
+    "japaneseName": "シノビショウゾク",
+    "rarity": 6,
+    "maxGrind": 35,
+    "level": 50,
+    "resaleValue": 10,
+    "defenseBase": 155,
+    "defenseMax": 225,
+    "evasionBase": 178,
+    "evasionMax": 248,
+    "psoWorldId": 517
+  },
+  {
+    "name": "Spirit Garb",
+    "japaneseName": "スピリットガーブ",
+    "rarity": 6,
+    "maxGrind": 0,
+    "level": 52,
+    "resaleValue": 10,
+    "defenseBase": 132,
+    "defenseMax": 132,
+    "evasionBase": 147,
+    "evasionMax": 147,
+    "psoWorldId": 518
+  },
+  {
+    "name": "Workout Wear",
+    "japaneseName": "エクササイズウェア",
+    "rarity": 6,
+    "maxGrind": 40,
+    "level": 56,
+    "resaleValue": 10,
+    "defenseBase": 124,
+    "defenseMax": 204,
+    "evasionBase": 155,
+    "evasionMax": 235,
+    "psoWorldId": 519
+  },
+  {
+    "name": "Dymos Armor",
+    "japaneseName": "ダイモスアーマー",
+    "rarity": 5,
+    "maxGrind": 40,
+    "level": 28,
+    "resaleValue": 10,
+    "defenseBase": 138,
+    "defenseMax": 218,
+    "evasionBase": 86,
+    "evasionMax": 166,
+    "psoWorldId": 520
+  },
+  {
+    "name": "Hunter Shell",
+    "japaneseName": "ハンターズシェル",
+    "rarity": 5,
+    "maxGrind": 35,
+    "level": 20,
+    "resaleValue": 10,
+    "defenseBase": 126,
+    "defenseMax": 196,
+    "evasionBase": 97,
+    "evasionMax": 167,
+    "psoWorldId": 521
+  },
+  {
+    "name": "Dragon Wing",
+    "japaneseName": "ドラゴンウイング",
+    "rarity": 5,
+    "maxGrind": 40,
+    "level": 24,
+    "resaleValue": 10,
+    "defenseBase": 115,
+    "defenseMax": 195,
+    "evasionBase": 132,
+    "evasionMax": 212,
+    "psoWorldId": 522
+  },
+  {
+    "name": "Eleanor Frame",
+    "japaneseName": "エルノアフレーム",
+    "rarity": 5,
+    "maxGrind": 40,
+    "level": 20,
+    "resaleValue": 10,
+    "defenseBase": 109,
+    "defenseMax": 189,
+    "evasionBase": 138,
+    "evasionMax": 218,
+    "psoWorldId": 523
+  },
+  {
+    "name": "Stage Outfit",
+    "japaneseName": "芸の正装",
+    "rarity": 5,
+    "maxGrind": 45,
+    "level": 26,
+    "resaleValue": 10,
+    "defenseBase": 97,
+    "defenseMax": 187,
+    "evasionBase": 109,
+    "evasionMax": 199,
+    "psoWorldId": 524
+  },
+  {
+    "name": "Rookie/Power",
+    "japaneseName": "ルーキー／パワー",
+    "description": "Slot into armor to use. Minutely raises ATP.",
+    "rarity": 1,
+    "attackBase": 5,
+    "attackMax": 5,
+    "psoWorldId": 316
+  },
+  {
+    "name": "Ace/Power",
+    "japaneseName": "エース／パワー",
+    "rarity": 3,
+    "attackBase": 10,
+    "attackMax": 10,
+    "psoWorldId": 317
+  },
+  {
+    "name": "Hero/Power",
+    "japaneseName": "ヒーロー／パワー",
+    "rarity": 5,
+    "attackBase": 15,
+    "attackMax": 15,
+    "psoWorldId": 318
+  },
+  {
+    "name": "Master/Power",
+    "japaneseName": "マスター／パワー",
+    "rarity": 6,
+    "attackBase": 20,
+    "attackMax": 20,
+    "psoWorldId": 319
+  },
+  {
+    "name": "Divine/Power",
+    "japaneseName": "ゴッド／パワー",
+    "rarity": 7,
+    "attackBase": 25,
+    "attackMax": 25,
+    "psoWorldId": 320
+  },
+  {
+    "name": "Rookie/Guard",
+    "japaneseName": "ルーキー／ガード",
+    "description": "Slot into armor to use. Minutely raises DFP.",
+    "rarity": 1,
+    "defenseBase": 5,
+    "defenseMax": 5,
+    "psoWorldId": 321
+  },
+  {
+    "name": "Ace/Guard",
+    "japaneseName": "エース／ガード",
+    "rarity": 3,
+    "defenseBase": 10,
+    "defenseMax": 10,
+    "psoWorldId": 322
+  },
+  {
+    "name": "Hero/Guard",
+    "japaneseName": "ヒーロー／ガード",
+    "rarity": 5,
+    "defenseBase": 15,
+    "defenseMax": 15,
+    "psoWorldId": 323
+  },
+  {
+    "name": "Master/Guard",
+    "japaneseName": "マスター／ガード",
+    "rarity": 6,
+    "defenseBase": 20,
+    "defenseMax": 20,
+    "psoWorldId": 324
+  },
+  {
+    "name": "Divine/Guard",
+    "japaneseName": "ゴッド／ガード",
+    "rarity": 7,
+    "defenseBase": 25,
+    "defenseMax": 25,
+    "psoWorldId": 325
+  },
+  {
+    "name": "Rookie/Swift",
+    "japaneseName": "ルーキー／スイフト",
+    "description": "Slot into armor to use. Minutely raises EVP.",
+    "rarity": 1,
+    "evasionBase": 5,
+    "evasionMax": 5,
+    "psoWorldId": 326
+  },
+  {
+    "name": "Ace/Swift",
+    "japaneseName": "エース／スイフト",
+    "description": "Slot into armor to use. Slightly raises EVP.",
+    "rarity": 3,
+    "evasionBase": 10,
+    "evasionMax": 10,
+    "psoWorldId": 327
+  },
+  {
+    "name": "Hero/Swift",
+    "japaneseName": "ヒーロー／スイフト",
+    "rarity": 5,
+    "evasionBase": 15,
+    "evasionMax": 15,
+    "psoWorldId": 328
+  },
+  {
+    "name": "Master/Swift",
+    "japaneseName": "マスター／スイフト",
+    "rarity": 6,
+    "evasionBase": 20,
+    "evasionMax": 20,
+    "psoWorldId": 329
+  },
+  {
+    "name": "Divine/Swift",
+    "japaneseName": "ゴッド／スイフト",
+    "rarity": 7,
+    "evasionBase": 25,
+    "evasionMax": 25,
+    "psoWorldId": 330
+  },
+  {
+    "name": "Rookie/Hit",
+    "japaneseName": "ルーキー／ヒット",
+    "description": "Slot into armor to use. Minutely raises ATA.",
+    "rarity": 1,
+    "psoWorldId": 331
+  },
+  {
+    "name": "Ace/Hit",
+    "japaneseName": "エース／ヒット",
+    "rarity": 3,
+    "psoWorldId": 332
+  },
+  {
+    "name": "Hero/Hit",
+    "japaneseName": "ヒーロー／ヒット",
+    "rarity": 5,
+    "psoWorldId": 333
+  },
+  {
+    "name": "Master/Hit",
+    "japaneseName": "マスター／ヒット",
+    "rarity": 6,
+    "psoWorldId": 334
+  },
+  {
+    "name": "Divine/Hit",
+    "japaneseName": "ゴッド／ヒット",
+    "rarity": 7,
+    "psoWorldId": 335
+  },
+  {
+    "name": "Rookie/Mind",
+    "japaneseName": "ルーキー／マインド",
+    "description": "Slot into armor to use. Minutely raises MST.",
+    "rarity": 1,
+    "psoWorldId": 336
+  },
+  {
+    "name": "Ace/Mind",
+    "japaneseName": "エース／マインド",
+    "rarity": 3,
+    "psoWorldId": 337
+  },
+  {
+    "name": "Hero/Mind",
+    "japaneseName": "ヒーロー／マインド",
+    "rarity": 5,
+    "psoWorldId": 338
+  },
+  {
+    "name": "Master/Mind",
+    "japaneseName": "マスター／マインド",
+    "rarity": 6,
+    "psoWorldId": 339
+  },
+  {
+    "name": "Divine/Mind",
+    "japaneseName": "ゴッド／マインド",
+    "rarity": 7,
+    "psoWorldId": 340
+  },
+  {
+    "name": "Rookie/HP",
+    "japaneseName": "ルーキー/HP",
+    "rarity": 1,
+    "psoWorldId": 341
+  },
+  {
+    "name": "Ace/HP",
+    "japaneseName": "エース/HP",
+    "rarity": 3,
+    "psoWorldId": 342
+  },
+  {
+    "name": "Hero/HP",
+    "japaneseName": "ヒーロー/HP",
+    "rarity": 5,
+    "psoWorldId": 343
+  },
+  {
+    "name": "Master/HP",
+    "japaneseName": "マスター/HP",
+    "rarity": 6,
+    "psoWorldId": 344
+  },
+  {
+    "name": "Divine/HP",
+    "japaneseName": "ゴッド/HP",
+    "rarity": 7,
+    "psoWorldId": 345
+  },
+  {
+    "name": "Rookie/PP",
+    "japaneseName": "ルーキー/PP",
+    "rarity": 1,
+    "psoWorldId": 346
+  },
+  {
+    "name": "Ace/PP",
+    "japaneseName": "エース/PP",
+    "rarity": 3,
+    "psoWorldId": 347
+  },
+  {
+    "name": "Hero/PP",
+    "japaneseName": "ヒーロー/PP",
+    "rarity": 5,
+    "psoWorldId": 348
+  },
+  {
+    "name": "Master/PP",
+    "japaneseName": "マスター/PP",
+    "rarity": 6,
+    "psoWorldId": 349
+  },
+  {
+    "name": "Divine/PP",
+    "japaneseName": "ゴッド/PP",
+    "rarity": 7,
+    "psoWorldId": 350
+  },
+  {
+    "name": "HP Recovery Lv1",
+    "japaneseName": "HPリカバリーLv1",
+    "details": "Enables Level 1 HP Regeneration.",
+    "rarity": 2,
+    "psoWorldId": 428
+  },
+  {
+    "name": "HP Recovery Lv2",
+    "japaneseName": "HPリカバリーLv2",
+    "details": "Enables Level 2 HP Regeneration.",
+    "rarity": 4,
+    "psoWorldId": 429
+  },
+  {
+    "name": "HP Recovery Lv3",
+    "japaneseName": "HPリカバリーLv3",
+    "details": "Enables Level 3 HP Regeneration.",
+    "rarity": 5,
+    "psoWorldId": 430
+  },
+  {
+    "name": "HP Recovery Lv4",
+    "japaneseName": "HPリカバリーLv4",
+    "details": "Enables Level 4 HP Regeneration.",
+    "rarity": 6,
+    "psoWorldId": 431
+  },
+  {
+    "name": "HP Recovery Lv5",
+    "japaneseName": "HPリカバリーLv5",
+    "details": "Enables Level 5 HP Regeneration.",
+    "rarity": 7,
+    "psoWorldId": 432
+  },
+  {
+    "name": "PP Recovery Lv1",
+    "japaneseName": "PPリカバリーLv1",
+    "details": "Enables Level 1 PP Regeneration.",
+    "rarity": 2,
+    "psoWorldId": 433
+  },
+  {
+    "name": "PP Recovery Lv2",
+    "japaneseName": "PPリカバリーLv2",
+    "details": "Enables Level 2 PP Regeneration.",
+    "rarity": 4,
+    "psoWorldId": 434
+  },
+  {
+    "name": "PP Recovery Lv3",
+    "japaneseName": "PPリカバリーLv3",
+    "details": "Enables Level 3 PP Regeneration.",
+    "rarity": 5,
+    "psoWorldId": 435
+  },
+  {
+    "name": "PP Recovery Lv4",
+    "japaneseName": "PPリカバリーLv4",
+    "details": "Enables Level 4 PP Regeneration.",
+    "rarity": 6,
+    "psoWorldId": 436
+  },
+  {
+    "name": "PP Recovery Lv5",
+    "japaneseName": "PPリカバリーLv5",
+    "details": "Enables Level 5 PP Regeneration.",
+    "rarity": 7,
+    "psoWorldId": 437
+  },
+  {
+    "name": "Heat Resist Lv1",
+    "japaneseName": "ヒートレジストLv1",
+    "rarity": 1,
+    "psoWorldId": 438
+  },
+  {
+    "name": "Heat Resist Lv2",
+    "japaneseName": "ヒートレジストLv2",
+    "rarity": 3,
+    "psoWorldId": 439
+  },
+  {
+    "name": "Heat Resist Lv3",
+    "japaneseName": "ヒートレジストLv3",
+    "rarity": 5,
+    "psoWorldId": 440
+  },
+  {
+    "name": "Heat Resist Lv4",
+    "japaneseName": "ヒートレジストLv4",
+    "rarity": 6,
+    "psoWorldId": 441
+  },
+  {
+    "name": "Heat Resist Lv5",
+    "japaneseName": "ヒートレジストLv5",
+    "rarity": 7,
+    "psoWorldId": 442
+  },
+  {
+    "name": "Ice Resist Lv1",
+    "japaneseName": "アイスレジストLv1",
+    "description": "Slot into armor to use. Boosts resistance to ice-based techniques.",
+    "rarity": 1,
+    "psoWorldId": 443
+  },
+  {
+    "name": "Ice Resist Lv2",
+    "japaneseName": "アイスレジストLv2",
+    "rarity": 3,
+    "psoWorldId": 444
+  },
+  {
+    "name": "Ice Resist Lv3",
+    "japaneseName": "アイスレジストLv3",
+    "rarity": 5,
+    "psoWorldId": 445
+  },
+  {
+    "name": "Ice Resist Lv4",
+    "japaneseName": "アイスレジストLv4",
+    "rarity": 6,
+    "psoWorldId": 446
+  },
+  {
+    "name": "Ice Resist Lv5",
+    "japaneseName": "アイスレジストLv5",
+    "rarity": 7,
+    "psoWorldId": 447
+  },
+  {
+    "name": "Stun Resist Lv1",
+    "japaneseName": "スタンレジストLv1",
+    "rarity": 1,
+    "psoWorldId": 448
+  },
+  {
+    "name": "Stun Resist Lv2",
+    "japaneseName": "スタンレジストLv2",
+    "rarity": 3,
+    "psoWorldId": 449
+  },
+  {
+    "name": "Stun Resist Lv3",
+    "japaneseName": "スタンレジストLv3",
+    "rarity": 5,
+    "psoWorldId": 450
+  },
+  {
+    "name": "Stun Resist Lv4",
+    "japaneseName": "スタンレジストLv4",
+    "rarity": 6,
+    "psoWorldId": 451
+  },
+  {
+    "name": "Stun Resist Lv5",
+    "japaneseName": "スタンレジストLv5",
+    "rarity": 7,
+    "psoWorldId": 452
+  },
+  {
+    "name": "Light Resist Lv1",
+    "japaneseName": "ライトレジストLv1",
+    "rarity": 1,
+    "psoWorldId": 453
+  },
+  {
+    "name": "Light Resist Lv2",
+    "japaneseName": "ライトレジストLv2",
+    "rarity": 3,
+    "psoWorldId": 454
+  },
+  {
+    "name": "Light Resist Lv3",
+    "japaneseName": "ライトレジストLv3",
+    "rarity": 5,
+    "psoWorldId": 455
+  },
+  {
+    "name": "Light Resist Lv4",
+    "japaneseName": "ライトレジストLv4",
+    "rarity": 6,
+    "psoWorldId": 456
+  },
+  {
+    "name": "Light Resist Lv5",
+    "japaneseName": "ライトレジストLv5",
+    "rarity": 7,
+    "psoWorldId": 457
+  },
+  {
+    "name": "Dark Resist Lv1",
+    "japaneseName": "ダークレジストLv1",
+    "rarity": 1,
+    "psoWorldId": 458
+  },
+  {
+    "name": "Dark Resist Lv2",
+    "japaneseName": "ダークレジストLv2",
+    "rarity": 3,
+    "psoWorldId": 459
+  },
+  {
+    "name": "Dark Resist Lv3",
+    "japaneseName": "ダークレジストLv3",
+    "rarity": 5,
+    "psoWorldId": 460
+  },
+  {
+    "name": "Dark Resist Lv4",
+    "japaneseName": "ダークレジストLv4",
+    "rarity": 6,
+    "psoWorldId": 461
+  },
+  {
+    "name": "Dark Resist Lv5",
+    "japaneseName": "ダークレジストLv5",
+    "rarity": 7,
+    "psoWorldId": 462
+  },
+  {
+    "name": "All Resist Lv1",
+    "japaneseName": "オールレジストLv1",
+    "rarity": 2,
+    "psoWorldId": 463
+  },
+  {
+    "name": "All Resist Lv2",
+    "japaneseName": "オールレジストLv2",
+    "rarity": 4,
+    "psoWorldId": 464
+  },
+  {
+    "name": "All Resist Lv3",
+    "japaneseName": "オールレジストLv3",
+    "rarity": 5,
+    "psoWorldId": 465
+  },
+  {
+    "name": "All Resist Lv4",
+    "japaneseName": "オールレジストLv4",
+    "rarity": 6,
+    "psoWorldId": 466
+  },
+  {
+    "name": "All Resist Lv5",
+    "japaneseName": "オールレジストLv5",
+    "rarity": 7,
+    "psoWorldId": 467
+  },
+  {
+    "name": "Heat Protect",
+    "japaneseName": "ヒートプロテクト",
+    "details": "Grants immunity to Burn status effect.",
+    "rarity": 6,
+    "psoWorldId": 468
+  },
+  {
+    "name": "Ice Protect",
+    "japaneseName": "アイスプロテクト",
+    "details": "Grants immunity to Freeze status effect.",
+    "rarity": 6,
+    "psoWorldId": 469
+  },
+  {
+    "name": "Stun Protect",
+    "japaneseName": "スタンプロテクト",
+    "details": "Grants immunity to Stun status effect.",
+    "rarity": 6,
+    "psoWorldId": 470
+  },
+  {
+    "name": "Light Protect",
+    "japaneseName": "ライトプロテクト",
+    "details": "Grants immunity to Confuse status effect.",
+    "rarity": 6,
+    "psoWorldId": 471
+  },
+  {
+    "name": "Dark Protect",
+    "japaneseName": "ダークプロテクト",
+    "details": "Grants immunity to Poison status effect.",
+    "rarity": 6,
+    "psoWorldId": 472
+  },
+  {
+    "name": "Slow Protect",
+    "japaneseName": "スロープロテクト",
+    "details": "Grants immunity to Slow status effect.",
+    "rarity": 6,
+    "psoWorldId": 473
+  },
+  {
+    "name": "Tech Save Lv1",
+    "japaneseName": "テクニセイブLv1",
+    "details": "Reduces PP consumption for Techniques by 10%.",
+    "rarity": 5,
+    "psoWorldId": 474
+  },
+  {
+    "name": "Tech Save Lv2",
+    "japaneseName": "テクニセイブLv2",
+    "details": "Reduces PP consumption for Techniques by 15%.",
+    "rarity": 6,
+    "psoWorldId": 475
+  },
+  {
+    "name": "Tech Save Lv3",
+    "japaneseName": "テクニセイブLv3",
+    "details": "Reduces PP consumption for Techniques by 20%.",
+    "rarity": 7,
+    "psoWorldId": 476
+  },
+  {
+    "name": "PA save Lv1",
+    "japaneseName": "アーツセイブLv1",
+    "rarity": 5,
+    "psoWorldId": 477
+  },
+  {
+    "name": "PA save Lv2",
+    "japaneseName": "アーツセイブLv2",
+    "details": "Reduces PP consumption for Photon Arts by 15%.",
+    "rarity": 6,
+    "psoWorldId": 478
+  },
+  {
+    "name": "PA save Lv3",
+    "japaneseName": "アーツセイブLv3",
+    "details": "Reduces PP consumption for Photon Arts by 20%.",
+    "rarity": 7,
+    "psoWorldId": 479
+  },
+  {
+    "name": "Tech Level Boost",
+    "japaneseName": "テクレベルブース",
+    "details": "It increases a character's techniques by +1. This is capped at the character's natural technique limits.",
+    "rarity": 5,
+    "psoWorldId": 480
+  },
+  {
+    "name": "Element Boost",
+    "japaneseName": "エレメントブースト",
+    "description": "Slot into armor to use. Ups element levels by +1. Cannot be stacked.",
+    "details": "Increases a weapon's element level by +1. This item cannot be stacked.",
+    "rarity": 5,
+    "psoWorldId": 481
+  },
+  {
+    "name": "Compress PA",
+    "japaneseName": "コンプレスアーツ",
+    "details": "Reduces the charge time for Photon Arts by 33%.",
+    "rarity": 7,
+    "psoWorldId": 482
+  },
+  {
+    "name": "Mag",
+    "japaneseName": "マグ",
+    "details": "The base form (level 0) for a Mag.",
+    "psoWorldId": 315
+  },
+  {
+    "name": "Yul",
+    "japaneseName": "ユル",
+    "details": "Evolution conditions:\n-Lv 10\n-Power > Other stats\n\nAcquired Photon Blast:\nGranir",
+    "psoWorldId": 351
+  },
+  {
+    "name": "Aio",
+    "japaneseName": "エオー",
+    "details": "Evolution conditions:\n-Lv10\n-Guard > Other stats\n\nAcquired Photon Blast:\nMidgul",
+    "psoWorldId": 352
+  },
+  {
+    "name": "Yth",
+    "japaneseName": "イース",
+    "details": "Evolution conditions:\n-Lv10\n-Hit > Other stats\n\nAcquired Photon Blast:\nPacifal",
+    "psoWorldId": 353
+  },
+  {
+    "name": "Ingh",
+    "japaneseName": "イング",
+    "psoWorldId": 354
+  },
+  {
+    "name": "Othel",
+    "japaneseName": "オセル",
+    "details": "Evolution conditions:\n-Lv30\n-Power > Other stats\n\nAcquired Photon Blast:\nPacifal",
+    "psoWorldId": 355
+  },
+  {
+    "name": "Aiolo",
+    "japaneseName": "エオロー",
+    "details": "Evolution conditions:\n-Lv30\n-Guard > Other stats\n\nAcquired Photon Blast:\nFlozir",
+    "psoWorldId": 357
+  },
+  {
+    "name": "Peoth",
+    "japaneseName": "ペオース",
+    "details": "Evolution conditions:\n-Lv30\n-Hit > Other stats\n\nAcquired Photon Blast:\nGranir",
+    "psoWorldId": 358
+  },
+  {
+    "name": "Deegh",
+    "japaneseName": "ディーグ",
+    "details": "Evolution conditions:\n-Lv30\n-Mind > Other stats\n\nAcquired Photon Blast:\nMidgul",
+    "psoWorldId": 359
+  },
+  {
+    "name": "Thohn",
+    "japaneseName": "ソーン",
+    "details": "Evolution conditions:\n-Lv30\n-All stats 0 except Power\n\nAcquired Photon Blast:\nGranir",
+    "psoWorldId": 360
+  },
+  {
+    "name": "Maray",
+    "japaneseName": "マレイ",
+    "details": "Evolution conditions:\n-Lv30\n-All stats 0 except Guard\n\nAcquired Photon Blast:\nMidgul",
+    "psoWorldId": 361
+  },
+  {
+    "name": "Teroo",
+    "japaneseName": "テルー",
+    "details": "Evolution conditions:\n-Lv30\n-All stats 0 except Hit\n\nAcquired Photon Blast:\nPacifal",
+    "psoWorldId": 362
+  },
+  {
+    "name": "Niid",
+    "japaneseName": "ニイド",
+    "details": "Evolution conditions:\n-Lv30\n-All stats 0 except Mind\n\nAcquired Photon Blast:\nFlozir",
+    "psoWorldId": 363
+  },
+  {
+    "name": "Urado",
+    "japaneseName": "ウラド",
+    "details": "Evolution conditions:\n-Lv60, 70, 80, 90, 100\n-Power > Guard > Other stats\n\nAcquired Photon Blast:\nMidgul",
+    "psoWorldId": 364
+  },
+  {
+    "name": "Wyn",
+    "japaneseName": "ウィン",
+    "details": "Evolution conditions:\n-Lv60, 70, 80, 90, 100\n-Power > Hit > Other stats\n\nAcquired Photon Blast:\nPacifal",
+    "psoWorldId": 365
+  },
+  {
+    "name": "Chato",
+    "japaneseName": "シャト",
+    "details": "Evolution conditions:\nRed-Eared Shato\n-Lv60, 70, 80, 90, 100\n-Power > Mind > Other stats\n\nAcquired Photon Blast:\nFlozir\n\nOr:\nBlack Body Shato\n-Lv60, 70, 80, 90, 100\n-Mind > Power > Other stats\n\nAcquired Photon Blast:\nGranir",
+    "psoWorldId": 366
+  },
+  {
+    "name": "Tyrna",
+    "japaneseName": "ティルナ",
+    "details": "Evolution conditions:\n-Lv60, 70, 80, 90, 100\n-Guard > Power > Other stats\n\nAcquired Photon Blast:\nGranir",
+    "psoWorldId": 367
+  },
+  {
+    "name": "Beork",
+    "japaneseName": "ベオーク",
+    "details": "Evolution conditions:\n-Lv60, 70, 80, 90, 100\n-Guard > Hit > Other stats\n\nAcquired Photon Blast:\nPacifal",
+    "psoWorldId": 368
+  },
+  {
+    "name": "Larg",
+    "japaneseName": "ラーグ",
+    "details": "Evolution conditions:\n-Lv60, 70, 80, 90, 100\n-Guard > Mind > Other stats\n\nAcquired Photon Blast:\nFlozir",
+    "psoWorldId": 369
+  },
+  {
+    "name": "Ansul",
+    "japaneseName": "アンスール",
+    "details": "Evolution conditions:\n-Lv60, 70, 80, 90, 100\n-Hit > Power > Other stats\n\nAcquired Photon Blast:\nGranir",
+    "psoWorldId": 370
+  },
+  {
+    "name": "Hagal",
+    "japaneseName": "ハガル",
+    "details": "Evolution conditions:\n-Lv60, 70, 80, 90, 100\n-Hit > Guard > Other stats\n\nAcquired Photon Blast:\nMidgar",
+    "psoWorldId": 371
+  },
+  {
+    "name": "Sig",
+    "japaneseName": "シグ",
+    "details": "Evolution conditions:\nWhite Body Shigu\n-Lv60, 70, 80, 90, 100\n-Hit > Mind > Other stats\n\nAcquired Photon Blast:\nFlozir\n\nOr:\nRegular Shigu\n-Lv60, 70, 80, 90, 100\n-Mind > Hit > Other stats\n\nAcquired Photon Blast:\nPacifal",
+    "psoWorldId": 372
+  },
+  {
+    "name": "Feo",
+    "japaneseName": "フェオ",
+    "details": "Evolution conditions:\n-Lv60, 70, 80, 90, 100\n-Mind > Guard > Other stats\n\nAcquired Photon Blast:\nMidgul",
+    "psoWorldId": 373
+  },
+  {
+    "name": "Rappy",
+    "japaneseName": "ラッピー",
+    "details": "Evolution conditions:\n-At least Lv60\n-Use the \"Rappy Soul\" item on your mag",
+    "psoWorldId": 374
+  },
+  {
+    "name": "Puyo",
+    "japaneseName": "ぷよぷよ",
+    "details": "Evolution conditions:\n-At least Lv60\n-Use the \"Puyo Soul\" item on your mag",
+    "psoWorldId": 375
+  },
+  {
+    "name": "Lassi",
+    "japaneseName": "ラッシィ",
+    "details": "Evolution conditions:\n-At least Lv60\n-Use the \"Lassi Soul\" item on your mag",
+    "psoWorldId": 376
+  },
+  {
+    "name": "Toppi",
+    "japaneseName": "トッピー",
+    "details": "Evolution conditions:\n-At least Lv60\n-Use the \"Toppi Soul\" item on your mag",
+    "psoWorldId": 377
+  },
+  {
+    "name": "Soniti",
+    "japaneseName": "ソニチ",
+    "details": "Evolution conditions:\n-At least Lv70\n-Use the \"Sonichi Soul\" item on your mag",
+    "psoWorldId": 378
+  },
+  {
+    "name": "Arkharz",
+    "japaneseName": "アーカーズ",
+    "details": "Evolution conditions:\n-At least Lv70\n-Use the \"Arkharz Soul\" item on your mag",
+    "psoWorldId": 379
+  },
+  {
+    "name": "Femini",
+    "japaneseName": "フェミニ",
+    "details": "Evolution conditions:\n-At least Lv75\n-Use the \"Femini Soul\" item on your mag",
+    "psoWorldId": 380
+  },
+  {
+    "name": "Radam",
+    "japaneseName": "ラダム",
+    "details": "Evolution conditions:\n-At least Lv80\n-Use the \"Radam Soul\" item on your mag",
+    "psoWorldId": 381
+  },
+  {
+    "name": "Monomate",
+    "japaneseName": "モノメイト",
+    "details": "Restores 30% of HP.",
+    "rarity": 1,
+    "psoWorldId": 299
+  },
+  {
+    "name": "Dimate",
+    "japaneseName": "ディメイト",
+    "details": "Restores 60% of HP.",
+    "rarity": 2,
+    "psoWorldId": 300
+  },
+  {
+    "name": "Trimate",
+    "japaneseName": "トリメイト",
+    "details": "Restores 100% of HP.",
+    "rarity": 3,
+    "psoWorldId": 301
+  },
+  {
+    "name": "Monofluid",
+    "japaneseName": "モノフルイド",
+    "details": "Restores 30% of PP.",
+    "rarity": 2,
+    "psoWorldId": 302
+  },
+  {
+    "name": "Difluid",
+    "japaneseName": "ディフルイド",
+    "details": "Restores 60% of PP.",
+    "rarity": 3,
+    "psoWorldId": 303
+  },
+  {
+    "name": "Trifluid",
+    "japaneseName": "トリフルイド",
+    "details": "Restores 100% of PP.",
+    "rarity": 4,
+    "psoWorldId": 304
+  },
+  {
+    "name": "Sol Atomizer",
+    "japaneseName": "ソルアルトマイザー",
+    "details": "Removes all status effects.",
+    "rarity": 2,
+    "psoWorldId": 305
+  },
+  {
+    "name": "Moon Atomizer",
+    "japaneseName": "ムーンアトマイザー",
+    "details": "Revives dead teammates.",
+    "rarity": 4,
+    "psoWorldId": 306
+  },
+  {
+    "name": "Star Atomizer",
+    "japaneseName": "スターアトマイザー",
+    "details": "Removes status effects from the party and restores 50% of HP.",
+    "rarity": 5,
+    "psoWorldId": 307
+  },
+  {
+    "name": "Trap Vision",
+    "japaneseName": "トラップビジョン",
+    "details": "Temporarily allows any non-Cast race to see traps.",
+    "rarity": 2,
+    "psoWorldId": 308
+  },
+  {
+    "name": "Scape Doll",
+    "japaneseName": "スケープドール",
+    "details": "Revives your character upon death.",
+    "rarity": 5,
+    "psoWorldId": 309
+  },
+  {
+    "name": "Telepipe",
+    "japaneseName": "テレパイプ",
+    "details": "Creates a temporary portal to the city.",
+    "rarity": 2,
+    "psoWorldId": 310
+  },
+  {
+    "name": "Heat Trap",
+    "japaneseName": "ヒートトラップ",
+    "details": "Inflicts Burn Status effect on enemies.",
+    "rarity": 1,
+    "psoWorldId": 311
+  },
+  {
+    "name": "Ice Trap",
+    "japaneseName": "アイストラップ",
+    "details": "Inflicts Freeze Status effect on enemies.",
+    "rarity": 1,
+    "psoWorldId": 312
+  },
+  {
+    "name": "Light Trap",
+    "japaneseName": "ライトトラップ",
+    "details": "Inflicts Confusion status effect on enemies.",
+    "rarity": 1,
+    "psoWorldId": 313
+  },
+  {
+    "name": "Heal Trap",
+    "japaneseName": "ヒールトラップ",
+    "details": "Revives incapacitated teammates and restores 50% of HP.",
+    "rarity": 1,
+    "psoWorldId": 314
+  },
+  {
+    "name": "Reset Material",
+    "japaneseName": "リセットマテリアル",
+    "details": "Resets a character's material usage.",
+    "rarity": 1,
+    "psoWorldId": 525
+  },
+  {
+    "name": "HP Material",
+    "japaneseName": "HPマテリアル",
+    "details": "Increases HP by 2.",
+    "rarity": 6,
+    "psoWorldId": 526
+  },
+  {
+    "name": "PP Material",
+    "japaneseName": "PPマテリアル",
+    "details": "Increases PP by 2.",
+    "rarity": 6,
+    "psoWorldId": 527
+  },
+  {
+    "name": "Power Material",
+    "japaneseName": "パワーマテリアル",
+    "details": "Increases a character's attack points by 1.",
+    "rarity": 6,
+    "psoWorldId": 528
+  },
+  {
+    "name": "Guard Material",
+    "japaneseName": "ガードマテリアル",
+    "details": "Increases a character's defense points by 1.",
+    "rarity": 6,
+    "psoWorldId": 529
+  },
+  {
+    "name": "Hit Material",
+    "japaneseName": "ヒットマテリアル",
+    "details": "Increases a character's accuracy points by 1.",
+    "rarity": 6,
+    "psoWorldId": 530
+  },
+  {
+    "name": "Swift Material",
+    "japaneseName": "スイフトマテリアル",
+    "details": "Increases a character's evasion points by 1.",
+    "rarity": 6,
+    "psoWorldId": 531
+  },
+  {
+    "name": "Mind Material",
+    "japaneseName": "マインドマテリアル",
+    "details": "Increases a character's mental points by 1.",
+    "rarity": 6,
+    "psoWorldId": 532
+  },
+  {
+    "name": "Monogrinder",
+    "japaneseName": "モノグラインダー",
+    "details": "Can be used to grind 1 star to 3 star weapons/armors.",
+    "rarity": 1,
+    "psoWorldId": 533
+  },
+  {
+    "name": "Digrinder",
+    "japaneseName": "ディグラインダー",
+    "details": "Can be used to grind 1 star to 5 star weapons/armors.",
+    "rarity": 3,
+    "psoWorldId": 534
+  },
+  {
+    "name": "Trigrinder",
+    "japaneseName": "トリグラインダー",
+    "details": "Can be used to grind 1 star to 7 star weapons/armors.",
+    "rarity": 5,
+    "psoWorldId": 535
+  },
+  {
+    "name": "Heat Element",
+    "japaneseName": "ヒートエレメント",
+    "details": "Grants a weapon the element of \"Heat\", allowing you to inflict Burn on enemies. Under the effects of Burn, enemies will take constant damage over time. While the damage taken is higher than Poison's, the duration is shorter.\n\nThe strength of Burn increases with the element level.",
+    "rarity": 4,
+    "psoWorldId": 536
+  },
+  {
+    "name": "Ice Element",
+    "japaneseName": "アイスエレメント",
+    "details": "Grants a weapon the element of \"Ice\", allowing you to inflict Freeze on enemies. Under the effects of Freeze, enemies will take 20% more damage.\n\nThe strength of Freeze increases with the element level.",
+    "rarity": 4,
+    "psoWorldId": 537
+  },
+  {
+    "name": "Stun Element",
+    "japaneseName": "スタンエレメンント",
+    "details": "Grants a weapon the element of \"Stun\", allowing you to inflict Stun on enemies. Under the effects of Stun, the enemy can take no action.\n\nThe strength of Stun increases with the element level.",
+    "rarity": 4,
+    "psoWorldId": 538
+  },
+  {
+    "name": "Light Element",
+    "japaneseName": "ライトエレメント",
+    "details": "Grants a weapon the element of \"Light\", allowing you to inflict Confusion on enemies. Under the effects of Confusion, the line between ally and enemy are blurred, and the enemy can attack either.\n\nThe strength of Confusion increases with the element level.",
+    "rarity": 5,
+    "psoWorldId": 539
+  },
+  {
+    "name": "Dark Element",
+    "japaneseName": "ダークエレメント",
+    "details": "Grants a weapon the element of \"Dark\", allowing you to inflict Poison on enemies. Under the effects of Poison, enemies will take constant damage over time. While the damage taken is lower than Burn's, the duration is longer.\n\nThe strength of Poison increases with the element level.",
+    "rarity": 5,
+    "psoWorldId": 540
+  },
+  {
+    "name": "Draw Element",
+    "japaneseName": "ドローエレメント",
+    "details": "Grants a weapon the element of \"Draw\", allowing you to absorb a percentage of the damage you deal as HP.\n\nThe percentage drawn at each level of Draw is as follows:\nLv 1: 5%\nLv 2: 10%\nLv 3: 15%\nLv 4: 20%\nLv 5: 25%",
+    "rarity": 5,
+    "psoWorldId": 541
+  },
+  {
+    "name": "Heart Element",
+    "japaneseName": "ハートエレメント",
+    "details": "Grants a weapon the element of \"Heart\", allowing you to absorb a percentage of the damage you deal as PP.\n\nThe percentage drawn at each level of Heart is as follows:\nLv 1: 5%\nLv 2: 10%\nLv 3: 15%\nLv 4: 20%\nLv 5: 25%",
+    "rarity": 5,
+    "psoWorldId": 542
+  },
+  {
+    "name": "Heaven Element",
+    "japaneseName": "ヘブンエレメント",
+    "details": "Grants a weapon the element of \"Heaven\", giving you a chance to instantly incapacitate an enemy.\n\nThe chance of incapacitation increases with the element level.\n\nThis item is acquired by completing all other titles.",
+    "rarity": 5,
+    "psoWorldId": 543
+  },
+  {
+    "name": "Soul Element",
+    "japaneseName": "ソウルエレメント",
+    "details": "Grants a weapon the element of \"Soul\", granting a boost to your Attack Power and Mental Strength when your remaining HP is below 33%. However, this is ineffective with Techniques.\n\nThe stat increase percentage at each level of Soul is as follows:\nLv 1: 10%\nLv 2: 15%\nLv 3: 20%\nLv 4: 25%\nLv 5: 30%",
+    "rarity": 5,
+    "psoWorldId": 544
+  }
+]
