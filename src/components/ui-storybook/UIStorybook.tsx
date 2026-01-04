@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import HUDStorybook from '../hud/HUDStorybook';
+import ActionPaletteStorybook from '../palette/ActionPaletteStorybook';
 
 type UIComponent = 'hud' | 'action-palette' | 'minimap' | 'item-tooltip' | 'main-menu' | 'stats' | 'shops';
 
 const UI_COMPONENTS: { id: UIComponent; label: string; available: boolean }[] = [
   { id: 'hud', label: 'HUD', available: true },
-  { id: 'action-palette', label: 'Action Palette', available: false },
+  { id: 'action-palette', label: 'Action Palette', available: true },
   { id: 'minimap', label: 'Minimap', available: false },
   { id: 'item-tooltip', label: 'Item Tooltip', available: false },
   { id: 'main-menu', label: 'Main Menu', available: false },
@@ -43,7 +44,7 @@ export default function UIStorybook() {
       {/* Content */}
       <div style={styles.content}>
         {selected === 'hud' && <HUDStorybook />}
-        {selected === 'action-palette' && <PlaceholderPanel name="Action Palette" />}
+        {selected === 'action-palette' && <ActionPaletteStorybook />}
         {selected === 'minimap' && <PlaceholderPanel name="Minimap" />}
         {selected === 'item-tooltip' && <PlaceholderPanel name="Item Tooltip" />}
         {selected === 'main-menu' && <PlaceholderPanel name="Main Menu" />}
