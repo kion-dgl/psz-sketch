@@ -982,7 +982,7 @@ export default function WeaponGallery() {
             </div>
 
             {/* Photon Arts */}
-            {selectedWeaponStats.photonArts.length > 0 && (
+            {selectedWeaponStats.photonArts && selectedWeaponStats.photonArts.length > 0 && (
               <div style={{ marginBottom: '12px' }}>
                 <div style={{ fontSize: '10px', color: '#888', marginBottom: '6px' }}>Photon Arts</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -1009,7 +1009,7 @@ export default function WeaponGallery() {
             )}
 
             {/* Usable By */}
-            {selectedWeaponStats.usableBy.length > 0 && (
+            {selectedWeaponStats.usableBy && selectedWeaponStats.usableBy.length > 0 && (
               <div>
                 <div style={{ fontSize: '10px', color: '#888', marginBottom: '6px' }}>Usable By</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
