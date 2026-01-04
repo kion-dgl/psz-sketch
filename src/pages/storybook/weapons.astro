@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import WeaponGallery from '../../components/weapons/WeaponGallery';
+
+export const prerender = false;
+---
+
+<Layout title="Weapon Gallery - PSZ Sketch">
+  <WeaponGallery client:load />
+</Layout>

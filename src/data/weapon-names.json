@@ -1,0 +1,51 @@
+{
+  "wswc01_1_b": {
+    "name": "Ein Calibur",
+    "notes": "orange tip",
+    "missingVariants": ["Deo Calibur (purple tip)"]
+  },
+  "wswc01_3_b": {
+    "name": "Askalon",
+    "notes": "pink edge",
+    "missingVariants": ["Ainraiffe (orange edge)"]
+  },
+  "wswh01_1_b": {
+    "name": "Sword",
+    "notes": "black center",
+    "missingVariants": ["Chrome Sword (gray center)"]
+  },
+  "wswh01_3_b": {
+    "name": "Jamshid",
+    "missingVariants": ["Zanhak"]
+  },
+  "wswn01_1_b": {
+    "name": "Claymore",
+    "missingVariants": ["Ray Claymore"]
+  },
+  "wswn01_3_b": {
+    "name": "Ka Vorg",
+    "missingVariants": ["Klau Solas"]
+  },
+  "wswr01_1_b": {
+    "name": "Eghesachs",
+    "missingVariants": ["Gale Bringer"]
+  },
+  "wswr02_1_b": {
+    "name": "Yonohate Fu",
+    "missingVariants": ["Akatsuki Fu"]
+  },
+  "wswr03_1_b": {
+    "name": "Akatsuki In",
+    "missingVariants": ["Yonohate In"]
+  },
+  "wswr04_1_b": {
+    "name": "Milias Sword"
+  },
+  "wswr04_2_b": {
+    "name": "Milias Breaker",
+    "notes": "texture broken, identified by shape and texture preview"
+  },
+  "wswr05_1_b": {
+    "name": "Hocho"
+  }
+}

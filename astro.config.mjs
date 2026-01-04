@@ -14,6 +14,20 @@ export default defineConfig({
 	adapter: vercel(),
 	vite: {
 		plugins: [tailwindcss()],
+		server: {
+			watch: {
+				// Exclude large static asset directories from file watching
+				// to reduce memory usage during development
+				ignored: [
+					'**/public/weapons/**',
+					'**/public/stages/**',
+					'**/public/objects/**',
+					'**/public/player/**',
+					'**/public/screenshots/**',
+					'**/public/character-previews/**',
+				],
+			},
+		},
 	},
 	env: {
 		schema: {

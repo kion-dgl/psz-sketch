@@ -1,0 +1,43 @@
+{
+  "prefixes": {
+    "ba": "Bazooka",
+    "cl": "Claw",
+    "da": "Dagger",
+    "ds": "Double Saber",
+    "gb": "Gunblade",
+    "hg": "Handgun",
+    "lc": "Launcher",
+    "ma": "Mag",
+    "mg": "Machinegun",
+    "rf": "Rifle",
+    "ro": "Rod",
+    "sa": "Saber",
+    "sh": "Shield",
+    "sl": "Slicer",
+    "sp": "Spear",
+    "sw": "Sword",
+    "wa": "Wand"
+  },
+  "rarities": {
+    "c": { "label": "Common", "stars": "1-2", "color": "#888888" },
+    "h": { "label": "Uncommon", "stars": "3-4", "color": "#4a9eff" },
+    "n": { "label": "Rare", "stars": "5-6", "color": "#ffcc00" },
+    "r": { "label": "Very Rare", "stars": "7+", "color": "#ff4444" }
+  },
+  "magSpecialFormat": {
+    "note": "Mags use different numbering: wma{type}{level} where type=a-e and level=1-5",
+    "types": {
+      "a": "Attack Mag",
+      "b": "Defense Mag",
+      "c": "Support Mag",
+      "d": "Special Mag",
+      "e": "Rare Mag"
+    }
+  },
+  "idFormat": "w + prefix(2) + rarity(1) + number(2)",
+  "example": "whgr03 = weapon + handgun + very_rare + 03",
+  "dataSources": [
+    "https://www.pso-world.com/psz-items.php (weapon database with stats)",
+    "https://phantasystar.fandom.com/wiki/Category:Phantasy_Star_Zero_Weapons (wiki with lore)"
+  ]
+}
