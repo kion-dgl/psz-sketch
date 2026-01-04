@@ -2129,5 +2129,921 @@
         "variantId": "wror06_1_b"
       }
     ]
+  },
+  "wands": {
+    "category": "wand",
+    "wikiUrl": "https://phantasystar.fandom.com/wiki/Wands_(Phantasy_Star_Zero)",
+    "weapons": [
+      {
+        "name": "Wand",
+        "rarity": 1,
+        "level": 1,
+        "modelId": "wwah01",
+        "variantId": "wwah01_1_o"
+      },
+      {
+        "name": "Tact",
+        "rarity": 1,
+        "level": 1,
+        "modelId": "wwac01",
+        "variantId": "wwac01_1_o"
+      },
+      {
+        "name": "Cane",
+        "rarity": 1,
+        "level": 1,
+        "modelId": "wwan01",
+        "variantId": "wwan01_1_o"
+      },
+      {
+        "name": "Ein Tact",
+        "rarity": 2,
+        "level": 2,
+        "modelId": "wwac01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wwac01_1_o"
+      },
+      {
+        "name": "Chrome Wand",
+        "rarity": 3,
+        "level": 5,
+        "modelId": "wwah01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wwah01_1_o"
+      },
+      {
+        "name": "Clear Cane",
+        "rarity": 3,
+        "level": 5,
+        "modelId": "wwan01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wwan01_1_o"
+      },
+      {
+        "name": "Dumbbell",
+        "rarity": 3,
+        "level": 5,
+        "modelId": "wwar04",
+        "variantId": "wwar04_1_o"
+      },
+      {
+        "name": "Rose Quartz",
+        "rarity": 4,
+        "level": 12,
+        "modelId": "wwah01",
+        "variantId": "wwah01_3_o"
+      },
+      {
+        "name": "Magi Processor",
+        "rarity": 4,
+        "level": 12,
+        "modelId": "wwac01",
+        "variantId": "wwac01_3_o"
+      },
+      {
+        "name": "Bright Moon",
+        "rarity": 4,
+        "level": 12,
+        "modelId": "wwar03",
+        "variantId": "wwar03_1_o"
+      },
+      {
+        "name": "Magi Circuit",
+        "rarity": 5,
+        "level": 20,
+        "modelId": "wwac01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wwac01_3_o"
+      },
+      {
+        "name": "Annasans",
+        "rarity": 5,
+        "level": 24,
+        "modelId": "wwan01",
+        "variantId": "wwan01_3_o"
+      },
+      {
+        "name": "Emerald Tablet",
+        "rarity": 5,
+        "level": 24,
+        "modelId": "wwar01",
+        "variantId": "wwar01_1_o"
+      },
+      {
+        "name": "Diopside",
+        "rarity": 6,
+        "level": 32,
+        "modelId": "wwah01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wwah01_3_o"
+      },
+      {
+        "name": "Heavy Dumbbell",
+        "rarity": 6,
+        "level": 36,
+        "modelId": "wwar04",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wwar04_1_o"
+      },
+      {
+        "name": "Alice Olivia",
+        "rarity": 7,
+        "level": 54,
+        "modelId": "wwan01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wwan01_3_o"
+      },
+      {
+        "name": "Starlight",
+        "rarity": 7,
+        "level": 60,
+        "modelId": "wwar03",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wwar03_1_o"
+      },
+      {
+        "name": "Zero Cane",
+        "rarity": 7,
+        "level": 70,
+        "modelId": "wwar05",
+        "variantId": "wwar05_1_o"
+      },
+      {
+        "name": "Al Azif",
+        "rarity": 7,
+        "level": 80,
+        "modelId": "wwar01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wwar01_1_o"
+      },
+      {
+        "name": "Game Master",
+        "rarity": 7,
+        "level": 50,
+        "modelId": "wwar02",
+        "variantId": "wwar02_1_o",
+        "notes": "Event weapon"
+      },
+      {
+        "name": "CONSOLES+",
+        "rarity": 7,
+        "level": 50,
+        "modelId": "wwar02",
+        "variantId": "wwar02_2_o",
+        "notes": "Event weapon"
+      },
+      {
+        "name": "InGame:Greh8Kiri",
+        "rarity": 7,
+        "level": 50,
+        "modelId": "wwar02",
+        "variantId": "wwar02_3_o",
+        "notes": "Event weapon"
+      },
+      {
+        "name": "Nintendo Power",
+        "rarity": 7,
+        "level": 50,
+        "modelId": "wwar02",
+        "variantId": "wwar02_5_o",
+        "notes": "Event weapon"
+      }
+    ]
+  },
+  "shields": {
+    "category": "shield",
+    "wikiUrl": "https://phantasystar.fandom.com/wiki/Shields_(Phantasy_Star_Zero)",
+    "weapons": [
+      {
+        "name": "Shield",
+        "rarity": 1,
+        "level": 1,
+        "modelId": "wshh01",
+        "variantId": "wshh01_1_o"
+      },
+      {
+        "name": "Helion Roar",
+        "rarity": 2,
+        "level": 2,
+        "modelId": "wshh02",
+        "variantId": "wshh02_1_o"
+      },
+      {
+        "name": "Ray Bangle",
+        "rarity": 2,
+        "level": 2,
+        "modelId": "wshn01",
+        "variantId": "wshn01_1_o"
+      },
+      {
+        "name": "Clear Bangle",
+        "rarity": 3,
+        "level": 5,
+        "modelId": "wshn01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wshn01_1_o"
+      },
+      {
+        "name": "Jade Hulse",
+        "rarity": 3,
+        "level": 5,
+        "modelId": "wshh02",
+        "variantId": "wshh02_3_o"
+      },
+      {
+        "name": "Tatami Mat",
+        "rarity": 3,
+        "level": 5,
+        "modelId": "wshr03",
+        "variantId": "wshr03_1_o"
+      },
+      {
+        "name": "Chrome Shield",
+        "rarity": 4,
+        "level": 12,
+        "modelId": "wshr07",
+        "variantId": "wshr07_1_o"
+      },
+      {
+        "name": "Crimsonfield",
+        "rarity": 4,
+        "level": 12,
+        "modelId": "wshr02",
+        "variantId": "wshr02_1_o"
+      },
+      {
+        "name": "Blaze Roar",
+        "rarity": 5,
+        "level": 20,
+        "modelId": "wshh02",
+        "variantId": "wshh02_2_o"
+      },
+      {
+        "name": "Egalta",
+        "rarity": 5,
+        "level": 20,
+        "modelId": "wshn01",
+        "variantId": "wshn01_3_o"
+      },
+      {
+        "name": "Lieucon Stihl",
+        "rarity": 5,
+        "level": 20,
+        "modelId": "wshr05",
+        "variantId": "wshr05_1_o"
+      },
+      {
+        "name": "Selvaria's Shield",
+        "rarity": 5,
+        "level": 20,
+        "modelId": "wshr06",
+        "variantId": "wshr06_1_o",
+        "notes": "Valkyria Chronicles crossover"
+      },
+      {
+        "name": "Acegalda",
+        "rarity": 6,
+        "level": 32,
+        "modelId": "wshn01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wshn01_3_o"
+      },
+      {
+        "name": "Crysta Hulse",
+        "rarity": 6,
+        "level": 32,
+        "modelId": "wshh02",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wshh02_3_o"
+      },
+      {
+        "name": "Remjees",
+        "rarity": 6,
+        "level": 32,
+        "modelId": "wshh01",
+        "variantId": "wshh01_3_o"
+      },
+      {
+        "name": "Scarred Tatami",
+        "rarity": 6,
+        "level": 32,
+        "modelId": "wshr03",
+        "variantId": "wshr03_2_o"
+      },
+      {
+        "name": "Schwarz Stihl",
+        "rarity": 6,
+        "level": 36,
+        "modelId": "wshr05",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wshr05_1_o"
+      },
+      {
+        "name": "Vanguard",
+        "rarity": 6,
+        "level": 36,
+        "modelId": "wshr04",
+        "variantId": "wshr04_1_o"
+      },
+      {
+        "name": "Ajax",
+        "rarity": 7,
+        "level": 54,
+        "modelId": "wshr04",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wshr04_1_o"
+      },
+      {
+        "name": "Emeraldfield",
+        "rarity": 7,
+        "level": 60,
+        "modelId": "wshr02",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wshr02_1_o"
+      },
+      {
+        "name": "Iros",
+        "rarity": 7,
+        "level": 70,
+        "modelId": "wshh01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wshh01_3_o"
+      }
+    ]
+  },
+  "mags": {
+    "category": "mag",
+    "wikiUrl": "https://phantasystar.fandom.com/wiki/Category:Phantasy_Star_Zero_Mags",
+    "weapons": [
+      {
+        "name": "Mag",
+        "rarity": 1,
+        "level": 1,
+        "modelId": "wmaa1",
+        "variantId": "wmaa1_1_1",
+        "notes": "Stage 1 - Starting mag"
+      },
+      {
+        "name": "Yul",
+        "rarity": 3,
+        "level": 10,
+        "modelId": "wmaa2",
+        "variantId": "wmaa2_1_1",
+        "notes": "Stage 2"
+      },
+      {
+        "name": "Aio",
+        "rarity": 3,
+        "level": 10,
+        "modelId": "wmab2",
+        "variantId": "wmab2_1_1",
+        "notes": "Stage 2"
+      },
+      {
+        "name": "Yth",
+        "rarity": 3,
+        "level": 10,
+        "modelId": "wmac2",
+        "variantId": "wmac2_1_1",
+        "notes": "Stage 2"
+      },
+      {
+        "name": "Ingh",
+        "rarity": 3,
+        "level": 10,
+        "modelId": "wmad2",
+        "variantId": "wmad2_1_1",
+        "notes": "Stage 2"
+      },
+      {
+        "name": "Othel",
+        "rarity": 5,
+        "level": 30,
+        "modelId": "wmaa3",
+        "variantId": "wmaa3_1_1",
+        "notes": "Stage 3"
+      },
+      {
+        "name": "Thohn",
+        "rarity": 5,
+        "level": 30,
+        "modelId": "wmaa3",
+        "variantId": "wmaa3_2_1",
+        "notes": "Stage 3"
+      },
+      {
+        "name": "Aiolo",
+        "rarity": 5,
+        "level": 30,
+        "modelId": "wmab3",
+        "variantId": "wmab3_1_1",
+        "notes": "Stage 3"
+      },
+      {
+        "name": "Maray",
+        "rarity": 5,
+        "level": 30,
+        "modelId": "wmab3",
+        "variantId": "wmab3_2_1",
+        "notes": "Stage 3"
+      },
+      {
+        "name": "Peoth",
+        "rarity": 5,
+        "level": 30,
+        "modelId": "wmac3",
+        "variantId": "wmac3_1_1",
+        "notes": "Stage 3"
+      },
+      {
+        "name": "Teroo",
+        "rarity": 5,
+        "level": 30,
+        "modelId": "wmac3",
+        "variantId": "wmac3_2_1",
+        "notes": "Stage 3"
+      },
+      {
+        "name": "Deegh",
+        "rarity": 5,
+        "level": 30,
+        "modelId": "wmad3",
+        "variantId": "wmad3_1_1",
+        "notes": "Stage 3"
+      },
+      {
+        "name": "Niid",
+        "rarity": 5,
+        "level": 30,
+        "modelId": "wmad3",
+        "variantId": "wmad3_2_1",
+        "notes": "Stage 3"
+      },
+      {
+        "name": "Urado",
+        "rarity": 7,
+        "level": 60,
+        "modelId": "wmaa4",
+        "variantId": "wmaa4_1_1",
+        "notes": "Stage 4"
+      },
+      {
+        "name": "Tyrna",
+        "rarity": 7,
+        "level": 60,
+        "modelId": "wmab4",
+        "variantId": "wmab4_3_1",
+        "notes": "Stage 4"
+      },
+      {
+        "name": "Ansul",
+        "rarity": 7,
+        "level": 60,
+        "modelId": "wmac4",
+        "variantId": "wmac4_1_1",
+        "notes": "Stage 4"
+      },
+      {
+        "name": "Wyn",
+        "rarity": 7,
+        "level": 60,
+        "modelId": "wmac4",
+        "variantId": "wmac4_2_1",
+        "notes": "Stage 4"
+      },
+      {
+        "name": "Hagal",
+        "rarity": 7,
+        "level": 60,
+        "modelId": "wmac4",
+        "variantId": "wmac4_3_1",
+        "notes": "Stage 4"
+      },
+      {
+        "name": "Feo",
+        "rarity": 7,
+        "level": 60,
+        "modelId": "wmad4",
+        "variantId": "wmad4_1_1",
+        "notes": "Stage 4"
+      },
+      {
+        "name": "Sig",
+        "rarity": 7,
+        "level": 60,
+        "modelId": "wmad4",
+        "variantId": "wmad4_2_1",
+        "notes": "Stage 4 - Colored Body"
+      },
+      {
+        "name": "Sig (White)",
+        "rarity": 7,
+        "level": 60,
+        "modelId": "wmad4",
+        "variantId": "wmad4_4_1",
+        "notes": "Stage 4 - White Body variant"
+      },
+      {
+        "name": "Beork",
+        "rarity": 7,
+        "level": 60,
+        "modelId": null,
+        "variantId": null,
+        "missingTexture": true,
+        "notes": "Stage 4 - Missing model"
+      },
+      {
+        "name": "Larg",
+        "rarity": 7,
+        "level": 60,
+        "modelId": null,
+        "variantId": null,
+        "missingTexture": true,
+        "notes": "Stage 4 - Missing model"
+      },
+      {
+        "name": "Chato",
+        "rarity": 7,
+        "level": 60,
+        "modelId": null,
+        "variantId": null,
+        "missingTexture": true,
+        "notes": "Stage 4 - Missing model (has Black and Colored variants)"
+      },
+      {
+        "name": "Puyo",
+        "rarity": 7,
+        "level": 70,
+        "modelId": "wmae5",
+        "variantId": "wmae5_5_1",
+        "notes": "Rare mag - Puyo Puyo crossover"
+      },
+      {
+        "name": "Pirate Bear",
+        "rarity": 7,
+        "level": 70,
+        "modelId": "wmae5",
+        "variantId": "wmae5_8_1",
+        "notes": "Rare mag - Unknown official name"
+      },
+      {
+        "name": "Soniti",
+        "rarity": 7,
+        "level": 70,
+        "modelId": null,
+        "variantId": null,
+        "missingTexture": true,
+        "notes": "Rare mag - Missing model"
+      },
+      {
+        "name": "Rappy",
+        "rarity": 7,
+        "level": 70,
+        "modelId": null,
+        "variantId": null,
+        "missingTexture": true,
+        "notes": "Rare mag - Missing model"
+      },
+      {
+        "name": "Femini",
+        "rarity": 7,
+        "level": 70,
+        "modelId": null,
+        "variantId": null,
+        "missingTexture": true,
+        "notes": "Rare mag - Missing model"
+      },
+      {
+        "name": "Radam",
+        "rarity": 7,
+        "level": 70,
+        "modelId": null,
+        "variantId": null,
+        "missingTexture": true,
+        "notes": "Rare mag - Missing model"
+      }
+    ]
+  },
+  "daggers": {
+    "category": "dagger",
+    "wikiUrl": "https://phantasystar.fandom.com/wiki/Daggers_(Phantasy_Star_Zero)",
+    "weapons": [
+      {
+        "name": "Daggers",
+        "rarity": 1,
+        "level": 1,
+        "modelId": "wdah01",
+        "variantId": "wdah01_1_r"
+      },
+      {
+        "name": "Ein Ripper",
+        "rarity": 2,
+        "level": 2,
+        "modelId": "wdac01",
+        "variantId": "wdac01_1_r"
+      },
+      {
+        "name": "Ray Knife",
+        "rarity": 2,
+        "level": 2,
+        "modelId": "wdan01",
+        "variantId": "wdan01_1_r"
+      },
+      {
+        "name": "8-Ouncer",
+        "rarity": 2,
+        "level": 2,
+        "modelId": "wdar02",
+        "variantId": "wdar02_1_r"
+      },
+      {
+        "name": "Chrome Daggers",
+        "rarity": 3,
+        "level": 5,
+        "modelId": "wdah01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wdah01_1_r"
+      },
+      {
+        "name": "Deo Ripper",
+        "rarity": 3,
+        "level": 5,
+        "modelId": "wdac01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wdac01_1_r"
+      },
+      {
+        "name": "Hollow Gimlet",
+        "rarity": 3,
+        "level": 6,
+        "modelId": "wdar03",
+        "variantId": "wdar03_1_r"
+      },
+      {
+        "name": "Lapis Fang",
+        "rarity": 4,
+        "level": 12,
+        "modelId": "wdah01",
+        "variantId": "wdah01_3_r"
+      },
+      {
+        "name": "Clear Knife",
+        "rarity": 4,
+        "level": 12,
+        "modelId": "wdan01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wdan01_1_r"
+      },
+      {
+        "name": "Tonfa",
+        "rarity": 4,
+        "level": 14,
+        "modelId": "wdar01",
+        "variantId": "wdar01_1_r"
+      },
+      {
+        "name": "Jormungand",
+        "rarity": 5,
+        "level": 20,
+        "modelId": "wdac01",
+        "variantId": "wdac01_3_r"
+      },
+      {
+        "name": "Featherhand",
+        "rarity": 5,
+        "level": 24,
+        "modelId": "wdan01",
+        "variantId": "wdan01_3_r"
+      },
+      {
+        "name": "12-Ouncer",
+        "rarity": 5,
+        "level": 26,
+        "modelId": "wdar02",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wdar02_1_r"
+      },
+      {
+        "name": "Jasper Roar",
+        "rarity": 6,
+        "level": 32,
+        "modelId": "wdah01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wdah01_3_r"
+      },
+      {
+        "name": "Fenrir",
+        "rarity": 6,
+        "level": 36,
+        "modelId": "wdac01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wdac01_3_r"
+      },
+      {
+        "name": "Bloody Gimlet",
+        "rarity": 6,
+        "level": 40,
+        "modelId": "wdar03",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wdar03_1_r"
+      },
+      {
+        "name": "Foie Haze",
+        "rarity": 7,
+        "level": 54,
+        "modelId": "wdan01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wdan01_3_r"
+      },
+      {
+        "name": "Rage Tonfa",
+        "rarity": 7,
+        "level": 56,
+        "modelId": "wdar01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wdar01_1_r"
+      }
+    ]
+  },
+  "machineguns": {
+    "category": "machinegun",
+    "wikiUrl": "https://phantasystar.fandom.com/wiki/Mech_Guns_(Phantasy_Star_Zero)",
+    "weapons": [
+      {
+        "name": "Twin Fire",
+        "rarity": 1,
+        "level": 1,
+        "modelId": "wmgh01",
+        "variantId": "wmgh01_1_r"
+      },
+      {
+        "name": "Twin Assault",
+        "rarity": 2,
+        "level": 2,
+        "modelId": "wmgc01",
+        "variantId": "wmgc01_1_r"
+      },
+      {
+        "name": "Twin Ketchup",
+        "rarity": 2,
+        "level": 2,
+        "modelId": "wmgr02",
+        "variantId": "wmgr02_1_r"
+      },
+      {
+        "name": "Chrome Fire",
+        "rarity": 2,
+        "level": 2,
+        "modelId": "wmgh01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wmgh01_1_r"
+      },
+      {
+        "name": "Twin Carbines",
+        "rarity": 3,
+        "level": 5,
+        "modelId": "wmgh02",
+        "variantId": "wmgh02_1_r"
+      },
+      {
+        "name": "Deo Twins",
+        "rarity": 3,
+        "level": 5,
+        "modelId": "wmgc01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wmgc01_1_r"
+      },
+      {
+        "name": "Scissors Mech Guns",
+        "rarity": 3,
+        "level": 6,
+        "modelId": "wmgr03",
+        "variantId": "wmgr03_1_r"
+      },
+      {
+        "name": "Twin Mustard",
+        "rarity": 4,
+        "level": 12,
+        "modelId": "wmgr02",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wmgr02_1_r"
+      },
+      {
+        "name": "Chrome Twins",
+        "rarity": 4,
+        "level": 12,
+        "modelId": "wmgh02",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wmgh02_1_r"
+      },
+      {
+        "name": "Bergmann",
+        "rarity": 4,
+        "level": 12,
+        "modelId": "wmgh01",
+        "variantId": "wmgh01_3_r"
+      },
+      {
+        "name": "Clear Scissor Twins",
+        "rarity": 5,
+        "level": 16,
+        "modelId": "wmgr03",
+        "variantId": "wmgr03_2_r"
+      },
+      {
+        "name": "Schmeisser",
+        "rarity": 5,
+        "level": 20,
+        "modelId": "wmgh01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wmgh01_3_r"
+      },
+      {
+        "name": "Grifone",
+        "rarity": 5,
+        "level": 24,
+        "modelId": "wmgc01",
+        "variantId": "wmgc01_3_r"
+      },
+      {
+        "name": "Blue Bulletta",
+        "rarity": 6,
+        "level": 32,
+        "modelId": "wmgh02",
+        "variantId": "wmgh02_3_r"
+      },
+      {
+        "name": "Blackhawk",
+        "rarity": 6,
+        "level": 36,
+        "modelId": "wmgc01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wmgc01_3_r"
+      },
+      {
+        "name": "Twin Violets",
+        "rarity": 6,
+        "level": 38,
+        "modelId": "wmgr01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wmgr01_1_r"
+      },
+      {
+        "name": "Riverman Missouri",
+        "rarity": 6,
+        "level": 42,
+        "modelId": "wmgr04",
+        "variantId": "wmgr04_1_r",
+        "notes": "Named after the USS Missouri battleship"
+      },
+      {
+        "name": "Crimson Vis",
+        "rarity": 7,
+        "level": 54,
+        "modelId": "wmgh02",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wmgh02_3_r"
+      },
+      {
+        "name": "Twin Psychoguns",
+        "rarity": 7,
+        "level": 64,
+        "modelId": "wmgr01",
+        "variantId": "wmgr01_1_r"
+      }
+    ]
   }
 }
