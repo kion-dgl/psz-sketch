@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1000 866"
+    xmlns:cc="http://creativecommons.org/ns#"
+>
+<metadata typeof="cc:Work">
+    This work, from
+    <a property="cc:attributionName" rel="cc:attributionURL"
+        href="https://github.com/akdb/pso-icons"
+    >
+    pso-icons</a>, is licensed under a
+    <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">
+        Creative Commons Attribution-ShareAlike 4.0 International License
+    </a>.
+</metadata>
+<style>
+* {
+    fill: #efef00;
+}
+</style>
+
+<!--Center edge-->
+<path d="
+    m   345,286
+        140,0
+        170,294
+        -140,0
+    z"
+/>
+
+<!--NE edge-->
+<path d="
+    m   414,105
+        307,0
+        61,112
+        -4,7
+        -80,0
+        -4,-7
+        -227,0
+    z"
+/>
+
+<!--SW edge-->
+<path d="
+    m   206,657
+        307,0
+        65,112
+        -267,0
+        -4,7
+        -40,0
+    z"
+/>
+
+<!--NW Orb-->
+<ellipse
+    cx="329" cy="158" rx="84" ry="79"
+/>
+
+<!--SE Orb-->
+<ellipse
+    cx="665" cy="683" rx="87" ry="82"
+/>
+
+</svg>

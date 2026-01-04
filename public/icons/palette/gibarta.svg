@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1000 866"
+    xmlns:cc="http://creativecommons.org/ns#"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+<metadata typeof="cc:Work">
+    This work, from
+    <a property="cc:attributionName" rel="cc:attributionURL"
+        href="https://github.com/akdb/pso-icons"
+    >
+    pso-icons</a>, is licensed under a
+    <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">
+        Creative Commons Attribution-ShareAlike 4.0 International License
+    </a>.
+</metadata>
+<style>
+* {
+    fill: #31cbff;
+}
+</style>
+<defs>
+    <!--Outer spike-->
+    <g id="g">
+        <!--Orb-->
+        <circle id="c"
+            cx="485" cy="433" r="52"
+        />
+
+        <!--Spike base-->
+        <path id="b" d="
+            m   556,485
+                182,0
+                -26,-52
+                26,-52
+                -182,0
+            a   90,90 0 0 1 0,104
+            z"
+        />
+        
+        <!--Spike point-->
+        <path d="
+            m   247,433
+                87,-51
+                79,0
+            a   90,90 0 0 0 0,104
+            l    -79,0
+            z"
+        />
+    </g>
+
+</defs>
+
+<!--Center spike end-->
+<path d="
+    m   142,433
+        87,-51
+        174,0
+    a   90,90 0 0 0 0,104
+    l    -174,0
+    z"
+/>
+
+<!--Center spike base-->
+<path d="
+    m   546,485
+        192,0
+        -26,-52
+        26,-52
+        -192,0
+    a   90,90 0 0 1 0,104
+    z"
+/>
+
+<!--Center spike orb-->
+<use xlink:href="#c"
+    transform="translate(-10,0)"
+/>
+
+<!--Base orb-->
+<use xlink:href="#c"
+    transform="translate(354,0)"
+/>
+
+<!--Upper spike-->
+<use xlink:href="#g"
+    transform="rotate(33, 928,433)"
+/>
+
+<!--Lower spike-->
+<use xlink:href="#g"
+    transform="rotate(-33, 928,433)"
+/>
+
+</svg>

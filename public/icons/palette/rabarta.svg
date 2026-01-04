@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1000 866"
+    xmlns:cc="http://creativecommons.org/ns#"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+<metadata typeof="cc:Work">
+    This work, from
+    <a property="cc:attributionName" rel="cc:attributionURL"
+        href="https://github.com/akdb/pso-icons"
+    >
+    pso-icons</a>, is licensed under a
+    <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">
+        Creative Commons Attribution-ShareAlike 4.0 International License
+    </a>.
+</metadata>
+<style>
+* {
+    fill: #31cbff;
+}
+</style>
+
+<!--W spike-->
+<g id="g">
+    <!--Spike base-->
+    <path d="
+        m   412,473
+            -170,0
+            -26,-40
+            26,-40
+            170,0
+            -26,40
+        z"
+    />
+
+    <!--Spike tip-->
+    <path d="
+        m   197,498
+            -144,-65
+            144,-65
+            -29,65
+        z"
+    />
+</g>
+
+<!--NW Spike-->
+<use xlink:href="#g"
+    transform="rotate(60,500,433)"
+/>
+
+<!--NE Spike-->
+<use xlink:href="#g"
+    transform="rotate(120,500,433)"
+/>
+
+<!--EE Spike-->
+<use xlink:href="#g"
+    transform="rotate(180,500,433)"
+/>
+
+<!--SE Spike-->
+<use xlink:href="#g"
+    transform="rotate(240,500,433)"
+/>
+
+<!--SW Spike-->
+<use xlink:href="#g"
+    transform="rotate(300,500,433)"
+/>
+
+<!--Top orb-->
+<circle id="e"
+    cx="500" cy="110" r="46"
+/>
+
+<!--Lower left orb-->
+<use xlink:href="#e"
+    transform="rotate(120, 500,433)"
+/>
+
+<!--Lower right orb-->
+<use xlink:href="#e"
+    transform="rotate(240, 500,433)"
+/>
+
+<!--Center orb-->
+<circle cx="500" cy="433" r="68" />
+
+</svg>

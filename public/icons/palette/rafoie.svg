@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1000 866"
+    xmlns:cc="http://creativecommons.org/ns#"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+<metadata typeof="cc:Work">
+    This work, from
+    <a property="cc:attributionName" rel="cc:attributionURL"
+        href="https://github.com/akdb/pso-icons"
+    >
+    pso-icons</a>, is licensed under a
+    <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">
+        Creative Commons Attribution-ShareAlike 4.0 International License
+    </a>.
+</metadata>
+<style>
+* {
+    fill: #ff7633;
+}
+</style>
+
+<!--NW burst half-->
+<g id="g">
+    <!--Spike-->
+    <path d="
+        m   74,380
+            221,0
+            -37,53
+            37,53
+            -221,0
+            -37,-53
+        z"
+    />
+
+    <!--Edge-->
+    <path d="
+        m   288,86
+            421,0
+            146,253
+            -80,0
+            -105,-182
+            -343,0
+            -105,182
+            -80,0
+        z"
+    />
+</g>
+
+<!--SE burst half-->
+<use xlink:href="#g"
+    transform="rotate(180, 500,433)"
+/>
+
+<!--N orb-->
+<circle id="c" cx="500" cy="310" r="65" />
+
+<!--SW orb-->
+<use xlink:href="#c"
+    transform="translate(-20,40) rotate(240,500,433)"
+/>
+
+<!--SE orb-->
+<use xlink:href="#c"
+    transform="translate(20,40) rotate(120,500,433)"
+/>
+
+</svg>
