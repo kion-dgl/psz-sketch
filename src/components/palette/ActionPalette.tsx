@@ -89,11 +89,11 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '8px',
+    padding: '4px',
   },
   icon: {
-    width: '32px',
-    height: '32px',
+    width: '42px',
+    height: '42px',
     objectFit: 'contain',
   },
   trigger: {
