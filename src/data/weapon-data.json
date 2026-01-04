@@ -1260,5 +1260,874 @@
         "variantId": "whgr05_2_o"
       }
     ]
+  },
+  "rifles": {
+    "category": "rifle",
+    "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)",
+    "weapons": [
+      {
+        "name": "Ein Rifle",
+        "rarity": 2,
+        "level": 2,
+        "modelId": "wrfc01",
+        "variantId": "wrfc01_1_b"
+      },
+      {
+        "name": "Deo Rifle",
+        "rarity": 4,
+        "level": 12,
+        "modelId": "wrfc01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wrfc01_1_b"
+      },
+      {
+        "name": "Ryjarg",
+        "rarity": 5,
+        "level": 20,
+        "modelId": "wrfc01",
+        "variantId": "wrfc01_3_b"
+      },
+      {
+        "name": "Lavateinn",
+        "rarity": 6,
+        "level": 32,
+        "modelId": "wrfc01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wrfc01_3_b"
+      },
+      {
+        "name": "Carbine",
+        "rarity": 3,
+        "level": 5,
+        "modelId": "wrfh01",
+        "variantId": "wrfh01_1_b"
+      },
+      {
+        "name": "Chrome Carbine",
+        "rarity": 4,
+        "level": 14,
+        "modelId": "wrfh01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wrfh01_1_b"
+      },
+      {
+        "name": "Metford",
+        "rarity": 5,
+        "level": 24,
+        "modelId": "wrfh01",
+        "variantId": "wrfh01_3_b"
+      },
+      {
+        "name": "Enfield",
+        "rarity": 6,
+        "level": 36,
+        "modelId": "wrfh01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wrfh01_3_b"
+      },
+      {
+        "name": "Ray Shot",
+        "rarity": 5,
+        "level": 24,
+        "modelId": "wrfn01",
+        "variantId": "wrfn01_1_b"
+      },
+      {
+        "name": "Clear Shot",
+        "rarity": 6,
+        "level": 38,
+        "modelId": "wrfn01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wrfn01_1_b"
+      },
+      {
+        "name": "Gerhilde",
+        "rarity": 6,
+        "level": 42,
+        "modelId": "wrfn01",
+        "variantId": "wrfn01_3_b"
+      },
+      {
+        "name": "Ortlinde",
+        "rarity": 7,
+        "level": 54,
+        "modelId": "wrfn01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wrfn01_3_b"
+      },
+      {
+        "name": "Phobos Shoot",
+        "rarity": 7,
+        "level": 54,
+        "modelId": "wrfr01",
+        "variantId": "wrfr01_1_b"
+      },
+      {
+        "name": "Black Phobos",
+        "rarity": 7,
+        "level": 70,
+        "modelId": "wrfr01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wrfr01_1_b"
+      },
+      {
+        "name": "Yasminokov M95",
+        "rarity": 7,
+        "level": 56,
+        "modelId": "wrfr02",
+        "variantId": "wrfr02_1_b"
+      },
+      {
+        "name": "Yasminokov M109",
+        "rarity": 7,
+        "level": 70,
+        "modelId": "wrfr02",
+        "variantId": "wrfr02_2_b"
+      },
+      {
+        "name": "Garland",
+        "rarity": 7,
+        "level": 56,
+        "modelId": "wrfr03",
+        "variantId": "wrfr03_1_b"
+      },
+      {
+        "name": "Garland Zwei",
+        "rarity": 7,
+        "level": 65,
+        "modelId": "wrfr03",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wrfr03_1_b"
+      },
+      {
+        "name": "Garland Drei",
+        "rarity": 7,
+        "level": 75,
+        "modelId": "wrfr03",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wrfr03_1_b"
+      },
+      {
+        "name": "Liese Garland",
+        "rarity": 7,
+        "level": 90,
+        "modelId": "wrfr03",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wrfr03_1_b"
+      },
+      {
+        "name": "Heimdal",
+        "rarity": 7,
+        "level": 60,
+        "modelId": "wrfr03",
+        "variantId": "wrfr03_3_b"
+      },
+      {
+        "name": "Curse Answerer",
+        "rarity": 7,
+        "level": 80,
+        "modelId": "wrfr03",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wrfr03_3_b"
+      },
+      {
+        "name": "M14 Missouri",
+        "rarity": 7,
+        "level": 58,
+        "modelId": "wrfr04",
+        "variantId": "wrfr04_2_b"
+      },
+      {
+        "name": "M25SE Missouri",
+        "rarity": 7,
+        "level": 75,
+        "modelId": "wrfr04",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wrfr04_2_b"
+      },
+      {
+        "name": "M&A33",
+        "rarity": 7,
+        "level": 58,
+        "modelId": "wrfr05",
+        "variantId": "wrfr05_1_b"
+      },
+      {
+        "name": "M&A41",
+        "rarity": 7,
+        "level": 75,
+        "modelId": "wrfr05",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wrfr05_1_b"
+      },
+      {
+        "name": "Missouri CX4",
+        "rarity": 7,
+        "level": 60,
+        "modelId": "wrfr06",
+        "variantId": "wrfr06_1_b"
+      },
+      {
+        "name": "Missouri RX4",
+        "rarity": 7,
+        "level": 80,
+        "modelId": "wrfr06",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wrfr06_1_b"
+      }
+    ]
+  },
+  "bazookas": {
+    "category": "bazooka",
+    "wikiUrl": "https://phantasystar.fandom.com/wiki/Bazookas_(Phantasy_Star_Zero)",
+    "weapons": [
+      {
+        "name": "Ein Rocket",
+        "rarity": 2,
+        "level": 2,
+        "modelId": "wbac01",
+        "variantId": "wbac01_1_b"
+      },
+      {
+        "name": "Deo Rocket",
+        "rarity": 4,
+        "level": 12,
+        "modelId": "wbac01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wbac01_1_b"
+      },
+      {
+        "name": "Blue Danube",
+        "rarity": 5,
+        "level": 20,
+        "modelId": "wbac01",
+        "variantId": "wbac01_3_b"
+      },
+      {
+        "name": "Yellow Sun",
+        "rarity": 6,
+        "level": 32,
+        "modelId": "wbac01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wbac01_3_b"
+      },
+      {
+        "name": "Ein Bazooka",
+        "rarity": 2,
+        "level": 2,
+        "modelId": "wbac02",
+        "variantId": "wbac02_1_b"
+      },
+      {
+        "name": "Deo Bazooka",
+        "rarity": 4,
+        "level": 14,
+        "modelId": "wbac02",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wbac02_1_b"
+      },
+      {
+        "name": "Adrastea",
+        "rarity": 5,
+        "level": 24,
+        "modelId": "wbac02",
+        "variantId": "wbac02_3_b"
+      },
+      {
+        "name": "Nemesis",
+        "rarity": 6,
+        "level": 36,
+        "modelId": "wbac02",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wbac02_3_b"
+      },
+      {
+        "name": "Cannon",
+        "rarity": 3,
+        "level": 5,
+        "modelId": "wbah01",
+        "variantId": "wbah01_1_b"
+      },
+      {
+        "name": "Chrome Cannon",
+        "rarity": 4,
+        "level": 16,
+        "modelId": "wbah01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wbah01_1_b"
+      },
+      {
+        "name": "Carl Gustav",
+        "rarity": 5,
+        "level": 26,
+        "modelId": "wbah01",
+        "variantId": "wbah01_3_b"
+      },
+      {
+        "name": "Armbrust",
+        "rarity": 6,
+        "level": 38,
+        "modelId": "wbah01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wbah01_3_b"
+      },
+      {
+        "name": "Octo Bazooka",
+        "rarity": 7,
+        "level": 54,
+        "modelId": "wbar01",
+        "variantId": "wbar01_1_b"
+      },
+      {
+        "name": "Devil Bazooka",
+        "rarity": 7,
+        "level": 70,
+        "modelId": "wbar01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wbar01_1_b"
+      },
+      {
+        "name": "Canon Rouge",
+        "rarity": 7,
+        "level": 56,
+        "modelId": "wbar02",
+        "variantId": "wbar02_1_b"
+      },
+      {
+        "name": "Canon Bleu",
+        "rarity": 7,
+        "level": 70,
+        "modelId": "wbar02",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wbar02_1_b"
+      },
+      {
+        "name": "Ein Rocket (Rare)",
+        "rarity": 7,
+        "level": 58,
+        "modelId": "wbar03",
+        "variantId": "wbar03_1_b",
+        "notes": "Duplicate model of wbac01_1_b"
+      }
+    ]
+  },
+  "laserCannons": {
+    "category": "launcher",
+    "wikiUrl": "https://phantasystar.fandom.com/wiki/Laser_Cannons_(Phantasy_Star_Zero)",
+    "weapons": [
+      {
+        "name": "Ein Cannon",
+        "rarity": 2,
+        "level": 2,
+        "modelId": "wlcc01",
+        "variantId": "wlcc01_1_b"
+      },
+      {
+        "name": "Deo Cannon",
+        "rarity": 4,
+        "level": 12,
+        "modelId": "wlcc01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wlcc01_1_b"
+      },
+      {
+        "name": "Vthraghna",
+        "rarity": 5,
+        "level": 20,
+        "modelId": "wlcc01",
+        "variantId": "wlcc01_3_b"
+      },
+      {
+        "name": "Vthra Weapon",
+        "rarity": 6,
+        "level": 32,
+        "modelId": "wlcc01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wlcc01_3_b"
+      },
+      {
+        "name": "Ray Maser",
+        "rarity": 5,
+        "level": 24,
+        "modelId": "wlcn01",
+        "variantId": "wlcn01_1_b"
+      },
+      {
+        "name": "Clear Maser",
+        "rarity": 6,
+        "level": 38,
+        "modelId": "wlcn01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wlcn01_1_b"
+      },
+      {
+        "name": "Holy Sort",
+        "rarity": 6,
+        "level": 42,
+        "modelId": "wlcn01",
+        "variantId": "wlcn01_3_b"
+      },
+      {
+        "name": "St. Kilda",
+        "rarity": 7,
+        "level": 54,
+        "modelId": "wlcn01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wlcn01_3_b"
+      },
+      {
+        "name": "Ray Beam",
+        "rarity": 5,
+        "level": 26,
+        "modelId": "wlcn02",
+        "variantId": "wlcn02_1_b"
+      },
+      {
+        "name": "Clear Beam",
+        "rarity": 6,
+        "level": 40,
+        "modelId": "wlcn02",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wlcn02_1_b"
+      },
+      {
+        "name": "Gun Diva",
+        "rarity": 6,
+        "level": 44,
+        "modelId": "wlcn02",
+        "variantId": "wlcn02_3_b"
+      },
+      {
+        "name": "Gallatin",
+        "rarity": 7,
+        "level": 56,
+        "modelId": "wlcn02",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wlcn02_3_b"
+      },
+      {
+        "name": "Chaos Cannon",
+        "rarity": 7,
+        "level": 54,
+        "modelId": "wlcr01",
+        "variantId": "wlcr01_1_b"
+      },
+      {
+        "name": "Tartaros Cannon",
+        "rarity": 7,
+        "level": 70,
+        "modelId": "wlcr01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wlcr01_1_b"
+      },
+      {
+        "name": "Pinky Beam",
+        "rarity": 7,
+        "level": 56,
+        "modelId": "wlcr02",
+        "variantId": "wlcr02_1_b"
+      },
+      {
+        "name": "Cutie Beam",
+        "rarity": 7,
+        "level": 70,
+        "modelId": "wlcr02",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wlcr02_1_b"
+      },
+      {
+        "name": "Berry Ice Beam",
+        "rarity": 7,
+        "level": 58,
+        "modelId": "wlcr03",
+        "variantId": "wlcr03_1_b"
+      },
+      {
+        "name": "Mellow Ice Beam",
+        "rarity": 7,
+        "level": 75,
+        "modelId": "wlcr03",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wlcr03_1_b"
+      }
+    ]
+  },
+  "gunblades": {
+    "category": "gunblade",
+    "wikiUrl": "https://phantasystar.fandom.com/wiki/Gun_Blades_(Phantasy_Star_Zero)",
+    "weapons": [
+      {
+        "name": "Ein Mazurka",
+        "rarity": 2,
+        "level": 2,
+        "modelId": "wgbc01",
+        "variantId": "wgbc01_1_o"
+      },
+      {
+        "name": "Deo Mazurka",
+        "rarity": 4,
+        "level": 12,
+        "modelId": "wgbc01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wgbc01_1_o"
+      },
+      {
+        "name": "Vraolet",
+        "rarity": 5,
+        "level": 20,
+        "modelId": "wgbc01",
+        "variantId": "wgbc01_3_o"
+      },
+      {
+        "name": "Frigiand",
+        "rarity": 6,
+        "level": 32,
+        "modelId": "wgbc01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wgbc01_3_o"
+      },
+      {
+        "name": "Gun Slash",
+        "rarity": 3,
+        "level": 5,
+        "modelId": "wgbh01",
+        "variantId": "wgbh01_1_o"
+      },
+      {
+        "name": "Gun Braver",
+        "rarity": 4,
+        "level": 14,
+        "modelId": "wgbh01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wgbh01_1_o"
+      },
+      {
+        "name": "Neigling",
+        "rarity": 5,
+        "level": 24,
+        "modelId": "wgbh01",
+        "variantId": "wgbh01_3_o"
+      },
+      {
+        "name": "Naglering",
+        "rarity": 6,
+        "level": 36,
+        "modelId": "wgbh01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wgbh01_3_o"
+      },
+      {
+        "name": "Ray Duplex",
+        "rarity": 5,
+        "level": 26,
+        "modelId": "wgbn01",
+        "variantId": "wgbn01_1_o"
+      },
+      {
+        "name": "Clear Duplex",
+        "rarity": 6,
+        "level": 40,
+        "modelId": "wgbn01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wgbn01_1_o"
+      },
+      {
+        "name": "Nersir",
+        "rarity": 6,
+        "level": 42,
+        "modelId": "wgbn01",
+        "variantId": "wgbn01_3_o"
+      },
+      {
+        "name": "Neidaryl",
+        "rarity": 7,
+        "level": 54,
+        "modelId": "wgbn01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wgbn01_3_o"
+      },
+      {
+        "name": "Sonic Laser",
+        "rarity": 7,
+        "level": 54,
+        "modelId": "wgbr01",
+        "variantId": "wgbr01_1_o"
+      },
+      {
+        "name": "Celesta Laser",
+        "rarity": 7,
+        "level": 70,
+        "modelId": "wgbr01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wgbr01_1_o"
+      },
+      {
+        "name": "Axeon",
+        "rarity": 7,
+        "level": 56,
+        "modelId": "wgbr02",
+        "variantId": "wgbr02_1_o"
+      },
+      {
+        "name": "Lord Axeon",
+        "rarity": 7,
+        "level": 70,
+        "modelId": "wgbr02",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wgbr02_1_o"
+      },
+      {
+        "name": "Emperor Axeon",
+        "rarity": 7,
+        "level": 85,
+        "modelId": "wgbr02",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wgbr02_1_o"
+      },
+      {
+        "name": "Karakasa Jikomi",
+        "rarity": 7,
+        "level": 58,
+        "modelId": "wgbr03",
+        "variantId": "wgbr03_1_o"
+      },
+      {
+        "name": "Bangasa Jikomi",
+        "rarity": 7,
+        "level": 75,
+        "modelId": "wgbr03",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wgbr03_1_o"
+      },
+      {
+        "name": "Blade Cannon",
+        "rarity": 7,
+        "level": 60,
+        "modelId": "wgbr04",
+        "variantId": "wgbr04_1_o"
+      }
+    ]
+  },
+  "rods": {
+    "category": "rod",
+    "wikiUrl": "https://phantasystar.fandom.com/wiki/Rods_(Phantasy_Star_Zero)",
+    "weapons": [
+      {
+        "name": "Rod",
+        "rarity": 3,
+        "level": 5,
+        "modelId": "wroh01",
+        "variantId": "wroh01_1_b"
+      },
+      {
+        "name": "Chrome Rod",
+        "rarity": 4,
+        "level": 14,
+        "modelId": "wroh01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wroh01_1_b"
+      },
+      {
+        "name": "Crumhorne",
+        "rarity": 5,
+        "level": 20,
+        "modelId": "wroh01",
+        "variantId": "wroh01_3_b"
+      },
+      {
+        "name": "Gallanhorne",
+        "rarity": 6,
+        "level": 32,
+        "modelId": "wroh01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wroh01_3_b"
+      },
+      {
+        "name": "Wandstick",
+        "rarity": 5,
+        "level": 24,
+        "modelId": "wron01",
+        "variantId": "wron01_1_b"
+      },
+      {
+        "name": "Ray Wandstick",
+        "rarity": 6,
+        "level": 38,
+        "modelId": "wron01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wron01_1_b"
+      },
+      {
+        "name": "Sasarai",
+        "rarity": 6,
+        "level": 42,
+        "modelId": "wron01",
+        "variantId": "wron01_3_b"
+      },
+      {
+        "name": "Salvador",
+        "rarity": 7,
+        "level": 54,
+        "modelId": "wron01",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wron01_3_b"
+      },
+      {
+        "name": "Ray Staff",
+        "rarity": 5,
+        "level": 26,
+        "modelId": "wron02",
+        "variantId": "wron02_1_b"
+      },
+      {
+        "name": "Clear Staff",
+        "rarity": 6,
+        "level": 40,
+        "modelId": "wron02",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wron02_1_b"
+      },
+      {
+        "name": "Asclepios",
+        "rarity": 6,
+        "level": 44,
+        "modelId": "wron02",
+        "variantId": "wron02_3_b"
+      },
+      {
+        "name": "Kerykeion",
+        "rarity": 7,
+        "level": 56,
+        "modelId": "wron02",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wron02_3_b"
+      },
+      {
+        "name": "Psycho Wand",
+        "rarity": 7,
+        "level": 54,
+        "modelId": "wror01",
+        "variantId": "wror01_1_b"
+      },
+      {
+        "name": "Witch Broom",
+        "rarity": 7,
+        "level": 56,
+        "modelId": "wror02",
+        "variantId": "wror02_1_b"
+      },
+      {
+        "name": "Caster Broom",
+        "rarity": 7,
+        "level": 70,
+        "modelId": "wror02",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wror02_1_b"
+      },
+      {
+        "name": "Pretty Parasol",
+        "rarity": 7,
+        "level": 56,
+        "modelId": "wror03",
+        "variantId": "wror03_1_b"
+      },
+      {
+        "name": "Goth Parasol",
+        "rarity": 7,
+        "level": 70,
+        "modelId": "wror03",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wror03_1_b"
+      },
+      {
+        "name": "Calamity Soul",
+        "rarity": 7,
+        "level": 58,
+        "modelId": "wror04",
+        "variantId": "wror04_1_b"
+      },
+      {
+        "name": "White Desaster",
+        "rarity": 7,
+        "level": 75,
+        "modelId": "wror04",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wror04_1_b",
+        "notes": "Typo in original name - Desaster"
+      },
+      {
+        "name": "Imperial Rod",
+        "rarity": 7,
+        "level": 58,
+        "modelId": "wror05",
+        "variantId": "wror05_1_b"
+      },
+      {
+        "name": "Crescent Cast",
+        "rarity": 7,
+        "level": 75,
+        "modelId": "wror05",
+        "variantId": null,
+        "missingTexture": true,
+        "useModelFrom": "wror05_1_b"
+      },
+      {
+        "name": "Caduceus",
+        "rarity": 7,
+        "level": 60,
+        "modelId": "wror06",
+        "variantId": "wror06_1_b"
+      }
+    ]
   }
 }
