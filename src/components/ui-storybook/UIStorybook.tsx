@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import HUDStorybook from '../hud/HUDStorybook';
 import ActionPaletteStorybook from '../palette/ActionPaletteStorybook';
+import MinimapStorybook from '../minimap/MinimapStorybook';
+import TooltipStorybook from '../tooltip/TooltipStorybook';
 
-type UIComponent = 'hud' | 'action-palette' | 'minimap' | 'item-tooltip' | 'main-menu' | 'stats' | 'shops';
+type UIComponent = 'hud' | 'action-palette' | 'minimap' | 'tooltip' | 'main-menu' | 'stats' | 'shops';
 
 const UI_COMPONENTS: { id: UIComponent; label: string; available: boolean }[] = [
   { id: 'hud', label: 'HUD', available: true },
   { id: 'action-palette', label: 'Action Palette', available: true },
-  { id: 'minimap', label: 'Minimap', available: false },
-  { id: 'item-tooltip', label: 'Item Tooltip', available: false },
+  { id: 'minimap', label: 'Minimap', available: true },
+  { id: 'tooltip', label: 'Tooltip', available: true },
   { id: 'main-menu', label: 'Main Menu', available: false },
   { id: 'stats', label: 'Stats', available: false },
   { id: 'shops', label: 'Shops', available: false },
@@ -45,8 +47,8 @@ export default function UIStorybook() {
       <div style={styles.content}>
         {selected === 'hud' && <HUDStorybook />}
         {selected === 'action-palette' && <ActionPaletteStorybook />}
-        {selected === 'minimap' && <PlaceholderPanel name="Minimap" />}
-        {selected === 'item-tooltip' && <PlaceholderPanel name="Item Tooltip" />}
+        {selected === 'minimap' && <MinimapStorybook />}
+        {selected === 'tooltip' && <TooltipStorybook />}
         {selected === 'main-menu' && <PlaceholderPanel name="Main Menu" />}
         {selected === 'stats' && <PlaceholderPanel name="Stats" />}
         {selected === 'shops' && <PlaceholderPanel name="Shops" />}

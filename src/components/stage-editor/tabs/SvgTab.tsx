@@ -100,7 +100,7 @@ function generateSvgMinimap(
   });
 
   const gateMarkers = gatesInBounds
-    .map((portal) => {
+    .map((portal, index) => {
       const x = toSvgX(portal.position[0]);
       const y = toSvgY(portal.position[2]);
       // Red rectangle - orientation based on direction
@@ -108,7 +108,34 @@ function generateSvgMinimap(
       const isHorizontal = portal.direction === 'north' || portal.direction === 'south';
       const rectWidth = isHorizontal ? 48 : 8;
       const rectHeight = isHorizontal ? 8 : 48;
-      return `<rect x="${(x - rectWidth / 2).toFixed(1)}" y="${(y - rectHeight / 2).toFixed(1)}" width="${rectWidth}" height="${rectHeight}" fill="#ff4444" stroke="white" stroke-width="1"/>`;
+
+      // Position label based on gate direction
+      let labelX = x;
+      let labelY = y;
+      let anchor = 'middle';
+      const labelOffset = 16;
+
+      switch (portal.direction) {
+        case 'north':
+          labelY = y - labelOffset;
+          break;
+        case 'south':
+          labelY = y + labelOffset + 8;
+          break;
+        case 'east':
+          labelX = x + labelOffset + 4;
+          anchor = 'start';
+          break;
+        case 'west':
+          labelX = x - labelOffset - 4;
+          anchor = 'end';
+          break;
+      }
+
+      const rect = `<rect x="${(x - rectWidth / 2).toFixed(1)}" y="${(y - rectHeight / 2).toFixed(1)}" width="${rectWidth}" height="${rectHeight}" fill="#ff4444" stroke="white" stroke-width="1"/>`;
+      const label = `<text x="${labelX.toFixed(1)}" y="${labelY.toFixed(1)}" text-anchor="${anchor}" font-size="10" fill="#ffaaaa" font-family="sans-serif">${portal.label}</text>`;
+
+      return rect + '\n' + label;
     })
     .join('\n');
 
