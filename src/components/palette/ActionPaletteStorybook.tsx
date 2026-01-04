@@ -40,18 +40,17 @@ const BORDER_COLORS = ['green', 'purple', 'red', 'blue', 'yellow', 'cyan', 'whit
 interface SlotConfig {
   icon: string;
   border: string;
-  iconColor: string;
 }
 
 const DEFAULT_SLOTS: SlotConfig[] = [
   // Default slots (1-3)
-  { icon: '/icons/palette/attack.svg', border: 'green', iconColor: 'default' },
-  { icon: '/icons/equipment/rod.svg', border: 'purple', iconColor: 'white' },
-  { icon: '/icons/palette/foie.svg', border: 'red', iconColor: 'default' },
+  { icon: '/icons/palette/attack.svg', border: 'green' },
+  { icon: '/icons/equipment/rod.svg', border: 'purple' },
+  { icon: '/icons/palette/foie.svg', border: 'red' },
   // R-held slots (4-6)
-  { icon: '/icons/palette/resta.svg', border: 'cyan', iconColor: 'default' },
-  { icon: '/icons/palette/evade.svg', border: 'blue', iconColor: 'default' },
-  { icon: '/icons/palette/gifoie.svg', border: 'yellow', iconColor: 'default' },
+  { icon: '/icons/palette/resta.svg', border: 'cyan' },
+  { icon: '/icons/palette/evade.svg', border: 'blue' },
+  { icon: '/icons/palette/gifoie.svg', border: 'yellow' },
 ];
 
 export default function ActionPaletteStorybook() {
@@ -99,7 +98,6 @@ export default function ActionPaletteStorybook() {
             slots={slots.map(s => ({
               icon: s.icon,
               borderColor: s.border,
-              iconColor: s.iconColor === 'white' ? 'white' : undefined,
             })) as any}
             triggerHeld={triggerHeld}
           />
@@ -110,21 +108,16 @@ export default function ActionPaletteStorybook() {
       <div style={styles.controls}>
         {/* R Trigger Toggle */}
         <div style={styles.controlGroup}>
-          <label style={styles.label}>Hold R Trigger</label>
+          <label style={styles.label}>R Trigger</label>
           <button
             style={{
               ...styles.toggleButton,
               ...(triggerHeld ? styles.toggleActive : {}),
             }}
-            onMouseDown={() => setTriggerHeld(true)}
-            onMouseUp={() => setTriggerHeld(false)}
-            onMouseLeave={() => setTriggerHeld(false)}
+            onClick={() => setTriggerHeld(!triggerHeld)}
           >
-            Hold R
+            {triggerHeld ? 'R Held (4-6)' : 'Default (1-3)'}
           </button>
-          <span style={styles.hint}>
-            (hold to see slots 4-6)
-          </span>
         </div>
 
         {/* Default Slots Header */}
@@ -148,17 +141,6 @@ export default function ActionPaletteStorybook() {
                   {BORDER_COLORS.map((color) => (
                     <option key={color} value={color}>{color}</option>
                   ))}
-                </select>
-              </div>
-              <div style={styles.controlGroup}>
-                <label style={styles.label}>Icon Color</label>
-                <select
-                  value={slots[i].iconColor}
-                  onChange={(e) => updateSlot(i, 'iconColor', e.target.value)}
-                  style={styles.select}
-                >
-                  <option value="default">Default</option>
-                  <option value="white">White</option>
                 </select>
               </div>
             </div>
@@ -186,17 +168,6 @@ export default function ActionPaletteStorybook() {
                   {BORDER_COLORS.map((color) => (
                     <option key={color} value={color}>{color}</option>
                   ))}
-                </select>
-              </div>
-              <div style={styles.controlGroup}>
-                <label style={styles.label}>Icon Color</label>
-                <select
-                  value={slots[i].iconColor}
-                  onChange={(e) => updateSlot(i, 'iconColor', e.target.value)}
-                  style={styles.select}
-                >
-                  <option value="default">Default</option>
-                  <option value="white">White</option>
                 </select>
               </div>
             </div>
@@ -271,11 +242,6 @@ const styles: Record<string, React.CSSProperties> = {
   toggleActive: {
     background: '#6b8afd',
     color: '#fff',
-  },
-  hint: {
-    fontSize: '11px',
-    color: '#666',
-    marginTop: '4px',
   },
   sectionTitle: {
     fontSize: '14px',

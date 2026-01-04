@@ -1,7 +1,6 @@
 interface PaletteSlot {
   icon: string | null; // URL to icon SVG
   borderColor: string; // green, purple, red, etc.
-  iconColor?: string; // override icon color (default based on border)
 }
 
 interface ActionPaletteProps {
@@ -40,12 +39,7 @@ export default function ActionPalette({ slots, triggerHeld = false }: ActionPale
                 <img
                   src={slot.icon}
                   alt=""
-                  style={{
-                    ...styles.icon,
-                    filter: slot.iconColor === 'white'
-                      ? 'brightness(0) invert(1)'
-                      : undefined,
-                  }}
+                  style={styles.icon}
                 />
               )}
             </div>
