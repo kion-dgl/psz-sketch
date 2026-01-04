@@ -14,6 +14,34 @@ import {
   type WeaponCategory,
 } from './weaponData';
 
+// PSO-World weapon stats interface
+interface PhotonArt {
+  name: string;
+  attackMod: number;
+  accuracyMod: number;
+  ppUsed: number;
+  element: string;
+}
+
+interface PsoWorldWeaponStats {
+  name: string;
+  japaneseName?: string;
+  rarity: number;
+  weaponType: string;
+  element?: string;
+  elementLevel?: number;
+  maxGrind: number;
+  level: number;
+  resaleValue: number;
+  attackBase: number;
+  attackMax: number;
+  accuracyBase: number;
+  accuracyMax: number;
+  photonArts: PhotonArt[];
+  usableBy: string[];
+  psoWorldId: number;
+}
+
 // Comprehensive weapon data entry from weapon-data.json
 interface WeaponDataEntry {
   name: string;
@@ -294,6 +322,7 @@ export default function WeaponGallery() {
   const [weaponInfoMap, setWeaponInfoMap] = useState<Record<string, WeaponInfo>>({});
   const [weaponData, setWeaponData] = useState<WeaponDataJson | null>(null);
   const [materialSettings, setMaterialSettings] = useState<MaterialSettings>(DEFAULT_MATERIAL_SETTINGS);
+  const [psoWorldStats, setPsoWorldStats] = useState<Map<string, PsoWorldWeaponStats>>(new Map());
 
   // Load all weapon info on mount to get all variants
   useEffect(() => {
@@ -309,6 +338,20 @@ export default function WeaponGallery() {
         setWeaponData(weaponDataJson);
       } catch (err) {
         console.warn('Could not load weapon data:', err);
+      }
+
+      // Load PSO-World weapon stats
+      try {
+        const statsRes = await fetch('/src/data/psoworld-weapon-stats.json');
+        const statsArray: PsoWorldWeaponStats[] = await statsRes.json();
+        const statsMap = new Map<string, PsoWorldWeaponStats>();
+        for (const stat of statsArray) {
+          // Index by lowercase name for case-insensitive matching
+          statsMap.set(stat.name.toLowerCase(), stat);
+        }
+        setPsoWorldStats(statsMap);
+      } catch (err) {
+        console.warn('Could not load PSO-World stats:', err);
       }
 
       // Create a map of weapons from comprehensive data
@@ -427,6 +470,12 @@ export default function WeaponGallery() {
   const selectedWeaponInfo = selectedVariant
     ? weaponInfoMap[selectedVariant.weaponId]
     : null;
+
+  // Get PSO-World stats for selected weapon
+  const selectedWeaponStats = useMemo(() => {
+    if (!selectedVariant) return null;
+    return psoWorldStats.get(selectedVariant.displayName.toLowerCase()) || null;
+  }, [selectedVariant, psoWorldStats]);
 
   const updateSetting = <K extends keyof MaterialSettings>(key: K, value: MaterialSettings[K]) => {
     setMaterialSettings((prev) => ({ ...prev, [key]: value }));
@@ -881,6 +930,114 @@ export default function WeaponGallery() {
             Reset to Defaults
           </button>
         </div>
+
+        {/* Weapon Stats Panel */}
+        {selectedWeaponStats && (
+          <div style={{ padding: '12px', borderBottom: '1px solid #333' }}>
+            <h3 style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#4a9eff' }}>
+              Weapon Stats
+            </h3>
+
+            {/* Japanese Name */}
+            {selectedWeaponStats.japaneseName && (
+              <div style={{ marginBottom: '8px', fontSize: '11px', color: '#888' }}>
+                {selectedWeaponStats.japaneseName}
+              </div>
+            )}
+
+            {/* Stats Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
+              <div style={{ background: '#1a1a2e', padding: '8px', borderRadius: '4px' }}>
+                <div style={{ fontSize: '9px', color: '#888', marginBottom: '2px' }}>Attack</div>
+                <div style={{ fontSize: '12px', fontWeight: 'bold' }}>
+                  {selectedWeaponStats.attackBase}
+                  <span style={{ color: '#4a9eff' }}> → {selectedWeaponStats.attackMax}</span>
+                </div>
+              </div>
+              <div style={{ background: '#1a1a2e', padding: '8px', borderRadius: '4px' }}>
+                <div style={{ fontSize: '9px', color: '#888', marginBottom: '2px' }}>Accuracy</div>
+                <div style={{ fontSize: '12px', fontWeight: 'bold' }}>
+                  {selectedWeaponStats.accuracyBase}
+                  {selectedWeaponStats.accuracyBase !== selectedWeaponStats.accuracyMax && (
+                    <span style={{ color: '#4a9eff' }}> → {selectedWeaponStats.accuracyMax}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Stats */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', fontSize: '10px', marginBottom: '12px' }}>
+              <div style={{ color: '#888' }}>Max Grind:</div>
+              <div>+{selectedWeaponStats.maxGrind}</div>
+              <div style={{ color: '#888' }}>Sell Price:</div>
+              <div>{selectedWeaponStats.resaleValue} Meseta</div>
+              {selectedWeaponStats.element && (
+                <>
+                  <div style={{ color: '#888' }}>Element:</div>
+                  <div style={{ color: '#ff9900' }}>
+                    Lv{selectedWeaponStats.elementLevel} {selectedWeaponStats.element}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Photon Arts */}
+            {selectedWeaponStats.photonArts.length > 0 && (
+              <div style={{ marginBottom: '12px' }}>
+                <div style={{ fontSize: '10px', color: '#888', marginBottom: '6px' }}>Photon Arts</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {selectedWeaponStats.photonArts.map((pa, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        background: '#1a1a2e',
+                        padding: '6px 8px',
+                        borderRadius: '4px',
+                        fontSize: '10px',
+                      }}
+                    >
+                      <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{pa.name}</div>
+                      <div style={{ color: '#888', display: 'flex', gap: '8px' }}>
+                        <span>ATK {pa.attackMod}%</span>
+                        <span>ACC {pa.accuracyMod}%</span>
+                        <span>PP {pa.ppUsed}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Usable By */}
+            {selectedWeaponStats.usableBy.length > 0 && (
+              <div>
+                <div style={{ fontSize: '10px', color: '#888', marginBottom: '6px' }}>Usable By</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                  {selectedWeaponStats.usableBy.map((cls, idx) => (
+                    <span
+                      key={idx}
+                      style={{
+                        background: '#333',
+                        padding: '2px 6px',
+                        borderRadius: '3px',
+                        fontSize: '9px',
+                      }}
+                    >
+                      {cls}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* No Stats Message */}
+        {selectedVariant && !selectedWeaponStats && (
+          <div style={{ padding: '12px', borderBottom: '1px solid #333', color: '#666', fontSize: '11px' }}>
+            No detailed stats available for this weapon.
+          </div>
+        )}
 
         {/* Texture Preview - Show all variant textures + potential extras */}
         {selectedVariant && selectedWeaponInfo && (
