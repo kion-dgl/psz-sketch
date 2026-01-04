@@ -71,8 +71,8 @@ export default function HUD({
             {/* Yellow fill canvas behind red dot */}
             <canvas
               ref={canvasRef}
-              width={32}
-              height={32}
+              width={48}
+              height={48}
               style={styles.pbCanvas}
             />
             {/* Red center dot */}
@@ -170,8 +170,11 @@ const styles: Record<string, React.CSSProperties> = {
   },
   pbCanvas: {
     position: 'absolute',
-    width: '32px',
-    height: '32px',
+    width: '40px',
+    height: '40px',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
   },
   pbFill: {
     width: '12px',
