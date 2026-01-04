@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 
 interface HUDProps {
   name: string;
@@ -25,12 +25,57 @@ export default function HUD({
   const ppPercent = useMemo(() => Math.min(100, (currentPP / maxPP) * 100), [currentPP, maxPP]);
   const pbPercent = useMemo(() => Math.min(100, Math.max(0, photonBlastGauge)), [photonBlastGauge]);
 
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Draw photon blast fill arc
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const size = canvas.width;
+    const center = size / 2;
+    const radius = size / 2 - 2;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, size, size);
+
+    // Draw yellow fill arc (starts at 12 o'clock, fills clockwise)
+    if (pbPercent > 0) {
+      const startAngle = -Math.PI / 2; // 12 o'clock
+      const endAngle = startAngle + (pbPercent / 100) * Math.PI * 2;
+
+      ctx.beginPath();
+      ctx.moveTo(center, center);
+      ctx.arc(center, center, radius, startAngle, endAngle, false);
+      ctx.closePath();
+
+      // Yellow gradient fill
+      const gradient = ctx.createRadialGradient(center, center, 0, center, center, radius);
+      gradient.addColorStop(0, '#ffeb3b');
+      gradient.addColorStop(0.5, '#ffc107');
+      gradient.addColorStop(1, '#ff9800');
+      ctx.fillStyle = gradient;
+      ctx.fill();
+    }
+  }, [pbPercent]);
+
   return (
     <div style={styles.container}>
       {/* Photon Blast Gauge */}
       <div style={styles.pbGauge}>
         <div style={styles.pbOuter}>
           <div style={styles.pbInner}>
+            {/* Yellow fill canvas behind red dot */}
+            <canvas
+              ref={canvasRef}
+              width={32}
+              height={32}
+              style={styles.pbCanvas}
+            />
+            {/* Red center dot */}
             <div
               style={{
                 ...styles.pbFill,
@@ -121,12 +166,20 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
+    position: 'relative',
+  },
+  pbCanvas: {
+    position: 'absolute',
+    width: '32px',
+    height: '32px',
   },
   pbFill: {
-    width: '24px',
-    height: '24px',
+    width: '12px',
+    height: '12px',
     borderRadius: '50%',
     transition: 'all 0.3s ease',
+    position: 'relative',
+    zIndex: 1,
   },
   statsPanel: {
     flex: 1,
