@@ -5,8 +5,8 @@ interface PaletteSlot {
 }
 
 interface ActionPaletteProps {
-  slots: [PaletteSlot, PaletteSlot, PaletteSlot];
-  trigger?: 'L' | 'R';
+  slots: [PaletteSlot, PaletteSlot, PaletteSlot, PaletteSlot, PaletteSlot, PaletteSlot];
+  triggerHeld?: boolean; // When true, show slots 4-6 instead of 1-3
 }
 
 const BORDER_COLORS: Record<string, string> = {
@@ -19,11 +19,14 @@ const BORDER_COLORS: Record<string, string> = {
   white: '#ffffff',
 };
 
-export default function ActionPalette({ slots, trigger = 'R' }: ActionPaletteProps) {
+export default function ActionPalette({ slots, triggerHeld = false }: ActionPaletteProps) {
+  // Show slots 0-2 normally, slots 3-5 when R is held
+  const visibleSlots = triggerHeld ? slots.slice(3, 6) : slots.slice(0, 3);
+
   return (
     <div style={styles.container}>
       <div style={styles.slotsContainer}>
-        {slots.map((slot, index) => (
+        {visibleSlots.map((slot, index) => (
           <div
             key={index}
             style={{
@@ -49,7 +52,10 @@ export default function ActionPalette({ slots, trigger = 'R' }: ActionPalettePro
           </div>
         ))}
       </div>
-      <div style={styles.trigger}>{trigger}</div>
+      <div style={{
+        ...styles.trigger,
+        ...(triggerHeld ? styles.triggerActive : {}),
+      }}>R</div>
     </div>
   );
 }
@@ -102,5 +108,13 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#2c5a7c',
     textShadow: '1px 1px 0 rgba(255,255,255,0.5)',
     marginLeft: '4px',
+    padding: '4px 8px',
+    borderRadius: '4px',
+    transition: 'all 0.15s ease',
+  },
+  triggerActive: {
+    background: '#2c5a7c',
+    color: '#fff',
+    textShadow: 'none',
   },
 };

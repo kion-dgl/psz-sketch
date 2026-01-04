@@ -37,22 +37,56 @@ const EQUIPMENT_ICONS = [
 
 const BORDER_COLORS = ['green', 'purple', 'red', 'blue', 'yellow', 'cyan', 'white'];
 
+interface SlotConfig {
+  icon: string;
+  border: string;
+  iconColor: string;
+}
+
+const DEFAULT_SLOTS: SlotConfig[] = [
+  // Default slots (1-3)
+  { icon: '/icons/palette/attack.svg', border: 'green', iconColor: 'default' },
+  { icon: '/icons/equipment/rod.svg', border: 'purple', iconColor: 'white' },
+  { icon: '/icons/palette/foie.svg', border: 'red', iconColor: 'default' },
+  // R-held slots (4-6)
+  { icon: '/icons/palette/resta.svg', border: 'cyan', iconColor: 'default' },
+  { icon: '/icons/palette/evade.svg', border: 'blue', iconColor: 'default' },
+  { icon: '/icons/palette/gifoie.svg', border: 'yellow', iconColor: 'default' },
+];
+
 export default function ActionPaletteStorybook() {
-  const [slot1Icon, setSlot1Icon] = useState('/icons/palette/foie.svg');
-  const [slot1Border, setSlot1Border] = useState('green');
-  const [slot1IconColor, setSlot1IconColor] = useState('default');
+  const [slots, setSlots] = useState<SlotConfig[]>(DEFAULT_SLOTS);
+  const [triggerHeld, setTriggerHeld] = useState(false);
 
-  const [slot2Icon, setSlot2Icon] = useState('/icons/equipment/rod.svg');
-  const [slot2Border, setSlot2Border] = useState('purple');
-  const [slot2IconColor, setSlot2IconColor] = useState('white');
+  const updateSlot = (index: number, field: keyof SlotConfig, value: string) => {
+    setSlots(prev => prev.map((slot, i) =>
+      i === index ? { ...slot, [field]: value } : slot
+    ));
+  };
 
-  const [slot3Icon, setSlot3Icon] = useState('/icons/palette/gifoie.svg');
-  const [slot3Border, setSlot3Border] = useState('red');
-  const [slot3IconColor, setSlot3IconColor] = useState('default');
-
-  const [trigger, setTrigger] = useState<'L' | 'R'>('R');
-
-  const allIcons = [...TECHNIQUE_ICONS, ...EQUIPMENT_ICONS];
+  const renderIconSelect = (slotIndex: number) => (
+    <select
+      value={slots[slotIndex].icon}
+      onChange={(e) => updateSlot(slotIndex, 'icon', e.target.value)}
+      style={styles.select}
+    >
+      <optgroup label="Actions">
+        {ACTION_ICONS.map((icon) => (
+          <option key={icon.path} value={icon.path}>{icon.name}</option>
+        ))}
+      </optgroup>
+      <optgroup label="Techniques">
+        {TECHNIQUE_ICONS.map((icon) => (
+          <option key={icon.path} value={icon.path}>{icon.name}</option>
+        ))}
+      </optgroup>
+      <optgroup label="Equipment">
+        {EQUIPMENT_ICONS.map((icon) => (
+          <option key={icon.path} value={icon.path}>{icon.name}</option>
+        ))}
+      </optgroup>
+    </select>
+  );
 
   return (
     <div style={styles.container}>
@@ -62,191 +96,111 @@ export default function ActionPaletteStorybook() {
       <div style={styles.previewArea}>
         <div style={styles.previewBg}>
           <ActionPalette
-            slots={[
-              { icon: slot1Icon, borderColor: slot1Border, iconColor: slot1IconColor === 'white' ? 'white' : undefined },
-              { icon: slot2Icon, borderColor: slot2Border, iconColor: slot2IconColor === 'white' ? 'white' : undefined },
-              { icon: slot3Icon, borderColor: slot3Border, iconColor: slot3IconColor === 'white' ? 'white' : undefined },
-            ]}
-            trigger={trigger}
+            slots={slots.map(s => ({
+              icon: s.icon,
+              borderColor: s.border,
+              iconColor: s.iconColor === 'white' ? 'white' : undefined,
+            })) as any}
+            triggerHeld={triggerHeld}
           />
         </div>
       </div>
 
       {/* Controls */}
       <div style={styles.controls}>
-        {/* Trigger */}
+        {/* R Trigger Toggle */}
         <div style={styles.controlGroup}>
-          <label style={styles.label}>Trigger Button</label>
-          <div style={styles.buttonGroup}>
-            <button
-              style={{ ...styles.toggleButton, ...(trigger === 'L' ? styles.toggleActive : {}) }}
-              onClick={() => setTrigger('L')}
-            >
-              L
-            </button>
-            <button
-              style={{ ...styles.toggleButton, ...(trigger === 'R' ? styles.toggleActive : {}) }}
-              onClick={() => setTrigger('R')}
-            >
-              R
-            </button>
-          </div>
+          <label style={styles.label}>Hold R Trigger</label>
+          <button
+            style={{
+              ...styles.toggleButton,
+              ...(triggerHeld ? styles.toggleActive : {}),
+            }}
+            onMouseDown={() => setTriggerHeld(true)}
+            onMouseUp={() => setTriggerHeld(false)}
+            onMouseLeave={() => setTriggerHeld(false)}
+          >
+            Hold R
+          </button>
+          <span style={styles.hint}>
+            (hold to see slots 4-6)
+          </span>
         </div>
 
-        {/* Slot 1 */}
-        <div style={styles.slotControls}>
-          <h3 style={styles.slotTitle}>Slot 1</h3>
-          <div style={styles.controlGroup}>
-            <label style={styles.label}>Icon</label>
-            <select
-              value={slot1Icon}
-              onChange={(e) => setSlot1Icon(e.target.value)}
-              style={styles.select}
-            >
-              <optgroup label="Actions">
-                {ACTION_ICONS.map((icon) => (
-                  <option key={icon.path} value={icon.path}>{icon.name}</option>
-                ))}
-              </optgroup>
-              <optgroup label="Techniques">
-                {TECHNIQUE_ICONS.map((icon) => (
-                  <option key={icon.path} value={icon.path}>{icon.name}</option>
-                ))}
-              </optgroup>
-              <optgroup label="Equipment">
-                {EQUIPMENT_ICONS.map((icon) => (
-                  <option key={icon.path} value={icon.path}>{icon.name}</option>
-                ))}
-              </optgroup>
-            </select>
-          </div>
-          <div style={styles.controlGroup}>
-            <label style={styles.label}>Border Color</label>
-            <select
-              value={slot1Border}
-              onChange={(e) => setSlot1Border(e.target.value)}
-              style={styles.select}
-            >
-              {BORDER_COLORS.map((color) => (
-                <option key={color} value={color}>{color}</option>
-              ))}
-            </select>
-          </div>
-          <div style={styles.controlGroup}>
-            <label style={styles.label}>Icon Color</label>
-            <select
-              value={slot1IconColor}
-              onChange={(e) => setSlot1IconColor(e.target.value)}
-              style={styles.select}
-            >
-              <option value="default">Default</option>
-              <option value="white">White</option>
-            </select>
-          </div>
+        {/* Default Slots Header */}
+        <h3 style={styles.sectionTitle}>Default Slots (1-3)</h3>
+
+        <div style={styles.slotsGrid}>
+          {[0, 1, 2].map((i) => (
+            <div key={i} style={styles.slotControls}>
+              <h4 style={styles.slotTitle}>Slot {i + 1}</h4>
+              <div style={styles.controlGroup}>
+                <label style={styles.label}>Icon</label>
+                {renderIconSelect(i)}
+              </div>
+              <div style={styles.controlGroup}>
+                <label style={styles.label}>Border</label>
+                <select
+                  value={slots[i].border}
+                  onChange={(e) => updateSlot(i, 'border', e.target.value)}
+                  style={styles.select}
+                >
+                  {BORDER_COLORS.map((color) => (
+                    <option key={color} value={color}>{color}</option>
+                  ))}
+                </select>
+              </div>
+              <div style={styles.controlGroup}>
+                <label style={styles.label}>Icon Color</label>
+                <select
+                  value={slots[i].iconColor}
+                  onChange={(e) => updateSlot(i, 'iconColor', e.target.value)}
+                  style={styles.select}
+                >
+                  <option value="default">Default</option>
+                  <option value="white">White</option>
+                </select>
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* Slot 2 */}
-        <div style={styles.slotControls}>
-          <h3 style={styles.slotTitle}>Slot 2</h3>
-          <div style={styles.controlGroup}>
-            <label style={styles.label}>Icon</label>
-            <select
-              value={slot2Icon}
-              onChange={(e) => setSlot2Icon(e.target.value)}
-              style={styles.select}
-            >
-              <optgroup label="Actions">
-                {ACTION_ICONS.map((icon) => (
-                  <option key={icon.path} value={icon.path}>{icon.name}</option>
-                ))}
-              </optgroup>
-              <optgroup label="Techniques">
-                {TECHNIQUE_ICONS.map((icon) => (
-                  <option key={icon.path} value={icon.path}>{icon.name}</option>
-                ))}
-              </optgroup>
-              <optgroup label="Equipment">
-                {EQUIPMENT_ICONS.map((icon) => (
-                  <option key={icon.path} value={icon.path}>{icon.name}</option>
-                ))}
-              </optgroup>
-            </select>
-          </div>
-          <div style={styles.controlGroup}>
-            <label style={styles.label}>Border Color</label>
-            <select
-              value={slot2Border}
-              onChange={(e) => setSlot2Border(e.target.value)}
-              style={styles.select}
-            >
-              {BORDER_COLORS.map((color) => (
-                <option key={color} value={color}>{color}</option>
-              ))}
-            </select>
-          </div>
-          <div style={styles.controlGroup}>
-            <label style={styles.label}>Icon Color</label>
-            <select
-              value={slot2IconColor}
-              onChange={(e) => setSlot2IconColor(e.target.value)}
-              style={styles.select}
-            >
-              <option value="default">Default</option>
-              <option value="white">White</option>
-            </select>
-          </div>
-        </div>
+        {/* R-Held Slots Header */}
+        <h3 style={styles.sectionTitle}>R-Held Slots (4-6)</h3>
 
-        {/* Slot 3 */}
-        <div style={styles.slotControls}>
-          <h3 style={styles.slotTitle}>Slot 3</h3>
-          <div style={styles.controlGroup}>
-            <label style={styles.label}>Icon</label>
-            <select
-              value={slot3Icon}
-              onChange={(e) => setSlot3Icon(e.target.value)}
-              style={styles.select}
-            >
-              <optgroup label="Actions">
-                {ACTION_ICONS.map((icon) => (
-                  <option key={icon.path} value={icon.path}>{icon.name}</option>
-                ))}
-              </optgroup>
-              <optgroup label="Techniques">
-                {TECHNIQUE_ICONS.map((icon) => (
-                  <option key={icon.path} value={icon.path}>{icon.name}</option>
-                ))}
-              </optgroup>
-              <optgroup label="Equipment">
-                {EQUIPMENT_ICONS.map((icon) => (
-                  <option key={icon.path} value={icon.path}>{icon.name}</option>
-                ))}
-              </optgroup>
-            </select>
-          </div>
-          <div style={styles.controlGroup}>
-            <label style={styles.label}>Border Color</label>
-            <select
-              value={slot3Border}
-              onChange={(e) => setSlot3Border(e.target.value)}
-              style={styles.select}
-            >
-              {BORDER_COLORS.map((color) => (
-                <option key={color} value={color}>{color}</option>
-              ))}
-            </select>
-          </div>
-          <div style={styles.controlGroup}>
-            <label style={styles.label}>Icon Color</label>
-            <select
-              value={slot3IconColor}
-              onChange={(e) => setSlot3IconColor(e.target.value)}
-              style={styles.select}
-            >
-              <option value="default">Default</option>
-              <option value="white">White</option>
-            </select>
-          </div>
+        <div style={styles.slotsGrid}>
+          {[3, 4, 5].map((i) => (
+            <div key={i} style={styles.slotControls}>
+              <h4 style={styles.slotTitle}>Slot {i + 1}</h4>
+              <div style={styles.controlGroup}>
+                <label style={styles.label}>Icon</label>
+                {renderIconSelect(i)}
+              </div>
+              <div style={styles.controlGroup}>
+                <label style={styles.label}>Border</label>
+                <select
+                  value={slots[i].border}
+                  onChange={(e) => updateSlot(i, 'border', e.target.value)}
+                  style={styles.select}
+                >
+                  {BORDER_COLORS.map((color) => (
+                    <option key={color} value={color}>{color}</option>
+                  ))}
+                </select>
+              </div>
+              <div style={styles.controlGroup}>
+                <label style={styles.label}>Icon Color</label>
+                <select
+                  value={slots[i].iconColor}
+                  onChange={(e) => updateSlot(i, 'iconColor', e.target.value)}
+                  style={styles.select}
+                >
+                  <option value="default">Default</option>
+                  <option value="white">White</option>
+                </select>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -277,7 +231,7 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
   },
   controls: {
-    maxWidth: '600px',
+    maxWidth: '700px',
     margin: '0 auto',
     display: 'flex',
     flexDirection: 'column',
@@ -292,33 +246,48 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '4px',
   },
   label: {
-    fontSize: '12px',
-    color: '#aaa',
+    fontSize: '11px',
+    color: '#888',
   },
   select: {
-    padding: '8px',
+    padding: '6px',
     borderRadius: '4px',
     border: '1px solid #444',
     background: '#1a1a2e',
     color: '#fff',
-    fontSize: '14px',
-  },
-  buttonGroup: {
-    display: 'flex',
-    gap: '8px',
+    fontSize: '12px',
   },
   toggleButton: {
-    padding: '8px 16px',
+    padding: '10px 20px',
     background: '#3a3a5a',
     border: 'none',
     borderRadius: '4px',
     color: '#888',
     cursor: 'pointer',
     fontSize: '14px',
+    fontWeight: 'bold',
+    transition: 'all 0.15s ease',
   },
   toggleActive: {
     background: '#6b8afd',
     color: '#fff',
+  },
+  hint: {
+    fontSize: '11px',
+    color: '#666',
+    marginTop: '4px',
+  },
+  sectionTitle: {
+    fontSize: '14px',
+    color: '#6b8afd',
+    margin: '16px 0 8px 0',
+    borderBottom: '1px solid #3a3a5a',
+    paddingBottom: '8px',
+  },
+  slotsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '12px',
   },
   slotControls: {
     background: '#1a1a2e',
@@ -329,8 +298,8 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '8px',
   },
   slotTitle: {
-    fontSize: '14px',
+    fontSize: '12px',
     margin: 0,
-    color: '#6b8afd',
+    color: '#aaa',
   },
 };
