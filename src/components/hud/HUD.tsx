@@ -46,9 +46,10 @@ export default function HUD({
 
       {/* Stats Panel */}
       <div style={styles.statsPanel}>
-        {/* Level Row */}
+        {/* Name and Level Row */}
         <div style={styles.levelRow}>
           {leader && <span style={styles.leaderStar}>★</span>}
+          <span style={styles.name}>{name}</span>
           <span style={styles.lvLabel}>Lv</span>
           <span style={styles.lvValue}>{level}</span>
         </div>
@@ -144,6 +145,11 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#f1c40f',
     fontSize: '12px',
     textShadow: '1px 1px 0 #7f6a00',
+  },
+  name: {
+    color: '#f5f5dc',
+    textShadow: '1px 1px 0 #555',
+    marginRight: 'auto',
   },
   lvLabel: {
     color: '#f5f5dc',
