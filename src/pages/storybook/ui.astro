@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import UIStorybook from '../../components/ui-storybook/UIStorybook';
+
+export const prerender = false;
+---
+
+<Layout title="UI Components - PSZ Sketch">
+  <UIStorybook client:load />
+</Layout>

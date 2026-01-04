@@ -4,10 +4,10 @@ import HUD from './HUD';
 export default function HUDStorybook() {
   const [name, setName] = useState('Sarisa');
   const [level, setLevel] = useState(1);
-  const [maxHP, setMaxHP] = useState(82);
-  const [currentHP, setCurrentHP] = useState(82);
-  const [maxPP, setMaxPP] = useState(67);
-  const [currentPP, setCurrentPP] = useState(67);
+  const [maxHP, setMaxHP] = useState(100);
+  const [currentHP, setCurrentHP] = useState(100);
+  const [maxPP, setMaxPP] = useState(80);
+  const [currentPP, setCurrentPP] = useState(80);
   const [photonBlastGauge, setPhotonBlastGauge] = useState(0);
   const [leader, setLeader] = useState(true);
 
@@ -51,7 +51,7 @@ export default function HUDStorybook() {
             <input
               type="range"
               min="1"
-              max="200"
+              max="100"
               value={level}
               onChange={(e) => setLevel(Number(e.target.value))}
               style={styles.slider}
@@ -65,7 +65,7 @@ export default function HUDStorybook() {
             <input
               type="range"
               min="10"
-              max="9999"
+              max="1000"
               value={maxHP}
               onChange={(e) => {
                 const val = Number(e.target.value);
@@ -97,7 +97,7 @@ export default function HUDStorybook() {
             <input
               type="range"
               min="10"
-              max="999"
+              max="1000"
               value={maxPP}
               onChange={(e) => {
                 const val = Number(e.target.value);
@@ -179,10 +179,10 @@ export default function HUDStorybook() {
             style={styles.presetButton}
             onClick={() => {
               setLevel(100);
-              setMaxHP(2500);
-              setCurrentHP(2500);
-              setMaxPP(450);
-              setCurrentPP(450);
+              setMaxHP(800);
+              setCurrentHP(800);
+              setMaxPP(500);
+              setCurrentPP(500);
             }}
           >
             High Level
