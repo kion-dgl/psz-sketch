@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import ActionPalette from './ActionPalette';
 
+const ACTION_ICONS = [
+  { name: 'Attack', path: '/icons/palette/attack.svg' },
+  { name: 'Heavy Attack', path: '/icons/palette/heavy-attack.svg' },
+  { name: 'Evade', path: '/icons/palette/evade.svg' },
+];
+
 const TECHNIQUE_ICONS = [
   { name: 'Foie', path: '/icons/palette/foie.svg' },
   { name: 'Gifoie', path: '/icons/palette/gifoie.svg' },
@@ -97,6 +103,11 @@ export default function ActionPaletteStorybook() {
               onChange={(e) => setSlot1Icon(e.target.value)}
               style={styles.select}
             >
+              <optgroup label="Actions">
+                {ACTION_ICONS.map((icon) => (
+                  <option key={icon.path} value={icon.path}>{icon.name}</option>
+                ))}
+              </optgroup>
               <optgroup label="Techniques">
                 {TECHNIQUE_ICONS.map((icon) => (
                   <option key={icon.path} value={icon.path}>{icon.name}</option>
@@ -144,6 +155,11 @@ export default function ActionPaletteStorybook() {
               onChange={(e) => setSlot2Icon(e.target.value)}
               style={styles.select}
             >
+              <optgroup label="Actions">
+                {ACTION_ICONS.map((icon) => (
+                  <option key={icon.path} value={icon.path}>{icon.name}</option>
+                ))}
+              </optgroup>
               <optgroup label="Techniques">
                 {TECHNIQUE_ICONS.map((icon) => (
                   <option key={icon.path} value={icon.path}>{icon.name}</option>
@@ -191,6 +207,11 @@ export default function ActionPaletteStorybook() {
               onChange={(e) => setSlot3Icon(e.target.value)}
               style={styles.select}
             >
+              <optgroup label="Actions">
+                {ACTION_ICONS.map((icon) => (
+                  <option key={icon.path} value={icon.path}>{icon.name}</option>
+                ))}
+              </optgroup>
               <optgroup label="Techniques">
                 {TECHNIQUE_ICONS.map((icon) => (
                   <option key={icon.path} value={icon.path}>{icon.name}</option>

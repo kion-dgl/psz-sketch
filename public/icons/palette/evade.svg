@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<style>* { fill: #4ecdc4; }</style>
+<!-- Dash arrow -->
+<path d="
+  M 75,50
+  L 55,30
+  L 55,42
+  L 15,42
+  L 15,58
+  L 55,58
+  L 55,70
+  Z
+"/>
+<!-- Speed lines -->
+<path d="M 10,35 L 30,35" stroke="#4ecdc4" stroke-width="4" fill="none" opacity="0.6"/>
+<path d="M 5,50 L 25,50" stroke="#4ecdc4" stroke-width="4" fill="none" opacity="0.4"/>
+<path d="M 10,65 L 30,65" stroke="#4ecdc4" stroke-width="4" fill="none" opacity="0.6"/>
+</svg>
