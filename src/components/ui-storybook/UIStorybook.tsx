@@ -3,21 +3,25 @@ import HUDStorybook from '../hud/HUDStorybook';
 import ActionPaletteStorybook from '../palette/ActionPaletteStorybook';
 import MinimapStorybook from '../minimap/MinimapStorybook';
 import TooltipStorybook from '../tooltip/TooltipStorybook';
+import StatsStorybook from '../stats/StatsStorybook';
+import MainMenuStorybook from '../main-menu/MainMenuStorybook';
+import ScreenPreview from './ScreenPreview';
 
-type UIComponent = 'hud' | 'action-palette' | 'minimap' | 'tooltip' | 'main-menu' | 'stats' | 'shops';
+type UIComponent = 'screen' | 'hud' | 'action-palette' | 'minimap' | 'tooltip' | 'stats' | 'main-menu' | 'shops';
 
 const UI_COMPONENTS: { id: UIComponent; label: string; available: boolean }[] = [
+  { id: 'screen', label: 'Screen Preview', available: true },
   { id: 'hud', label: 'HUD', available: true },
   { id: 'action-palette', label: 'Action Palette', available: true },
   { id: 'minimap', label: 'Minimap', available: true },
   { id: 'tooltip', label: 'Tooltip', available: true },
-  { id: 'main-menu', label: 'Main Menu', available: false },
-  { id: 'stats', label: 'Stats', available: false },
+  { id: 'stats', label: 'Stats', available: true },
+  { id: 'main-menu', label: 'Main Menu', available: true },
   { id: 'shops', label: 'Shops', available: false },
 ];
 
 export default function UIStorybook() {
-  const [selected, setSelected] = useState<UIComponent>('hud');
+  const [selected, setSelected] = useState<UIComponent>('screen');
 
   return (
     <div style={styles.container}>
@@ -45,12 +49,13 @@ export default function UIStorybook() {
 
       {/* Content */}
       <div style={styles.content}>
+        {selected === 'screen' && <ScreenPreview />}
         {selected === 'hud' && <HUDStorybook />}
         {selected === 'action-palette' && <ActionPaletteStorybook />}
         {selected === 'minimap' && <MinimapStorybook />}
         {selected === 'tooltip' && <TooltipStorybook />}
-        {selected === 'main-menu' && <PlaceholderPanel name="Main Menu" />}
-        {selected === 'stats' && <PlaceholderPanel name="Stats" />}
+        {selected === 'stats' && <StatsStorybook />}
+        {selected === 'main-menu' && <MainMenuStorybook />}
         {selected === 'shops' && <PlaceholderPanel name="Shops" />}
       </div>
     </div>
