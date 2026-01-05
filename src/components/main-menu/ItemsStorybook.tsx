@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import ItemsMenu, { InventoryItem } from './ItemsMenu';
+import ItemsMenu from './ItemsMenu';
+import type { InventoryItem } from './inventory-types';
 
 // Preset inventories for different scenarios
 const PRESETS: { name: string; description: string; items: InventoryItem[] }[] = [
