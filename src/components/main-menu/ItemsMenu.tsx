@@ -1,45 +1,10 @@
 import { useState, useEffect } from 'react';
 
-interface ItemsMenuProps {
-  onBack: () => void;
-}
+export type ItemCategory = 'usable' | 'weapon' | 'armor' | 'special';
 
-type ItemCategory = 'usable' | 'weapon' | 'armor' | 'special';
-
-// Item data structure from psoworld-items.json
-interface PsoWorldItem {
-  name: string;
-  japaneseName?: string;
-  description?: string;
-  details?: string;
-  rarity?: number;
-  level?: number;
-  defenseBase?: number;
-  defenseMax?: number;
-  evasionBase?: number;
-  evasionMax?: number;
-  attackBase?: number;
-  attackMax?: number;
-  maxGrind?: number;
-  psoWorldId?: number;
-}
-
-// Weapon data from psoworld-weapon-stats.json
-interface PsoWorldWeapon {
-  name: string;
-  japaneseName?: string;
-  rarity: number;
-  weaponType: string;
-  level: number;
-  attackBase: number;
-  attackMax: number;
-  accuracyBase: number;
-  accuracyMax: number;
-  psoWorldId: number;
-}
-
-interface InventoryItem {
+export interface InventoryItem {
   id: string;
+  itemId?: string;
   name: string;
   japaneseName?: string;
   category: ItemCategory;
@@ -49,47 +14,28 @@ interface InventoryItem {
   // For armor
   dfp?: number;
   evp?: number;
+  slots?: number;
   // For weapons
   atp?: number;
   ata?: number;
+  mst?: number;
   weaponType?: string;
   level?: number;
+  // For units
+  unitType?: string;
 }
 
-// Categorize items from psoworld-items.json
-function categorizeItem(item: PsoWorldItem): ItemCategory | null {
-  const name = item.name.toLowerCase();
+export interface PlayerInventory {
+  version: number;
+  maxItems: number;
+  items: InventoryItem[];
+}
 
-  // Usable items
-  if (name.includes('mate') || name.includes('fluid') ||
-      name.includes('atomizer') || name.includes('trap') ||
-      name === 'telepipe' || name === 'scape doll' || name === 'trap vision') {
-    return 'usable';
-  }
-
-  // Armor items (have defense stats)
-  if (item.defenseBase !== undefined && item.defenseMax !== undefined) {
-    return 'armor';
-  }
-
-  // Special items (materials, grinders, elements, units, mag items)
-  if (name.includes('material') || name.includes('grinder') ||
-      name.includes('element') || name.includes('soul') ||
-      name.includes('rookie/') || name.includes('ace/') ||
-      name.includes('hero/') || name.includes('master/') ||
-      name.includes('divine/') || name.includes('resist') ||
-      name.includes('protect') || name.includes('recovery') ||
-      name.includes('save') || name.includes('boost') ||
-      name.includes('compress') || name === 'mag') {
-    return 'special';
-  }
-
-  // Mag evolutions
-  if (item.psoWorldId && item.psoWorldId >= 351 && item.psoWorldId <= 381) {
-    return 'special';
-  }
-
-  return null;
+interface ItemsMenuProps {
+  onBack?: () => void;
+  inventory?: InventoryItem[];
+  maxItems?: number;
+  showBackButton?: boolean;
 }
 
 const CATEGORIES: { id: ItemCategory; label: string }[] = [
@@ -99,81 +45,46 @@ const CATEGORIES: { id: ItemCategory; label: string }[] = [
   { id: 'special', label: 'Special' },
 ];
 
-export default function ItemsMenu({ onBack }: ItemsMenuProps) {
+export default function ItemsMenu({
+  onBack,
+  inventory: externalInventory,
+  maxItems = 40,
+  showBackButton = true
+}: ItemsMenuProps) {
   const [selectedCategory, setSelectedCategory] = useState<ItemCategory>('usable');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [page, setPage] = useState(1);
-  const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [inventory, setInventory] = useState<InventoryItem[]>(externalInventory || []);
+  const [loading, setLoading] = useState(!externalInventory);
 
-  // Load items from JSON files
+  // Load items from player-inventory.json if no external inventory provided
   useEffect(() => {
-    async function loadItems() {
+    if (externalInventory) {
+      setInventory(externalInventory);
+      setLoading(false);
+      return;
+    }
+
+    async function loadInventory() {
       try {
-        const items: InventoryItem[] = [];
-
-        // Load psoworld-items.json
-        const itemsResponse = await fetch('/data/psoworld-items.json');
-        if (itemsResponse.ok) {
-          const psoItems: PsoWorldItem[] = await itemsResponse.json();
-
-          psoItems.forEach((item, index) => {
-            const category = categorizeItem(item);
-            if (category) {
-              items.push({
-                id: `item_${item.psoWorldId || index}`,
-                name: item.name,
-                japaneseName: item.japaneseName,
-                category,
-                quantity: category === 'usable' ? Math.floor(Math.random() * 10) + 1 : 1,
-                description: item.details || item.description || '',
-                rarity: item.rarity || 1,
-                dfp: item.defenseBase,
-                evp: item.evasionBase,
-                level: item.level,
-              });
-            }
-          });
+        const response = await fetch('/data/player-inventory.json');
+        if (response.ok) {
+          const data: PlayerInventory = await response.json();
+          setInventory(data.items);
         }
-
-        // Load psoworld-weapon-stats.json for weapons
-        const weaponsResponse = await fetch('/data/psoworld-weapon-stats.json');
-        if (weaponsResponse.ok) {
-          const weapons: PsoWorldWeapon[] = await weaponsResponse.json();
-
-          // Add a sample of weapons (first 20)
-          weapons.slice(0, 20).forEach((weapon) => {
-            items.push({
-              id: `weapon_${weapon.psoWorldId}`,
-              name: weapon.name,
-              japaneseName: weapon.japaneseName,
-              category: 'weapon',
-              quantity: 1,
-              description: weapon.weaponType,
-              rarity: weapon.rarity,
-              atp: weapon.attackBase,
-              ata: weapon.accuracyBase,
-              weaponType: weapon.weaponType,
-              level: weapon.level,
-            });
-          });
-        }
-
-        setInventory(items);
       } catch (error) {
-        console.error('Failed to load items:', error);
+        console.error('Failed to load inventory:', error);
       } finally {
         setLoading(false);
       }
     }
 
-    loadItems();
-  }, []);
+    loadInventory();
+  }, [externalInventory]);
 
   const filteredItems = inventory.filter(item => item.category === selectedCategory);
   const selectedItem = filteredItems[selectedIndex];
   const totalItems = inventory.length;
-  const maxItems = 40;
   const totalPages = Math.ceil(filteredItems.length / 10) || 1;
 
   const handleCategoryChange = (direction: 'prev' | 'next') => {
@@ -243,7 +154,7 @@ export default function ItemsMenu({ onBack }: ItemsMenuProps) {
                 </span>
                 <span style={styles.itemName}>{item.name}</span>
                 {item.quantity > 1 && (
-                  <span style={styles.itemQuantity}>x {item.quantity}</span>
+                  <span style={styles.itemQuantity}>x{item.quantity}</span>
                 )}
               </button>
             );
@@ -319,6 +230,12 @@ export default function ItemsMenu({ onBack }: ItemsMenuProps) {
                   <span style={styles.detailLabel}>ATA</span>
                   <span style={styles.detailValue}>{selectedItem.ata}</span>
                 </div>
+                {selectedItem.mst && (
+                  <div style={styles.detailRow}>
+                    <span style={styles.detailLabel}>MST</span>
+                    <span style={styles.detailValue}>+{selectedItem.mst}</span>
+                  </div>
+                )}
               </>
             )}
 
@@ -332,6 +249,12 @@ export default function ItemsMenu({ onBack }: ItemsMenuProps) {
                   <span style={styles.detailLabel}>EVP</span>
                   <span style={styles.detailValue}>{selectedItem.evp}</span>
                 </div>
+                {selectedItem.slots !== undefined && (
+                  <div style={styles.detailRow}>
+                    <span style={styles.detailLabel}>Slots</span>
+                    <span style={styles.detailValue}>{selectedItem.slots}</span>
+                  </div>
+                )}
               </>
             )}
 
@@ -358,7 +281,9 @@ export default function ItemsMenu({ onBack }: ItemsMenuProps) {
       </div>
 
       {/* Back button overlay */}
-      <button onClick={onBack} style={styles.backButton}>← Back</button>
+      {showBackButton && onBack && (
+        <button onClick={onBack} style={styles.backButton}>← Back</button>
+      )}
     </div>
   );
 }
