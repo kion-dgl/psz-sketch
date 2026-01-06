@@ -9,9 +9,10 @@ import ItemsStorybook from '../main-menu/ItemsStorybook';
 import EquipStorybook from '../main-menu/EquipStorybook';
 import ItemShopStorybook from '../shops/ItemShopStorybook';
 import WeaponShopStorybook from '../shops/WeaponShopStorybook';
+import Shop3DStorybook from '../shops/Shop3DStorybook';
 import ScreenPreview from './ScreenPreview';
 
-type UIComponent = 'screen' | 'hud' | 'action-palette' | 'minimap' | 'tooltip' | 'stats' | 'main-menu' | 'items' | 'equip' | 'item-shop' | 'weapon-shop';
+type UIComponent = 'screen' | 'hud' | 'action-palette' | 'minimap' | 'tooltip' | 'stats' | 'main-menu' | 'items' | 'equip' | 'item-shop' | 'weapon-shop' | 'shop-3d';
 
 const UI_COMPONENTS: { id: UIComponent; label: string; available: boolean }[] = [
   { id: 'screen', label: 'Screen Preview', available: true },
@@ -25,6 +26,7 @@ const UI_COMPONENTS: { id: UIComponent; label: string; available: boolean }[] = 
   { id: 'equip', label: 'Equip', available: true },
   { id: 'item-shop', label: 'Item Shop', available: true },
   { id: 'weapon-shop', label: 'Weapon Shop', available: true },
+  { id: 'shop-3d', label: 'Shop 3D', available: true },
 ];
 
 export default function UIStorybook() {
@@ -67,6 +69,7 @@ export default function UIStorybook() {
         {selected === 'equip' && <EquipStorybook />}
         {selected === 'item-shop' && <ItemShopStorybook />}
         {selected === 'weapon-shop' && <WeaponShopStorybook />}
+        {selected === 'shop-3d' && <Shop3DStorybook />}
       </div>
     </div>
   );

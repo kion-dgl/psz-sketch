@@ -1,7 +1,6 @@
 import LobbyArea, { type LobbyRenderProps } from '../shared/LobbyArea';
 import MarketEnvironment from './MarketEnvironment';
 import NPCs from './NPCs';
-import ShopNPCs from './ShopNPCs';
 import InvisibleWalls from './InvisibleWalls';
 import AreaTriggers from './AreaTriggers';
 import InteractiveTriggers, { type InteractiveTrigger } from '../shared/InteractiveTriggers';
@@ -13,9 +12,6 @@ const CITY_TRIGGERS: InteractiveTrigger[] = [
 const SPAWN_CONFIGS = [
   { condition: 'counter-exit', position: [0.98, 10, 18.84] as [number, number, number], rotation: Math.PI }
 ];
-
-// Toggle to use interactive shop NPCs (set to true to enable in-world shop UI)
-const USE_INTERACTIVE_SHOPS = true;
 
 export default function CityMarket() {
   return (
@@ -34,7 +30,7 @@ export default function CityMarket() {
             visible={true}
             onPlayerInZone={setPlayerInInteractiveZone}
           />
-          {USE_INTERACTIVE_SHOPS ? <ShopNPCs /> : <NPCs />}
+          <NPCs />
         </>
       )}
     />
