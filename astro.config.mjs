@@ -19,6 +19,7 @@ export default defineConfig({
 				// Exclude large static asset directories from file watching
 				// to reduce memory usage during development
 				ignored: [
+					'**/.vercel/**',
 					'**/public/weapons/**',
 					'**/public/stages/**',
 					'**/public/objects/**',

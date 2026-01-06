@@ -1,14 +1,38 @@
 import { useState, useEffect } from 'react';
-import type { ItemCategory, InventoryItem, PlayerInventory } from './inventory-types';
+import type {
+  ItemCategory,
+  InventoryItem,
+  PlayerInventory,
+  PlayerState,
+  ItemAction,
+  ItemActionOption,
+} from './inventory-types';
+import {
+  getItemActions,
+  canPlayerEquip,
+  getWeaponSortOrder,
+} from './inventory-types';
 
-export type { ItemCategory, InventoryItem, PlayerInventory };
+export type { ItemCategory, InventoryItem, PlayerInventory, PlayerState };
 
 interface ItemsMenuProps {
   onBack?: () => void;
   inventory?: InventoryItem[];
+  playerState?: PlayerState;
   maxItems?: number;
   showBackButton?: boolean;
+  onItemAction?: (item: InventoryItem, action: ItemAction) => void;
 }
+
+// Default player state for storybook/testing
+const DEFAULT_PLAYER_STATE: PlayerState = {
+  level: 50,
+  characterClass: 'HUmar',
+  currentHP: 800,
+  maxHP: 1000,
+  currentPP: 50,
+  maxPP: 100,
+};
 
 const CATEGORIES: { id: ItemCategory; label: string }[] = [
   { id: 'usable', label: 'Usable' },
@@ -20,14 +44,18 @@ const CATEGORIES: { id: ItemCategory; label: string }[] = [
 export default function ItemsMenu({
   onBack,
   inventory: externalInventory,
+  playerState = DEFAULT_PLAYER_STATE,
   maxItems = 40,
-  showBackButton = true
+  showBackButton = true,
+  onItemAction,
 }: ItemsMenuProps) {
   const [selectedCategory, setSelectedCategory] = useState<ItemCategory>('usable');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [page, setPage] = useState(1);
   const [inventory, setInventory] = useState<InventoryItem[]>(externalInventory || []);
   const [loading, setLoading] = useState(!externalInventory);
+  const [showActionMenu, setShowActionMenu] = useState(false);
+  const [actionMenuIndex, setActionMenuIndex] = useState(0);
 
   // Load items from player-inventory.json if no external inventory provided
   useEffect(() => {
@@ -54,10 +82,23 @@ export default function ItemsMenu({
     loadInventory();
   }, [externalInventory]);
 
-  const filteredItems = inventory.filter(item => item.category === selectedCategory);
+  // Sort and filter items
+  const filteredItems = inventory
+    .filter(item => item.category === selectedCategory)
+    .sort((a, b) => {
+      // Sort weapons by category: melee → ranged → magic
+      if (selectedCategory === 'weapon') {
+        return getWeaponSortOrder(a.weaponCategory) - getWeaponSortOrder(b.weaponCategory);
+      }
+      return 0;
+    });
+
   const selectedItem = filteredItems[selectedIndex];
   const totalItems = inventory.length;
   const totalPages = Math.ceil(filteredItems.length / 10) || 1;
+
+  // Get actions for selected item
+  const itemActions = selectedItem ? getItemActions(selectedItem, playerState) : [];
 
   const handleCategoryChange = (direction: 'prev' | 'next') => {
     const currentIndex = CATEGORIES.findIndex(c => c.id === selectedCategory);
@@ -70,6 +111,29 @@ export default function ItemsMenu({
     }
     setSelectedIndex(0);
     setPage(1);
+    setShowActionMenu(false);
+  };
+
+  const handleItemSelect = (index: number) => {
+    setSelectedIndex(index);
+    setShowActionMenu(true);
+    setActionMenuIndex(0);
+  };
+
+  const handleActionSelect = (action: ItemActionOption) => {
+    if (action.disabled || !selectedItem) return;
+
+    onItemAction?.(selectedItem, action.action);
+    setShowActionMenu(false);
+  };
+
+  // Check if item can be equipped by player
+  const getItemStatus = (item: InventoryItem): { canEquip: boolean; isEquipped: boolean } => {
+    const equipCheck = canPlayerEquip(item, playerState);
+    return {
+      canEquip: equipCheck.canEquip,
+      isEquipped: item.isEquipped || false,
+    };
   };
 
   // Paginate items
@@ -93,7 +157,7 @@ export default function ItemsMenu({
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
-              onClick={() => { setSelectedCategory(cat.id); setSelectedIndex(0); setPage(1); }}
+              onClick={() => { setSelectedCategory(cat.id); setSelectedIndex(0); setPage(1); setShowActionMenu(false); }}
               style={{
                 ...styles.tab,
                 ...(selectedCategory === cat.id ? styles.tabActive : {}),
@@ -109,22 +173,43 @@ export default function ItemsMenu({
         <div style={styles.itemList}>
           {pageItems.map((item, index) => {
             const globalIndex = (page - 1) * 10 + index;
+            const status = getItemStatus(item);
+            const isSelected = selectedIndex === globalIndex;
+            const isGrayedOut = (item.category === 'weapon' || item.category === 'armor') && !status.canEquip;
+
             return (
               <button
                 key={item.id}
-                onClick={() => setSelectedIndex(globalIndex)}
+                onClick={() => handleItemSelect(globalIndex)}
                 onMouseEnter={() => setSelectedIndex(globalIndex)}
                 style={{
                   ...styles.itemRow,
-                  ...(selectedIndex === globalIndex ? styles.itemRowSelected : {}),
+                  ...(isSelected ? styles.itemRowSelected : {}),
+                  ...(isGrayedOut ? styles.itemRowDisabled : {}),
                 }}
               >
+                {/* Status icon */}
+                <span style={styles.statusIcon}>
+                  {status.isEquipped && <span style={styles.equippedIcon}>E</span>}
+                  {!status.canEquip && !status.isEquipped && (item.category === 'weapon' || item.category === 'armor') && (
+                    <span style={styles.cantEquipIcon}>✕</span>
+                  )}
+                </span>
+
+                {/* Item icon */}
                 <span style={styles.itemIcon}>
                   {item.category === 'usable' ? '💊' :
                    item.category === 'weapon' ? '⚔' :
-                   item.category === 'armor' ? '🛡' : '✨'}
+                   item.category === 'armor' ? (item.isUnit ? '◇' : '🛡') : '✨'}
                 </span>
-                <span style={styles.itemName}>{item.name}</span>
+
+                <span style={{
+                  ...styles.itemName,
+                  ...(isGrayedOut ? styles.itemNameDisabled : {}),
+                }}>
+                  {item.name}
+                </span>
+
                 {item.quantity > 1 && (
                   <span style={styles.itemQuantity}>x{item.quantity}</span>
                 )}
@@ -145,15 +230,15 @@ export default function ItemsMenu({
         {/* Footer */}
         <div style={styles.footer}>
           <span style={styles.footerHint}>
-            <span style={styles.buttonHint}>START</span> Close
+            <span style={styles.buttonHint}>A</span> Select
           </span>
           <span style={styles.footerHint}>
-            <span style={styles.buttonHint}>Y</span> Info
+            <span style={styles.buttonHint}>B</span> Back
           </span>
         </div>
       </div>
 
-      {/* Right Panel - Details */}
+      {/* Right Panel - Details or Action Menu */}
       <div style={styles.rightPanel}>
         <div style={styles.pageNav}>
           <button
@@ -173,7 +258,43 @@ export default function ItemsMenu({
           >▶</button>
         </div>
 
-        {selectedItem ? (
+        {showActionMenu && selectedItem ? (
+          // Action Menu
+          <div style={styles.actionMenu}>
+            <div style={styles.actionMenuTitle}>{selectedItem.name}</div>
+            <div style={styles.actionList}>
+              {itemActions.map((action, index) => (
+                <button
+                  key={action.action}
+                  onClick={() => handleActionSelect(action)}
+                  onMouseEnter={() => setActionMenuIndex(index)}
+                  style={{
+                    ...styles.actionButton,
+                    ...(actionMenuIndex === index ? styles.actionButtonSelected : {}),
+                    ...(action.disabled ? styles.actionButtonDisabled : {}),
+                  }}
+                  disabled={action.disabled}
+                >
+                  {action.label}
+                  {action.disabled && action.disabledReason && (
+                    <span style={styles.disabledReason}>({action.disabledReason})</span>
+                  )}
+                </button>
+              ))}
+              <button
+                onClick={() => setShowActionMenu(false)}
+                onMouseEnter={() => setActionMenuIndex(itemActions.length)}
+                style={{
+                  ...styles.actionButton,
+                  ...(actionMenuIndex === itemActions.length ? styles.actionButtonSelected : {}),
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : selectedItem ? (
+          // Item Details
           <div style={styles.detailsContent}>
             {/* Japanese name */}
             {selectedItem.japaneseName && (
@@ -221,7 +342,7 @@ export default function ItemsMenu({
                   <span style={styles.detailLabel}>EVP</span>
                   <span style={styles.detailValue}>{selectedItem.evp}</span>
                 </div>
-                {selectedItem.slots !== undefined && (
+                {selectedItem.slots !== undefined && !selectedItem.isUnit && (
                   <div style={styles.detailRow}>
                     <span style={styles.detailLabel}>Slots</span>
                     <span style={styles.detailValue}>{selectedItem.slots}</span>
@@ -230,10 +351,23 @@ export default function ItemsMenu({
               </>
             )}
 
-            {selectedItem.level && (
+            {selectedItem.requiredLevel && (
               <div style={styles.detailRow}>
                 <span style={styles.detailLabel}>Lv Required</span>
-                <span style={styles.detailValue}>{selectedItem.level}</span>
+                <span style={{
+                  ...styles.detailValue,
+                  ...(playerState.level < selectedItem.requiredLevel ? styles.levelTooLow : {}),
+                }}>
+                  {selectedItem.requiredLevel}
+                </span>
+              </div>
+            )}
+
+            {/* Max stack for consumables */}
+            {selectedItem.category === 'usable' && selectedItem.maxStack && (
+              <div style={styles.detailRow}>
+                <span style={styles.detailLabel}>Max</span>
+                <span style={styles.detailValue}>{selectedItem.quantity}/{selectedItem.maxStack}</span>
               </div>
             )}
 
@@ -328,7 +462,7 @@ const styles: Record<string, React.CSSProperties> = {
   itemRow: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: '4px',
     padding: '6px 8px',
     background: 'transparent',
     border: 'none',
@@ -341,6 +475,30 @@ const styles: Record<string, React.CSSProperties> = {
   itemRowSelected: {
     background: '#f0a020',
     color: '#1a1a1a',
+  },
+  itemRowDisabled: {
+    opacity: 0.6,
+  },
+  statusIcon: {
+    width: '16px',
+    height: '16px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '10px',
+  },
+  equippedIcon: {
+    background: '#4a8',
+    color: '#fff',
+    padding: '1px 3px',
+    borderRadius: '2px',
+    fontSize: '9px',
+    fontWeight: 'bold',
+  },
+  cantEquipIcon: {
+    color: '#c44',
+    fontSize: '12px',
+    fontWeight: 'bold',
   },
   itemIcon: {
     width: '20px',
@@ -356,6 +514,9 @@ const styles: Record<string, React.CSSProperties> = {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+  },
+  itemNameDisabled: {
+    color: '#5a7a8a',
   },
   itemQuantity: {
     fontSize: '12px',
@@ -434,6 +595,53 @@ const styles: Record<string, React.CSSProperties> = {
     margin: '0 4px',
     fontSize: '10px',
   },
+  // Action Menu styles
+  actionMenu: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  actionMenuTitle: {
+    color: '#1a3a5a',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    borderBottom: '1px solid #3a7aa8',
+    paddingBottom: '6px',
+    marginBottom: '4px',
+  },
+  actionList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+  },
+  actionButton: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '8px 10px',
+    background: 'transparent',
+    border: 'none',
+    borderRadius: '4px',
+    color: '#1a3a5a',
+    fontSize: '13px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    textAlign: 'left',
+  },
+  actionButtonSelected: {
+    background: '#f0a020',
+    color: '#1a1a1a',
+  },
+  actionButtonDisabled: {
+    color: '#7a9aaa',
+    cursor: 'not-allowed',
+  },
+  disabledReason: {
+    fontSize: '10px',
+    fontWeight: 'normal',
+    color: '#8a6a5a',
+  },
+  // Details styles
   detailsContent: {
     display: 'flex',
     flexDirection: 'column',
@@ -466,6 +674,9 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#1a1a1a',
     fontSize: '11px',
     fontWeight: 'bold',
+  },
+  levelTooLow: {
+    color: '#c44',
   },
   rarityRow: {
     marginTop: '8px',
