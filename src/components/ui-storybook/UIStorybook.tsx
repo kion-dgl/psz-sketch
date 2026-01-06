@@ -6,9 +6,10 @@ import TooltipStorybook from '../tooltip/TooltipStorybook';
 import StatsStorybook from '../stats/StatsStorybook';
 import MainMenuStorybook from '../main-menu/MainMenuStorybook';
 import ItemsStorybook from '../main-menu/ItemsStorybook';
+import EquipStorybook from '../main-menu/EquipStorybook';
 import ScreenPreview from './ScreenPreview';
 
-type UIComponent = 'screen' | 'hud' | 'action-palette' | 'minimap' | 'tooltip' | 'stats' | 'main-menu' | 'items' | 'shops';
+type UIComponent = 'screen' | 'hud' | 'action-palette' | 'minimap' | 'tooltip' | 'stats' | 'main-menu' | 'items' | 'equip' | 'shops';
 
 const UI_COMPONENTS: { id: UIComponent; label: string; available: boolean }[] = [
   { id: 'screen', label: 'Screen Preview', available: true },
@@ -19,6 +20,7 @@ const UI_COMPONENTS: { id: UIComponent; label: string; available: boolean }[] = 
   { id: 'stats', label: 'Stats', available: true },
   { id: 'main-menu', label: 'Main Menu', available: true },
   { id: 'items', label: 'Items', available: true },
+  { id: 'equip', label: 'Equip', available: true },
   { id: 'shops', label: 'Shops', available: false },
 ];
 
@@ -59,6 +61,7 @@ export default function UIStorybook() {
         {selected === 'stats' && <StatsStorybook />}
         {selected === 'main-menu' && <MainMenuStorybook />}
         {selected === 'items' && <ItemsStorybook />}
+        {selected === 'equip' && <EquipStorybook />}
         {selected === 'shops' && <PlaceholderPanel name="Shops" />}
       </div>
     </div>
