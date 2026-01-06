@@ -19,7 +19,7 @@ interface ItemsMenuWebProps {
   onItemAction?: (item: InventoryItem, action: ItemAction) => void;
 }
 
-interface ContextMenuState {
+interface ActionMenuState {
   visible: boolean;
   x: number;
   y: number;
@@ -41,8 +41,8 @@ export default function ItemsMenuWeb({
   onItemAction,
 }: ItemsMenuWebProps) {
   const [selectedCategory, setSelectedCategory] = useState<ItemCategory>('usable');
-  const [hoveredItem, setHoveredItem] = useState<InventoryItem | null>(null);
-  const [contextMenu, setContextMenu] = useState<ContextMenuState>({
+  const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+  const [actionMenu, setActionMenu] = useState<ActionMenuState>({
     visible: false,
     x: 0,
     y: 0,
@@ -50,28 +50,29 @@ export default function ItemsMenuWeb({
     actions: [],
   });
   const containerRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close context menu on click outside
+  // Close action menu on click outside
   useEffect(() => {
-    const handleClickOutside = () => {
-      if (contextMenu.visible) {
-        setContextMenu(prev => ({ ...prev, visible: false }));
+    const handleClickOutside = (e: MouseEvent) => {
+      if (actionMenu.visible && menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setActionMenu(prev => ({ ...prev, visible: false }));
       }
     };
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [contextMenu.visible]);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [actionMenu.visible]);
 
-  // Close context menu on escape
+  // Close action menu on escape
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && contextMenu.visible) {
-        setContextMenu(prev => ({ ...prev, visible: false }));
+      if (e.key === 'Escape' && actionMenu.visible) {
+        setActionMenu(prev => ({ ...prev, visible: false }));
       }
     };
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [contextMenu.visible]);
+  }, [actionMenu.visible]);
 
   // Sort and filter items
   const filteredItems = inventory
@@ -83,15 +84,32 @@ export default function ItemsMenuWeb({
       return 0;
     });
 
-  const handleContextMenu = (e: React.MouseEvent, item: InventoryItem) => {
-    e.preventDefault();
+  // Get hovered item for preview panel
+  const hoveredItem = hoveredItemId ? inventory.find(i => i.id === hoveredItemId) : null;
+
+  const handleItemClick = (e: React.MouseEvent, item: InventoryItem) => {
     const actions = getItemActions(item, playerState);
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
 
-    // Position context menu within viewport
-    const x = Math.min(e.clientX, window.innerWidth - 160);
-    const y = Math.min(e.clientY, window.innerHeight - (actions.length * 36 + 20));
+    // Position menu to the right of the item, or left if not enough space
+    const menuWidth = 160;
+    const menuHeight = actions.length * 40 + 50;
 
-    setContextMenu({
+    let x = rect.right + 8;
+    let y = rect.top;
+
+    // Adjust if menu would go off screen
+    if (x + menuWidth > window.innerWidth) {
+      x = rect.left - menuWidth - 8;
+    }
+    if (y + menuHeight > window.innerHeight) {
+      y = window.innerHeight - menuHeight - 8;
+    }
+    if (y < 8) {
+      y = 8;
+    }
+
+    setActionMenu({
       visible: true,
       x,
       y,
@@ -101,9 +119,9 @@ export default function ItemsMenuWeb({
   };
 
   const handleActionClick = (action: ItemActionOption) => {
-    if (action.disabled || !contextMenu.item) return;
-    onItemAction?.(contextMenu.item, action.action);
-    setContextMenu(prev => ({ ...prev, visible: false }));
+    if (action.disabled || !actionMenu.item) return;
+    onItemAction?.(actionMenu.item, action.action);
+    setActionMenu(prev => ({ ...prev, visible: false }));
   };
 
   const getItemStatus = (item: InventoryItem) => {
@@ -132,7 +150,10 @@ export default function ItemsMenuWeb({
         {CATEGORIES.map(cat => (
           <button
             key={cat.id}
-            onClick={() => setSelectedCategory(cat.id)}
+            onClick={() => {
+              setSelectedCategory(cat.id);
+              setActionMenu(prev => ({ ...prev, visible: false }));
+            }}
             style={{
               ...styles.tab,
               ...(selectedCategory === cat.id ? styles.tabActive : {}),
@@ -156,18 +177,20 @@ export default function ItemsMenuWeb({
           ) : (
             filteredItems.map(item => {
               const status = getItemStatus(item);
-              const isHovered = hoveredItem?.id === item.id;
+              const isHovered = hoveredItemId === item.id;
+              const isSelected = actionMenu.visible && actionMenu.item?.id === item.id;
               const isGrayedOut = (item.category === 'weapon' || item.category === 'armor') && !status.canEquip;
 
               return (
                 <div
                   key={item.id}
-                  onContextMenu={(e) => handleContextMenu(e, item)}
-                  onMouseEnter={() => setHoveredItem(item)}
-                  onMouseLeave={() => setHoveredItem(null)}
+                  onClick={(e) => handleItemClick(e, item)}
+                  onMouseEnter={() => setHoveredItemId(item.id)}
+                  onMouseLeave={() => setHoveredItemId(null)}
                   style={{
                     ...styles.itemCard,
-                    ...(isHovered ? styles.itemCardHovered : {}),
+                    ...(isHovered && !isSelected ? styles.itemCardHovered : {}),
+                    ...(isSelected ? styles.itemCardSelected : {}),
                     ...(isGrayedOut ? styles.itemCardDisabled : {}),
                   }}
                 >
@@ -203,9 +226,6 @@ export default function ItemsMenuWeb({
                     {'★'.repeat(Math.min(item.rarity, 5))}
                     {'☆'.repeat(Math.max(0, 5 - item.rarity))}
                   </div>
-
-                  {/* Right-click hint */}
-                  <div style={styles.contextHint}>Right-click for options</div>
                 </div>
               );
             })
@@ -214,132 +234,159 @@ export default function ItemsMenuWeb({
 
         {/* Hover Preview Panel */}
         <div style={styles.previewPanel}>
-          {hoveredItem ? (
-            <>
-              <div style={styles.previewHeader}>
-                <span style={styles.previewName}>{hoveredItem.name}</span>
-                {hoveredItem.japaneseName && (
-                  <span style={styles.previewJapanese}>{hoveredItem.japaneseName}</span>
-                )}
-              </div>
+          {hoveredItem || actionMenu.item ? (
+            (() => {
+              const displayItem = actionMenu.visible ? actionMenu.item! : hoveredItem!;
+              return (
+                <>
+                  <div style={styles.previewHeader}>
+                    <span style={styles.previewName}>{displayItem.name}</span>
+                    {displayItem.japaneseName && (
+                      <span style={styles.previewJapanese}>{displayItem.japaneseName}</span>
+                    )}
+                  </div>
 
-              <div style={styles.previewDescription}>
-                {hoveredItem.description}
-              </div>
+                  <div style={styles.previewDescription}>
+                    {displayItem.description}
+                  </div>
 
-              <div style={styles.previewStats}>
-                {hoveredItem.category === 'weapon' && (
-                  <>
-                    <div style={styles.statRow}>
-                      <span>Type</span>
-                      <span>{hoveredItem.weaponType}</span>
-                    </div>
-                    <div style={styles.statRow}>
-                      <span>ATP</span>
-                      <span style={styles.statValue}>{hoveredItem.atp}</span>
-                    </div>
-                    <div style={styles.statRow}>
-                      <span>ATA</span>
-                      <span style={styles.statValue}>{hoveredItem.ata}</span>
-                    </div>
-                    {hoveredItem.mst && (
+                  <div style={styles.previewStats}>
+                    {displayItem.category === 'weapon' && (
+                      <>
+                        <div style={styles.statRow}>
+                          <span>Type</span>
+                          <span>{displayItem.weaponType}</span>
+                        </div>
+                        <div style={styles.statRow}>
+                          <span>ATP</span>
+                          <span style={styles.statValue}>{displayItem.atp}</span>
+                        </div>
+                        <div style={styles.statRow}>
+                          <span>ATA</span>
+                          <span style={styles.statValue}>{displayItem.ata}</span>
+                        </div>
+                        {displayItem.mst && (
+                          <div style={styles.statRow}>
+                            <span>MST</span>
+                            <span style={styles.statValue}>+{displayItem.mst}</span>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {displayItem.category === 'armor' && (
+                      <>
+                        <div style={styles.statRow}>
+                          <span>DFP</span>
+                          <span style={styles.statValue}>{displayItem.dfp}</span>
+                        </div>
+                        <div style={styles.statRow}>
+                          <span>EVP</span>
+                          <span style={styles.statValue}>{displayItem.evp}</span>
+                        </div>
+                        {displayItem.slots !== undefined && !displayItem.isUnit && (
+                          <div style={styles.statRow}>
+                            <span>Slots</span>
+                            <span style={styles.statValue}>{displayItem.slots}</span>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {displayItem.category === 'usable' && displayItem.maxStack && (
                       <div style={styles.statRow}>
-                        <span>MST</span>
-                        <span style={styles.statValue}>+{hoveredItem.mst}</span>
+                        <span>Stack</span>
+                        <span style={styles.statValue}>{displayItem.quantity}/{displayItem.maxStack}</span>
                       </div>
                     )}
-                  </>
-                )}
 
-                {hoveredItem.category === 'armor' && (
-                  <>
-                    <div style={styles.statRow}>
-                      <span>DFP</span>
-                      <span style={styles.statValue}>{hoveredItem.dfp}</span>
-                    </div>
-                    <div style={styles.statRow}>
-                      <span>EVP</span>
-                      <span style={styles.statValue}>{hoveredItem.evp}</span>
-                    </div>
-                    {hoveredItem.slots !== undefined && !hoveredItem.isUnit && (
+                    {displayItem.requiredLevel && (
                       <div style={styles.statRow}>
-                        <span>Slots</span>
-                        <span style={styles.statValue}>{hoveredItem.slots}</span>
+                        <span>Required Lv</span>
+                        <span style={{
+                          ...styles.statValue,
+                          color: playerState.level < displayItem.requiredLevel ? '#f66' : '#6f6',
+                        }}>
+                          {displayItem.requiredLevel}
+                        </span>
                       </div>
                     )}
-                  </>
-                )}
-
-                {hoveredItem.category === 'usable' && hoveredItem.maxStack && (
-                  <div style={styles.statRow}>
-                    <span>Stack</span>
-                    <span style={styles.statValue}>{hoveredItem.quantity}/{hoveredItem.maxStack}</span>
                   </div>
-                )}
 
-                {hoveredItem.requiredLevel && (
-                  <div style={styles.statRow}>
-                    <span>Required Lv</span>
-                    <span style={{
-                      ...styles.statValue,
-                      color: playerState.level < hoveredItem.requiredLevel ? '#f66' : '#6f6',
-                    }}>
-                      {hoveredItem.requiredLevel}
-                    </span>
+                  <div style={styles.previewRarity}>
+                    {'★'.repeat(displayItem.rarity)}
+                    {'☆'.repeat(Math.max(0, 10 - displayItem.rarity))}
                   </div>
-                )}
-              </div>
-
-              <div style={styles.previewRarity}>
-                {'★'.repeat(hoveredItem.rarity)}
-                {'☆'.repeat(Math.max(0, 10 - hoveredItem.rarity))}
-              </div>
-            </>
+                </>
+              );
+            })()
           ) : (
             <div style={styles.previewEmpty}>
               <span style={styles.previewEmptyIcon}>👆</span>
               <span>Hover over an item to see details</span>
-              <span style={styles.previewEmptyHint}>Right-click for actions</span>
+              <span style={styles.previewEmptyHint}>Click to open actions</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Context Menu */}
-      {contextMenu.visible && contextMenu.item && (
+      {/* Action Menu (Popover) */}
+      {actionMenu.visible && actionMenu.item && (
         <div
+          ref={menuRef}
           style={{
-            ...styles.contextMenu,
-            left: contextMenu.x,
-            top: contextMenu.y,
+            ...styles.actionMenu,
+            left: actionMenu.x,
+            top: actionMenu.y,
           }}
-          onClick={(e) => e.stopPropagation()}
         >
-          <div style={styles.contextMenuHeader}>
-            {contextMenu.item.name}
+          <div style={styles.actionMenuHeader}>
+            {actionMenu.item.name}
           </div>
-          {contextMenu.actions.map(action => (
-            <button
-              key={action.action}
-              onClick={() => handleActionClick(action)}
-              disabled={action.disabled}
-              style={{
-                ...styles.contextMenuItem,
-                ...(action.disabled ? styles.contextMenuItemDisabled : {}),
-              }}
-            >
-              <span style={styles.contextMenuIcon}>
-                {action.action === 'use' && '✨'}
-                {action.action === 'equip' && '⬆'}
-                {action.action === 'unequip' && '⬇'}
-                {action.action === 'discard' && '🗑'}
-              </span>
-              <span>{action.label}</span>
-              {action.disabled && action.disabledReason && (
-                <span style={styles.contextMenuReason}>{action.disabledReason}</span>
-              )}
-            </button>
-          ))}
+          <div style={styles.actionMenuBody}>
+            {actionMenu.actions.map(action => (
+              <button
+                key={action.action}
+                onClick={() => handleActionClick(action)}
+                disabled={action.disabled}
+                style={{
+                  ...styles.actionMenuItem,
+                  ...(action.disabled ? styles.actionMenuItemDisabled : {}),
+                }}
+                onMouseEnter={(e) => {
+                  if (!action.disabled) {
+                    (e.target as HTMLElement).style.background = 'rgba(107, 138, 253, 0.2)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.background = 'transparent';
+                }}
+              >
+                <span style={styles.actionMenuIcon}>
+                  {action.action === 'use' && '✨'}
+                  {action.action === 'equip' && '⬆'}
+                  {action.action === 'unequip' && '⬇'}
+                  {action.action === 'discard' && '🗑'}
+                </span>
+                <span style={styles.actionMenuLabel}>{action.label}</span>
+                {action.disabled && action.disabledReason && (
+                  <span style={styles.actionMenuReason}>{action.disabledReason}</span>
+                )}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => setActionMenu(prev => ({ ...prev, visible: false }))}
+            style={styles.actionMenuCancel}
+            onMouseEnter={(e) => {
+              (e.target as HTMLElement).style.background = 'rgba(255, 100, 100, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLElement).style.background = 'transparent';
+            }}
+          >
+            Cancel
+          </button>
         </div>
       )}
     </div>
@@ -348,6 +395,7 @@ export default function ItemsMenuWeb({
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
+    position: 'relative',
     width: '700px',
     background: '#1e1e2e',
     borderRadius: '12px',
@@ -442,15 +490,18 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '12px 8px',
     background: '#2a2a3e',
     borderRadius: '8px',
-    border: '1px solid #3a3a4e',
-    cursor: 'context-menu',
+    border: '2px solid transparent',
+    cursor: 'pointer',
     transition: 'all 0.15s',
   },
   itemCardHovered: {
-    background: '#3a3a4e',
+    background: '#32324a',
+    borderColor: '#4a4a6a',
+  },
+  itemCardSelected: {
+    background: '#3a4a5e',
     borderColor: '#6b8afd',
-    transform: 'translateY(-2px)',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+    boxShadow: '0 0 0 2px rgba(107, 138, 253, 0.3)',
   },
   itemCardDisabled: {
     opacity: 0.5,
@@ -508,14 +559,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '8px',
     color: '#ffd700',
     letterSpacing: '-1px',
-  },
-  contextHint: {
-    position: 'absolute',
-    bottom: '4px',
-    fontSize: '8px',
-    color: '#555',
-    opacity: 0,
-    transition: 'opacity 0.2s',
   },
   previewPanel: {
     width: '220px',
@@ -587,31 +630,34 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '10px',
     color: '#444',
   },
-  // Context Menu
-  contextMenu: {
+  // Action Menu (Popover)
+  actionMenu: {
     position: 'fixed',
     background: '#2a2a3e',
     border: '1px solid #4a4a5e',
     borderRadius: '8px',
     boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-    minWidth: '150px',
+    minWidth: '160px',
     zIndex: 1000,
     overflow: 'hidden',
   },
-  contextMenuHeader: {
-    padding: '10px 12px',
-    fontSize: '12px',
+  actionMenuHeader: {
+    padding: '10px 14px',
+    fontSize: '13px',
     fontWeight: 600,
     color: '#fff',
     background: '#3a3a4e',
     borderBottom: '1px solid #4a4a5e',
   },
-  contextMenuItem: {
+  actionMenuBody: {
+    padding: '4px 0',
+  },
+  actionMenuItem: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: '10px',
     width: '100%',
-    padding: '10px 12px',
+    padding: '10px 14px',
     background: 'transparent',
     border: 'none',
     color: '#e0e0e0',
@@ -620,30 +666,32 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: 'left',
     transition: 'background 0.1s',
   },
-  contextMenuItemDisabled: {
+  actionMenuItemDisabled: {
     color: '#666',
     cursor: 'not-allowed',
   },
-  contextMenuIcon: {
+  actionMenuIcon: {
     fontSize: '14px',
+    width: '18px',
   },
-  contextMenuReason: {
-    marginLeft: 'auto',
+  actionMenuLabel: {
+    flex: 1,
+  },
+  actionMenuReason: {
     fontSize: '10px',
     color: '#888',
   },
+  actionMenuCancel: {
+    display: 'block',
+    width: '100%',
+    padding: '10px 14px',
+    background: 'transparent',
+    border: 'none',
+    borderTop: '1px solid #3a3a4e',
+    color: '#888',
+    fontSize: '12px',
+    cursor: 'pointer',
+    textAlign: 'center',
+    transition: 'background 0.1s',
+  },
 };
-
-// Add hover effect for context menu items via CSS-in-JS workaround
-const styleSheet = typeof document !== 'undefined' ? document.createElement('style') : null;
-if (styleSheet) {
-  styleSheet.textContent = `
-    .items-menu-web-context-item:hover:not(:disabled) {
-      background: rgba(107, 138, 253, 0.2) !important;
-    }
-    .items-menu-web-item:hover .context-hint {
-      opacity: 1 !important;
-    }
-  `;
-  document.head.appendChild(styleSheet);
-}
