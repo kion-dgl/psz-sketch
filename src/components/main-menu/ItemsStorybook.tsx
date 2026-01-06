@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ItemsMenu from './ItemsMenu';
-import type { InventoryItem, PlayerState, ItemAction, CharacterClass } from './inventory-types';
+import ItemsMenuWeb from './ItemsMenuWeb';
+import type { InventoryItem, PlayerState, ItemAction } from './inventory-types';
 
 // Sample inventory with all interaction types
 const SAMPLE_INVENTORY: InventoryItem[] = [
@@ -101,8 +102,11 @@ const PLAYER_PRESETS: { name: string; state: PlayerState }[] = [
   },
 ];
 
+type ViewMode = 'game' | 'web';
+
 export default function ItemsStorybook() {
-  const [selectedPreset, setSelectedPreset] = useState(2); // Default to damaged hunter
+  const [viewMode, setViewMode] = useState<ViewMode>('web');
+  const [selectedPreset, setSelectedPreset] = useState(2);
   const [actionLog, setActionLog] = useState<string[]>([]);
 
   const playerState = PLAYER_PRESETS[selectedPreset].state;
@@ -114,8 +118,34 @@ export default function ItemsStorybook() {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Items Menu - Interactions</h1>
-      <p style={styles.subtitle}>Test item actions: Use, Equip, Unequip, Discard</p>
+      <h1 style={styles.title}>Items Menu</h1>
+      <p style={styles.subtitle}>Compare game-style vs web-style inventory interfaces</p>
+
+      {/* View Mode Toggle */}
+      <div style={styles.modeToggle}>
+        <button
+          onClick={() => setViewMode('game')}
+          style={{
+            ...styles.modeButton,
+            ...(viewMode === 'game' ? styles.modeButtonActive : {}),
+          }}
+        >
+          <span style={styles.modeIcon}>🎮</span>
+          Game Style
+          <span style={styles.modeDesc}>D-pad navigation, select/back buttons</span>
+        </button>
+        <button
+          onClick={() => setViewMode('web')}
+          style={{
+            ...styles.modeButton,
+            ...(viewMode === 'web' ? styles.modeButtonActive : {}),
+          }}
+        >
+          <span style={styles.modeIcon}>🖱</span>
+          Web Style
+          <span style={styles.modeDesc}>Hover preview, right-click context menu</span>
+        </button>
+      </div>
 
       {/* Player State Selector */}
       <div style={styles.controlSection}>
@@ -136,23 +166,42 @@ export default function ItemsStorybook() {
         </div>
         <div style={styles.statsRow}>
           <span style={styles.stat}>Lv {playerState.level}</span>
-          <span style={styles.stat}>HP: {playerState.currentHP}/{playerState.maxHP}</span>
-          <span style={styles.stat}>PP: {playerState.currentPP}/{playerState.maxPP}</span>
+          <span style={{
+            ...styles.stat,
+            color: playerState.currentHP < playerState.maxHP ? '#f88' : '#8f8',
+          }}>
+            HP: {playerState.currentHP}/{playerState.maxHP}
+          </span>
+          <span style={{
+            ...styles.stat,
+            color: playerState.currentPP < playerState.maxPP ? '#88f' : '#8f8',
+          }}>
+            PP: {playerState.currentPP}/{playerState.maxPP}
+          </span>
           <span style={styles.stat}>{playerState.characterClass}</span>
         </div>
       </div>
 
       {/* Preview Area */}
       <div style={styles.previewArea}>
-        <div style={styles.previewBg}>
-          <ItemsMenu
+        {viewMode === 'game' ? (
+          <div style={styles.gamePreviewBg}>
+            <ItemsMenu
+              inventory={SAMPLE_INVENTORY}
+              playerState={playerState}
+              maxItems={40}
+              showBackButton={false}
+              onItemAction={handleItemAction}
+            />
+          </div>
+        ) : (
+          <ItemsMenuWeb
             inventory={SAMPLE_INVENTORY}
             playerState={playerState}
             maxItems={40}
-            showBackButton={false}
             onItemAction={handleItemAction}
           />
-        </div>
+        )}
       </div>
 
       {/* Action Log */}
@@ -160,7 +209,11 @@ export default function ItemsStorybook() {
         <h3 style={styles.sectionTitle}>Action Log</h3>
         <div style={styles.log}>
           {actionLog.length === 0 ? (
-            <div style={styles.logEmpty}>Click an item, then select an action...</div>
+            <div style={styles.logEmpty}>
+              {viewMode === 'game'
+                ? 'Click an item, then select an action...'
+                : 'Right-click an item to see the context menu...'}
+            </div>
           ) : (
             actionLog.map((msg, i) => (
               <div key={i} style={styles.logEntry}>{msg}</div>
@@ -169,40 +222,30 @@ export default function ItemsStorybook() {
         </div>
       </div>
 
-      {/* Info */}
+      {/* Comparison Info */}
       <div style={styles.info}>
-        <h3 style={styles.infoTitle}>Interaction Rules</h3>
-        <div style={styles.rulesGrid}>
-          <div style={styles.ruleCard}>
-            <h4 style={styles.ruleTitle}>Consumables</h4>
-            <ul style={styles.ruleList}>
-              <li>Mates: Use only when HP not full</li>
-              <li>Fluids: Use only when PP not full</li>
-              <li>Max stack: 10 (Star Atomizer: 5, Scape Doll: 1)</li>
+        <h3 style={styles.infoTitle}>Interface Comparison</h3>
+        <div style={styles.comparisonGrid}>
+          <div style={styles.comparisonCard}>
+            <h4 style={styles.comparisonTitle}>🎮 Game Style</h4>
+            <ul style={styles.comparisonList}>
+              <li>Click item to open action menu</li>
+              <li>Navigate with keyboard arrows</li>
+              <li>A = Select, B = Back</li>
+              <li>Compact list view</li>
+              <li>Details panel on right</li>
+              <li>Faithful to original PSO UI</li>
             </ul>
           </div>
-          <div style={styles.ruleCard}>
-            <h4 style={styles.ruleTitle}>Weapons</h4>
-            <ul style={styles.ruleList}>
-              <li>Sorted: Melee → Ranged → Magic</li>
-              <li><span style={styles.equippedBadge}>E</span> = Equipped</li>
-              <li><span style={styles.cantEquipBadge}>✕</span> = Can't equip (level/class)</li>
-            </ul>
-          </div>
-          <div style={styles.ruleCard}>
-            <h4 style={styles.ruleTitle}>Armor & Units</h4>
-            <ul style={styles.ruleList}>
-              <li>Armor shows slot count</li>
-              <li>Units use ◇ icon</li>
-              <li>Level requirements shown in red if too low</li>
-            </ul>
-          </div>
-          <div style={styles.ruleCard}>
-            <h4 style={styles.ruleTitle}>Special</h4>
-            <ul style={styles.ruleList}>
-              <li>Materials: Can be used</li>
-              <li>Grinders, Photon Drops, Enemy Parts: Discard only</li>
-              <li>Most require NPC interaction</li>
+          <div style={styles.comparisonCard}>
+            <h4 style={styles.comparisonTitle}>🖱 Web Style</h4>
+            <ul style={styles.comparisonList}>
+              <li>Right-click for context menu</li>
+              <li>Hover to preview item details</li>
+              <li>Grid layout with cards</li>
+              <li>Visual badges for status</li>
+              <li>Modern, discoverable UI</li>
+              <li>Better for mouse/touch</li>
             </ul>
           </div>
         </div>
@@ -229,8 +272,43 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: 'center',
     marginBottom: '20px',
   },
+  modeToggle: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '12px',
+    marginBottom: '20px',
+  },
+  modeButton: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '4px',
+    padding: '16px 24px',
+    background: '#2d2d44',
+    border: '2px solid #3a3a5a',
+    borderRadius: '12px',
+    color: '#888',
+    fontSize: '14px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    minWidth: '180px',
+  },
+  modeButtonActive: {
+    background: '#3a4a6a',
+    borderColor: '#6b8afd',
+    color: '#fff',
+  },
+  modeIcon: {
+    fontSize: '24px',
+  },
+  modeDesc: {
+    fontSize: '10px',
+    fontWeight: 400,
+    color: '#666',
+  },
   controlSection: {
-    maxWidth: '700px',
+    maxWidth: '750px',
     margin: '0 auto 20px',
     background: '#2d2d44',
     padding: '16px',
@@ -278,14 +356,14 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     marginBottom: '20px',
   },
-  previewBg: {
+  gamePreviewBg: {
     background: 'linear-gradient(135deg, #2d3436 0%, #000000 100%)',
     padding: '40px',
     borderRadius: '8px',
     boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
   },
   logSection: {
-    maxWidth: '700px',
+    maxWidth: '750px',
     margin: '0 auto 20px',
     background: '#2d2d44',
     padding: '16px',
@@ -309,7 +387,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderBottom: '1px solid #333',
   },
   info: {
-    maxWidth: '700px',
+    maxWidth: '750px',
     margin: '0 auto',
     background: '#2d2d44',
     padding: '20px',
@@ -322,39 +400,26 @@ const styles: Record<string, React.CSSProperties> = {
     borderBottom: '1px solid #3a3a5a',
     paddingBottom: '8px',
   },
-  rulesGrid: {
+  comparisonGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '12px',
+    gap: '16px',
   },
-  ruleCard: {
+  comparisonCard: {
     background: '#252538',
-    padding: '12px',
-    borderRadius: '6px',
+    padding: '16px',
+    borderRadius: '8px',
   },
-  ruleTitle: {
-    fontSize: '12px',
+  comparisonTitle: {
+    fontSize: '14px',
     color: '#fff',
-    margin: '0 0 8px 0',
+    margin: '0 0 12px 0',
   },
-  ruleList: {
+  comparisonList: {
     margin: 0,
-    padding: '0 0 0 16px',
-    fontSize: '11px',
+    padding: '0 0 0 20px',
+    fontSize: '12px',
     color: '#aaa',
-    lineHeight: 1.6,
-  },
-  equippedBadge: {
-    display: 'inline-block',
-    background: '#4a8',
-    color: '#fff',
-    padding: '1px 4px',
-    borderRadius: '2px',
-    fontSize: '9px',
-    fontWeight: 'bold',
-  },
-  cantEquipBadge: {
-    color: '#c44',
-    fontWeight: 'bold',
+    lineHeight: 1.8,
   },
 };
