@@ -128,13 +128,14 @@ function SceneContent({
   // Fixed camera position when shop is open
   useEffect(() => {
     if (isShopOpen) {
-      // Position camera in front of NPC, looking at them
-      camera.position.set(0, 1.5, 3.5);
-      camera.lookAt(0, 1, 0);
+      // Position camera to frame NPC on left, menu on right
+      // NPC is at x=-1.5, menu at x=2 (relative 3.5), center at x=0.25
+      camera.position.set(0.25, 1.5, 5);
+      camera.lookAt(0.25, 1, 0);
     } else {
-      // Default position
-      camera.position.set(0, 2, 5);
-      camera.lookAt(0, 1, 0);
+      // Default position - centered on NPC
+      camera.position.set(-1.5, 2, 5);
+      camera.lookAt(-1.5, 1, 0);
     }
   }, [isShopOpen, camera]);
 
@@ -149,9 +150,9 @@ function SceneContent({
         <meshStandardMaterial color="#2a3a4a" />
       </mesh>
 
-      {/* Item Shop NPC */}
+      {/* Item Shop NPC - positioned on left side */}
       <ClickableShopNPC
-        position={[0, 0, 0]}
+        position={[-1.5, 0, 0]}
         name="Item Shop"
         modelPath={NPC_MODELS.itemShop}
         shopType="item"
@@ -231,7 +232,7 @@ function ClickableShopNPC({
       {/* Shop UI - positioned to the right of NPC */}
       {isShopOpen && (
         <Html
-          position={[2.5, 1.5, 0]}
+          position={[3.5, 1.5, 0]}
           center
           transform
           distanceFactor={5}
