@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo, Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Html, useGLTF, Environment } from '@react-three/drei';
+import { useState, useEffect, useMemo, Suspense, useRef } from 'react';
+import { Canvas, useThree } from '@react-three/fiber';
+import { Html, useGLTF } from '@react-three/drei';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
+import * as THREE from 'three';
 
 interface ShopItem {
   id: string;
@@ -16,19 +17,16 @@ interface ShopPresets {
     baseItems: ShopItem[];
     presets: { name: string; premiumItems: ShopItem[] }[];
   };
-  weaponShop: {
-    presets: { name: string; weapons: any[] }[];
-  };
 }
 
 const NPC_MODELS = {
   itemShop: '/objects/special_c1/np_003_00_0.imd/np_003_00_0.glb',
-  weaponShop: '/objects/special_c1/np_002_00_0.imd/np_002_00_0.glb',
 };
 
 export default function Shop3DStorybook() {
   const [shopData, setShopData] = useState<ShopPresets | null>(null);
   const [playerMeseta, setPlayerMeseta] = useState(50000);
+  const [isShopOpen, setIsShopOpen] = useState(false);
   const [actionLog, setActionLog] = useState<string[]>([]);
 
   useEffect(() => {
@@ -59,19 +57,11 @@ export default function Shop3DStorybook() {
     ...shopData.itemShop.presets[2].premiumItems
   ];
 
-  const weaponShopItems = shopData.weaponShop.presets[1].weapons.map((w: any) => ({
-    id: w.id,
-    name: w.name,
-    price: w.price,
-    description: `${w.type} - ATP: ${w.atp}, ATA: ${w.ata}`,
-    rarity: w.rarity,
-  }));
-
   return (
     <div style={styles.container}>
       <div style={styles.header}>
         <h2 style={styles.title}>3D Shop Demo</h2>
-        <p style={styles.subtitle}>Click on an NPC to open their shop</p>
+        <p style={styles.subtitle}>Click on the NPC to open the shop (simulates player interaction)</p>
       </div>
 
       <div style={styles.controls}>
@@ -87,47 +77,16 @@ export default function Shop3DStorybook() {
 
       <div style={styles.canvasContainer}>
         <Canvas
-          camera={{ position: [0, 3, 8], fov: 50 }}
+          camera={{ position: [0, 2, 5], fov: 50 }}
           style={{ background: '#1a1a2e' }}
         >
           <Suspense fallback={null}>
-            <ambientLight intensity={0.5} />
-            <directionalLight position={[5, 10, 5]} intensity={1} />
-
-            {/* Floor */}
-            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-              <planeGeometry args={[20, 20]} />
-              <meshStandardMaterial color="#2a3a4a" />
-            </mesh>
-
-            {/* Item Shop NPC */}
-            <ClickableShopNPC
-              position={[-2, 0, 0]}
-              name="Item Shop"
-              modelPath={NPC_MODELS.itemShop}
-              shopType="item"
+            <SceneContent
               items={itemShopItems}
               playerMeseta={playerMeseta}
               onPurchase={handlePurchase}
-            />
-
-            {/* Weapon Shop NPC */}
-            <ClickableShopNPC
-              position={[2, 0, 0]}
-              name="Weapon Shop"
-              modelPath={NPC_MODELS.weaponShop}
-              shopType="weapon"
-              items={weaponShopItems}
-              playerMeseta={playerMeseta}
-              onPurchase={handlePurchase}
-            />
-
-            <OrbitControls
-              enablePan={false}
-              minDistance={4}
-              maxDistance={15}
-              minPolarAngle={Math.PI / 6}
-              maxPolarAngle={Math.PI / 2.2}
+              isShopOpen={isShopOpen}
+              setIsShopOpen={setIsShopOpen}
             />
           </Suspense>
         </Canvas>
@@ -138,7 +97,7 @@ export default function Shop3DStorybook() {
         <div style={styles.logTitle}>Purchase Log</div>
         <div style={styles.logContent}>
           {actionLog.length === 0 ? (
-            <span style={styles.logEmpty}>Click on an NPC to open their shop...</span>
+            <span style={styles.logEmpty}>Click on the NPC to open the shop...</span>
           ) : (
             actionLog.map((log, idx) => (
               <div key={idx} style={styles.logEntry}>{log}</div>
@@ -150,6 +109,62 @@ export default function Shop3DStorybook() {
   );
 }
 
+// Scene content with camera control
+function SceneContent({
+  items,
+  playerMeseta,
+  onPurchase,
+  isShopOpen,
+  setIsShopOpen,
+}: {
+  items: ShopItem[];
+  playerMeseta: number;
+  onPurchase: (item: ShopItem, quantity: number) => void;
+  isShopOpen: boolean;
+  setIsShopOpen: (open: boolean) => void;
+}) {
+  const { camera } = useThree();
+
+  // Fixed camera position when shop is open
+  useEffect(() => {
+    if (isShopOpen) {
+      // Position camera in front of NPC, looking at them
+      camera.position.set(0, 1.5, 3.5);
+      camera.lookAt(0, 1, 0);
+    } else {
+      // Default position
+      camera.position.set(0, 2, 5);
+      camera.lookAt(0, 1, 0);
+    }
+  }, [isShopOpen, camera]);
+
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[5, 10, 5]} intensity={1} />
+
+      {/* Floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+        <planeGeometry args={[20, 20]} />
+        <meshStandardMaterial color="#2a3a4a" />
+      </mesh>
+
+      {/* Item Shop NPC */}
+      <ClickableShopNPC
+        position={[0, 0, 0]}
+        name="Item Shop"
+        modelPath={NPC_MODELS.itemShop}
+        shopType="item"
+        items={items}
+        playerMeseta={playerMeseta}
+        onPurchase={onPurchase}
+        isShopOpen={isShopOpen}
+        setIsShopOpen={setIsShopOpen}
+      />
+    </>
+  );
+}
+
 function ClickableShopNPC({
   position,
   name,
@@ -158,6 +173,8 @@ function ClickableShopNPC({
   items,
   playerMeseta,
   onPurchase,
+  isShopOpen,
+  setIsShopOpen,
 }: {
   position: [number, number, number];
   name: string;
@@ -166,8 +183,9 @@ function ClickableShopNPC({
   items: ShopItem[];
   playerMeseta: number;
   onPurchase: (item: ShopItem, quantity: number) => void;
+  isShopOpen: boolean;
+  setIsShopOpen: (open: boolean) => void;
 }) {
-  const [isShopOpen, setIsShopOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const { scene } = useGLTF(modelPath);
 
@@ -197,8 +215,8 @@ function ClickableShopNPC({
         />
       </mesh>
 
-      {/* NPC Model */}
-      <primitive object={clonedScene} position={[0, -1, 0]} />
+      {/* NPC Model - positioned so feet are on the floor */}
+      <primitive object={clonedScene} position={[0, 0, 0]} />
 
       {/* Name label when hovered */}
       {isHovered && !isShopOpen && (
@@ -210,13 +228,12 @@ function ClickableShopNPC({
         </Html>
       )}
 
-      {/* Shop UI */}
+      {/* Shop UI - positioned to the right of NPC */}
       {isShopOpen && (
         <Html
-          position={[0, 3, 0]}
+          position={[2.5, 1.5, 0]}
           center
           transform
-          sprite
           distanceFactor={5}
           style={{ pointerEvents: 'auto' }}
         >
