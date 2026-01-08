@@ -1,0 +1,39 @@
+{
+  "name": "N-Tathlam",
+  "japaneseName": "ネグロタスラム",
+  "rarity": 7,
+  "weaponType": "Handgun",
+  "elementLevel": 5,
+  "element": "Heat",
+  "maxGrind": 20,
+  "level": 60,
+  "resaleValue": 10,
+  "attackBase": 265,
+  "attackMax": 305,
+  "accuracyBase": 216,
+  "accuracyMax": 216,
+  "photonArts": [
+    {
+      "name": "Quick Draw",
+      "attackMod": 80,
+      "accuracyMod": 75,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 167,
+  "modelId": "whgr01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "whgr01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Handguns_(Phantasy_Star_Zero)"
+}

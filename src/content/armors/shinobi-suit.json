@@ -1,0 +1,13 @@
+{
+  "name": "Shinobi Suit",
+  "japaneseName": "シノビショウゾク",
+  "rarity": 6,
+  "maxGrind": 35,
+  "level": 50,
+  "resaleValue": 10,
+  "defenseBase": 155,
+  "defenseMax": 225,
+  "evasionBase": 178,
+  "evasionMax": 248,
+  "psoWorldId": 517
+}

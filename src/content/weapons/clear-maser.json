@@ -1,0 +1,33 @@
+{
+  "name": "Clear Maser",
+  "japaneseName": "クリアメーザー",
+  "rarity": 4,
+  "weaponType": "Laser Cannon",
+  "maxGrind": 25,
+  "level": 12,
+  "resaleValue": 581,
+  "attackBase": 98,
+  "attackMax": 148,
+  "accuracyBase": 163,
+  "accuracyMax": 163,
+  "photonArts": [
+    {
+      "name": "Sector Line",
+      "attackMod": 150,
+      "accuracyMod": 80,
+      "ppUsed": 22,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 268,
+  "modelId": "wlcn01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wlcn01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Laser_Cannons_(Phantasy_Star_Zero)"
+}

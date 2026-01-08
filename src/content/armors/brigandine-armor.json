@@ -1,0 +1,13 @@
+{
+  "name": "Brigandine Armor",
+  "japaneseName": "ブリガンディアーマー",
+  "rarity": 4,
+  "maxGrind": 35,
+  "level": 10,
+  "resaleValue": 656,
+  "defenseBase": 102,
+  "defenseMax": 172,
+  "evasionBase": 66,
+  "evasionMax": 136,
+  "psoWorldId": 488
+}

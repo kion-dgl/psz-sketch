@@ -1,0 +1,14 @@
+{
+  "name": "Keplar Suit",
+  "japaneseName": "ケプラースーツ",
+  "details": "Can only be used by Male characters",
+  "rarity": 7,
+  "maxGrind": 50,
+  "level": 72,
+  "resaleValue": 10,
+  "defenseBase": 252,
+  "defenseMax": 352,
+  "evasionBase": 178,
+  "evasionMax": 278,
+  "psoWorldId": 512
+}

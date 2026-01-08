@@ -1,0 +1,44 @@
+{
+  "name": "Gun Diva",
+  "japaneseName": "ガンディーヴァ",
+  "rarity": 6,
+  "weaponType": "Laser Cannon",
+  "maxGrind": 15,
+  "level": 36,
+  "resaleValue": 1680,
+  "attackBase": 212,
+  "attackMax": 242,
+  "accuracyBase": 237,
+  "accuracyMax": 237,
+  "photonArts": [
+    {
+      "name": "Sector Line",
+      "attackMod": 150,
+      "accuracyMod": 80,
+      "ppUsed": 22,
+      "element": "-"
+    },
+    {
+      "name": "Bio Panic",
+      "attackMod": 100,
+      "accuracyMod": 180,
+      "ppUsed": 16,
+      "element": "Level 3 Dark"
+    },
+    {
+      "name": "Divine Ray",
+      "attackMod": 250,
+      "accuracyMod": 200,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 265,
+  "modelId": "wlcn02",
+  "variantId": "wlcn02_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Laser_Cannons_(Phantasy_Star_Zero)"
+}

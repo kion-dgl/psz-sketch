@@ -1,0 +1,35 @@
+{
+  "name": "Kouga Shuriken",
+  "japaneseName": "コウガシュリケン",
+  "rarity": 7,
+  "weaponType": "Slicer",
+  "elementLevel": 3,
+  "element": "Dark",
+  "maxGrind": 30,
+  "level": 64,
+  "resaleValue": 10,
+  "accuracyBase": 171,
+  "accuracyMax": 171,
+  "photonArts": [
+    {
+      "name": "Bright Sign",
+      "attackMod": 110,
+      "accuracyMod": 120,
+      "ppUsed": 14,
+      "element": "Level 3 Stun"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 426,
+  "modelId": "wslr04",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wslr04_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Slicers_(Phantasy_Star_Zero)"
+}

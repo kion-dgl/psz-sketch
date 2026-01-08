@@ -1,0 +1,45 @@
+{
+  "name": "Ryjarg",
+  "japaneseName": "ライジャルグ",
+  "rarity": 5,
+  "weaponType": "Rifle",
+  "maxGrind": 40,
+  "level": 20,
+  "resaleValue": 840,
+  "attackBase": 160,
+  "attackMax": 240,
+  "accuracyBase": 173,
+  "accuracyMax": 173,
+  "photonArts": [
+    {
+      "name": "Wipeout",
+      "attackMod": 75,
+      "accuracyMod": 80,
+      "ppUsed": 21,
+      "element": "Level 4 Heat"
+    },
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    },
+    {
+      "name": "Mine Sneak",
+      "attackMod": 160,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 180,
+  "modelId": "wrfc01",
+  "variantId": "wrfc01_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

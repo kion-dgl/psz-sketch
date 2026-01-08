@@ -1,0 +1,14 @@
+{
+  "name": "Hard Frame",
+  "japaneseName": "ハードフレーム",
+  "details": "Can have a maximum of 3 slots.",
+  "rarity": 2,
+  "maxGrind": 35,
+  "level": 2,
+  "resaleValue": 109,
+  "defenseBase": 41,
+  "defenseMax": 111,
+  "evasionBase": 39,
+  "evasionMax": 109,
+  "psoWorldId": 492
+}

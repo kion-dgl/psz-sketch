@@ -1,0 +1,32 @@
+{
+  "name": "Chrome Carbine",
+  "japaneseName": "クロムカービン",
+  "rarity": 3,
+  "weaponType": "Rifle",
+  "maxGrind": 40,
+  "level": 5,
+  "resaleValue": 191,
+  "attackBase": 76,
+  "attackMax": 156,
+  "accuracyBase": 117,
+  "accuracyMax": 117,
+  "photonArts": [
+    {
+      "name": "Wipeout",
+      "attackMod": 75,
+      "accuracyMod": 80,
+      "ppUsed": 21,
+      "element": "Level 4 Heat"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 175,
+  "modelId": "wrfh01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wrfh01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

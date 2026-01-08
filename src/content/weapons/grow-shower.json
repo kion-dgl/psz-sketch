@@ -1,0 +1,37 @@
+{
+  "name": "Grow Shower",
+  "japaneseName": "スクスクシャワー",
+  "rarity": 2,
+  "weaponType": "Handgun",
+  "elementLevel": 1,
+  "element": "Exp",
+  "maxGrind": 90,
+  "level": 1,
+  "resaleValue": 10,
+  "attackBase": 39,
+  "attackMax": 219,
+  "accuracyBase": 88,
+  "accuracyMax": 88,
+  "photonArts": [
+    {
+      "name": "Quick Draw",
+      "attackMod": 80,
+      "accuracyMod": 75,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 169,
+  "modelId": "whgr02",
+  "variantId": "whgr02_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Handguns_(Phantasy_Star_Zero)"
+}

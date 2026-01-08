@@ -1,0 +1,38 @@
+{
+  "name": "Pinky Hand",
+  "japaneseName": "ピンキーハンド",
+  "rarity": 6,
+  "weaponType": "Claw",
+  "elementLevel": 2,
+  "element": "Heart",
+  "maxGrind": 40,
+  "level": 40,
+  "resaleValue": 10,
+  "attackBase": 236,
+  "attackMax": 316,
+  "accuracyBase": 278,
+  "accuracyMax": 278,
+  "photonArts": [
+    {
+      "name": "Slide End",
+      "attackMod": 75,
+      "accuracyMod": 120,
+      "ppUsed": 21,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 89,
+  "modelId": "wclr03",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wclr03_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Claws_(Phantasy_Star_Zero)"
+}

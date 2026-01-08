@@ -1,0 +1,19 @@
+{
+  "name": "Ein Blade",
+  "japaneseName": "アインブレード",
+  "rarity": 3,
+  "weaponType": "Saber",
+  "maxGrind": 50,
+  "level": 5,
+  "resaleValue": 170,
+  "attackBase": 89,
+  "attackMax": 189,
+  "accuracyBase": 156,
+  "accuracyMax": 156,
+  "psoWorldId": 8,
+  "modelId": "wsac01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wsac01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Sabers_(Phantasy_Star_Zero)"
+}

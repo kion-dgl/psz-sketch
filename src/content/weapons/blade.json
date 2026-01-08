@@ -1,0 +1,17 @@
+{
+  "name": "Blade",
+  "japaneseName": "ブレード",
+  "rarity": 1,
+  "weaponType": "Saber",
+  "maxGrind": 60,
+  "level": 1,
+  "resaleValue": 27,
+  "attackBase": 40,
+  "attackMax": 160,
+  "accuracyBase": 96,
+  "accuracyMax": 96,
+  "psoWorldId": 3,
+  "modelId": "wsac01",
+  "variantId": "wsac01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Sabers_(Phantasy_Star_Zero)"
+}

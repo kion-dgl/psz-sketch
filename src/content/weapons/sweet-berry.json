@@ -1,0 +1,51 @@
+{
+  "name": "Sweet Berry",
+  "japaneseName": "スイートベリィ",
+  "rarity": 3,
+  "weaponType": "Spear",
+  "elementLevel": 3,
+  "element": "Jellen",
+  "maxGrind": 70,
+  "level": 5,
+  "resaleValue": 10,
+  "attackBase": 108,
+  "attackMax": 248,
+  "accuracyBase": 157,
+  "accuracyMax": 157,
+  "photonArts": [
+    {
+      "name": "Hopping Run",
+      "attackMod": 90,
+      "accuracyMod": 130,
+      "ppUsed": 24,
+      "element": "-"
+    },
+    {
+      "name": "Spear Rider",
+      "attackMod": 145,
+      "accuracyMod": 160,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Speed Rain",
+      "attackMod": 80,
+      "accuracyMod": 70,
+      "ppUsed": 32,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 85,
+  "modelId": "wspr03",
+  "variantId": "wspr03_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Spears_(Phantasy_Star_Zero)"
+}

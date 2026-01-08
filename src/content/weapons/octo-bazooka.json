@@ -1,0 +1,37 @@
+{
+  "name": "Octo Bazooka",
+  "japaneseName": "オクトバズーカ",
+  "rarity": 4,
+  "weaponType": "Bazooka",
+  "elementLevel": 2,
+  "element": "Slow",
+  "maxGrind": 30,
+  "level": 15,
+  "resaleValue": 10,
+  "attackBase": 212,
+  "attackMax": 272,
+  "accuracyBase": 158,
+  "accuracyMax": 158,
+  "photonArts": [
+    {
+      "name": "Wild Blow",
+      "attackMod": 120,
+      "accuracyMod": 90,
+      "ppUsed": 28,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 253,
+  "modelId": "wbar01",
+  "variantId": "wbar01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Bazookas_(Phantasy_Star_Zero)"
+}

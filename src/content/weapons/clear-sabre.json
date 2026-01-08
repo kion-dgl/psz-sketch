@@ -1,0 +1,37 @@
+{
+  "name": "Clear Sabre",
+  "japaneseName": "クリアサーベル",
+  "rarity": 4,
+  "weaponType": "Saber",
+  "maxGrind": 25,
+  "level": 12,
+  "resaleValue": 441,
+  "attackBase": 132,
+  "attackMax": 182,
+  "accuracyBase": 192,
+  "accuracyMax": 192,
+  "photonArts": [
+    {
+      "name": "Cross Rave",
+      "attackMod": 160,
+      "accuracyMod": 120,
+      "ppUsed": 13,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 20,
+  "modelId": "wsan01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wsan01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Sabers_(Phantasy_Star_Zero)"
+}

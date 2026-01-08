@@ -1,0 +1,48 @@
+{
+  "name": "Trois Souther",
+  "japaneseName": "トロワサウザー",
+  "rarity": 7,
+  "weaponType": "Slicer",
+  "maxGrind": 20,
+  "level": 54,
+  "resaleValue": 1506,
+  "accuracyBase": 162,
+  "accuracyMax": 162,
+  "photonArts": [
+    {
+      "name": "Edge Riser",
+      "attackMod": 150,
+      "accuracyMod": 200,
+      "ppUsed": 15,
+      "element": "-"
+    },
+    {
+      "name": "Bright Sign",
+      "attackMod": 110,
+      "accuracyMod": 120,
+      "ppUsed": 14,
+      "element": "Level 3 Stun"
+    },
+    {
+      "name": "Say Goodbye",
+      "attackMod": 100,
+      "accuracyMod": 210,
+      "ppUsed": 15,
+      "element": "Level 3 Light"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 422,
+  "modelId": "wslc01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wslc01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Slicers_(Phantasy_Star_Zero)"
+}

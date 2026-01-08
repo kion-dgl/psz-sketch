@@ -1,0 +1,51 @@
+{
+  "name": "Dragon Horn",
+  "japaneseName": "ドラゴンホーン",
+  "rarity": 6,
+  "weaponType": "Spear",
+  "elementLevel": 3,
+  "element": "Heat",
+  "maxGrind": 30,
+  "level": 40,
+  "resaleValue": 10,
+  "attackBase": 348,
+  "attackMax": 408,
+  "accuracyBase": 269,
+  "accuracyMax": 269,
+  "photonArts": [
+    {
+      "name": "Hopping Run",
+      "attackMod": 90,
+      "accuracyMod": 130,
+      "ppUsed": 24,
+      "element": "-"
+    },
+    {
+      "name": "Spear Rider",
+      "attackMod": 145,
+      "accuracyMod": 160,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Speed Rain",
+      "attackMod": 80,
+      "accuracyMod": 70,
+      "ppUsed": 32,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 84,
+  "modelId": "wspr01",
+  "variantId": "wspr01_2_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Spears_(Phantasy_Star_Zero)"
+}

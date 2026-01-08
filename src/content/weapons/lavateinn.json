@@ -1,0 +1,47 @@
+{
+  "name": "Lavateinn",
+  "japaneseName": "ラーヴァテイン",
+  "rarity": 7,
+  "weaponType": "Rifle",
+  "maxGrind": 30,
+  "level": 54,
+  "resaleValue": 3854,
+  "attackBase": 291,
+  "attackMax": 351,
+  "accuracyBase": 219,
+  "accuracyMax": 219,
+  "photonArts": [
+    {
+      "name": "Wipeout",
+      "attackMod": 75,
+      "accuracyMod": 80,
+      "ppUsed": 21,
+      "element": "Level 4 Heat"
+    },
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    },
+    {
+      "name": "Mine Sneak",
+      "attackMod": 160,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 181,
+  "modelId": "wrfc01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wrfc01_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

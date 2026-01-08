@@ -1,0 +1,37 @@
+{
+  "name": "Deo Pistol",
+  "japaneseName": "デオピストル",
+  "rarity": 3,
+  "weaponType": "Handgun",
+  "maxGrind": 50,
+  "level": 5,
+  "resaleValue": 165,
+  "attackBase": 65,
+  "attackMax": 165,
+  "accuracyBase": 114,
+  "accuracyMax": 114,
+  "photonArts": [
+    {
+      "name": "Quick Draw",
+      "attackMod": 80,
+      "accuracyMod": 75,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 156,
+  "modelId": "whgc01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "whgc01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Handguns_(Phantasy_Star_Zero)"
+}

@@ -1,0 +1,35 @@
+{
+  "name": "Dioskuroi",
+  "japaneseName": "ディオスクロイ",
+  "rarity": 7,
+  "weaponType": "Double Saber",
+  "elementLevel": 3,
+  "element": "Jellen",
+  "maxGrind": 40,
+  "level": 63,
+  "resaleValue": 10,
+  "attackBase": 366,
+  "attackMax": 446,
+  "accuracyBase": 261,
+  "accuracyMax": 261,
+  "photonArts": [
+    {
+      "name": "Million Rave",
+      "attackMod": 135,
+      "accuracyMod": 100,
+      "ppUsed": 25,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 150,
+  "modelId": "wdsr03",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wdsr03_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Double_Sabers_(Phantasy_Star_Zero)"
+}

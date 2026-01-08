@@ -1,0 +1,31 @@
+{
+  "name": "Clear Staff",
+  "japaneseName": "クリアスタッフ",
+  "rarity": 4,
+  "weaponType": "Rod",
+  "maxGrind": 25,
+  "level": 12,
+  "resaleValue": 623,
+  "accuracyBase": 131,
+  "accuracyMax": 131,
+  "photonArts": [
+    {
+      "name": "Beat Quake",
+      "attackMod": 140,
+      "accuracyMod": 150,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Newman",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 282,
+  "modelId": "wron02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wron02_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rods_(Phantasy_Star_Zero)"
+}

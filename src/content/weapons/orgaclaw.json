@@ -1,0 +1,35 @@
+{
+  "name": "Orgaclaw",
+  "japaneseName": "オルガクロー",
+  "rarity": 4,
+  "weaponType": "Claw",
+  "elementLevel": 2,
+  "element": "Ice",
+  "maxGrind": 10,
+  "level": 16,
+  "resaleValue": 10,
+  "attackBase": 171,
+  "attackMax": 191,
+  "accuracyBase": 194,
+  "accuracyMax": 194,
+  "photonArts": [
+    {
+      "name": "Bite Stamp",
+      "attackMod": 180,
+      "accuracyMod": 75,
+      "ppUsed": 26,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 81,
+  "modelId": "wclr02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wclr02_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Claws_(Phantasy_Star_Zero)"
+}

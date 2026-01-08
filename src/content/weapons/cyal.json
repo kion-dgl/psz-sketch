@@ -1,0 +1,49 @@
+{
+  "name": "Cyal",
+  "japaneseName": "シャル",
+  "rarity": 5,
+  "weaponType": "Saber",
+  "maxGrind": 20,
+  "level": 22,
+  "resaleValue": 749,
+  "attackBase": 184,
+  "attackMax": 224,
+  "accuracyBase": 230,
+  "accuracyMax": 230,
+  "photonArts": [
+    {
+      "name": "Cross Rave",
+      "attackMod": 160,
+      "accuracyMod": 120,
+      "ppUsed": 13,
+      "element": "-"
+    },
+    {
+      "name": "Force Ride",
+      "attackMod": 125,
+      "accuracyMod": 100,
+      "ppUsed": 15,
+      "element": "-"
+    },
+    {
+      "name": "Zeta Cutlass",
+      "attackMod": 130,
+      "accuracyMod": 140,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 18,
+  "modelId": "wsan02",
+  "variantId": "wsan02_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Sabers_(Phantasy_Star_Zero)"
+}

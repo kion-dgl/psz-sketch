@@ -1,0 +1,33 @@
+{
+  "name": "Eghesachs",
+  "japaneseName": "エッゲサックス",
+  "rarity": 4,
+  "weaponType": "Sword",
+  "elementLevel": 3,
+  "element": "Light",
+  "maxGrind": 60,
+  "level": 15,
+  "resaleValue": 10,
+  "attackBase": 186,
+  "attackMax": 306,
+  "accuracyBase": 145,
+  "accuracyMax": 145,
+  "photonArts": [
+    {
+      "name": "Sonic Raid",
+      "attackMod": 120,
+      "accuracyMod": 75,
+      "ppUsed": 23,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 45,
+  "modelId": "wswr01",
+  "variantId": "wswr01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Swords_(Phantasy_Star_Zero)"
+}

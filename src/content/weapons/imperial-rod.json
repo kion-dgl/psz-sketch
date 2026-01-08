@@ -1,0 +1,49 @@
+{
+  "name": "Imperial Rod",
+  "japaneseName": "インペリアルロッド",
+  "rarity": 4,
+  "weaponType": "Rod",
+  "elementLevel": 2,
+  "element": "Heart",
+  "maxGrind": 10,
+  "level": 12,
+  "resaleValue": 10,
+  "accuracyBase": 134,
+  "accuracyMax": 134,
+  "photonArts": [
+    {
+      "name": "Beat Quake",
+      "attackMod": 140,
+      "accuracyMod": 150,
+      "ppUsed": 19,
+      "element": "-"
+    },
+    {
+      "name": "Rolling Bar",
+      "attackMod": 90,
+      "accuracyMod": 100,
+      "ppUsed": 21,
+      "element": "-"
+    },
+    {
+      "name": "Rodeo Drive",
+      "attackMod": 120,
+      "accuracyMod": 130,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 296,
+  "modelId": "wror05",
+  "variantId": "wror05_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rods_(Phantasy_Star_Zero)"
+}

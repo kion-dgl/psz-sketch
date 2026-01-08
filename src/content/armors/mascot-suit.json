@@ -1,0 +1,13 @@
+{
+  "name": "Mascot Suit",
+  "japaneseName": "アニマルインナー",
+  "rarity": 4,
+  "maxGrind": 45,
+  "level": 10,
+  "resaleValue": 10,
+  "defenseBase": 70,
+  "defenseMax": 160,
+  "evasionBase": 78,
+  "evasionMax": 168,
+  "psoWorldId": 508
+}

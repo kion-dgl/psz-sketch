@@ -1,0 +1,49 @@
+{
+  "name": "Undulate",
+  "japaneseName": "アンデュレート",
+  "rarity": 6,
+  "weaponType": "Spear",
+  "maxGrind": 25,
+  "level": 32,
+  "resaleValue": 1606,
+  "attackBase": 330,
+  "attackMax": 380,
+  "accuracyBase": 241,
+  "accuracyMax": 241,
+  "photonArts": [
+    {
+      "name": "Hopping Run",
+      "attackMod": 90,
+      "accuracyMod": 130,
+      "ppUsed": 24,
+      "element": "-"
+    },
+    {
+      "name": "Spear Rider",
+      "attackMod": 145,
+      "accuracyMod": 160,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Speed Rain",
+      "attackMod": 80,
+      "accuracyMod": 70,
+      "ppUsed": 32,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 76,
+  "modelId": "wsph02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wsph02_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Spears_(Phantasy_Star_Zero)"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Battle Armor",
+  "japaneseName": "バトルアーマー",
+  "rarity": 2,
+  "maxGrind": 45,
+  "level": 2,
+  "resaleValue": 105,
+  "defenseBase": 49,
+  "defenseMax": 139,
+  "evasionBase": 31,
+  "evasionMax": 121,
+  "psoWorldId": 486
+}

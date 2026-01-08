@@ -1,0 +1,47 @@
+{
+  "name": "Wand",
+  "japaneseName": "ウォンド",
+  "rarity": 1,
+  "weaponType": "Wand",
+  "maxGrind": 50,
+  "level": 1,
+  "resaleValue": 27,
+  "accuracyBase": 81,
+  "accuracyMax": 81,
+  "photonArts": [
+    {
+      "name": "Funny Dive",
+      "attackMod": 125,
+      "accuracyMod": 200,
+      "ppUsed": 11,
+      "element": "-"
+    },
+    {
+      "name": "Magical Sign",
+      "attackMod": 140,
+      "accuracyMod": 160,
+      "ppUsed": 13,
+      "element": "Level 3 Slow"
+    },
+    {
+      "name": "Act Trick",
+      "attackMod": 0,
+      "accuracyMod": 0,
+      "ppUsed": 2,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 382,
+  "modelId": "wwah01",
+  "variantId": "wwah01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Wands_(Phantasy_Star_Zero)"
+}

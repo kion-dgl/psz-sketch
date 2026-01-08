@@ -1,0 +1,34 @@
+{
+  "name": "Valiant",
+  "japaneseName": "ヴァリアント",
+  "rarity": 5,
+  "weaponType": "Claw",
+  "elementLevel": 3,
+  "element": "Heart",
+  "maxGrind": 90,
+  "level": 20,
+  "resaleValue": 10,
+  "attackBase": 141,
+  "attackMax": 321,
+  "accuracyBase": 242,
+  "accuracyMax": 242,
+  "photonArts": [
+    {
+      "name": "Slide End",
+      "attackMod": 75,
+      "accuracyMod": 120,
+      "ppUsed": 21,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 92
+}

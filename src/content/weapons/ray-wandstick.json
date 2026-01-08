@@ -1,0 +1,31 @@
+{
+  "name": "Ray Wandstick",
+  "japaneseName": "レイワンド",
+  "rarity": 2,
+  "weaponType": "Rod",
+  "maxGrind": 40,
+  "level": 2,
+  "resaleValue": 100,
+  "accuracyBase": 85,
+  "accuracyMax": 85,
+  "photonArts": [
+    {
+      "name": "Beat Quake",
+      "attackMod": 140,
+      "accuracyMod": 150,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Newman",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 286,
+  "modelId": "wron01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wron01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rods_(Phantasy_Star_Zero)"
+}

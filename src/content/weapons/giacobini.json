@@ -1,0 +1,46 @@
+{
+  "name": "Giacobini",
+  "japaneseName": "ジャコビニ",
+  "rarity": 5,
+  "weaponType": "Slicer",
+  "maxGrind": 40,
+  "level": 20,
+  "resaleValue": 886,
+  "accuracyBase": 124,
+  "accuracyMax": 124,
+  "photonArts": [
+    {
+      "name": "Edge Riser",
+      "attackMod": 150,
+      "accuracyMod": 200,
+      "ppUsed": 15,
+      "element": "-"
+    },
+    {
+      "name": "Bright Sign",
+      "attackMod": 110,
+      "accuracyMod": 120,
+      "ppUsed": 14,
+      "element": "Level 3 Stun"
+    },
+    {
+      "name": "Say Goodbye",
+      "attackMod": 100,
+      "accuracyMod": 210,
+      "ppUsed": 15,
+      "element": "Level 3 Light"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 415,
+  "modelId": "wslc02",
+  "variantId": "wslc02_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Slicers_(Phantasy_Star_Zero)"
+}

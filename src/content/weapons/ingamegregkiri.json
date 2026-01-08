@@ -1,0 +1,32 @@
+{
+  "name": "InGame:Greg&Kiri",
+  "japaneseName": "ニンテンドードリーム",
+  "rarity": 4,
+  "weaponType": "Wand",
+  "elementLevel": 3,
+  "element": "Light",
+  "maxGrind": 50,
+  "level": 12,
+  "resaleValue": 10,
+  "accuracyBase": 162,
+  "accuracyMax": 162,
+  "photonArts": [
+    {
+      "name": "Act Trick",
+      "attackMod": 0,
+      "accuracyMod": 0,
+      "ppUsed": 2,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 392
+}

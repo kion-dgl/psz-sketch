@@ -1,0 +1,13 @@
+{
+  "name": "Arquebus Armor",
+  "japaneseName": "アークイバスアーマー",
+  "rarity": 6,
+  "maxGrind": 25,
+  "level": 35,
+  "resaleValue": 1897,
+  "defenseBase": 193,
+  "defenseMax": 243,
+  "evasionBase": 124,
+  "evasionMax": 174,
+  "psoWorldId": 490
+}

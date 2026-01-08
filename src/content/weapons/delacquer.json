@@ -1,0 +1,49 @@
+{
+  "name": "Delacquer",
+  "japaneseName": "ディラッカー",
+  "rarity": 4,
+  "weaponType": "Handgun",
+  "maxGrind": 45,
+  "level": 12,
+  "resaleValue": 412,
+  "attackBase": 91,
+  "attackMax": 181,
+  "accuracyBase": 137,
+  "accuracyMax": 137,
+  "photonArts": [
+    {
+      "name": "Quick Draw",
+      "attackMod": 80,
+      "accuracyMod": 75,
+      "ppUsed": 24,
+      "element": "-"
+    },
+    {
+      "name": "Flame Hit",
+      "attackMod": 145,
+      "accuracyMod": 100,
+      "ppUsed": 19,
+      "element": "Level 4 Heat"
+    },
+    {
+      "name": "Thriller Combo",
+      "attackMod": 150,
+      "accuracyMod": 120,
+      "ppUsed": 15,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 157,
+  "modelId": "whgc01",
+  "variantId": "whgc01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Handguns_(Phantasy_Star_Zero)"
+}

@@ -1,0 +1,45 @@
+{
+  "name": "Blue Bulletta",
+  "japaneseName": "ブルーバレッタ",
+  "rarity": 6,
+  "weaponType": "Mech Gun",
+  "maxGrind": 35,
+  "level": 36,
+  "resaleValue": 1302,
+  "attackBase": 113,
+  "attackMax": 183,
+  "accuracyBase": 155,
+  "accuracyMax": 155,
+  "photonArts": [
+    {
+      "name": "Cool Style",
+      "attackMod": 80,
+      "accuracyMod": 80,
+      "ppUsed": 23,
+      "element": "-"
+    },
+    {
+      "name": "Spinning Death",
+      "attackMod": 85,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Acro Step",
+      "attackMod": 85,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human"
+  ],
+  "psoWorldId": 228,
+  "modelId": "wmgh02",
+  "variantId": "wmgh02_3_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Mech_Guns_(Phantasy_Star_Zero)"
+}

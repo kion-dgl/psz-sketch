@@ -1,0 +1,33 @@
+{
+  "name": "Axeon",
+  "japaneseName": "アキシオン",
+  "rarity": 3,
+  "weaponType": "Gun Blade",
+  "elementLevel": 3,
+  "element": "Heat",
+  "maxGrind": 10,
+  "level": 5,
+  "resaleValue": 10,
+  "attackBase": 94,
+  "attackMax": 114,
+  "accuracyBase": 112,
+  "accuracyMax": 112,
+  "photonArts": [
+    {
+      "name": "Earth Bullet",
+      "attackMod": 170,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Ranger Human",
+    "Force Human"
+  ],
+  "psoWorldId": 214,
+  "modelId": "wgbr02",
+  "variantId": "wgbr02_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Gun_Blades_(Phantasy_Star_Zero)"
+}

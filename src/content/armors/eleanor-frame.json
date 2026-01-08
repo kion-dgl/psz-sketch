@@ -1,0 +1,13 @@
+{
+  "name": "Eleanor Frame",
+  "japaneseName": "エルノアフレーム",
+  "rarity": 5,
+  "maxGrind": 40,
+  "level": 20,
+  "resaleValue": 10,
+  "defenseBase": 109,
+  "defenseMax": 189,
+  "evasionBase": 138,
+  "evasionMax": 218,
+  "psoWorldId": 523
+}

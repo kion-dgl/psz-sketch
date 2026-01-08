@@ -1,0 +1,37 @@
+{
+  "name": "Scarred Tatami",
+  "japaneseName": "レキセンノタタミ",
+  "rarity": 6,
+  "weaponType": "Shield",
+  "elementLevel": 2,
+  "element": "Risk",
+  "maxGrind": 50,
+  "level": 40,
+  "resaleValue": 10,
+  "attackBase": 138,
+  "attackMax": 238,
+  "accuracyBase": 272,
+  "accuracyMax": 272,
+  "photonArts": [
+    {
+      "name": "Barrier Shift",
+      "attackMod": 0,
+      "accuracyMod": 0,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 121,
+  "modelId": "wshr03",
+  "variantId": "wshr03_2_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Shields_(Phantasy_Star_Zero)"
+}

@@ -1,0 +1,37 @@
+{
+  "name": "Tatami Mat",
+  "japaneseName": "タタミガエシ",
+  "rarity": 3,
+  "weaponType": "Shield",
+  "elementLevel": 1,
+  "element": "Risk",
+  "maxGrind": 70,
+  "level": 6,
+  "resaleValue": 10,
+  "attackBase": 52,
+  "attackMax": 192,
+  "accuracyBase": 165,
+  "accuracyMax": 165,
+  "photonArts": [
+    {
+      "name": "Bull Smash",
+      "attackMod": 210,
+      "accuracyMod": 200,
+      "ppUsed": 18,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 120,
+  "modelId": "wshr03",
+  "variantId": "wshr03_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Shields_(Phantasy_Star_Zero)"
+}

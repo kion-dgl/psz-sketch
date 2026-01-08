@@ -1,0 +1,27 @@
+{
+  "name": "Witch's Broom",
+  "japaneseName": "ウィッチブルーム",
+  "rarity": 3,
+  "weaponType": "Rod",
+  "elementLevel": 2,
+  "element": "Slow",
+  "maxGrind": 70,
+  "level": 5,
+  "resaleValue": 10,
+  "accuracyBase": 105,
+  "accuracyMax": 105,
+  "photonArts": [
+    {
+      "name": "Rolling Bar",
+      "attackMod": 90,
+      "accuracyMod": 100,
+      "ppUsed": 21,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 292
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Dymos Armor",
+  "japaneseName": "ダイモスアーマー",
+  "rarity": 5,
+  "maxGrind": 40,
+  "level": 28,
+  "resaleValue": 10,
+  "defenseBase": 138,
+  "defenseMax": 218,
+  "evasionBase": 86,
+  "evasionMax": 166,
+  "psoWorldId": 520
+}

@@ -1,0 +1,35 @@
+{
+  "name": "Bloody Gimlet",
+  "japaneseName": "ブラッディギムレット",
+  "rarity": 6,
+  "weaponType": "Daggers",
+  "elementLevel": 3,
+  "element": "Draw",
+  "maxGrind": 40,
+  "level": 40,
+  "resaleValue": 10,
+  "attackBase": 209,
+  "attackMax": 289,
+  "accuracyBase": 276,
+  "accuracyMax": 276,
+  "photonArts": [
+    {
+      "name": "Air Ride",
+      "attackMod": 95,
+      "accuracyMod": 80,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 61,
+  "modelId": "wdar03",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wdar03_1_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Daggers_(Phantasy_Star_Zero)"
+}

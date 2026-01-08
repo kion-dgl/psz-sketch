@@ -1,0 +1,35 @@
+{
+  "name": "Phantasma Gauntlet",
+  "japaneseName": "ファンタズマガント",
+  "rarity": 7,
+  "weaponType": "Claw",
+  "elementLevel": 3,
+  "element": "Heaven",
+  "maxGrind": 30,
+  "level": 58,
+  "resaleValue": 10,
+  "attackBase": 316,
+  "attackMax": 376,
+  "accuracyBase": 277,
+  "accuracyMax": 277,
+  "photonArts": [
+    {
+      "name": "Slide End",
+      "attackMod": 75,
+      "accuracyMod": 120,
+      "ppUsed": 21,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 104,
+  "modelId": "wclr01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wclr01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Claws_(Phantasy_Star_Zero)"
+}

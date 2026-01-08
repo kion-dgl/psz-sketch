@@ -1,0 +1,45 @@
+{
+  "name": "Riverman Missouri",
+  "japaneseName": "リヴァマンミズーリ",
+  "rarity": 6,
+  "weaponType": "Mech Gun",
+  "maxGrind": 45,
+  "level": 42,
+  "resaleValue": 10,
+  "attackBase": 138,
+  "attackMax": 228,
+  "accuracyBase": 172,
+  "accuracyMax": 172,
+  "photonArts": [
+    {
+      "name": "Cool Style",
+      "attackMod": 80,
+      "accuracyMod": 80,
+      "ppUsed": 23,
+      "element": "-"
+    },
+    {
+      "name": "Spinning Death",
+      "attackMod": 85,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Acro Step",
+      "attackMod": 85,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 240,
+  "modelId": "wmgr04",
+  "variantId": "wmgr04_1_r",
+  "notes": "Named after the USS Missouri battleship",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Mech_Guns_(Phantasy_Star_Zero)"
+}

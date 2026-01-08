@@ -1,0 +1,35 @@
+{
+  "name": "Seastar Slicer",
+  "japaneseName": "シースタースライサー",
+  "rarity": 5,
+  "weaponType": "Slicer",
+  "elementLevel": 2,
+  "element": "Zalure",
+  "maxGrind": 10,
+  "level": 24,
+  "resaleValue": 10,
+  "accuracyBase": 125,
+  "accuracyMax": 125,
+  "photonArts": [
+    {
+      "name": "Edge Riser",
+      "attackMod": 150,
+      "accuracyMod": 200,
+      "ppUsed": 15,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 416,
+  "modelId": "wslr03",
+  "variantId": "wslr03_2_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Slicers_(Phantasy_Star_Zero)"
+}

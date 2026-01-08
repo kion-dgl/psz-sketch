@@ -1,0 +1,47 @@
+{
+  "name": "Crimson Vis",
+  "japaneseName": "クリムゾンビス",
+  "rarity": 7,
+  "weaponType": "Mech Gun",
+  "maxGrind": 30,
+  "level": 54,
+  "resaleValue": 3516,
+  "attackBase": 152,
+  "attackMax": 212,
+  "accuracyBase": 171,
+  "accuracyMax": 171,
+  "photonArts": [
+    {
+      "name": "Cool Style",
+      "attackMod": 80,
+      "accuracyMod": 80,
+      "ppUsed": 23,
+      "element": "-"
+    },
+    {
+      "name": "Spinning Death",
+      "attackMod": 85,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Acro Step",
+      "attackMod": 85,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human"
+  ],
+  "psoWorldId": 229,
+  "modelId": "wmgh02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wmgh02_3_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Mech_Guns_(Phantasy_Star_Zero)"
+}

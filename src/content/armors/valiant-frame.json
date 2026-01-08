@@ -1,0 +1,14 @@
+{
+  "name": "Valiant Frame",
+  "japaneseName": "ヴァリアントフレーム",
+  "details": "Can have a maximum of 3 slots.",
+  "rarity": 5,
+  "maxGrind": 20,
+  "level": 20,
+  "resaleValue": 1155,
+  "defenseBase": 120,
+  "defenseMax": 160,
+  "evasionBase": 115,
+  "evasionMax": 155,
+  "psoWorldId": 495
+}

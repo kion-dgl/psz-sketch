@@ -1,0 +1,33 @@
+{
+  "name": "Hollow Gimlet",
+  "japaneseName": "ホローギムレット",
+  "rarity": 3,
+  "weaponType": "Daggers",
+  "elementLevel": 1,
+  "element": "Dark",
+  "maxGrind": 10,
+  "level": 6,
+  "resaleValue": 10,
+  "attackBase": 89,
+  "attackMax": 109,
+  "accuracyBase": 167,
+  "accuracyMax": 167,
+  "photonArts": [
+    {
+      "name": "Huge Cross",
+      "attackMod": 90,
+      "accuracyMod": 130,
+      "ppUsed": 22,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 59,
+  "modelId": "wdar03",
+  "variantId": "wdar03_1_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Daggers_(Phantasy_Star_Zero)"
+}

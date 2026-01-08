@@ -1,0 +1,48 @@
+{
+  "name": "Armbrust",
+  "japaneseName": "アルムブルスト",
+  "rarity": 6,
+  "weaponType": "Bazooka",
+  "maxGrind": 25,
+  "level": 32,
+  "resaleValue": 1644,
+  "attackBase": 338,
+  "attackMax": 388,
+  "accuracyBase": 205,
+  "accuracyMax": 205,
+  "photonArts": [
+    {
+      "name": "Crush Bomb",
+      "attackMod": 210,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    },
+    {
+      "name": "Wild Blow",
+      "attackMod": 120,
+      "accuracyMod": 90,
+      "ppUsed": 28,
+      "element": "-"
+    },
+    {
+      "name": "Crazy On",
+      "attackMod": 130,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human"
+  ],
+  "psoWorldId": 244,
+  "modelId": "wbah01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wbah01_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Bazookas_(Phantasy_Star_Zero)"
+}

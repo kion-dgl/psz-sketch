@@ -1,0 +1,45 @@
+{
+  "name": "Vraolet",
+  "japaneseName": "ブラオレット",
+  "rarity": 5,
+  "weaponType": "Gun Blade",
+  "maxGrind": 40,
+  "level": 24,
+  "resaleValue": 909,
+  "attackBase": 141,
+  "attackMax": 221,
+  "accuracyBase": 159,
+  "accuracyMax": 159,
+  "photonArts": [
+    {
+      "name": "Bullet Dance",
+      "attackMod": 125,
+      "accuracyMod": 70,
+      "ppUsed": 16,
+      "element": "-"
+    },
+    {
+      "name": "Impact Zero",
+      "attackMod": 180,
+      "accuracyMod": 135,
+      "ppUsed": 17,
+      "element": "-"
+    },
+    {
+      "name": "Earth Bullet",
+      "attackMod": 170,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 208,
+  "modelId": "wgbc01",
+  "variantId": "wgbc01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Gun_Blades_(Phantasy_Star_Zero)"
+}

@@ -1,0 +1,46 @@
+{
+  "name": "M&A41",
+  "japaneseName": "Ｍ＆Ａ４１",
+  "rarity": 7,
+  "weaponType": "Rifle",
+  "maxGrind": 40,
+  "level": 64,
+  "resaleValue": 10,
+  "attackBase": 271,
+  "attackMax": 351,
+  "accuracyBase": 248,
+  "accuracyMax": 248,
+  "photonArts": [
+    {
+      "name": "Wipeout",
+      "attackMod": 75,
+      "accuracyMod": 80,
+      "ppUsed": 21,
+      "element": "Level 4 Heat"
+    },
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    },
+    {
+      "name": "Mine Sneak",
+      "attackMod": 160,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 201,
+  "modelId": "wrfr05",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wrfr05_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

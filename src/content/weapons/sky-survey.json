@@ -1,0 +1,45 @@
+{
+  "name": "Sky Survey",
+  "japaneseName": "スカイサーベイ",
+  "rarity": 6,
+  "weaponType": "Slicer",
+  "maxGrind": 15,
+  "level": 32,
+  "resaleValue": 1558,
+  "accuracyBase": 151,
+  "accuracyMax": 151,
+  "photonArts": [
+    {
+      "name": "Edge Riser",
+      "attackMod": 150,
+      "accuracyMod": 200,
+      "ppUsed": 15,
+      "element": "-"
+    },
+    {
+      "name": "Bright Sign",
+      "attackMod": 110,
+      "accuracyMod": 120,
+      "ppUsed": 14,
+      "element": "Level 3 Stun"
+    },
+    {
+      "name": "Say Goodbye",
+      "attackMod": 100,
+      "accuracyMod": 210,
+      "ppUsed": 15,
+      "element": "Level 3 Light"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 419,
+  "modelId": "wsln01",
+  "variantId": "wsln01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Slicers_(Phantasy_Star_Zero)"
+}

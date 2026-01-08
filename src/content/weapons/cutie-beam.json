@@ -1,0 +1,48 @@
+{
+  "name": "Cutie Beam",
+  "japaneseName": "キューティービーム",
+  "rarity": 4,
+  "weaponType": "Laser Cannon",
+  "elementLevel": 2,
+  "element": "Light",
+  "maxGrind": 10,
+  "level": 16,
+  "resaleValue": 10,
+  "attackBase": 120,
+  "attackMax": 140,
+  "accuracyBase": 179,
+  "accuracyMax": 179,
+  "photonArts": [
+    {
+      "name": "Sector Line",
+      "attackMod": 150,
+      "accuracyMod": 80,
+      "ppUsed": 22,
+      "element": "-"
+    },
+    {
+      "name": "Bio Panic",
+      "attackMod": 100,
+      "accuracyMod": 180,
+      "ppUsed": 16,
+      "element": "Level 3 Dark"
+    },
+    {
+      "name": "Divine Ray",
+      "attackMod": 250,
+      "accuracyMod": 200,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 273,
+  "modelId": "wlcr02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wlcr02_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Laser_Cannons_(Phantasy_Star_Zero)"
+}

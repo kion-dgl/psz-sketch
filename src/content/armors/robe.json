@@ -1,0 +1,13 @@
+{
+  "name": "Robe",
+  "japaneseName": "ローブ",
+  "rarity": 1,
+  "maxGrind": 35,
+  "level": 1,
+  "resaleValue": 45,
+  "defenseBase": 20,
+  "defenseMax": 90,
+  "evasionBase": 31,
+  "evasionMax": 101,
+  "psoWorldId": 484
+}

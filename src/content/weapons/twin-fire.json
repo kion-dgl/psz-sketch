@@ -1,0 +1,46 @@
+{
+  "name": "Twin Fire",
+  "japaneseName": "ツインファイア",
+  "rarity": 1,
+  "weaponType": "Mech Gun",
+  "maxGrind": 40,
+  "level": 1,
+  "resaleValue": 72,
+  "attackBase": 22,
+  "attackMax": 102,
+  "accuracyBase": 61,
+  "accuracyMax": 61,
+  "photonArts": [
+    {
+      "name": "Cool Style",
+      "attackMod": 80,
+      "accuracyMod": 80,
+      "ppUsed": 23,
+      "element": "-"
+    },
+    {
+      "name": "Spinning Death",
+      "attackMod": 85,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Acro Step",
+      "attackMod": 85,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human"
+  ],
+  "psoWorldId": 222,
+  "modelId": "wmgh01",
+  "variantId": "wmgh01_1_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Mech_Guns_(Phantasy_Star_Zero)"
+}

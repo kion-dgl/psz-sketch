@@ -1,0 +1,53 @@
+{
+  "name": "Clair Doubles",
+  "japaneseName": "クレアダブルス",
+  "rarity": 7,
+  "weaponType": "Double Saber",
+  "elementLevel": 2,
+  "element": "Celeb",
+  "maxGrind": 20,
+  "level": 58,
+  "resaleValue": 10,
+  "attackBase": 418,
+  "attackMax": 458,
+  "accuracyBase": 245,
+  "accuracyMax": 245,
+  "photonArts": [
+    {
+      "name": "Cyclone Run",
+      "attackMod": 100,
+      "accuracyMod": 80,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Tornado Dance",
+      "attackMod": 130,
+      "accuracyMod": 120,
+      "ppUsed": 30,
+      "element": "-"
+    },
+    {
+      "name": "Million Rave",
+      "attackMod": 135,
+      "accuracyMod": 100,
+      "ppUsed": 25,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 134,
+  "modelId": "wdsr02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wdsr02_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Double_Sabers_(Phantasy_Star_Zero)"
+}

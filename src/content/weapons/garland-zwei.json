@@ -1,0 +1,34 @@
+{
+  "name": "Garland Zwei",
+  "japaneseName": "ガーラントツヴァイ",
+  "rarity": 5,
+  "weaponType": "Rifle",
+  "elementLevel": 2,
+  "element": "Draw",
+  "maxGrind": 40,
+  "level": 24,
+  "resaleValue": 10,
+  "attackBase": 165,
+  "attackMax": 245,
+  "accuracyBase": 176,
+  "accuracyMax": 176,
+  "photonArts": [
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Cast",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 187,
+  "modelId": "wrfr03",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wrfr03_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

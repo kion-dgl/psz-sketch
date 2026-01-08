@@ -1,0 +1,27 @@
+{
+  "name": "Rems Romulus",
+  "japaneseName": "レムスロムルス",
+  "rarity": 5,
+  "weaponType": "Double Saber",
+  "maxGrind": 40,
+  "level": 24,
+  "resaleValue": 567,
+  "attackBase": 212,
+  "attackMax": 292,
+  "accuracyBase": 201,
+  "accuracyMax": 201,
+  "photonArts": [
+    {
+      "name": "Million Rave",
+      "attackMod": 135,
+      "accuracyMod": 100,
+      "ppUsed": 25,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Newman",
+    "Force Newman"
+  ],
+  "psoWorldId": 129
+}

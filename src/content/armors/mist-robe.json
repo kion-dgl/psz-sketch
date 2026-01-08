@@ -1,0 +1,13 @@
+{
+  "name": "Mist Robe",
+  "japaneseName": "ミストローブ",
+  "rarity": 4,
+  "maxGrind": 20,
+  "level": 10,
+  "resaleValue": 703,
+  "defenseBase": 61,
+  "defenseMax": 101,
+  "evasionBase": 98,
+  "evasionMax": 138,
+  "psoWorldId": 500
+}

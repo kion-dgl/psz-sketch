@@ -1,0 +1,31 @@
+{
+  "name": "Ein Rifle",
+  "japaneseName": "アインライフル",
+  "rarity": 2,
+  "weaponType": "Rifle",
+  "maxGrind": 55,
+  "level": 2,
+  "resaleValue": 79,
+  "attackBase": 54,
+  "attackMax": 164,
+  "accuracyBase": 96,
+  "accuracyMax": 96,
+  "photonArts": [
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 178,
+  "modelId": "wrfc01",
+  "variantId": "wrfc01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

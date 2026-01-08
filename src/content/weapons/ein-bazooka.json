@@ -1,0 +1,30 @@
+{
+  "name": "Ein Bazooka",
+  "japaneseName": "アインバズーカ",
+  "rarity": 3,
+  "weaponType": "Bazooka",
+  "maxGrind": 55,
+  "level": 2,
+  "resaleValue": 94,
+  "attackBase": 98,
+  "attackMax": 208,
+  "accuracyBase": 104,
+  "accuracyMax": 104,
+  "photonArts": [
+    {
+      "name": "Crush Bomb",
+      "attackMod": 210,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 249,
+  "modelId": "wbac02",
+  "variantId": "wbac02_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Bazookas_(Phantasy_Star_Zero)"
+}

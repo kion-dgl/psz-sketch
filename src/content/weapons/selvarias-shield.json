@@ -1,0 +1,38 @@
+{
+  "name": "Selvaria's Shield",
+  "japaneseName": "セルベリアの盾",
+  "rarity": 5,
+  "weaponType": "Shield",
+  "elementLevel": 3,
+  "element": "Exp",
+  "maxGrind": 50,
+  "level": 20,
+  "resaleValue": 10,
+  "attackBase": 123,
+  "attackMax": 223,
+  "accuracyBase": 241,
+  "accuracyMax": 241,
+  "photonArts": [
+    {
+      "name": "Bull Smash",
+      "attackMod": 210,
+      "accuracyMod": 200,
+      "ppUsed": 18,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 126,
+  "modelId": "wshr06",
+  "variantId": "wshr06_1_o",
+  "notes": "Valkyria Chronicles crossover",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Shields_(Phantasy_Star_Zero)"
+}

@@ -1,0 +1,45 @@
+{
+  "name": "M14 Missouri",
+  "japaneseName": "Ｍ１４ミズーリ",
+  "rarity": 6,
+  "weaponType": "Rifle",
+  "maxGrind": 20,
+  "level": 40,
+  "resaleValue": 10,
+  "attackBase": 208,
+  "attackMax": 248,
+  "accuracyBase": 242,
+  "accuracyMax": 242,
+  "photonArts": [
+    {
+      "name": "Wipeout",
+      "attackMod": 75,
+      "accuracyMod": 80,
+      "ppUsed": 21,
+      "element": "Level 4 Heat"
+    },
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    },
+    {
+      "name": "Mine Sneak",
+      "attackMod": 160,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 196,
+  "modelId": "wrfr04",
+  "variantId": "wrfr04_2_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

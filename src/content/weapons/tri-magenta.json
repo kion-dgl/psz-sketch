@@ -1,0 +1,43 @@
+{
+  "name": "Tri-Magenta",
+  "japaneseName": "トライマゼンダ",
+  "rarity": 6,
+  "weaponType": "Slicer",
+  "maxGrind": 25,
+  "level": 36,
+  "resaleValue": 886,
+  "accuracyBase": 147,
+  "accuracyMax": 147,
+  "photonArts": [
+    {
+      "name": "Edge Riser",
+      "attackMod": 150,
+      "accuracyMod": 200,
+      "ppUsed": 15,
+      "element": "-"
+    },
+    {
+      "name": "Bright Sign",
+      "attackMod": 110,
+      "accuracyMod": 120,
+      "ppUsed": 14,
+      "element": "Level 3 Stun"
+    },
+    {
+      "name": "Say Goodbye",
+      "attackMod": 100,
+      "accuracyMod": 210,
+      "ppUsed": 15,
+      "element": "Level 3 Light"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 418
+}

@@ -1,0 +1,29 @@
+{
+  "name": "Wandstick",
+  "japaneseName": "ワンド",
+  "rarity": 1,
+  "weaponType": "Rod",
+  "maxGrind": 40,
+  "level": 1,
+  "resaleValue": 40,
+  "accuracyBase": 66,
+  "accuracyMax": 66,
+  "photonArts": [
+    {
+      "name": "Beat Quake",
+      "attackMod": 140,
+      "accuracyMod": 150,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Newman",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 285,
+  "modelId": "wron01",
+  "variantId": "wron01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rods_(Phantasy_Star_Zero)"
+}

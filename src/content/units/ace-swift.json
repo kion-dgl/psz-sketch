@@ -1,0 +1,9 @@
+{
+  "name": "Ace/Swift",
+  "japaneseName": "エース／スイフト",
+  "description": "Slot into armor to use. Slightly raises EVP.",
+  "rarity": 3,
+  "evasionBase": 10,
+  "evasionMax": 10,
+  "psoWorldId": 327
+}

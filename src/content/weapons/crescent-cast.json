@@ -1,0 +1,51 @@
+{
+  "name": "Crescent Cast",
+  "japaneseName": "クレセントキャスト",
+  "rarity": 6,
+  "weaponType": "Rod",
+  "elementLevel": 3,
+  "element": "Draw",
+  "maxGrind": 30,
+  "level": 36,
+  "resaleValue": 10,
+  "accuracyBase": 185,
+  "accuracyMax": 185,
+  "photonArts": [
+    {
+      "name": "Beat Quake",
+      "attackMod": 140,
+      "accuracyMod": 150,
+      "ppUsed": 19,
+      "element": "-"
+    },
+    {
+      "name": "Rolling Bar",
+      "attackMod": 90,
+      "accuracyMod": 100,
+      "ppUsed": 21,
+      "element": "-"
+    },
+    {
+      "name": "Rodeo Drive",
+      "attackMod": 120,
+      "accuracyMod": 130,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 297,
+  "modelId": "wror05",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wror05_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rods_(Phantasy_Star_Zero)"
+}

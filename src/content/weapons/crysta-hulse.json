@@ -1,0 +1,36 @@
+{
+  "name": "Crysta Hulse",
+  "japaneseName": "クリスタハルス",
+  "rarity": 6,
+  "weaponType": "Shield",
+  "elementLevel": 5,
+  "element": "Ice",
+  "maxGrind": 20,
+  "level": 36,
+  "resaleValue": 1264,
+  "attackBase": 150,
+  "attackMax": 190,
+  "accuracyBase": 280,
+  "accuracyMax": 280,
+  "photonArts": [
+    {
+      "name": "Barrier Shift",
+      "attackMod": 0,
+      "accuracyMod": 0,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Force Human"
+  ],
+  "psoWorldId": 112,
+  "modelId": "wshh02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wshh02_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Shields_(Phantasy_Star_Zero)"
+}

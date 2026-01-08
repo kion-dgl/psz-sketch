@@ -1,0 +1,7 @@
+{
+  "name": "Ice Element",
+  "japaneseName": "アイスエレメント",
+  "details": "Grants a weapon the element of \"Ice\", allowing you to inflict Freeze on enemies. Under the effects of Freeze, enemies will take 20% more damage.\n\nThe strength of Freeze increases with the element level.",
+  "rarity": 4,
+  "psoWorldId": 537
+}

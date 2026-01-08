@@ -1,0 +1,49 @@
+{
+  "name": "Kurtana",
+  "japaneseName": "クルタナ",
+  "rarity": 4,
+  "weaponType": "Saber",
+  "maxGrind": 35,
+  "level": 12,
+  "resaleValue": 411,
+  "attackBase": 118,
+  "attackMax": 188,
+  "accuracyBase": 182,
+  "accuracyMax": 182,
+  "photonArts": [
+    {
+      "name": "Cross Rave",
+      "attackMod": 160,
+      "accuracyMod": 120,
+      "ppUsed": 13,
+      "element": "-"
+    },
+    {
+      "name": "Force Ride",
+      "attackMod": 125,
+      "accuracyMod": 100,
+      "ppUsed": 15,
+      "element": "-"
+    },
+    {
+      "name": "Zeta Cutlass",
+      "attackMod": 130,
+      "accuracyMod": 140,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 11,
+  "modelId": "wsah01",
+  "variantId": "wsah01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Sabers_(Phantasy_Star_Zero)"
+}

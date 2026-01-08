@@ -1,0 +1,47 @@
+{
+  "name": "Roche Limit",
+  "japaneseName": "ロシェリミット",
+  "rarity": 6,
+  "weaponType": "Double Saber",
+  "maxGrind": 35,
+  "level": 36,
+  "resaleValue": 1585,
+  "attackBase": 279,
+  "attackMax": 349,
+  "accuracyBase": 229,
+  "accuracyMax": 229,
+  "photonArts": [
+    {
+      "name": "Cyclone Run",
+      "attackMod": 100,
+      "accuracyMod": 80,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Tornado Dance",
+      "attackMod": 130,
+      "accuracyMod": 120,
+      "ppUsed": 30,
+      "element": "-"
+    },
+    {
+      "name": "Million Rave",
+      "attackMod": 135,
+      "accuracyMod": 100,
+      "ppUsed": 25,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 142,
+  "modelId": "wdsc01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wdsc01_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Double_Sabers_(Phantasy_Star_Zero)"
+}

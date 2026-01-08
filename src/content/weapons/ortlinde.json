@@ -1,0 +1,32 @@
+{
+  "name": "Ortlinde",
+  "japaneseName": "オルトリンデ",
+  "rarity": 6,
+  "weaponType": "Rifle",
+  "maxGrind": 10,
+  "level": 36,
+  "resaleValue": 1477,
+  "attackBase": 231,
+  "attackMax": 251,
+  "accuracyBase": 205,
+  "accuracyMax": 205,
+  "photonArts": [
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 185,
+  "modelId": "wrfn01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wrfn01_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

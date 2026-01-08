@@ -1,0 +1,48 @@
+{
+  "name": "Foie Haze",
+  "japaneseName": "フォイアヘイズ",
+  "rarity": 7,
+  "weaponType": "Daggers",
+  "maxGrind": 10,
+  "level": 54,
+  "resaleValue": 3877,
+  "attackBase": 275,
+  "attackMax": 295,
+  "accuracyBase": 308,
+  "accuracyMax": 308,
+  "photonArts": [
+    {
+      "name": "Air Ride",
+      "attackMod": 95,
+      "accuracyMod": 80,
+      "ppUsed": 19,
+      "element": "-"
+    },
+    {
+      "name": "Reverse Kill",
+      "attackMod": 80,
+      "accuracyMod": 80,
+      "ppUsed": 25,
+      "element": "-"
+    },
+    {
+      "name": "Huge Cross",
+      "attackMod": 90,
+      "accuracyMod": 130,
+      "ppUsed": 22,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Force Newman"
+  ],
+  "psoWorldId": 65,
+  "modelId": "wdan01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wdan01_3_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Daggers_(Phantasy_Star_Zero)"
+}

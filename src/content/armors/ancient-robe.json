@@ -1,0 +1,13 @@
+{
+  "name": "Ancient Robe",
+  "japaneseName": "エインシェントローブ",
+  "rarity": 7,
+  "maxGrind": 5,
+  "level": 50,
+  "resaleValue": 5486,
+  "defenseBase": 157,
+  "defenseMax": 167,
+  "evasionBase": 251,
+  "evasionMax": 261,
+  "psoWorldId": 503
+}

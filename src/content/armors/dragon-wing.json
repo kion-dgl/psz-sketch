@@ -1,0 +1,13 @@
+{
+  "name": "Dragon Wing",
+  "japaneseName": "ドラゴンウイング",
+  "rarity": 5,
+  "maxGrind": 40,
+  "level": 24,
+  "resaleValue": 10,
+  "defenseBase": 115,
+  "defenseMax": 195,
+  "evasionBase": 132,
+  "evasionMax": 212,
+  "psoWorldId": 522
+}

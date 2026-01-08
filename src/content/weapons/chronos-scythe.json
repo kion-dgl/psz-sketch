@@ -1,0 +1,30 @@
+{
+  "name": "Chronos Scythe",
+  "japaneseName": "クロノスサイズ",
+  "rarity": 6,
+  "weaponType": "Double Saber",
+  "elementLevel": 3,
+  "element": "Slow",
+  "maxGrind": 30,
+  "level": 42,
+  "resaleValue": 10,
+  "attackBase": 302,
+  "attackMax": 362,
+  "accuracyBase": 186,
+  "accuracyMax": 186,
+  "photonArts": [
+    {
+      "name": "Tornado Dance",
+      "attackMod": 130,
+      "accuracyMod": 120,
+      "ppUsed": 30,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 148
+}

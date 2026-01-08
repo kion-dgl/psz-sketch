@@ -1,0 +1,32 @@
+{
+  "name": "Deo Rocket",
+  "japaneseName": "デオロケット",
+  "rarity": 4,
+  "weaponType": "Bazooka",
+  "maxGrind": 45,
+  "level": 12,
+  "resaleValue": 589,
+  "attackBase": 192,
+  "attackMax": 282,
+  "accuracyBase": 152,
+  "accuracyMax": 152,
+  "photonArts": [
+    {
+      "name": "Crazy On",
+      "attackMod": 130,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 246,
+  "modelId": "wbac01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wbac01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Bazookas_(Phantasy_Star_Zero)"
+}

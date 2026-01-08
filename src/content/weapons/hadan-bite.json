@@ -1,0 +1,49 @@
+{
+  "name": "Hadan Bite",
+  "japaneseName": "ハダンバイト",
+  "rarity": 7,
+  "weaponType": "Claw",
+  "elementLevel": 4,
+  "element": "Dark",
+  "maxGrind": 20,
+  "level": 54,
+  "resaleValue": 3823,
+  "attackBase": 366,
+  "attackMax": 406,
+  "accuracyBase": 287,
+  "accuracyMax": 287,
+  "photonArts": [
+    {
+      "name": "Serpent Air",
+      "attackMod": 115,
+      "accuracyMod": 80,
+      "ppUsed": 18,
+      "element": "-"
+    },
+    {
+      "name": "Bite Stamp",
+      "attackMod": 180,
+      "accuracyMod": 75,
+      "ppUsed": 26,
+      "element": "-"
+    },
+    {
+      "name": "Slide End",
+      "attackMod": 75,
+      "accuracyMod": 120,
+      "ppUsed": 21,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 100,
+  "modelId": "wclh02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wclh02_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Claws_(Phantasy_Star_Zero)"
+}

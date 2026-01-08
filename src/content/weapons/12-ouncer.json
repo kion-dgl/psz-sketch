@@ -1,0 +1,39 @@
+{
+  "name": "12-Ouncer",
+  "japaneseName": "トゥエルブオンス",
+  "rarity": 5,
+  "weaponType": "Daggers",
+  "elementLevel": 3,
+  "element": "Soul",
+  "maxGrind": 50,
+  "level": 26,
+  "resaleValue": 10,
+  "attackBase": 131,
+  "attackMax": 231,
+  "accuracyBase": 249,
+  "accuracyMax": 249,
+  "photonArts": [
+    {
+      "name": "Huge Cross",
+      "attackMod": 90,
+      "accuracyMod": 130,
+      "ppUsed": 22,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 55,
+  "modelId": "wdar02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wdar02_1_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Daggers_(Phantasy_Star_Zero)"
+}

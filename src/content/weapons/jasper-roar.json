@@ -1,0 +1,48 @@
+{
+  "name": "Jasper Roar",
+  "japaneseName": "ジャスパーロア",
+  "rarity": 6,
+  "weaponType": "Daggers",
+  "maxGrind": 25,
+  "level": 32,
+  "resaleValue": 1340,
+  "attackBase": 182,
+  "attackMax": 232,
+  "accuracyBase": 266,
+  "accuracyMax": 266,
+  "photonArts": [
+    {
+      "name": "Air Ride",
+      "attackMod": 95,
+      "accuracyMod": 80,
+      "ppUsed": 19,
+      "element": "-"
+    },
+    {
+      "name": "Reverse Kill",
+      "attackMod": 80,
+      "accuracyMod": 80,
+      "ppUsed": 25,
+      "element": "-"
+    },
+    {
+      "name": "Huge Cross",
+      "attackMod": 90,
+      "accuracyMod": 130,
+      "ppUsed": 22,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Force Human"
+  ],
+  "psoWorldId": 56,
+  "modelId": "wdah01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wdah01_3_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Daggers_(Phantasy_Star_Zero)"
+}

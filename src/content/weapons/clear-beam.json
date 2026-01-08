@@ -1,0 +1,32 @@
+{
+  "name": "Clear Beam",
+  "japaneseName": "クリアビーム",
+  "rarity": 4,
+  "weaponType": "Laser Cannon",
+  "maxGrind": 25,
+  "level": 12,
+  "resaleValue": 581,
+  "attackBase": 112,
+  "attackMax": 162,
+  "accuracyBase": 172,
+  "accuracyMax": 172,
+  "photonArts": [
+    {
+      "name": "Bio Panic",
+      "attackMod": 100,
+      "accuracyMod": 180,
+      "ppUsed": 16,
+      "element": "Level 3 Dark"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 264,
+  "modelId": "wlcn02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wlcn02_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Laser_Cannons_(Phantasy_Star_Zero)"
+}

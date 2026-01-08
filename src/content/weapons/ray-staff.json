@@ -1,0 +1,29 @@
+{
+  "name": "Ray Staff",
+  "japaneseName": "レイスタッフ",
+  "rarity": 3,
+  "weaponType": "Rod",
+  "maxGrind": 30,
+  "level": 5,
+  "resaleValue": 249,
+  "accuracyBase": 109,
+  "accuracyMax": 109,
+  "photonArts": [
+    {
+      "name": "Beat Quake",
+      "attackMod": 140,
+      "accuracyMod": 150,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Newman",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 281,
+  "modelId": "wron02",
+  "variantId": "wron02_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rods_(Phantasy_Star_Zero)"
+}

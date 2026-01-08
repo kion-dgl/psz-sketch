@@ -1,0 +1,43 @@
+{
+  "name": "Cannon Bleu",
+  "japaneseName": "カノンブルー",
+  "rarity": 7,
+  "weaponType": "Bazooka",
+  "elementLevel": 5,
+  "element": "Ice",
+  "maxGrind": 30,
+  "level": 80,
+  "resaleValue": 10,
+  "attackBase": 557,
+  "attackMax": 617,
+  "accuracyBase": 219,
+  "accuracyMax": 219,
+  "photonArts": [
+    {
+      "name": "Crush Bomb",
+      "attackMod": 210,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    },
+    {
+      "name": "Wild Blow",
+      "attackMod": 120,
+      "accuracyMod": 90,
+      "ppUsed": 28,
+      "element": "-"
+    },
+    {
+      "name": "Crazy On",
+      "attackMod": 130,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 256
+}

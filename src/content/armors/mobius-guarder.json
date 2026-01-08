@@ -1,0 +1,11 @@
+{
+  "name": "Mobius Guarder",
+  "japaneseName": "メビウスガーダー",
+  "rarity": 4,
+  "maxGrind": 45,
+  "defenseBase": 98,
+  "defenseMax": 188,
+  "evasionBase": 61,
+  "evasionMax": 151,
+  "psoWorldId": 510
+}

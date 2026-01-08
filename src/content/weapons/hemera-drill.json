@@ -1,0 +1,35 @@
+{
+  "name": "Hemera Drill",
+  "japaneseName": "ヘーメラードリル",
+  "rarity": 6,
+  "weaponType": "Spear",
+  "elementLevel": 2,
+  "element": "Zalure",
+  "maxGrind": 30,
+  "level": 42,
+  "resaleValue": 10,
+  "attackBase": 357,
+  "attackMax": 417,
+  "accuracyBase": 245,
+  "accuracyMax": 245,
+  "photonArts": [
+    {
+      "name": "Speed Rain",
+      "attackMod": 80,
+      "accuracyMod": 70,
+      "ppUsed": 32,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 90,
+  "modelId": "wspr02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wspr02_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Spears_(Phantasy_Star_Zero)"
+}

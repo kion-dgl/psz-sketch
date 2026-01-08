@@ -1,0 +1,32 @@
+{
+  "name": "Al Azif",
+  "japaneseName": "アルアジーフ",
+  "rarity": 7,
+  "weaponType": "Wand",
+  "elementLevel": 3,
+  "element": "Soul",
+  "maxGrind": 10,
+  "level": 80,
+  "resaleValue": 10,
+  "accuracyBase": 270,
+  "accuracyMax": 270,
+  "photonArts": [
+    {
+      "name": "Magical Sign",
+      "attackMod": 140,
+      "accuracyMod": 160,
+      "ppUsed": 13,
+      "element": "Level 3 Slow"
+    }
+  ],
+  "usableBy": [
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 412,
+  "modelId": "wwar01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wwar01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Wands_(Phantasy_Star_Zero)"
+}

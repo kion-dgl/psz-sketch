@@ -1,0 +1,30 @@
+{
+  "name": "Ray Beam",
+  "japaneseName": "レイビーム",
+  "rarity": 3,
+  "weaponType": "Laser Cannon",
+  "maxGrind": 30,
+  "level": 5,
+  "resaleValue": 233,
+  "attackBase": 80,
+  "attackMax": 140,
+  "accuracyBase": 143,
+  "accuracyMax": 143,
+  "photonArts": [
+    {
+      "name": "Bio Panic",
+      "attackMod": 100,
+      "accuracyMod": 180,
+      "ppUsed": 16,
+      "element": "Level 3 Dark"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 263,
+  "modelId": "wlcn02",
+  "variantId": "wlcn02_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Laser_Cannons_(Phantasy_Star_Zero)"
+}

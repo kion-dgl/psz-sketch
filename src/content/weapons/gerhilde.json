@@ -1,0 +1,30 @@
+{
+  "name": "Gerhilde",
+  "japaneseName": "ゲルヒルデ",
+  "rarity": 5,
+  "weaponType": "Rifle",
+  "maxGrind": 20,
+  "level": 24,
+  "resaleValue": 869,
+  "attackBase": 171,
+  "attackMax": 211,
+  "accuracyBase": 178,
+  "accuracyMax": 178,
+  "photonArts": [
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 184,
+  "modelId": "wrfn01",
+  "variantId": "wrfn01_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

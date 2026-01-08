@@ -1,0 +1,33 @@
+{
+  "name": "Double Calibur",
+  "japaneseName": "ダブルカリバー",
+  "rarity": 4,
+  "weaponType": "Double Saber",
+  "maxGrind": 45,
+  "level": 12,
+  "resaleValue": 548,
+  "attackBase": 147,
+  "attackMax": 237,
+  "accuracyBase": 165,
+  "accuracyMax": 165,
+  "photonArts": [
+    {
+      "name": "Cyclone Run",
+      "attackMod": 100,
+      "accuracyMod": 80,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 136,
+  "modelId": "wdsc01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wdsc01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Double_Sabers_(Phantasy_Star_Zero)"
+}

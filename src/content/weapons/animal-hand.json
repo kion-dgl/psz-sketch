@@ -1,0 +1,36 @@
+{
+  "name": "Animal Hand",
+  "japaneseName": "アニマルハンド",
+  "rarity": 3,
+  "weaponType": "Claw",
+  "elementLevel": 1,
+  "element": "Draw",
+  "maxGrind": 70,
+  "level": 6,
+  "resaleValue": 10,
+  "attackBase": 89,
+  "attackMax": 229,
+  "accuracyBase": 168,
+  "accuracyMax": 168,
+  "photonArts": [
+    {
+      "name": "Bite Stamp",
+      "attackMod": 180,
+      "accuracyMod": 75,
+      "ppUsed": 26,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 87,
+  "modelId": "wclr03",
+  "variantId": "wclr03_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Claws_(Phantasy_Star_Zero)"
+}

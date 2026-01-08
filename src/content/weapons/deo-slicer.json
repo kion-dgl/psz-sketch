@@ -1,0 +1,34 @@
+{
+  "name": "Deo Slicer",
+  "japaneseName": "デオスライサー",
+  "rarity": 4,
+  "weaponType": "Slicer",
+  "maxGrind": 45,
+  "level": 12,
+  "resaleValue": 521,
+  "accuracyBase": 106,
+  "accuracyMax": 106,
+  "photonArts": [
+    {
+      "name": "Edge Riser",
+      "attackMod": 150,
+      "accuracyMod": 200,
+      "ppUsed": 15,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 403,
+  "modelId": "wslc01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wslc01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Slicers_(Phantasy_Star_Zero)"
+}

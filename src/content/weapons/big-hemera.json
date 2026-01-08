@@ -1,0 +1,35 @@
+{
+  "name": "Big Hemera",
+  "japaneseName": "ビッグ・ヘーメラー",
+  "rarity": 7,
+  "weaponType": "Spear",
+  "elementLevel": 3,
+  "element": "Zalure",
+  "maxGrind": 20,
+  "level": 80,
+  "resaleValue": 10,
+  "attackBase": 517,
+  "attackMax": 557,
+  "accuracyBase": 282,
+  "accuracyMax": 282,
+  "photonArts": [
+    {
+      "name": "Speed Rain",
+      "attackMod": 80,
+      "accuracyMod": 70,
+      "ppUsed": 32,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 93,
+  "modelId": "wspr02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wspr02_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Spears_(Phantasy_Star_Zero)"
+}

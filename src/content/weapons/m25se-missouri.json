@@ -1,0 +1,33 @@
+{
+  "name": "M25SE Missouri",
+  "japaneseName": "Ｍ２５ＳＥミズーリ",
+  "rarity": 7,
+  "weaponType": "Rifle",
+  "maxGrind": 10,
+  "level": 80,
+  "resaleValue": 10,
+  "attackBase": 309,
+  "attackMax": 329,
+  "accuracyBase": 267,
+  "accuracyMax": 267,
+  "photonArts": [
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 197,
+  "modelId": "wrfr04",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wrfr04_2_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

@@ -1,0 +1,49 @@
+{
+  "name": "Grand Chariot",
+  "japaneseName": "グランシャリオ",
+  "rarity": 7,
+  "weaponType": "Spear",
+  "maxGrind": 30,
+  "level": 50,
+  "resaleValue": 4490,
+  "attackBase": 434,
+  "attackMax": 494,
+  "accuracyBase": 272,
+  "accuracyMax": 272,
+  "photonArts": [
+    {
+      "name": "Hopping Run",
+      "attackMod": 90,
+      "accuracyMod": 130,
+      "ppUsed": 24,
+      "element": "-"
+    },
+    {
+      "name": "Spear Rider",
+      "attackMod": 145,
+      "accuracyMod": 160,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Speed Rain",
+      "attackMod": 80,
+      "accuracyMod": 70,
+      "ppUsed": 32,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 80,
+  "modelId": "wspc01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wspc01_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Spears_(Phantasy_Star_Zero)"
+}

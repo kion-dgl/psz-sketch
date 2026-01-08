@@ -1,0 +1,33 @@
+{
+  "name": "Clear Fin",
+  "japaneseName": "クリアフィン",
+  "rarity": 5,
+  "weaponType": "Slicer",
+  "maxGrind": 20,
+  "level": 24,
+  "resaleValue": 916,
+  "accuracyBase": 131,
+  "accuracyMax": 131,
+  "photonArts": [
+    {
+      "name": "Edge Riser",
+      "attackMod": 150,
+      "accuracyMod": 200,
+      "ppUsed": 15,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 414,
+  "modelId": "wsln01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wsln01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Slicers_(Phantasy_Star_Zero)"
+}

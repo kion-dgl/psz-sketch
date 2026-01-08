@@ -1,0 +1,13 @@
+{
+  "name": "Cuirass Armor",
+  "japaneseName": "キュイラスアーマー",
+  "rarity": 5,
+  "maxGrind": 30,
+  "level": 20,
+  "resaleValue": 1116,
+  "defenseBase": 143,
+  "defenseMax": 203,
+  "evasionBase": 92,
+  "evasionMax": 152,
+  "psoWorldId": 489
+}

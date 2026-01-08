@@ -1,0 +1,37 @@
+{
+  "name": "Crimsonfield",
+  "japaneseName": "クリムゾンフィールド",
+  "rarity": 4,
+  "weaponType": "Shield",
+  "elementLevel": 2,
+  "element": "Heart",
+  "maxGrind": 60,
+  "level": 12,
+  "resaleValue": 10,
+  "attackBase": 98,
+  "attackMax": 218,
+  "accuracyBase": 208,
+  "accuracyMax": 208,
+  "photonArts": [
+    {
+      "name": "Barrier Shift",
+      "attackMod": 0,
+      "accuracyMod": 0,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 118,
+  "modelId": "wshr02",
+  "variantId": "wshr02_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Shields_(Phantasy_Star_Zero)"
+}

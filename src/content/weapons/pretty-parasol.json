@@ -1,0 +1,35 @@
+{
+  "name": "Pretty Parasol",
+  "japaneseName": "プリティヒガサ",
+  "rarity": 4,
+  "weaponType": "Rod",
+  "elementLevel": 2,
+  "element": "Draw",
+  "maxGrind": 60,
+  "level": 12,
+  "resaleValue": 10,
+  "accuracyBase": 133,
+  "accuracyMax": 133,
+  "photonArts": [
+    {
+      "name": "Beat Quake",
+      "attackMod": 140,
+      "accuracyMod": 150,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 290,
+  "modelId": "wror03",
+  "variantId": "wror03_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rods_(Phantasy_Star_Zero)"
+}

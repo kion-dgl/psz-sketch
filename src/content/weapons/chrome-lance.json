@@ -1,0 +1,35 @@
+{
+  "name": "Chrome Lance",
+  "japaneseName": "クロムランス",
+  "rarity": 4,
+  "weaponType": "Spear",
+  "maxGrind": 30,
+  "level": 12,
+  "resaleValue": 556,
+  "attackBase": 161,
+  "attackMax": 221,
+  "accuracyBase": 184,
+  "accuracyMax": 184,
+  "photonArts": [
+    {
+      "name": "Hopping Run",
+      "attackMod": 90,
+      "accuracyMod": 130,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 68,
+  "modelId": "wsph01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wsph01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Spears_(Phantasy_Star_Zero)"
+}

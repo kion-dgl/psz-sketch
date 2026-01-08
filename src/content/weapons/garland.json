@@ -1,0 +1,32 @@
+{
+  "name": "Garland",
+  "japaneseName": "ガーラント",
+  "rarity": 3,
+  "weaponType": "Rifle",
+  "elementLevel": 2,
+  "element": "Draw",
+  "maxGrind": 50,
+  "level": 5,
+  "resaleValue": 10,
+  "attackBase": 84,
+  "attackMax": 184,
+  "accuracyBase": 122,
+  "accuracyMax": 122,
+  "photonArts": [
+    {
+      "name": "Wipeout",
+      "attackMod": 75,
+      "accuracyMod": 80,
+      "ppUsed": 21,
+      "element": "Level 4 Heat"
+    }
+  ],
+  "usableBy": [
+    "Hunter Cast",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 186,
+  "modelId": "wrfr03",
+  "variantId": "wrfr03_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

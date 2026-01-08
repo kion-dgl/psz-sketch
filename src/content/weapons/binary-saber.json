@@ -1,0 +1,51 @@
+{
+  "name": "Binary Saber",
+  "japaneseName": "ダブルセイバー",
+  "rarity": 3,
+  "weaponType": "Double Saber",
+  "elementLevel": 1,
+  "element": "Heart",
+  "maxGrind": 10,
+  "level": 4,
+  "resaleValue": 10,
+  "attackBase": 108,
+  "attackMax": 128,
+  "accuracyBase": 137,
+  "accuracyMax": 137,
+  "photonArts": [
+    {
+      "name": "Cyclone Run",
+      "attackMod": 100,
+      "accuracyMod": 80,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Tornado Dance",
+      "attackMod": 130,
+      "accuracyMod": 120,
+      "ppUsed": 30,
+      "element": "-"
+    },
+    {
+      "name": "Million Rave",
+      "attackMod": 135,
+      "accuracyMod": 100,
+      "ppUsed": 25,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 131,
+  "modelId": "wdsr02",
+  "variantId": "wdsr02_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Double_Sabers_(Phantasy_Star_Zero)"
+}

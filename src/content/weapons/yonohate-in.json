@@ -1,0 +1,36 @@
+{
+  "name": "Yonohate In",
+  "japaneseName": "ヨノハテ・印",
+  "rarity": 7,
+  "weaponType": "Sword",
+  "elementLevel": 2,
+  "element": "Risk",
+  "maxGrind": 50,
+  "level": 80,
+  "resaleValue": 10,
+  "attackBase": 502,
+  "attackMax": 602,
+  "accuracyBase": 221,
+  "accuracyMax": 221,
+  "photonArts": [
+    {
+      "name": "Sonic Raid",
+      "attackMod": 120,
+      "accuracyMod": 75,
+      "ppUsed": 23,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 43,
+  "modelId": "wswr03",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wswr03_1_b",
+  "notes": "missing texture",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Swords_(Phantasy_Star_Zero)"
+}

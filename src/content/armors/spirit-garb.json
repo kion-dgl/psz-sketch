@@ -1,0 +1,13 @@
+{
+  "name": "Spirit Garb",
+  "japaneseName": "スピリットガーブ",
+  "rarity": 6,
+  "maxGrind": 0,
+  "level": 52,
+  "resaleValue": 10,
+  "defenseBase": 132,
+  "defenseMax": 132,
+  "evasionBase": 147,
+  "evasionMax": 147,
+  "psoWorldId": 518
+}

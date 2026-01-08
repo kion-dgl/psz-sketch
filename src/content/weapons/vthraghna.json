@@ -1,0 +1,45 @@
+{
+  "name": "Vthraghna",
+  "japaneseName": "ウルスラグナ",
+  "rarity": 5,
+  "weaponType": "Laser Cannon",
+  "maxGrind": 40,
+  "level": 24,
+  "resaleValue": 955,
+  "attackBase": 147,
+  "attackMax": 227,
+  "accuracyBase": 201,
+  "accuracyMax": 201,
+  "photonArts": [
+    {
+      "name": "Sector Line",
+      "attackMod": 150,
+      "accuracyMod": 80,
+      "ppUsed": 22,
+      "element": "-"
+    },
+    {
+      "name": "Bio Panic",
+      "attackMod": 100,
+      "accuracyMod": 180,
+      "ppUsed": 16,
+      "element": "Level 3 Dark"
+    },
+    {
+      "name": "Divine Ray",
+      "attackMod": 250,
+      "accuracyMod": 200,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 261,
+  "modelId": "wlcc01",
+  "variantId": "wlcc01_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Laser_Cannons_(Phantasy_Star_Zero)"
+}

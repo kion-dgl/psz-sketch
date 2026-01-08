@@ -1,0 +1,35 @@
+{
+  "name": "Caduceus",
+  "japaneseName": "カドゥケウスの杖",
+  "rarity": 5,
+  "weaponType": "Rod",
+  "elementLevel": 3,
+  "element": "Exp",
+  "maxGrind": 35,
+  "level": 20,
+  "resaleValue": 10,
+  "accuracyBase": 159,
+  "accuracyMax": 159,
+  "photonArts": [
+    {
+      "name": "Rodeo Drive",
+      "attackMod": 120,
+      "accuracyMod": 130,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 298,
+  "modelId": "wror06",
+  "variantId": "wror06_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rods_(Phantasy_Star_Zero)"
+}

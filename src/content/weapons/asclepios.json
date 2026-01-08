@@ -1,0 +1,43 @@
+{
+  "name": "Asclepios",
+  "japaneseName": "アスクレピオス",
+  "rarity": 6,
+  "weaponType": "Rod",
+  "maxGrind": 15,
+  "level": 36,
+  "resaleValue": 1802,
+  "accuracyBase": 181,
+  "accuracyMax": 181,
+  "photonArts": [
+    {
+      "name": "Beat Quake",
+      "attackMod": 140,
+      "accuracyMod": 150,
+      "ppUsed": 19,
+      "element": "-"
+    },
+    {
+      "name": "Rolling Bar",
+      "attackMod": 90,
+      "accuracyMod": 100,
+      "ppUsed": 21,
+      "element": "-"
+    },
+    {
+      "name": "Rodeo Drive",
+      "attackMod": 120,
+      "accuracyMod": 130,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Newman",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 283,
+  "modelId": "wron02",
+  "variantId": "wron02_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rods_(Phantasy_Star_Zero)"
+}

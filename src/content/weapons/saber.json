@@ -1,0 +1,17 @@
+{
+  "name": "Saber",
+  "japaneseName": "セイバー",
+  "rarity": 1,
+  "weaponType": "Saber",
+  "maxGrind": 40,
+  "level": 1,
+  "resaleValue": 28,
+  "attackBase": 39,
+  "attackMax": 119,
+  "accuracyBase": 97,
+  "accuracyMax": 97,
+  "psoWorldId": 2,
+  "modelId": "wsan02",
+  "variantId": "wsan02_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Sabers_(Phantasy_Star_Zero)"
+}

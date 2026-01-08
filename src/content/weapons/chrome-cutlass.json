@@ -1,0 +1,19 @@
+{
+  "name": "Chrome Cutlass",
+  "japaneseName": "クロムカトラス",
+  "rarity": 2,
+  "weaponType": "Saber",
+  "maxGrind": 45,
+  "level": 2,
+  "resaleValue": 66,
+  "attackBase": 56,
+  "attackMax": 146,
+  "accuracyBase": 112,
+  "accuracyMax": 112,
+  "psoWorldId": 4,
+  "modelId": "wsah01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wsah01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Sabers_(Phantasy_Star_Zero)"
+}

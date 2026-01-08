@@ -1,0 +1,7 @@
+{
+  "name": "Dark Element",
+  "japaneseName": "ダークエレメント",
+  "details": "Grants a weapon the element of \"Dark\", allowing you to inflict Poison on enemies. Under the effects of Poison, enemies will take constant damage over time. While the damage taken is lower than Burn's, the duration is longer.\n\nThe strength of Poison increases with the element level.",
+  "rarity": 5,
+  "psoWorldId": 540
+}

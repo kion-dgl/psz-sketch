@@ -1,0 +1,48 @@
+{
+  "name": "Liese Garland",
+  "japaneseName": "リーゼガーラント",
+  "rarity": 3,
+  "weaponType": "Rifle",
+  "elementLevel": 1,
+  "element": "Exp",
+  "maxGrind": 60,
+  "level": 4,
+  "resaleValue": 10,
+  "attackBase": 79,
+  "attackMax": 199,
+  "accuracyBase": 125,
+  "accuracyMax": 125,
+  "photonArts": [
+    {
+      "name": "Wipeout",
+      "attackMod": 75,
+      "accuracyMod": 80,
+      "ppUsed": 21,
+      "element": "Level 4 Heat"
+    },
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    },
+    {
+      "name": "Mine Sneak",
+      "attackMod": 160,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 189,
+  "modelId": "wrfr03",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wrfr03_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

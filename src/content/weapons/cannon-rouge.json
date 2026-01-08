@@ -1,0 +1,43 @@
+{
+  "name": "Cannon Rouge",
+  "japaneseName": "カノンルージュ",
+  "rarity": 5,
+  "weaponType": "Bazooka",
+  "elementLevel": 4,
+  "element": "Light",
+  "maxGrind": 50,
+  "level": 28,
+  "resaleValue": 10,
+  "attackBase": 306,
+  "attackMax": 406,
+  "accuracyBase": 173,
+  "accuracyMax": 173,
+  "photonArts": [
+    {
+      "name": "Crush Bomb",
+      "attackMod": 210,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    },
+    {
+      "name": "Wild Blow",
+      "attackMod": 120,
+      "accuracyMod": 90,
+      "ppUsed": 28,
+      "element": "-"
+    },
+    {
+      "name": "Crazy On",
+      "attackMod": 130,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 255
+}

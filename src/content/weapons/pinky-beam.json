@@ -1,0 +1,46 @@
+{
+  "name": "Pinky Beam",
+  "japaneseName": "ピンキービーム",
+  "rarity": 6,
+  "weaponType": "Laser Cannon",
+  "elementLevel": 3,
+  "element": "Heat",
+  "maxGrind": 30,
+  "level": 40,
+  "resaleValue": 10,
+  "attackBase": 226,
+  "attackMax": 286,
+  "accuracyBase": 224,
+  "accuracyMax": 224,
+  "photonArts": [
+    {
+      "name": "Sector Line",
+      "attackMod": 150,
+      "accuracyMod": 80,
+      "ppUsed": 22,
+      "element": "-"
+    },
+    {
+      "name": "Bio Panic",
+      "attackMod": 100,
+      "accuracyMod": 180,
+      "ppUsed": 16,
+      "element": "Level 3 Dark"
+    },
+    {
+      "name": "Divine Ray",
+      "attackMod": 250,
+      "accuracyMod": 200,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 274,
+  "modelId": "wlcr02",
+  "variantId": "wlcr02_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Laser_Cannons_(Phantasy_Star_Zero)"
+}
