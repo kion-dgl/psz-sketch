@@ -112,8 +112,8 @@ const weapons = defineCollection({
     maxGrind: z.number().default(0),
     level: z.number().default(1),
     resaleValue: z.number().optional(),
-    attackBase: z.number(),
-    attackMax: z.number(),
+    attackBase: z.number().optional(), // Not present for tech weapons (Rods, Wands)
+    attackMax: z.number().optional(),
     accuracyBase: z.number(),
     accuracyMax: z.number(),
     // Optional element
