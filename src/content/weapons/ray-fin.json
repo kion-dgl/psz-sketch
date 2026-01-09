@@ -1,0 +1,31 @@
+{
+  "name": "Ray Fin",
+  "japaneseName": "レイフィン",
+  "rarity": 4,
+  "weaponType": "Slicer",
+  "maxGrind": 25,
+  "level": 12,
+  "resaleValue": 539,
+  "accuracyBase": 109,
+  "accuracyMax": 109,
+  "photonArts": [
+    {
+      "name": "Edge Riser",
+      "attackMod": 150,
+      "accuracyMod": 200,
+      "ppUsed": 15,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 413,
+  "modelId": "wsln01",
+  "variantId": "wsln01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Slicers_(Phantasy_Star_Zero)"
+}

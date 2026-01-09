@@ -1,0 +1,32 @@
+{
+  "name": "Caster Broom",
+  "japaneseName": "キャスターブルーム",
+  "rarity": 6,
+  "weaponType": "Rod",
+  "elementLevel": 3,
+  "element": "Chaos",
+  "maxGrind": 30,
+  "level": 36,
+  "resaleValue": 10,
+  "accuracyBase": 174,
+  "accuracyMax": 174,
+  "photonArts": [
+    {
+      "name": "Rodeo Drive",
+      "attackMod": 120,
+      "accuracyMod": 130,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 293,
+  "modelId": "wror02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wror02_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rods_(Phantasy_Star_Zero)"
+}

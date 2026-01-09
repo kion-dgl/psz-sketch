@@ -1,0 +1,37 @@
+{
+  "name": "Starlight",
+  "japaneseName": "スターライト",
+  "rarity": 7,
+  "weaponType": "Wand",
+  "elementLevel": 5,
+  "element": "Dark",
+  "maxGrind": 20,
+  "level": 60,
+  "resaleValue": 10,
+  "accuracyBase": 239,
+  "accuracyMax": 239,
+  "photonArts": [
+    {
+      "name": "Act Trick",
+      "attackMod": 0,
+      "accuracyMod": 0,
+      "ppUsed": 2,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 396,
+  "modelId": "wwar03",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wwar03_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Wands_(Phantasy_Star_Zero)"
+}

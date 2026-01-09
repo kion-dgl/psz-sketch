@@ -1,0 +1,39 @@
+{
+  "name": "Emeraldfield",
+  "japaneseName": "エメラルドフィールド",
+  "rarity": 7,
+  "weaponType": "Shield",
+  "elementLevel": 3,
+  "element": "Draw",
+  "maxGrind": 30,
+  "level": 60,
+  "resaleValue": 10,
+  "attackBase": 225,
+  "attackMax": 285,
+  "accuracyBase": 316,
+  "accuracyMax": 316,
+  "photonArts": [
+    {
+      "name": "Barrier Shift",
+      "attackMod": 0,
+      "accuracyMod": 0,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 119,
+  "modelId": "wshr02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wshr02_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Shields_(Phantasy_Star_Zero)"
+}

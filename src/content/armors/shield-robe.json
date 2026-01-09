@@ -1,0 +1,13 @@
+{
+  "name": "Shield Robe",
+  "japaneseName": "シールドローブ",
+  "rarity": 3,
+  "maxGrind": 25,
+  "level": 5,
+  "resaleValue": 281,
+  "defenseBase": 44,
+  "defenseMax": 94,
+  "evasionBase": 70,
+  "evasionMax": 120,
+  "psoWorldId": 499
+}

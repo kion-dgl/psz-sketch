@@ -1,0 +1,44 @@
+{
+  "name": "Adrastea",
+  "japaneseName": "アドラステア",
+  "rarity": 5,
+  "weaponType": "Bazooka",
+  "maxGrind": 40,
+  "level": 24,
+  "resaleValue": 1001,
+  "attackBase": 287,
+  "attackMax": 367,
+  "accuracyBase": 187,
+  "accuracyMax": 187,
+  "photonArts": [
+    {
+      "name": "Crush Bomb",
+      "attackMod": 210,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    },
+    {
+      "name": "Wild Blow",
+      "attackMod": 120,
+      "accuracyMod": 90,
+      "ppUsed": 28,
+      "element": "-"
+    },
+    {
+      "name": "Crazy On",
+      "attackMod": 130,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 251,
+  "modelId": "wbac02",
+  "variantId": "wbac02_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Bazookas_(Phantasy_Star_Zero)"
+}

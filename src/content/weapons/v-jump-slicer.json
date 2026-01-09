@@ -1,0 +1,32 @@
+{
+  "name": "V-Jump Slicer",
+  "japaneseName": "Vジャンプスライサー",
+  "rarity": 4,
+  "weaponType": "Slicer",
+  "elementLevel": 3,
+  "element": "Heat",
+  "maxGrind": 50,
+  "level": 12,
+  "resaleValue": 10,
+  "accuracyBase": 101,
+  "accuracyMax": 101,
+  "photonArts": [
+    {
+      "name": "Bright Sign",
+      "attackMod": 110,
+      "accuracyMod": 120,
+      "ppUsed": 14,
+      "element": "Level 3 Stun"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 401
+}

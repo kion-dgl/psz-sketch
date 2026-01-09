@@ -1,0 +1,29 @@
+{
+  "name": "Yasminkov M109",
+  "japaneseName": "ヤスミノコフＭ１０９",
+  "rarity": 7,
+  "weaponType": "Rifle",
+  "elementLevel": 2,
+  "element": "Heaven",
+  "maxGrind": 20,
+  "level": 90,
+  "resaleValue": 10,
+  "attackBase": 342,
+  "attackMax": 382,
+  "accuracyBase": 233,
+  "accuracyMax": 233,
+  "photonArts": [
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 195
+}

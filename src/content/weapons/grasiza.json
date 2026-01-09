@@ -1,0 +1,47 @@
+{
+  "name": "Grasiza",
+  "japaneseName": "グラーシーザ",
+  "rarity": 5,
+  "weaponType": "Spear",
+  "maxGrind": 40,
+  "level": 24,
+  "resaleValue": 978,
+  "attackBase": 238,
+  "attackMax": 318,
+  "accuracyBase": 215,
+  "accuracyMax": 215,
+  "photonArts": [
+    {
+      "name": "Hopping Run",
+      "attackMod": 90,
+      "accuracyMod": 130,
+      "ppUsed": 24,
+      "element": "-"
+    },
+    {
+      "name": "Spear Rider",
+      "attackMod": 145,
+      "accuracyMod": 160,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Speed Rain",
+      "attackMod": 80,
+      "accuracyMod": 70,
+      "ppUsed": 32,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 77,
+  "modelId": "wspc01",
+  "variantId": "wspc01_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Spears_(Phantasy_Star_Zero)"
+}

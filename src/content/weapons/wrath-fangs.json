@@ -1,0 +1,33 @@
+{
+  "name": "Wrath Fangs",
+  "japaneseName": "ラースファング",
+  "rarity": 4,
+  "weaponType": "Claw",
+  "maxGrind": 35,
+  "level": 12,
+  "resaleValue": 490,
+  "attackBase": 144,
+  "attackMax": 214,
+  "accuracyBase": 189,
+  "accuracyMax": 189,
+  "photonArts": [
+    {
+      "name": "Serpent Air",
+      "attackMod": 115,
+      "accuracyMod": 80,
+      "ppUsed": 18,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 98,
+  "modelId": "wclh02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wclh02_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Claws_(Phantasy_Star_Zero)"
+}

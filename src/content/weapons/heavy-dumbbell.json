@@ -1,0 +1,37 @@
+{
+  "name": "Heavy Dumbbell",
+  "japaneseName": "ヘビーダンベル",
+  "rarity": 6,
+  "weaponType": "Wand",
+  "elementLevel": 1,
+  "element": "Heaven",
+  "maxGrind": 30,
+  "level": 36,
+  "resaleValue": 10,
+  "accuracyBase": 212,
+  "accuracyMax": 212,
+  "photonArts": [
+    {
+      "name": "Act Trick",
+      "attackMod": 0,
+      "accuracyMod": 0,
+      "ppUsed": 2,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 395,
+  "modelId": "wwar04",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wwar04_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Wands_(Phantasy_Star_Zero)"
+}

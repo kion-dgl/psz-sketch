@@ -1,0 +1,36 @@
+{
+  "name": "Gale Bringer",
+  "japaneseName": "ゲイルブリンガー",
+  "rarity": 6,
+  "weaponType": "Sword",
+  "elementLevel": 3,
+  "element": "Stun",
+  "maxGrind": 40,
+  "level": 38,
+  "resaleValue": 10,
+  "attackBase": 352,
+  "attackMax": 432,
+  "accuracyBase": 196,
+  "accuracyMax": 196,
+  "photonArts": [
+    {
+      "name": "Sonic Raid",
+      "attackMod": 120,
+      "accuracyMod": 75,
+      "ppUsed": 23,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 47,
+  "modelId": "wswr01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wswr01_1_b",
+  "notes": "missing texture",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Swords_(Phantasy_Star_Zero)"
+}

@@ -1,0 +1,47 @@
+{
+  "name": "Python Bite",
+  "japaneseName": "パイソンバイト",
+  "rarity": 5,
+  "weaponType": "Claw",
+  "elementLevel": 2,
+  "element": "Stun",
+  "maxGrind": 30,
+  "level": 20,
+  "resaleValue": 833,
+  "attackBase": 201,
+  "attackMax": 261,
+  "accuracyBase": 227,
+  "accuracyMax": 227,
+  "photonArts": [
+    {
+      "name": "Serpent Air",
+      "attackMod": 115,
+      "accuracyMod": 80,
+      "ppUsed": 18,
+      "element": "-"
+    },
+    {
+      "name": "Bite Stamp",
+      "attackMod": 180,
+      "accuracyMod": 75,
+      "ppUsed": 26,
+      "element": "-"
+    },
+    {
+      "name": "Slide End",
+      "attackMod": 75,
+      "accuracyMod": 120,
+      "ppUsed": 21,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 99,
+  "modelId": "wclh02",
+  "variantId": "wclh02_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Claws_(Phantasy_Star_Zero)"
+}

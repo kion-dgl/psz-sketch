@@ -1,0 +1,30 @@
+{
+  "name": "Romulus",
+  "japaneseName": "ロムルス",
+  "rarity": 3,
+  "weaponType": "Double Saber",
+  "maxGrind": 50,
+  "level": 5,
+  "resaleValue": 91,
+  "attackBase": 108,
+  "attackMax": 208,
+  "accuracyBase": 140,
+  "accuracyMax": 140,
+  "photonArts": [
+    {
+      "name": "Million Rave",
+      "attackMod": 135,
+      "accuracyMod": 100,
+      "ppUsed": 25,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Newman",
+    "Force Newman"
+  ],
+  "psoWorldId": 128,
+  "modelId": "wdsn03",
+  "variantId": "wdsn03_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Double_Sabers_(Phantasy_Star_Zero)"
+}

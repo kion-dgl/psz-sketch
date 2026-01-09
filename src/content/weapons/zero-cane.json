@@ -1,0 +1,42 @@
+{
+  "name": "Zero Cane",
+  "japaneseName": "ゼロケイン",
+  "rarity": 7,
+  "weaponType": "Wand",
+  "maxGrind": 0,
+  "level": 70,
+  "resaleValue": 10,
+  "accuracyBase": 259,
+  "accuracyMax": 259,
+  "photonArts": [
+    {
+      "name": "Funny Dive",
+      "attackMod": 125,
+      "accuracyMod": 200,
+      "ppUsed": 11,
+      "element": "-"
+    },
+    {
+      "name": "Magical Sign",
+      "attackMod": 140,
+      "accuracyMod": 160,
+      "ppUsed": 13,
+      "element": "Level 3 Slow"
+    },
+    {
+      "name": "Act Trick",
+      "attackMod": 0,
+      "accuracyMod": 0,
+      "ppUsed": 2,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 394,
+  "modelId": "wwar05",
+  "variantId": "wwar05_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Wands_(Phantasy_Star_Zero)"
+}

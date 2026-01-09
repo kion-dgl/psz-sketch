@@ -1,0 +1,35 @@
+{
+  "name": "Eaten Pizza",
+  "japaneseName": "イートピッツァ",
+  "rarity": 4,
+  "weaponType": "Slicer",
+  "elementLevel": 2,
+  "element": "Draw",
+  "maxGrind": 60,
+  "level": 12,
+  "resaleValue": 10,
+  "accuracyBase": 112,
+  "accuracyMax": 112,
+  "photonArts": [
+    {
+      "name": "Edge Riser",
+      "attackMod": 150,
+      "accuracyMod": 200,
+      "ppUsed": 15,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 402,
+  "modelId": "wslr02",
+  "variantId": "wslr02_2_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Slicers_(Phantasy_Star_Zero)"
+}

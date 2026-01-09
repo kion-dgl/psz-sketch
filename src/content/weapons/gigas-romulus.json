@@ -1,0 +1,27 @@
+{
+  "name": "Gigas Romulus",
+  "japaneseName": "ギガスロムルス",
+  "rarity": 7,
+  "weaponType": "Double Saber",
+  "maxGrind": 30,
+  "level": 54,
+  "resaleValue": 1639,
+  "attackBase": 387,
+  "attackMax": 447,
+  "accuracyBase": 235,
+  "accuracyMax": 235,
+  "photonArts": [
+    {
+      "name": "Million Rave",
+      "attackMod": 135,
+      "accuracyMod": 100,
+      "ppUsed": 25,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Newman",
+    "Force Newman"
+  ],
+  "psoWorldId": 130
+}

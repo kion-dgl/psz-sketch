@@ -1,0 +1,33 @@
+{
+  "name": "Iron Spear",
+  "japaneseName": "アイアンスピア",
+  "rarity": 2,
+  "weaponType": "Spear",
+  "maxGrind": 45,
+  "level": 2,
+  "resaleValue": 89,
+  "attackBase": 83,
+  "attackMax": 173,
+  "accuracyBase": 117,
+  "accuracyMax": 117,
+  "photonArts": [
+    {
+      "name": "Spear Rider",
+      "attackMod": 145,
+      "accuracyMod": 160,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 73,
+  "modelId": "wsph02",
+  "variantId": "wsph02_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Spears_(Phantasy_Star_Zero)"
+}

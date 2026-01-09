@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<style>* { fill: #ff6b6b; }</style>
+<!-- Sword slash -->
+<path d="
+  M 20,80
+  L 70,30
+  L 80,20
+  L 85,25
+  L 35,75
+  L 30,85
+  Z
+"/>
+<!-- Crossguard -->
+<path d="
+  M 55,55
+  L 65,45
+  L 70,50
+  L 60,60
+  Z
+"/>
+<!-- Motion lines -->
+<path d="M 15,70 L 25,60" stroke="#ff6b6b" stroke-width="4" fill="none"/>
+<path d="M 10,60 L 20,50" stroke="#ff6b6b" stroke-width="3" fill="none"/>
+</svg>

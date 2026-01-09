@@ -1,0 +1,31 @@
+{
+  "name": "Gun Slash",
+  "japaneseName": "ガンスラッシュ",
+  "rarity": 2,
+  "weaponType": "Gun Blade",
+  "maxGrind": 45,
+  "level": 2,
+  "resaleValue": 83,
+  "attackBase": 45,
+  "attackMax": 135,
+  "accuracyBase": 86,
+  "accuracyMax": 86,
+  "photonArts": [
+    {
+      "name": "Bullet Dance",
+      "attackMod": 125,
+      "accuracyMod": 70,
+      "ppUsed": 16,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 202,
+  "modelId": "wgbh01",
+  "variantId": "wgbh01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Gun_Blades_(Phantasy_Star_Zero)"
+}

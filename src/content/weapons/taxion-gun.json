@@ -1,0 +1,27 @@
+{
+  "name": "Taxion Gun",
+  "japaneseName": "タージオンガン",
+  "rarity": 3,
+  "weaponType": "Handgun",
+  "maxGrind": 50,
+  "level": 5,
+  "resaleValue": 68,
+  "attackBase": 68,
+  "attackMax": 168,
+  "accuracyBase": 116,
+  "accuracyMax": 116,
+  "photonArts": [],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 163,
+  "modelId": "whgn02",
+  "variantId": "whgn02_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Handguns_(Phantasy_Star_Zero)"
+}

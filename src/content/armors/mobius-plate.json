@@ -1,0 +1,13 @@
+{
+  "name": "Mobius Plate",
+  "japaneseName": "メビウスプレート",
+  "rarity": 7,
+  "maxGrind": 30,
+  "level": 64,
+  "resaleValue": 10,
+  "defenseBase": 251,
+  "defenseMax": 311,
+  "evasionBase": 157,
+  "evasionMax": 217,
+  "psoWorldId": 513
+}

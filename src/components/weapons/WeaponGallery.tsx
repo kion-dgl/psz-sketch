@@ -40,29 +40,15 @@ interface PsoWorldWeaponStats {
   photonArts: PhotonArt[];
   usableBy: string[];
   psoWorldId: number;
-}
-
-// Comprehensive weapon data entry from weapon-data.json
-interface WeaponDataEntry {
-  name: string;
-  rarity: number;
-  level: number;
-  modelId: string;
-  variantId: string | null;
-  notes?: string;
+  // 3D Model data (merged from weapon-data.json)
+  modelId?: string;
+  variantId?: string | null;
   missingTexture?: boolean;
   useModelFrom?: string;
+  notes?: string;
+  wikiUrl?: string;
 }
 
-interface WeaponDataCategory {
-  category: string;
-  wikiUrl: string;
-  weapons: WeaponDataEntry[];
-}
-
-interface WeaponDataJson {
-  [key: string]: WeaponDataCategory;
-}
 
 // Weapon variant entry (for expanded list)
 interface WeaponVariant {
@@ -313,101 +299,68 @@ const WRAP_OPTIONS: { label: string; value: THREE.Wrapping }[] = [
   { label: 'Mirror', value: THREE.MirroredRepeatWrapping },
 ];
 
+// Props interface for WeaponGallery
+interface WeaponGalleryProps {
+  /** Weapon stats from content collection (passed from Astro) */
+  weaponStats?: PsoWorldWeaponStats[];
+}
+
 // Main Gallery Component
-export default function WeaponGallery() {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+export default function WeaponGallery({ weaponStats }: WeaponGalleryProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string>('sword');
   const [selectedVariant, setSelectedVariant] = useState<WeaponVariant | null>(null);
   const [allVariants, setAllVariants] = useState<WeaponVariant[]>([]);
   const [loading, setLoading] = useState(true);
   const [weaponInfoMap, setWeaponInfoMap] = useState<Record<string, WeaponInfo>>({});
-  const [weaponData, setWeaponData] = useState<WeaponDataJson | null>(null);
   const [materialSettings, setMaterialSettings] = useState<MaterialSettings>(DEFAULT_MATERIAL_SETTINGS);
-  const [psoWorldStats, setPsoWorldStats] = useState<Map<string, PsoWorldWeaponStats>>(new Map());
 
-  // Load all weapon info on mount to get all variants
+  // Build stats map from props (passed from Astro content collection)
+  const psoWorldStats = useMemo(() => {
+    const statsMap = new Map<string, PsoWorldWeaponStats>();
+    if (weaponStats) {
+      for (const stat of weaponStats) {
+        statsMap.set(stat.name.toLowerCase(), stat);
+      }
+    }
+    return statsMap;
+  }, [weaponStats]);
+
+  // Load weapon info files and build variants from weaponStats
   useEffect(() => {
     async function loadAllWeapons() {
       const variants: WeaponVariant[] = [];
       const infoMap: Record<string, WeaponInfo> = {};
 
-      // Load comprehensive weapon data
-      let weaponDataJson: WeaponDataJson = {};
-      try {
-        const dataRes = await fetch('/src/data/weapon-data.json');
-        weaponDataJson = await dataRes.json();
-        setWeaponData(weaponDataJson);
-      } catch (err) {
-        console.warn('Could not load weapon data:', err);
-      }
-
-      // Load PSO-World weapon stats
-      try {
-        const statsRes = await fetch('/src/data/psoworld-weapon-stats.json');
-        const statsArray: PsoWorldWeaponStats[] = await statsRes.json();
-        const statsMap = new Map<string, PsoWorldWeaponStats>();
-        for (const stat of statsArray) {
-          // Index by lowercase name for case-insensitive matching
-          statsMap.set(stat.name.toLowerCase(), stat);
-        }
-        setPsoWorldStats(statsMap);
-      } catch (err) {
-        console.warn('Could not load PSO-World stats:', err);
-      }
-
-      // Create a map of weapons from comprehensive data
-      const weaponDataMap: Map<string, WeaponDataEntry & { wikiUrl: string }> = new Map();
-      for (const [, categoryData] of Object.entries(weaponDataJson)) {
-        for (const weapon of categoryData.weapons) {
-          // Key by variant if available, otherwise by name
-          const key = weapon.variantId || weapon.name.toLowerCase().replace(/\s+/g, '_');
-          weaponDataMap.set(key, { ...weapon, wikiUrl: categoryData.wikiUrl });
-        }
-      }
-
-      // Load info for each weapon model
+      // Load info for each weapon model (for texture previews)
       await Promise.all(
         ALL_WEAPON_IDS.map(async (weaponId) => {
           try {
             const res = await fetch(getWeaponInfoPath(weaponId));
             const info: WeaponInfo = await res.json();
             infoMap[weaponId] = info;
-
-            for (const variant of info.variants) {
-              // Check if we have comprehensive data for this variant
-              const weaponEntry = weaponDataMap.get(variant);
-              variants.push({
-                weaponId,
-                variant,
-                displayName: weaponEntry?.name || variant,
-                rarity: weaponEntry?.rarity,
-                level: weaponEntry?.level,
-                notes: weaponEntry?.notes,
-                wikiUrl: weaponEntry?.wikiUrl,
-              });
-            }
           } catch (err) {
             console.error(`Failed to load weapon ${weaponId}:`, err);
           }
         })
       );
 
-      // Add missing texture weapons from comprehensive data
-      for (const [, categoryData] of Object.entries(weaponDataJson)) {
-        for (const weapon of categoryData.weapons) {
-          if (weapon.missingTexture && weapon.useModelFrom) {
-            // Find the model's base weaponId
-            const baseVariant = variants.find(v => v.variant === weapon.useModelFrom);
-            if (baseVariant) {
+      // Build variants from weaponStats (which includes merged model data)
+      if (weaponStats) {
+        for (const stat of weaponStats) {
+          if (stat.modelId) {
+            // Weapon has 3D model data
+            const variantId = stat.variantId || stat.useModelFrom;
+            if (variantId) {
               variants.push({
-                weaponId: baseVariant.weaponId,
-                variant: weapon.useModelFrom, // Use the model from this variant
-                displayName: weapon.name,
-                rarity: weapon.rarity,
-                level: weapon.level,
-                notes: weapon.notes,
-                missingTexture: true,
-                useModelFrom: weapon.useModelFrom,
-                wikiUrl: categoryData.wikiUrl,
+                weaponId: stat.modelId,
+                variant: variantId,
+                displayName: stat.name,
+                rarity: stat.rarity,
+                level: stat.level,
+                notes: stat.notes,
+                missingTexture: stat.missingTexture,
+                useModelFrom: stat.useModelFrom,
+                wikiUrl: stat.wikiUrl,
               });
             }
           }
@@ -430,7 +383,7 @@ export default function WeaponGallery() {
     }
 
     loadAllWeapons();
-  }, []);
+  }, [weaponStats]);
 
   // Group variants by category
   const variantsByCategory = useMemo(() => {
@@ -455,11 +408,8 @@ export default function WeaponGallery() {
 
   // Get variants to display
   const displayedVariants = useMemo(() => {
-    if (selectedCategory) {
-      return variantsByCategory[selectedCategory] || [];
-    }
-    return allVariants;
-  }, [selectedCategory, variantsByCategory, allVariants]);
+    return variantsByCategory[selectedCategory] || [];
+  }, [selectedCategory, variantsByCategory]);
 
   const selectedWeaponCategory = selectedVariant
     ? getWeaponCategory(selectedVariant.weaponId)
@@ -508,25 +458,6 @@ export default function WeaponGallery() {
         <h3 style={{ margin: '0 0 8px 0', fontSize: '12px', color: '#4a9eff' }}>
           Categories
         </h3>
-
-        <button
-          onClick={() => setSelectedCategory(null)}
-          style={{
-            display: 'block',
-            width: '100%',
-            padding: '6px 8px',
-            marginBottom: '4px',
-            background: selectedCategory === null ? '#4a9eff' : 'transparent',
-            color: selectedCategory === null ? 'white' : '#ccc',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '11px',
-            textAlign: 'left',
-          }}
-        >
-          All ({allVariants.length})
-        </button>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
           {WEAPON_CATEGORIES.map((cat) => (

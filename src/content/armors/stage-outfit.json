@@ -1,0 +1,13 @@
+{
+  "name": "Stage Outfit",
+  "japaneseName": "芸の正装",
+  "rarity": 5,
+  "maxGrind": 45,
+  "level": 26,
+  "resaleValue": 10,
+  "defenseBase": 97,
+  "defenseMax": 187,
+  "evasionBase": 109,
+  "evasionMax": 199,
+  "psoWorldId": 524
+}

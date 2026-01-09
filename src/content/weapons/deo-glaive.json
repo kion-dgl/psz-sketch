@@ -1,0 +1,29 @@
+{
+  "name": "Deo Glaive",
+  "japaneseName": "デオグレイブ",
+  "rarity": 4,
+  "weaponType": "Spear",
+  "maxGrind": 45,
+  "level": 12,
+  "attackBase": 170,
+  "attackMax": 260,
+  "accuracyBase": 179,
+  "accuracyMax": 179,
+  "photonArts": [
+    {
+      "name": "Spear Rider",
+      "attackMod": 145,
+      "accuracyMod": 160,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 582
+}

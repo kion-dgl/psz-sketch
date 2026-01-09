@@ -1,0 +1,44 @@
+{
+  "name": "Carbine",
+  "japaneseName": "カービン",
+  "rarity": 1,
+  "weaponType": "Rifle",
+  "maxGrind": 50,
+  "level": 1,
+  "resaleValue": 31,
+  "attackBase": 34,
+  "attackMax": 134,
+  "accuracyBase": 73,
+  "accuracyMax": 73,
+  "photonArts": [
+    {
+      "name": "Wipeout",
+      "attackMod": 75,
+      "accuracyMod": 80,
+      "ppUsed": 21,
+      "element": "Level 4 Heat"
+    },
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    },
+    {
+      "name": "Mine Sneak",
+      "attackMod": 160,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 174,
+  "modelId": "wrfh01",
+  "variantId": "wrfh01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Element Boost",
+  "japaneseName": "エレメントブースト",
+  "description": "Slot into armor to use. Ups element levels by +1. Cannot be stacked.",
+  "details": "Increases a weapon's element level by +1. This item cannot be stacked.",
+  "rarity": 5,
+  "psoWorldId": 481
+}

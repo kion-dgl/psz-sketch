@@ -1,0 +1,51 @@
+{
+  "name": "Twin Ketchup",
+  "japaneseName": "ツインケチャップ",
+  "rarity": 2,
+  "weaponType": "Mech Gun",
+  "elementLevel": 3,
+  "element": "Jellen",
+  "maxGrind": 30,
+  "level": 2,
+  "resaleValue": 10,
+  "attackBase": 27,
+  "attackMax": 87,
+  "accuracyBase": 70,
+  "accuracyMax": 70,
+  "photonArts": [
+    {
+      "name": "Cool Style",
+      "attackMod": 80,
+      "accuracyMod": 80,
+      "ppUsed": 23,
+      "element": "-"
+    },
+    {
+      "name": "Spinning Death",
+      "attackMod": 85,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Acro Step",
+      "attackMod": 85,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 238,
+  "modelId": "wmgr02",
+  "variantId": "wmgr02_1_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Mech_Guns_(Phantasy_Star_Zero)"
+}

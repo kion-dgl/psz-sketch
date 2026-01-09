@@ -1,0 +1,37 @@
+{
+  "name": "Chrome Gun",
+  "japaneseName": "クロムガン",
+  "rarity": 2,
+  "weaponType": "Handgun",
+  "maxGrind": 45,
+  "level": 2,
+  "resaleValue": 64,
+  "attackBase": 41,
+  "attackMax": 131,
+  "accuracyBase": 89,
+  "accuracyMax": 89,
+  "photonArts": [
+    {
+      "name": "Thriller Combo",
+      "attackMod": 150,
+      "accuracyMod": 120,
+      "ppUsed": 15,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 152,
+  "modelId": "whgh01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "whgh01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Handguns_(Phantasy_Star_Zero)"
+}

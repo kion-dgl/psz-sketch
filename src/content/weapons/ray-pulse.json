@@ -1,0 +1,27 @@
+{
+  "name": "Ray Pulse",
+  "japaneseName": "レイパルス",
+  "rarity": 1,
+  "weaponType": "Handgun",
+  "maxGrind": 40,
+  "level": 1,
+  "resaleValue": 27,
+  "attackBase": 31,
+  "attackMax": 111,
+  "accuracyBase": 74,
+  "accuracyMax": 74,
+  "photonArts": [],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 159,
+  "modelId": "whgn01",
+  "variantId": "whgn01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Handguns_(Phantasy_Star_Zero)"
+}

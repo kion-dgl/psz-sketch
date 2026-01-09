@@ -1,0 +1,41 @@
+{
+  "name": "White Disaster",
+  "japaneseName": "ホワイトディザスター",
+  "rarity": 7,
+  "weaponType": "Rod",
+  "elementLevel": 1,
+  "element": "Heaven",
+  "maxGrind": 20,
+  "level": 60,
+  "resaleValue": 10,
+  "accuracyBase": 182,
+  "accuracyMax": 182,
+  "photonArts": [
+    {
+      "name": "Beat Quake",
+      "attackMod": 140,
+      "accuracyMod": 150,
+      "ppUsed": 19,
+      "element": "-"
+    },
+    {
+      "name": "Rolling Bar",
+      "attackMod": 90,
+      "accuracyMod": 100,
+      "ppUsed": 21,
+      "element": "-"
+    },
+    {
+      "name": "Rodeo Drive",
+      "attackMod": 120,
+      "accuracyMod": 130,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 295
+}

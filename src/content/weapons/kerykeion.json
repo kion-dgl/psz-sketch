@@ -1,0 +1,45 @@
+{
+  "name": "Kerykeion",
+  "japaneseName": "ケリュケイオン",
+  "rarity": 7,
+  "weaponType": "Rod",
+  "maxGrind": 10,
+  "level": 54,
+  "resaleValue": 4865,
+  "accuracyBase": 199,
+  "accuracyMax": 199,
+  "photonArts": [
+    {
+      "name": "Beat Quake",
+      "attackMod": 140,
+      "accuracyMod": 150,
+      "ppUsed": 19,
+      "element": "-"
+    },
+    {
+      "name": "Rolling Bar",
+      "attackMod": 90,
+      "accuracyMod": 100,
+      "ppUsed": 21,
+      "element": "-"
+    },
+    {
+      "name": "Rodeo Drive",
+      "attackMod": 120,
+      "accuracyMod": 130,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Newman",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 284,
+  "modelId": "wron02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wron02_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rods_(Phantasy_Star_Zero)"
+}

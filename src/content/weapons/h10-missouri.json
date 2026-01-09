@@ -1,0 +1,49 @@
+{
+  "name": "H10 Missouri",
+  "japaneseName": "Ｈ１０ミズーリ",
+  "rarity": 6,
+  "weaponType": "Handgun",
+  "maxGrind": 30,
+  "level": 38,
+  "resaleValue": 10,
+  "attackBase": 191,
+  "attackMax": 251,
+  "accuracyBase": 196,
+  "accuracyMax": 196,
+  "photonArts": [
+    {
+      "name": "Quick Draw",
+      "attackMod": 80,
+      "accuracyMod": 75,
+      "ppUsed": 24,
+      "element": "-"
+    },
+    {
+      "name": "Flame Hit",
+      "attackMod": 145,
+      "accuracyMod": 100,
+      "ppUsed": 19,
+      "element": "Level 4 Heat"
+    },
+    {
+      "name": "Thriller Combo",
+      "attackMod": 150,
+      "accuracyMod": 120,
+      "ppUsed": 15,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 172,
+  "modelId": "whgr05",
+  "variantId": "whgr05_2_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Handguns_(Phantasy_Star_Zero)"
+}

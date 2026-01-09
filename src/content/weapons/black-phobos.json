@@ -1,0 +1,53 @@
+{
+  "name": "Black Phobos",
+  "japaneseName": "ブラックフォボス",
+  "rarity": 6,
+  "weaponType": "Rifle",
+  "elementLevel": 3,
+  "element": "Ice",
+  "maxGrind": 10,
+  "level": 42,
+  "resaleValue": 10,
+  "attackBase": 238,
+  "attackMax": 258,
+  "accuracyBase": 197,
+  "accuracyMax": 197,
+  "photonArts": [
+    {
+      "name": "Wipeout",
+      "attackMod": 75,
+      "accuracyMod": 80,
+      "ppUsed": 21,
+      "element": "Level 4 Heat"
+    },
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    },
+    {
+      "name": "Mine Sneak",
+      "attackMod": 160,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 193,
+  "modelId": "wrfr01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wrfr01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

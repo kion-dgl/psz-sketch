@@ -1,0 +1,37 @@
+{
+  "name": "Starfish Slicer",
+  "japaneseName": "ヒトデスライサー",
+  "rarity": 6,
+  "weaponType": "Slicer",
+  "elementLevel": 3,
+  "element": "Chaos",
+  "maxGrind": 30,
+  "level": 38,
+  "resaleValue": 10,
+  "accuracyBase": 141,
+  "accuracyMax": 141,
+  "photonArts": [
+    {
+      "name": "Say Goodbye",
+      "attackMod": 100,
+      "accuracyMod": 210,
+      "ppUsed": 15,
+      "element": "Level 3 Light"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 421,
+  "modelId": "wslr03",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wslr03_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Slicers_(Phantasy_Star_Zero)"
+}

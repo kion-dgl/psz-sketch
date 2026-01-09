@@ -1,0 +1,7 @@
+{
+  "name": "Soul Element",
+  "japaneseName": "ソウルエレメント",
+  "details": "Grants a weapon the element of \"Soul\", granting a boost to your Attack Power and Mental Strength when your remaining HP is below 33%. However, this is ineffective with Techniques.\n\nThe stat increase percentage at each level of Soul is as follows:\nLv 1: 10%\nLv 2: 15%\nLv 3: 20%\nLv 4: 25%\nLv 5: 30%",
+  "rarity": 5,
+  "psoWorldId": 544
+}

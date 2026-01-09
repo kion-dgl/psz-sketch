@@ -1,0 +1,32 @@
+{
+  "name": "Chrome Shield",
+  "japaneseName": "クロムシールド",
+  "rarity": 4,
+  "weaponType": "Shield",
+  "maxGrind": 35,
+  "level": 12,
+  "resaleValue": 438,
+  "attackBase": 75,
+  "attackMax": 145,
+  "accuracyBase": 200,
+  "accuracyMax": 200,
+  "photonArts": [
+    {
+      "name": "Bull Smash",
+      "attackMod": 210,
+      "accuracyMod": 200,
+      "ppUsed": 18,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Force Human"
+  ],
+  "psoWorldId": 106,
+  "modelId": "wshr07",
+  "variantId": "wshr07_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Shields_(Phantasy_Star_Zero)"
+}

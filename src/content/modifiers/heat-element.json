@@ -1,0 +1,7 @@
+{
+  "name": "Heat Element",
+  "japaneseName": "ヒートエレメント",
+  "details": "Grants a weapon the element of \"Heat\", allowing you to inflict Burn on enemies. Under the effects of Burn, enemies will take constant damage over time. While the damage taken is higher than Poison's, the duration is shorter.\n\nThe strength of Burn increases with the element level.",
+  "rarity": 4,
+  "psoWorldId": 536
+}

@@ -1,0 +1,39 @@
+{
+  "name": "Bloom Shower",
+  "japaneseName": "グングンシャワー",
+  "rarity": 5,
+  "weaponType": "Handgun",
+  "elementLevel": 3,
+  "element": "Heart",
+  "maxGrind": 40,
+  "level": 24,
+  "resaleValue": 10,
+  "attackBase": 115,
+  "attackMax": 195,
+  "accuracyBase": 158,
+  "accuracyMax": 158,
+  "photonArts": [
+    {
+      "name": "Thriller Combo",
+      "attackMod": 150,
+      "accuracyMod": 120,
+      "ppUsed": 15,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 170,
+  "modelId": "whgr02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "whgr02_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Handguns_(Phantasy_Star_Zero)"
+}

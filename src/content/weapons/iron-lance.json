@@ -1,0 +1,33 @@
+{
+  "name": "Iron Lance",
+  "japaneseName": "アイアンランス",
+  "rarity": 3,
+  "weaponType": "Spear",
+  "maxGrind": 40,
+  "level": 5,
+  "resaleValue": 222,
+  "attackBase": 115,
+  "attackMax": 195,
+  "accuracyBase": 153,
+  "accuracyMax": 153,
+  "photonArts": [
+    {
+      "name": "Hopping Run",
+      "attackMod": 90,
+      "accuracyMod": 130,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 67,
+  "modelId": "wsph01",
+  "variantId": "wsph01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Spears_(Phantasy_Star_Zero)"
+}

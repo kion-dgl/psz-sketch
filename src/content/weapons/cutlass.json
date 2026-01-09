@@ -1,0 +1,17 @@
+{
+  "name": "Cutlass",
+  "japaneseName": "カトラス",
+  "rarity": 1,
+  "weaponType": "Saber",
+  "maxGrind": 50,
+  "level": 1,
+  "resaleValue": 26,
+  "attackBase": 37,
+  "attackMax": 137,
+  "accuracyBase": 93,
+  "accuracyMax": 93,
+  "psoWorldId": 1,
+  "modelId": "wsah01",
+  "variantId": "wsah01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Sabers_(Phantasy_Star_Zero)"
+}

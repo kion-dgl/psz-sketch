@@ -1,0 +1,47 @@
+{
+  "name": "Neidaryl",
+  "japaneseName": "ネイダリール",
+  "rarity": 7,
+  "weaponType": "Gun Blade",
+  "maxGrind": 10,
+  "level": 50,
+  "resaleValue": 4316,
+  "attackBase": 274,
+  "attackMax": 294,
+  "accuracyBase": 206,
+  "accuracyMax": 206,
+  "photonArts": [
+    {
+      "name": "Bullet Dance",
+      "attackMod": 125,
+      "accuracyMod": 70,
+      "ppUsed": 16,
+      "element": "-"
+    },
+    {
+      "name": "Impact Zero",
+      "attackMod": 180,
+      "accuracyMod": 135,
+      "ppUsed": 17,
+      "element": "-"
+    },
+    {
+      "name": "Earth Bullet",
+      "attackMod": 170,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Newman",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 213,
+  "modelId": "wgbn01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wgbn01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Gun_Blades_(Phantasy_Star_Zero)"
+}

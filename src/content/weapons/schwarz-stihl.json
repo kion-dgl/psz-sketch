@@ -1,0 +1,34 @@
+{
+  "name": "Schwarz Stihl",
+  "japaneseName": "シュヴァルツスティル",
+  "rarity": 6,
+  "weaponType": "Shield",
+  "maxGrind": 50,
+  "level": 42,
+  "resaleValue": 10,
+  "attackBase": 163,
+  "attackMax": 263,
+  "accuracyBase": 301,
+  "accuracyMax": 301,
+  "photonArts": [
+    {
+      "name": "Bull Smash",
+      "attackMod": 210,
+      "accuracyMod": 200,
+      "ppUsed": 18,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 125,
+  "modelId": "wshr05",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wshr05_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Shields_(Phantasy_Star_Zero)"
+}

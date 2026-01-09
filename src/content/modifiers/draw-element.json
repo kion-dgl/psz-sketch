@@ -1,0 +1,7 @@
+{
+  "name": "Draw Element",
+  "japaneseName": "ドローエレメント",
+  "details": "Grants a weapon the element of \"Draw\", allowing you to absorb a percentage of the damage you deal as HP.\n\nThe percentage drawn at each level of Draw is as follows:\nLv 1: 5%\nLv 2: 10%\nLv 3: 15%\nLv 4: 20%\nLv 5: 25%",
+  "rarity": 5,
+  "psoWorldId": 541
+}

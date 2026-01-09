@@ -1,0 +1,39 @@
+{
+  "name": "Mellow Ice Beam",
+  "japaneseName": "メローアイスビーム",
+  "rarity": 5,
+  "weaponType": "Laser Cannon",
+  "elementLevel": 3,
+  "element": "Ice",
+  "maxGrind": 50,
+  "level": 26,
+  "resaleValue": 10,
+  "attackBase": 132,
+  "attackMax": 232,
+  "accuracyBase": 198,
+  "accuracyMax": 198,
+  "photonArts": [
+    {
+      "name": "Sector Line",
+      "attackMod": 150,
+      "accuracyMod": 80,
+      "ppUsed": 22,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 276,
+  "modelId": "wlcr03",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wlcr03_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Laser_Cannons_(Phantasy_Star_Zero)"
+}

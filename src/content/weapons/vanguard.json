@@ -1,0 +1,44 @@
+{
+  "name": "Vanguard",
+  "japaneseName": "ヴァンガード",
+  "rarity": 6,
+  "weaponType": "Shield",
+  "maxGrind": 40,
+  "level": 44,
+  "resaleValue": 10,
+  "attackBase": 167,
+  "attackMax": 247,
+  "accuracyBase": 298,
+  "accuracyMax": 298,
+  "photonArts": [
+    {
+      "name": "Linear Shave",
+      "attackMod": 160,
+      "accuracyMod": 160,
+      "ppUsed": 18,
+      "element": "-"
+    },
+    {
+      "name": "Barrier Shift",
+      "attackMod": 0,
+      "accuracyMod": 0,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Bull Smash",
+      "attackMod": 210,
+      "accuracyMod": 200,
+      "ppUsed": 18,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Cast",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 122,
+  "modelId": "wshr04",
+  "variantId": "wshr04_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Shields_(Phantasy_Star_Zero)"
+}

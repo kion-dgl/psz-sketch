@@ -1,0 +1,33 @@
+{
+  "name": "Morgenlote",
+  "japaneseName": "モルゲンロート",
+  "rarity": 7,
+  "weaponType": "Double Saber",
+  "maxGrind": 10,
+  "level": 54,
+  "resaleValue": 4426,
+  "attackBase": 397,
+  "attackMax": 417,
+  "accuracyBase": 210,
+  "accuracyMax": 210,
+  "photonArts": [
+    {
+      "name": "Tornado Dance",
+      "attackMod": 130,
+      "accuracyMod": 120,
+      "ppUsed": 30,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 144,
+  "modelId": "wdsn02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wdsn02_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Double_Sabers_(Phantasy_Star_Zero)"
+}

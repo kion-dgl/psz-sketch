@@ -1,0 +1,33 @@
+{
+  "name": "Chrome Twins",
+  "japaneseName": "クロムツインズ",
+  "rarity": 4,
+  "weaponType": "Mech Gun",
+  "maxGrind": 45,
+  "level": 12,
+  "resaleValue": 451,
+  "attackBase": 60,
+  "attackMax": 150,
+  "accuracyBase": 113,
+  "accuracyMax": 113,
+  "photonArts": [
+    {
+      "name": "Acro Step",
+      "attackMod": 85,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human"
+  ],
+  "psoWorldId": 227,
+  "modelId": "wmgh02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wmgh02_1_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Mech_Guns_(Phantasy_Star_Zero)"
+}

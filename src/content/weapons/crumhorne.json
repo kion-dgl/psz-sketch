@@ -1,0 +1,42 @@
+{
+  "name": "Crumhorne",
+  "japaneseName": "クラムホルン",
+  "rarity": 5,
+  "weaponType": "Rod",
+  "maxGrind": 30,
+  "level": 20,
+  "resaleValue": 989,
+  "accuracyBase": 149,
+  "accuracyMax": 149,
+  "photonArts": [
+    {
+      "name": "Beat Quake",
+      "attackMod": 140,
+      "accuracyMod": 150,
+      "ppUsed": 19,
+      "element": "-"
+    },
+    {
+      "name": "Rolling Bar",
+      "attackMod": 90,
+      "accuracyMod": 100,
+      "ppUsed": 21,
+      "element": "-"
+    },
+    {
+      "name": "Rodeo Drive",
+      "attackMod": 120,
+      "accuracyMod": 130,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 279,
+  "modelId": "wroh01",
+  "variantId": "wroh01_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rods_(Phantasy_Star_Zero)"
+}

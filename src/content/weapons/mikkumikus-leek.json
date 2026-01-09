@@ -1,0 +1,32 @@
+{
+  "name": "Mikkumiku's Leek",
+  "japaneseName": "みっくみくのネギ",
+  "rarity": 5,
+  "weaponType": "Wand",
+  "elementLevel": 4,
+  "element": "Chaos",
+  "maxGrind": 39,
+  "level": 20,
+  "resaleValue": 10,
+  "accuracyBase": 203,
+  "accuracyMax": 203,
+  "photonArts": [
+    {
+      "name": "Act Trick",
+      "attackMod": 0,
+      "accuracyMod": 0,
+      "ppUsed": 2,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 408
+}

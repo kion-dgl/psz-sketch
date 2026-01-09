@@ -1,0 +1,31 @@
+{
+  "name": "Ein Mazurka",
+  "japaneseName": "アインマズルガ",
+  "rarity": 2,
+  "weaponType": "Gun Blade",
+  "maxGrind": 55,
+  "level": 2,
+  "resaleValue": 86,
+  "attackBase": 48,
+  "attackMax": 158,
+  "accuracyBase": 88,
+  "accuracyMax": 88,
+  "photonArts": [
+    {
+      "name": "Earth Bullet",
+      "attackMod": 170,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 206,
+  "modelId": "wgbc01",
+  "variantId": "wgbc01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Gun_Blades_(Phantasy_Star_Zero)"
+}

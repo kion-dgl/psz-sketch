@@ -1,0 +1,45 @@
+{
+  "name": "Nathaniel",
+  "japaneseName": "ナタナエル",
+  "rarity": 6,
+  "weaponType": "Double Saber",
+  "maxGrind": 15,
+  "level": 32,
+  "resaleValue": 1639,
+  "attackBase": 263,
+  "attackMax": 293,
+  "accuracyBase": 194,
+  "accuracyMax": 194,
+  "photonArts": [
+    {
+      "name": "Cyclone Run",
+      "attackMod": 100,
+      "accuracyMod": 80,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Tornado Dance",
+      "attackMod": 130,
+      "accuracyMod": 120,
+      "ppUsed": 30,
+      "element": "-"
+    },
+    {
+      "name": "Million Rave",
+      "attackMod": 135,
+      "accuracyMod": 100,
+      "ppUsed": 25,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 145,
+  "modelId": "wdsn01",
+  "variantId": "wdsn01_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Double_Sabers_(Phantasy_Star_Zero)"
+}

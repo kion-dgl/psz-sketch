@@ -1,0 +1,33 @@
+{
+  "name": "Deo Mazurka",
+  "japaneseName": "デオマズルガ",
+  "rarity": 4,
+  "weaponType": "Gun Blade",
+  "maxGrind": 45,
+  "level": 12,
+  "resaleValue": 535,
+  "attackBase": 100,
+  "attackMax": 190,
+  "accuracyBase": 132,
+  "accuracyMax": 132,
+  "photonArts": [
+    {
+      "name": "Earth Bullet",
+      "attackMod": 170,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 207,
+  "modelId": "wgbc01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wgbc01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Gun_Blades_(Phantasy_Star_Zero)"
+}

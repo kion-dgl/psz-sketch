@@ -1,0 +1,49 @@
+{
+  "name": "Hocho",
+  "japaneseName": "包丁",
+  "rarity": 5,
+  "weaponType": "Sword",
+  "maxGrind": 30,
+  "level": 20,
+  "resaleValue": 10,
+  "attackBase": 233,
+  "attackMax": 293,
+  "accuracyBase": 192,
+  "accuracyMax": 192,
+  "photonArts": [
+    {
+      "name": "Dynamo Spin",
+      "attackMod": 80,
+      "accuracyMod": 80,
+      "ppUsed": 21,
+      "element": "-"
+    },
+    {
+      "name": "Sonic Raid",
+      "attackMod": 120,
+      "accuracyMod": 75,
+      "ppUsed": 23,
+      "element": "-"
+    },
+    {
+      "name": "Over-end",
+      "attackMod": 250,
+      "accuracyMod": 255,
+      "ppUsed": 45,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 52,
+  "modelId": "wswr05",
+  "variantId": "wswr05_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Swords_(Phantasy_Star_Zero)"
+}

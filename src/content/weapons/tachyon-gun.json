@@ -1,0 +1,37 @@
+{
+  "name": "Tachyon Gun",
+  "japaneseName": "タキオンガン",
+  "rarity": 7,
+  "weaponType": "Handgun",
+  "maxGrind": 30,
+  "level": 54,
+  "resaleValue": 1233,
+  "attackBase": 241,
+  "attackMax": 301,
+  "accuracyBase": 210,
+  "accuracyMax": 210,
+  "photonArts": [
+    {
+      "name": "Thriller Combo",
+      "attackMod": 150,
+      "accuracyMod": 120,
+      "ppUsed": 15,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 165,
+  "modelId": "whgn02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "whgn02_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Handguns_(Phantasy_Star_Zero)"
+}

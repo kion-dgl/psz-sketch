@@ -1,0 +1,29 @@
+{
+  "name": "Yasminkov M95",
+  "japaneseName": "ヤスミノコフＭ９５",
+  "rarity": 6,
+  "weaponType": "Rifle",
+  "elementLevel": 4,
+  "element": "Stun",
+  "maxGrind": 30,
+  "level": 46,
+  "resaleValue": 10,
+  "attackBase": 251,
+  "attackMax": 311,
+  "accuracyBase": 187,
+  "accuracyMax": 187,
+  "photonArts": [
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 194
+}

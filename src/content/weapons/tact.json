@@ -1,0 +1,33 @@
+{
+  "name": "Tact",
+  "japaneseName": "タクト",
+  "rarity": 1,
+  "weaponType": "Wand",
+  "maxGrind": 60,
+  "level": 1,
+  "resaleValue": 28,
+  "accuracyBase": 83,
+  "accuracyMax": 83,
+  "photonArts": [
+    {
+      "name": "Funny Dive",
+      "attackMod": 125,
+      "accuracyMod": 200,
+      "ppUsed": 11,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 383,
+  "modelId": "wwac01",
+  "variantId": "wwac01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Wands_(Phantasy_Star_Zero)"
+}

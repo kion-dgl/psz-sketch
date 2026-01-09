@@ -1,0 +1,51 @@
+{
+  "name": "Karakasa Jikomi",
+  "japaneseName": "カラカサジコミ",
+  "rarity": 3,
+  "weaponType": "Gun Blade",
+  "elementLevel": 2,
+  "element": "Heat",
+  "maxGrind": 70,
+  "level": 4,
+  "resaleValue": 10,
+  "attackBase": 64,
+  "attackMax": 204,
+  "accuracyBase": 96,
+  "accuracyMax": 96,
+  "photonArts": [
+    {
+      "name": "Bullet Dance",
+      "attackMod": 125,
+      "accuracyMod": 70,
+      "ppUsed": 16,
+      "element": "-"
+    },
+    {
+      "name": "Impact Zero",
+      "attackMod": 180,
+      "accuracyMod": 135,
+      "ppUsed": 17,
+      "element": "-"
+    },
+    {
+      "name": "Earth Bullet",
+      "attackMod": 170,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 219,
+  "modelId": "wgbr03",
+  "variantId": "wgbr03_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Gun_Blades_(Phantasy_Star_Zero)"
+}

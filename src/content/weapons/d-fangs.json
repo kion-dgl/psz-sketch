@@ -1,0 +1,31 @@
+{
+  "name": "D-Fangs",
+  "japaneseName": "ディーファング",
+  "rarity": 2,
+  "weaponType": "Claw",
+  "maxGrind": 45,
+  "level": 2,
+  "resaleValue": 78,
+  "attackBase": 68,
+  "attackMax": 158,
+  "accuracyBase": 126,
+  "accuracyMax": 126,
+  "photonArts": [
+    {
+      "name": "Serpent Air",
+      "attackMod": 115,
+      "accuracyMod": 80,
+      "ppUsed": 18,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 97,
+  "modelId": "wclh02",
+  "variantId": "wclh02_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Claws_(Phantasy_Star_Zero)"
+}

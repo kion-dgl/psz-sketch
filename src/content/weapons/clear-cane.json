@@ -1,0 +1,35 @@
+{
+  "name": "Clear Cane",
+  "japaneseName": "クリアケイン",
+  "rarity": 3,
+  "weaponType": "Wand",
+  "maxGrind": 30,
+  "level": 5,
+  "resaleValue": 182,
+  "accuracyBase": 138,
+  "accuracyMax": 138,
+  "photonArts": [
+    {
+      "name": "Funny Dive",
+      "attackMod": 125,
+      "accuracyMod": 200,
+      "ppUsed": 11,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 388,
+  "modelId": "wwan01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wwan01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Wands_(Phantasy_Star_Zero)"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Rookie/Swift",
+  "japaneseName": "ルーキー／スイフト",
+  "description": "Slot into armor to use. Minutely raises EVP.",
+  "rarity": 1,
+  "evasionBase": 5,
+  "evasionMax": 5,
+  "psoWorldId": 326
+}

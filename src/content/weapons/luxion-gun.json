@@ -1,0 +1,37 @@
+{
+  "name": "Luxion Gun",
+  "japaneseName": "ルクシオンガン",
+  "rarity": 5,
+  "weaponType": "Handgun",
+  "maxGrind": 40,
+  "level": 24,
+  "resaleValue": 427,
+  "attackBase": 132,
+  "attackMax": 212,
+  "accuracyBase": 166,
+  "accuracyMax": 166,
+  "photonArts": [
+    {
+      "name": "Thriller Combo",
+      "attackMod": 150,
+      "accuracyMod": 120,
+      "ppUsed": 15,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 164,
+  "modelId": "whgn02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "whgn02_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Handguns_(Phantasy_Star_Zero)"
+}

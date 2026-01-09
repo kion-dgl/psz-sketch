@@ -1,0 +1,32 @@
+{
+  "name": "Milias Breaker",
+  "japaneseName": "ミリアスブレイカー",
+  "rarity": 7,
+  "weaponType": "Sword",
+  "maxGrind": 20,
+  "level": 58,
+  "resaleValue": 10,
+  "attackBase": 566,
+  "attackMax": 606,
+  "accuracyBase": 252,
+  "accuracyMax": 252,
+  "photonArts": [
+    {
+      "name": "Over-end",
+      "attackMod": 250,
+      "accuracyMod": 255,
+      "ppUsed": 45,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 50,
+  "modelId": "wswr04",
+  "variantId": "wswr04_2_b",
+  "notes": "texture broken, identified by shape",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Swords_(Phantasy_Star_Zero)"
+}

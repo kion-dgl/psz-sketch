@@ -1,0 +1,13 @@
+{
+  "name": "Guardian Frame",
+  "japaneseName": "ガーディアンフレーム",
+  "details": "Can have a maximum of 3 slots.",
+  "rarity": 6,
+  "maxGrind": 15,
+  "level": 35,
+  "defenseBase": 163,
+  "defenseMax": 193,
+  "evasionBase": 155,
+  "evasionMax": 185,
+  "psoWorldId": 496
+}

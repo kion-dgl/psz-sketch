@@ -1,0 +1,49 @@
+{
+  "name": "Alice Olivia",
+  "japaneseName": "アリスオリビア",
+  "rarity": 7,
+  "weaponType": "Wand",
+  "maxGrind": 10,
+  "level": 54,
+  "resaleValue": 3548,
+  "accuracyBase": 251,
+  "accuracyMax": 251,
+  "photonArts": [
+    {
+      "name": "Funny Dive",
+      "attackMod": 125,
+      "accuracyMod": 200,
+      "ppUsed": 11,
+      "element": "-"
+    },
+    {
+      "name": "Magical Sign",
+      "attackMod": 140,
+      "accuracyMod": 160,
+      "ppUsed": 13,
+      "element": "Level 3 Slow"
+    },
+    {
+      "name": "Act Trick",
+      "attackMod": 0,
+      "accuracyMod": 0,
+      "ppUsed": 2,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 410,
+  "modelId": "wwan01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wwan01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Wands_(Phantasy_Star_Zero)"
+}

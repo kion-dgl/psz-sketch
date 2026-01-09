@@ -1,0 +1,13 @@
+{
+  "name": "Star Cloak",
+  "japaneseName": "スタークローク",
+  "rarity": 4,
+  "maxGrind": 35,
+  "level": 12,
+  "resaleValue": 10,
+  "defenseBase": 78,
+  "defenseMax": 148,
+  "evasionBase": 98,
+  "evasionMax": 168,
+  "psoWorldId": 509
+}

@@ -1,0 +1,46 @@
+{
+  "name": "Carl Gustav",
+  "japaneseName": "カールグスタフ",
+  "rarity": 5,
+  "weaponType": "Bazooka",
+  "maxGrind": 30,
+  "level": 20,
+  "resaleValue": 967,
+  "attackBase": 250,
+  "attackMax": 310,
+  "accuracyBase": 178,
+  "accuracyMax": 178,
+  "photonArts": [
+    {
+      "name": "Crush Bomb",
+      "attackMod": 210,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    },
+    {
+      "name": "Wild Blow",
+      "attackMod": 120,
+      "accuracyMod": 90,
+      "ppUsed": 28,
+      "element": "-"
+    },
+    {
+      "name": "Crazy On",
+      "attackMod": 130,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human"
+  ],
+  "psoWorldId": 243,
+  "modelId": "wbah01",
+  "variantId": "wbah01_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Bazookas_(Phantasy_Star_Zero)"
+}

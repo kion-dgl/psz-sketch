@@ -1,0 +1,49 @@
+{
+  "name": "Kutune Sirka",
+  "japaneseName": "クドネシリカ",
+  "rarity": 5,
+  "weaponType": "Saber",
+  "maxGrind": 30,
+  "level": 20,
+  "resaleValue": 699,
+  "attackBase": 165,
+  "attackMax": 225,
+  "accuracyBase": 219,
+  "accuracyMax": 219,
+  "photonArts": [
+    {
+      "name": "Cross Rave",
+      "attackMod": 160,
+      "accuracyMod": 120,
+      "ppUsed": 13,
+      "element": "-"
+    },
+    {
+      "name": "Force Ride",
+      "attackMod": 125,
+      "accuracyMod": 100,
+      "ppUsed": 15,
+      "element": "-"
+    },
+    {
+      "name": "Zeta Cutlass",
+      "attackMod": 130,
+      "accuracyMod": 140,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 12,
+  "modelId": "wsar06",
+  "variantId": "wsar06_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Sabers_(Phantasy_Star_Zero)"
+}

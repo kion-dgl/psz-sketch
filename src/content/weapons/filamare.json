@@ -1,0 +1,32 @@
+{
+  "name": "Filamare",
+  "japaneseName": "フィラメア",
+  "rarity": 5,
+  "weaponType": "Claw",
+  "maxGrind": 40,
+  "level": 24,
+  "resaleValue": 863,
+  "attackBase": 191,
+  "attackMax": 271,
+  "accuracyBase": 230,
+  "accuracyMax": 230,
+  "photonArts": [
+    {
+      "name": "Slide End",
+      "attackMod": 75,
+      "accuracyMod": 120,
+      "ppUsed": 21,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 101,
+  "modelId": "wclc01",
+  "variantId": "wclc01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Claws_(Phantasy_Star_Zero)"
+}

@@ -1,0 +1,51 @@
+{
+  "name": "Stormer",
+  "japaneseName": "シュテルマー",
+  "rarity": 6,
+  "weaponType": "Saber",
+  "maxGrind": 10,
+  "level": 36,
+  "resaleValue": 1273,
+  "attackBase": 249,
+  "attackMax": 269,
+  "accuracyBase": 291,
+  "accuracyMax": 291,
+  "photonArts": [
+    {
+      "name": "Cross Rave",
+      "attackMod": 160,
+      "accuracyMod": 120,
+      "ppUsed": 13,
+      "element": "-"
+    },
+    {
+      "name": "Force Ride",
+      "attackMod": 125,
+      "accuracyMod": 100,
+      "ppUsed": 15,
+      "element": "-"
+    },
+    {
+      "name": "Zeta Cutlass",
+      "attackMod": 130,
+      "accuracyMod": 140,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 19,
+  "modelId": "wsan02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wsan02_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Sabers_(Phantasy_Star_Zero)"
+}

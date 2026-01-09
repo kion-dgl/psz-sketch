@@ -1,0 +1,45 @@
+{
+  "name": "Neigling",
+  "japaneseName": "ネグリング",
+  "rarity": 5,
+  "weaponType": "Gun Blade",
+  "maxGrind": 30,
+  "level": 20,
+  "resaleValue": 878,
+  "attackBase": 131,
+  "attackMax": 191,
+  "accuracyBase": 155,
+  "accuracyMax": 155,
+  "photonArts": [
+    {
+      "name": "Bullet Dance",
+      "attackMod": 125,
+      "accuracyMod": 70,
+      "ppUsed": 16,
+      "element": "-"
+    },
+    {
+      "name": "Impact Zero",
+      "attackMod": 180,
+      "accuracyMod": 135,
+      "ppUsed": 17,
+      "element": "-"
+    },
+    {
+      "name": "Earth Bullet",
+      "attackMod": 170,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 204,
+  "modelId": "wgbh01",
+  "variantId": "wgbh01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Gun_Blades_(Phantasy_Star_Zero)"
+}

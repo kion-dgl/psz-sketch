@@ -1,0 +1,17 @@
+{
+  "name": "Twinkle Star",
+  "japaneseName": "ティンクルスター",
+  "rarity": 4,
+  "weaponType": "Saber",
+  "maxGrind": 40,
+  "level": 16,
+  "resaleValue": 10,
+  "attackBase": 114,
+  "attackMax": 194,
+  "accuracyBase": 189,
+  "accuracyMax": 189,
+  "psoWorldId": 10,
+  "modelId": "wsar03",
+  "variantId": "wsar03_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Sabers_(Phantasy_Star_Zero)"
+}

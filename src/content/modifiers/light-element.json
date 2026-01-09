@@ -1,0 +1,7 @@
+{
+  "name": "Light Element",
+  "japaneseName": "ライトエレメント",
+  "details": "Grants a weapon the element of \"Light\", allowing you to inflict Confusion on enemies. Under the effects of Confusion, the line between ally and enemy are blurred, and the enemy can attack either.\n\nThe strength of Confusion increases with the element level.",
+  "rarity": 5,
+  "psoWorldId": 539
+}

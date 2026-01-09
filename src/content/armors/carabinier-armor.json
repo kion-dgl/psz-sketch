@@ -1,0 +1,13 @@
+{
+  "name": "Carabinier Armor",
+  "japaneseName": "カラビニエルアーマー",
+  "rarity": 7,
+  "maxGrind": 20,
+  "level": 50,
+  "resaleValue": 5121,
+  "defenseBase": 261,
+  "defenseMax": 301,
+  "evasionBase": 167,
+  "evasionMax": 207,
+  "psoWorldId": 491
+}

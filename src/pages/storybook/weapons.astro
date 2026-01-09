@@ -1,10 +1,15 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import WeaponGallery from '../../components/weapons/WeaponGallery';
+import { getCollection } from 'astro:content';
+
+// Load weapon stats from content collection
+const weaponsCollection = await getCollection('weapons');
+const weaponStats = weaponsCollection.map(entry => entry.data);
 
 export const prerender = false;
 ---
 
 <Layout title="Weapon Gallery - PSZ Sketch">
-  <WeaponGallery client:load />
+  <WeaponGallery client:load weaponStats={weaponStats} />
 </Layout>

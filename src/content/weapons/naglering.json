@@ -1,0 +1,47 @@
+{
+  "name": "Naglering",
+  "japaneseName": "ナーゲルリング",
+  "rarity": 6,
+  "weaponType": "Gun Blade",
+  "maxGrind": 25,
+  "level": 32,
+  "resaleValue": 1492,
+  "attackBase": 177,
+  "attackMax": 227,
+  "accuracyBase": 178,
+  "accuracyMax": 178,
+  "photonArts": [
+    {
+      "name": "Bullet Dance",
+      "attackMod": 125,
+      "accuracyMod": 70,
+      "ppUsed": 16,
+      "element": "-"
+    },
+    {
+      "name": "Impact Zero",
+      "attackMod": 180,
+      "accuracyMod": 135,
+      "ppUsed": 17,
+      "element": "-"
+    },
+    {
+      "name": "Earth Bullet",
+      "attackMod": 170,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 205,
+  "modelId": "wgbh01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wgbh01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Gun_Blades_(Phantasy_Star_Zero)"
+}

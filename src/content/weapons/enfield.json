@@ -1,0 +1,46 @@
+{
+  "name": "Enfield",
+  "japaneseName": "エンフィールド",
+  "rarity": 6,
+  "weaponType": "Rifle",
+  "maxGrind": 25,
+  "level": 32,
+  "resaleValue": 1378,
+  "attackBase": 201,
+  "attackMax": 251,
+  "accuracyBase": 194,
+  "accuracyMax": 194,
+  "photonArts": [
+    {
+      "name": "Wipeout",
+      "attackMod": 75,
+      "accuracyMod": 80,
+      "ppUsed": 21,
+      "element": "Level 4 Heat"
+    },
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    },
+    {
+      "name": "Mine Sneak",
+      "attackMod": 160,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 177,
+  "modelId": "wrfh01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wrfh01_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

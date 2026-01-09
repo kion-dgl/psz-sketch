@@ -1,0 +1,30 @@
+{
+  "name": "Ray Maser",
+  "japaneseName": "レイメーザー",
+  "rarity": 3,
+  "weaponType": "Laser Cannon",
+  "maxGrind": 30,
+  "level": 5,
+  "resaleValue": 233,
+  "attackBase": 70,
+  "attackMax": 130,
+  "accuracyBase": 136,
+  "accuracyMax": 136,
+  "photonArts": [
+    {
+      "name": "Sector Line",
+      "attackMod": 150,
+      "accuracyMod": 80,
+      "ppUsed": 22,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 267,
+  "modelId": "wlcn01",
+  "variantId": "wlcn01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Laser_Cannons_(Phantasy_Star_Zero)"
+}

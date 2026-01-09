@@ -1,0 +1,46 @@
+{
+  "name": "Twin Psychoguns",
+  "japaneseName": "ツインサイコガン",
+  "rarity": 7,
+  "weaponType": "Mech Gun",
+  "elementLevel": 3,
+  "element": "Soul",
+  "maxGrind": 30,
+  "level": 64,
+  "resaleValue": 10,
+  "attackBase": 198,
+  "attackMax": 258,
+  "accuracyBase": 191,
+  "accuracyMax": 191,
+  "photonArts": [
+    {
+      "name": "Cool Style",
+      "attackMod": 80,
+      "accuracyMod": 80,
+      "ppUsed": 23,
+      "element": "-"
+    },
+    {
+      "name": "Spinning Death",
+      "attackMod": 85,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Acro Step",
+      "attackMod": 85,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 235,
+  "modelId": "wmgr01",
+  "variantId": "wmgr01_1_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Mech_Guns_(Phantasy_Star_Zero)"
+}

@@ -1,0 +1,33 @@
+{
+  "name": "Deo Rifle",
+  "japaneseName": "デオライフル",
+  "rarity": 4,
+  "weaponType": "Rifle",
+  "maxGrind": 45,
+  "level": 12,
+  "resaleValue": 494,
+  "attackBase": 114,
+  "attackMax": 204,
+  "accuracyBase": 144,
+  "accuracyMax": 144,
+  "photonArts": [
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 179,
+  "modelId": "wrfc01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wrfc01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

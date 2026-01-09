@@ -1,0 +1,37 @@
+{
+  "name": "8-Ouncer",
+  "japaneseName": "エイトオンス",
+  "rarity": 2,
+  "weaponType": "Daggers",
+  "elementLevel": 1,
+  "element": "Exp",
+  "maxGrind": 80,
+  "level": 2,
+  "resaleValue": 10,
+  "attackBase": 45,
+  "attackMax": 205,
+  "accuracyBase": 139,
+  "accuracyMax": 139,
+  "photonArts": [
+    {
+      "name": "Reverse Kill",
+      "attackMod": 80,
+      "accuracyMod": 80,
+      "ppUsed": 25,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 44,
+  "modelId": "wdar02",
+  "variantId": "wdar02_1_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Daggers_(Phantasy_Star_Zero)"
+}

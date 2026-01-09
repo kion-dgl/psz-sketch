@@ -1,0 +1,33 @@
+{
+  "name": "Ashviens",
+  "japaneseName": "アシュヴィーン",
+  "rarity": 4,
+  "weaponType": "Double Saber",
+  "elementLevel": 2,
+  "element": "Stun",
+  "maxGrind": 60,
+  "level": 18,
+  "resaleValue": 10,
+  "attackBase": 143,
+  "attackMax": 263,
+  "accuracyBase": 172,
+  "accuracyMax": 172,
+  "photonArts": [
+    {
+      "name": "Million Rave",
+      "attackMod": 135,
+      "accuracyMod": 100,
+      "ppUsed": 25,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 149,
+  "modelId": "wdsr03",
+  "variantId": "wdsr03_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Double_Sabers_(Phantasy_Star_Zero)"
+}

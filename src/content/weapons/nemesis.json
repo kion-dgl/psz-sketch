@@ -1,0 +1,46 @@
+{
+  "name": "Nemesis",
+  "japaneseName": "ネメシス",
+  "rarity": 7,
+  "weaponType": "Bazooka",
+  "maxGrind": 35,
+  "level": 50,
+  "resaleValue": 4596,
+  "attackBase": 523,
+  "attackMax": 593,
+  "accuracyBase": 237,
+  "accuracyMax": 237,
+  "photonArts": [
+    {
+      "name": "Crush Bomb",
+      "attackMod": 210,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    },
+    {
+      "name": "Wild Blow",
+      "attackMod": 120,
+      "accuracyMod": 90,
+      "ppUsed": 28,
+      "element": "-"
+    },
+    {
+      "name": "Crazy On",
+      "attackMod": 130,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 252,
+  "modelId": "wbac02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wbac02_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Bazookas_(Phantasy_Star_Zero)"
+}

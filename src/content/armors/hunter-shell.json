@@ -1,0 +1,13 @@
+{
+  "name": "Hunter Shell",
+  "japaneseName": "ハンターズシェル",
+  "rarity": 5,
+  "maxGrind": 35,
+  "level": 20,
+  "resaleValue": 10,
+  "defenseBase": 126,
+  "defenseMax": 196,
+  "evasionBase": 97,
+  "evasionMax": 167,
+  "psoWorldId": 521
+}

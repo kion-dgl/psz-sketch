@@ -1,0 +1,13 @@
+{
+  "name": "Octopus Suit",
+  "japaneseName": "オクトパスーツ",
+  "rarity": 4,
+  "maxGrind": 45,
+  "level": 10,
+  "resaleValue": 10,
+  "defenseBase": 82,
+  "defenseMax": 172,
+  "evasionBase": 94,
+  "evasionMax": 184,
+  "psoWorldId": 505
+}

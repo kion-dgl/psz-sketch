@@ -1,0 +1,47 @@
+{
+  "name": "Mehrennenka",
+  "japaneseName": "メーレンネンカ",
+  "rarity": 7,
+  "weaponType": "Double Saber",
+  "maxGrind": 10,
+  "level": 50,
+  "resaleValue": 4426,
+  "attackBase": 355,
+  "attackMax": 375,
+  "accuracyBase": 213,
+  "accuracyMax": 213,
+  "photonArts": [
+    {
+      "name": "Cyclone Run",
+      "attackMod": 100,
+      "accuracyMod": 80,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Tornado Dance",
+      "attackMod": 130,
+      "accuracyMod": 120,
+      "ppUsed": 30,
+      "element": "-"
+    },
+    {
+      "name": "Million Rave",
+      "attackMod": 135,
+      "accuracyMod": 100,
+      "ppUsed": 25,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 146,
+  "modelId": "wdsn01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wdsn01_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Double_Sabers_(Phantasy_Star_Zero)"
+}

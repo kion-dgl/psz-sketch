@@ -1,0 +1,33 @@
+{
+  "name": "Rika's Claw",
+  "japaneseName": "ファルクロー",
+  "rarity": 7,
+  "weaponType": "Claw",
+  "elementLevel": 3,
+  "element": "Stun",
+  "maxGrind": 20,
+  "level": 80,
+  "resaleValue": 10,
+  "attackBase": 386,
+  "attackMax": 426,
+  "accuracyBase": 309,
+  "accuracyMax": 309,
+  "photonArts": [
+    {
+      "name": "Bite Stamp",
+      "attackMod": 180,
+      "accuracyMod": 75,
+      "ppUsed": 26,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 83,
+  "modelId": "wclr02",
+  "variantId": "wclr02_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Claws_(Phantasy_Star_Zero)"
+}

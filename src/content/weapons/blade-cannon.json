@@ -1,0 +1,37 @@
+{
+  "name": "Blade Cannon",
+  "japaneseName": "砲剣ブレイドカノン",
+  "rarity": 5,
+  "weaponType": "Gun Blade",
+  "elementLevel": 1,
+  "element": "Heat",
+  "maxGrind": 40,
+  "level": 20,
+  "resaleValue": 10,
+  "attackBase": 160,
+  "attackMax": 240,
+  "accuracyBase": 138,
+  "accuracyMax": 138,
+  "photonArts": [
+    {
+      "name": "Earth Bullet",
+      "attackMod": 170,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 221,
+  "modelId": "wgbr04",
+  "variantId": "wgbr04_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Gun_Blades_(Phantasy_Star_Zero)"
+}

@@ -1,0 +1,33 @@
+{
+  "name": "Deo Cannon",
+  "japaneseName": "デオカノン",
+  "rarity": 4,
+  "weaponType": "Laser Cannon",
+  "maxGrind": 45,
+  "level": 12,
+  "resaleValue": 562,
+  "attackBase": 105,
+  "attackMax": 195,
+  "accuracyBase": 163,
+  "accuracyMax": 163,
+  "photonArts": [
+    {
+      "name": "Sector Line",
+      "attackMod": 150,
+      "accuracyMod": 80,
+      "ppUsed": 22,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 260,
+  "modelId": "wlcc01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wlcc01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Laser_Cannons_(Phantasy_Star_Zero)"
+}

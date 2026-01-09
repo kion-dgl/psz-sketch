@@ -1,0 +1,42 @@
+{
+  "name": "Rod",
+  "japaneseName": "ロッド",
+  "rarity": 1,
+  "weaponType": "Rod",
+  "maxGrind": 50,
+  "level": 1,
+  "resaleValue": 37,
+  "accuracyBase": 64,
+  "accuracyMax": 64,
+  "photonArts": [
+    {
+      "name": "Beat Quake",
+      "attackMod": 140,
+      "accuracyMod": 150,
+      "ppUsed": 19,
+      "element": "-"
+    },
+    {
+      "name": "Rolling Bar",
+      "attackMod": 90,
+      "accuracyMod": 100,
+      "ppUsed": 21,
+      "element": "-"
+    },
+    {
+      "name": "Rodeo Drive",
+      "attackMod": 120,
+      "accuracyMod": 130,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 277,
+  "modelId": "wroh01",
+  "variantId": "wroh01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rods_(Phantasy_Star_Zero)"
+}

@@ -1,0 +1,33 @@
+{
+  "name": "Mobius Drill",
+  "japaneseName": "メビウスドリル",
+  "rarity": 4,
+  "weaponType": "Spear",
+  "elementLevel": 1,
+  "element": "Stun",
+  "maxGrind": 50,
+  "level": 16,
+  "resaleValue": 10,
+  "attackBase": 189,
+  "attackMax": 289,
+  "accuracyBase": 177,
+  "accuracyMax": 177,
+  "photonArts": [
+    {
+      "name": "Spear Rider",
+      "attackMod": 145,
+      "accuracyMod": 160,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 88,
+  "modelId": "wspr02",
+  "variantId": "wspr02_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Spears_(Phantasy_Star_Zero)"
+}

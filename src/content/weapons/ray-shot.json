@@ -1,0 +1,30 @@
+{
+  "name": "Ray Shot",
+  "japaneseName": "レイショット",
+  "rarity": 2,
+  "weaponType": "Rifle",
+  "maxGrind": 35,
+  "level": 2,
+  "resaleValue": 82,
+  "attackBase": 58,
+  "attackMax": 128,
+  "accuracyBase": 99,
+  "accuracyMax": 99,
+  "photonArts": [
+    {
+      "name": "Wipeout",
+      "attackMod": 75,
+      "accuracyMod": 80,
+      "ppUsed": 21,
+      "element": "Level 4 Heat"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 182,
+  "modelId": "wrfn01",
+  "variantId": "wrfn01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

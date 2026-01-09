@@ -1,0 +1,46 @@
+{
+  "name": "Heimdal",
+  "japaneseName": "ヘイムダル",
+  "rarity": 5,
+  "weaponType": "Rifle",
+  "elementLevel": 3,
+  "element": "Jellen",
+  "maxGrind": 10,
+  "level": 24,
+  "resaleValue": 10,
+  "attackBase": 184,
+  "attackMax": 204,
+  "accuracyBase": 180,
+  "accuracyMax": 180,
+  "photonArts": [
+    {
+      "name": "Wipeout",
+      "attackMod": 75,
+      "accuracyMod": 80,
+      "ppUsed": 21,
+      "element": "Level 4 Heat"
+    },
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    },
+    {
+      "name": "Mine Sneak",
+      "attackMod": 160,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 190,
+  "modelId": "wrfr03",
+  "variantId": "wrfr03_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

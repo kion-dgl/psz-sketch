@@ -1,0 +1,44 @@
+{
+  "name": "Blue Danube",
+  "japaneseName": "ブルダニューブ",
+  "rarity": 6,
+  "weaponType": "Bazooka",
+  "maxGrind": 35,
+  "level": 36,
+  "resaleValue": 1702,
+  "attackBase": 363,
+  "attackMax": 433,
+  "accuracyBase": 210,
+  "accuracyMax": 210,
+  "photonArts": [
+    {
+      "name": "Crush Bomb",
+      "attackMod": 210,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    },
+    {
+      "name": "Wild Blow",
+      "attackMod": 120,
+      "accuracyMod": 90,
+      "ppUsed": 28,
+      "element": "-"
+    },
+    {
+      "name": "Crazy On",
+      "attackMod": 130,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 247,
+  "modelId": "wbac01",
+  "variantId": "wbac01_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Bazookas_(Phantasy_Star_Zero)"
+}

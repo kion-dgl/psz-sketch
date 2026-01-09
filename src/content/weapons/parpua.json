@@ -1,0 +1,37 @@
+{
+  "name": "Parpua",
+  "japaneseName": "バーピュア",
+  "rarity": 4,
+  "weaponType": "Handgun",
+  "elementLevel": 2,
+  "element": "Dark",
+  "maxGrind": 50,
+  "level": 14,
+  "resaleValue": 10,
+  "attackBase": 104,
+  "attackMax": 204,
+  "accuracyBase": 142,
+  "accuracyMax": 142,
+  "photonArts": [
+    {
+      "name": "Quick Draw",
+      "attackMod": 80,
+      "accuracyMod": 75,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 166,
+  "modelId": "whgr01",
+  "variantId": "whgr01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Handguns_(Phantasy_Star_Zero)"
+}

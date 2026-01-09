@@ -1,0 +1,32 @@
+{
+  "name": "Ray Knife",
+  "japaneseName": "レイナイフ",
+  "rarity": 2,
+  "weaponType": "Daggers",
+  "maxGrind": 35,
+  "level": 2,
+  "resaleValue": 80,
+  "attackBase": 51,
+  "attackMax": 121,
+  "accuracyBase": 135,
+  "accuracyMax": 135,
+  "photonArts": [
+    {
+      "name": "Huge Cross",
+      "attackMod": 90,
+      "accuracyMod": 130,
+      "ppUsed": 22,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Force Newman"
+  ],
+  "psoWorldId": 49,
+  "modelId": "wdan01",
+  "variantId": "wdan01_1_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Daggers_(Phantasy_Star_Zero)"
+}

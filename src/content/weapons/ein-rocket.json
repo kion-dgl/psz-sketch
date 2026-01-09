@@ -1,0 +1,30 @@
+{
+  "name": "Ein Rocket",
+  "japaneseName": "アインロケット",
+  "rarity": 3,
+  "weaponType": "Bazooka",
+  "maxGrind": 50,
+  "level": 5,
+  "resaleValue": 236,
+  "attackBase": 137,
+  "attackMax": 237,
+  "accuracyBase": 127,
+  "accuracyMax": 127,
+  "photonArts": [
+    {
+      "name": "Crazy On",
+      "attackMod": 130,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 245,
+  "modelId": "wbac01",
+  "variantId": "wbac01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Bazookas_(Phantasy_Star_Zero)"
+}

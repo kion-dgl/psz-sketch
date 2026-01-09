@@ -1,0 +1,36 @@
+{
+  "name": "Nintendo Power",
+  "japaneseName": "デンゲキDS",
+  "rarity": 4,
+  "weaponType": "Wand",
+  "elementLevel": 3,
+  "element": "Stun",
+  "maxGrind": 50,
+  "level": 12,
+  "resaleValue": 10,
+  "accuracyBase": 162,
+  "accuracyMax": 162,
+  "photonArts": [
+    {
+      "name": "Magical Sign",
+      "attackMod": 140,
+      "accuracyMod": 160,
+      "ppUsed": 13,
+      "element": "Level 3 Slow"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 393,
+  "modelId": "wwar02",
+  "variantId": "wwar02_5_o",
+  "notes": "Event weapon",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Wands_(Phantasy_Star_Zero)"
+}

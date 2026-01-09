@@ -1,0 +1,26 @@
+{
+  "name": "Power Beam",
+  "japaneseName": "パワービーム",
+  "rarity": 6,
+  "weaponType": "Handgun",
+  "elementLevel": 3,
+  "element": "Slow",
+  "maxGrind": 30,
+  "level": 20,
+  "resaleValue": 10,
+  "attackBase": 179,
+  "attackMax": 239,
+  "accuracyBase": 191,
+  "accuracyMax": 191,
+  "photonArts": [],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 168
+}

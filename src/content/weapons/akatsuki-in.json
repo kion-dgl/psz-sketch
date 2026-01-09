@@ -1,0 +1,33 @@
+{
+  "name": "Akatsuki In",
+  "japaneseName": "アカツキ・印",
+  "rarity": 7,
+  "weaponType": "Sword",
+  "elementLevel": 2,
+  "element": "Heaven",
+  "maxGrind": 10,
+  "level": 80,
+  "resaleValue": 10,
+  "attackBase": 412,
+  "attackMax": 432,
+  "accuracyBase": 200,
+  "accuracyMax": 200,
+  "photonArts": [
+    {
+      "name": "Dynamo Spin",
+      "attackMod": 80,
+      "accuracyMod": 80,
+      "ppUsed": 21,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 41,
+  "modelId": "wswr03",
+  "variantId": "wswr03_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Swords_(Phantasy_Star_Zero)"
+}

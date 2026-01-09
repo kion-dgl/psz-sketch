@@ -1,0 +1,46 @@
+{
+  "name": "Gallatin",
+  "japaneseName": "ガラティーン",
+  "rarity": 7,
+  "weaponType": "Laser Cannon",
+  "maxGrind": 10,
+  "level": 54,
+  "resaleValue": 4535,
+  "attackBase": 287,
+  "attackMax": 307,
+  "accuracyBase": 260,
+  "accuracyMax": 260,
+  "photonArts": [
+    {
+      "name": "Sector Line",
+      "attackMod": 150,
+      "accuracyMod": 80,
+      "ppUsed": 22,
+      "element": "-"
+    },
+    {
+      "name": "Bio Panic",
+      "attackMod": 100,
+      "accuracyMod": 180,
+      "ppUsed": 16,
+      "element": "Level 3 Dark"
+    },
+    {
+      "name": "Divine Ray",
+      "attackMod": 250,
+      "accuracyMod": 200,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 266,
+  "modelId": "wlcn02",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wlcn02_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Laser_Cannons_(Phantasy_Star_Zero)"
+}

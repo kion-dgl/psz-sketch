@@ -1,0 +1,31 @@
+{
+  "name": "Avenlote",
+  "japaneseName": "アヴェンロート",
+  "rarity": 5,
+  "weaponType": "Double Saber",
+  "maxGrind": 20,
+  "level": 22,
+  "resaleValue": 964,
+  "attackBase": 218,
+  "attackMax": 258,
+  "accuracyBase": 166,
+  "accuracyMax": 166,
+  "photonArts": [
+    {
+      "name": "Tornado Dance",
+      "attackMod": 130,
+      "accuracyMod": 120,
+      "ppUsed": 30,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 143,
+  "modelId": "wdsn02",
+  "variantId": "wdsn02_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Double_Sabers_(Phantasy_Star_Zero)"
+}

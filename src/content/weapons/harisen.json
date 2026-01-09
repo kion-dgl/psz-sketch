@@ -1,0 +1,17 @@
+{
+  "name": "Harisen",
+  "japaneseName": "ハリセン",
+  "rarity": 3,
+  "weaponType": "Saber",
+  "maxGrind": 70,
+  "level": 5,
+  "resaleValue": 10,
+  "attackBase": 82,
+  "attackMax": 222,
+  "accuracyBase": 154,
+  "accuracyMax": 154,
+  "psoWorldId": 6,
+  "modelId": "wsar02",
+  "variantId": "wsar02_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Sabers_(Phantasy_Star_Zero)"
+}

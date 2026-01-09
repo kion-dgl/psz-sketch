@@ -1,0 +1,48 @@
+{
+  "name": "Blackhawk",
+  "japaneseName": "ブラックホーク",
+  "rarity": 6,
+  "weaponType": "Mech Gun",
+  "maxGrind": 35,
+  "level": 32,
+  "resaleValue": 1349,
+  "attackBase": 121,
+  "attackMax": 191,
+  "accuracyBase": 160,
+  "accuracyMax": 160,
+  "photonArts": [
+    {
+      "name": "Cool Style",
+      "attackMod": 80,
+      "accuracyMod": 80,
+      "ppUsed": 23,
+      "element": "-"
+    },
+    {
+      "name": "Spinning Death",
+      "attackMod": 85,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Acro Step",
+      "attackMod": 85,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human"
+  ],
+  "psoWorldId": 233,
+  "modelId": "wmgc01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wmgc01_3_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Mech_Guns_(Phantasy_Star_Zero)"
+}

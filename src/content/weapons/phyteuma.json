@@ -1,0 +1,34 @@
+{
+  "name": "Phyteuma",
+  "japaneseName": "フィテウーマ",
+  "rarity": 6,
+  "weaponType": "Claw",
+  "maxGrind": 35,
+  "level": 36,
+  "resaleValue": 1467,
+  "attackBase": 257,
+  "attackMax": 327,
+  "accuracyBase": 264,
+  "accuracyMax": 264,
+  "photonArts": [
+    {
+      "name": "Slide End",
+      "attackMod": 75,
+      "accuracyMod": 120,
+      "ppUsed": 21,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 102,
+  "modelId": "wclc01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wclc01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Claws_(Phantasy_Star_Zero)"
+}

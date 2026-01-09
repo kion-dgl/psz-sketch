@@ -1,0 +1,30 @@
+{
+  "name": "Ein Glaive",
+  "japaneseName": "アイングレイブ",
+  "rarity": 2,
+  "weaponType": "Spear",
+  "maxGrind": 55,
+  "level": 2,
+  "resaleValue": 92,
+  "attackBase": 81,
+  "attackMax": 191,
+  "accuracyBase": 120,
+  "accuracyMax": 120,
+  "photonArts": [
+    {
+      "name": "Spear Rider",
+      "attackMod": 145,
+      "accuracyMod": 160,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 66
+}

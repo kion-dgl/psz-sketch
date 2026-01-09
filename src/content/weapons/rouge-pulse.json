@@ -1,0 +1,51 @@
+{
+  "name": "Rouge Pulse",
+  "japaneseName": "ルージュパルス",
+  "rarity": 7,
+  "weaponType": "Handgun",
+  "maxGrind": 10,
+  "level": 54,
+  "resaleValue": 3328,
+  "attackBase": 249,
+  "attackMax": 269,
+  "accuracyBase": 213,
+  "accuracyMax": 213,
+  "photonArts": [
+    {
+      "name": "Quick Draw",
+      "attackMod": 80,
+      "accuracyMod": 75,
+      "ppUsed": 24,
+      "element": "-"
+    },
+    {
+      "name": "Flame Hit",
+      "attackMod": 145,
+      "accuracyMod": 100,
+      "ppUsed": 19,
+      "element": "Level 4 Heat"
+    },
+    {
+      "name": "Thriller Combo",
+      "attackMod": 150,
+      "accuracyMod": 120,
+      "ppUsed": 15,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 162,
+  "modelId": "whgn01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "whgn01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Handguns_(Phantasy_Star_Zero)"
+}

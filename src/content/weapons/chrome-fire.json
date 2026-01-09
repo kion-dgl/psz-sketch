@@ -1,0 +1,34 @@
+{
+  "name": "Chrome Fire",
+  "japaneseName": "クロムファイア",
+  "rarity": 2,
+  "weaponType": "Mech Gun",
+  "maxGrind": 35,
+  "level": 2,
+  "resaleValue": 180,
+  "attackBase": 33,
+  "attackMax": 103,
+  "accuracyBase": 79,
+  "accuracyMax": 79,
+  "photonArts": [
+    {
+      "name": "Spinning Death",
+      "attackMod": 85,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human"
+  ],
+  "psoWorldId": 223,
+  "modelId": "wmgh01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wmgh01_1_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Mech_Guns_(Phantasy_Star_Zero)"
+}

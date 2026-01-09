@@ -1,0 +1,33 @@
+{
+  "name": "Ein Ripper",
+  "japaneseName": "アインリッパー",
+  "rarity": 2,
+  "weaponType": "Daggers",
+  "maxGrind": 55,
+  "level": 2,
+  "resaleValue": 77,
+  "attackBase": 49,
+  "attackMax": 159,
+  "accuracyBase": 132,
+  "accuracyMax": 132,
+  "photonArts": [
+    {
+      "name": "Reverse Kill",
+      "attackMod": 80,
+      "accuracyMod": 80,
+      "ppUsed": 25,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 46,
+  "modelId": "wdac01",
+  "variantId": "wdac01_1_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Daggers_(Phantasy_Star_Zero)"
+}

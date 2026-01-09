@@ -1,0 +1,13 @@
+{
+  "name": "Miyabi Hakama",
+  "japaneseName": "ミヤビハカマ",
+  "rarity": 4,
+  "maxGrind": 35,
+  "level": 18,
+  "resaleValue": 10,
+  "defenseBase": 85,
+  "defenseMax": 155,
+  "evasionBase": 90,
+  "evasionMax": 160,
+  "psoWorldId": 511
+}

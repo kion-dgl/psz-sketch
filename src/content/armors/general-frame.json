@@ -1,0 +1,14 @@
+{
+  "name": "General Frame",
+  "japaneseName": "ジェネラルフレーム",
+  "details": "Can have a maximum of 3 slots.",
+  "rarity": 4,
+  "maxGrind": 25,
+  "level": 10,
+  "resaleValue": 680,
+  "defenseBase": 86,
+  "defenseMax": 136,
+  "evasionBase": 82,
+  "evasionMax": 132,
+  "psoWorldId": 494
+}

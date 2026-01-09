@@ -1,0 +1,48 @@
+{
+  "name": "Celesta Laser",
+  "japaneseName": "セレスタレイザー",
+  "rarity": 7,
+  "weaponType": "Gun Blade",
+  "elementLevel": 3,
+  "element": "Chaos",
+  "maxGrind": 20,
+  "level": 62,
+  "resaleValue": 10,
+  "attackBase": 283,
+  "attackMax": 323,
+  "accuracyBase": 213,
+  "accuracyMax": 213,
+  "photonArts": [
+    {
+      "name": "Bullet Dance",
+      "attackMod": 125,
+      "accuracyMod": 70,
+      "ppUsed": 16,
+      "element": "-"
+    },
+    {
+      "name": "Impact Zero",
+      "attackMod": 180,
+      "accuracyMod": 135,
+      "ppUsed": 17,
+      "element": "-"
+    },
+    {
+      "name": "Earth Bullet",
+      "attackMod": 170,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 218,
+  "modelId": "wgbr01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wgbr01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Gun_Blades_(Phantasy_Star_Zero)"
+}

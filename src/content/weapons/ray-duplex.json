@@ -1,0 +1,31 @@
+{
+  "name": "Ray Duplex",
+  "japaneseName": "レイデュプル",
+  "rarity": 3,
+  "weaponType": "Gun Blade",
+  "maxGrind": 30,
+  "level": 5,
+  "resaleValue": 221,
+  "attackBase": 77,
+  "attackMax": 137,
+  "accuracyBase": 113,
+  "accuracyMax": 113,
+  "photonArts": [
+    {
+      "name": "Bullet Dance",
+      "attackMod": 125,
+      "accuracyMod": 70,
+      "ppUsed": 16,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Newman",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 210,
+  "modelId": "wgbn01",
+  "variantId": "wgbn01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Gun_Blades_(Phantasy_Star_Zero)"
+}

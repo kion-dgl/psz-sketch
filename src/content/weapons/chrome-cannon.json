@@ -1,0 +1,34 @@
+{
+  "name": "Chrome Cannon",
+  "japaneseName": "クロムキャノン",
+  "rarity": 3,
+  "weaponType": "Bazooka",
+  "maxGrind": 40,
+  "level": 5,
+  "resaleValue": 228,
+  "attackBase": 128,
+  "attackMax": 208,
+  "accuracyBase": 124,
+  "accuracyMax": 124,
+  "photonArts": [
+    {
+      "name": "Crush Bomb",
+      "attackMod": 210,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human"
+  ],
+  "psoWorldId": 242,
+  "modelId": "wbah01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wbah01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Bazookas_(Phantasy_Star_Zero)"
+}

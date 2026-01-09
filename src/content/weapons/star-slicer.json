@@ -1,0 +1,35 @@
+{
+  "name": "Star Slicer",
+  "japaneseName": "スタースライサー",
+  "rarity": 6,
+  "weaponType": "Slicer",
+  "elementLevel": 3,
+  "element": "Risk",
+  "maxGrind": 20,
+  "level": 40,
+  "resaleValue": 10,
+  "accuracyBase": 164,
+  "accuracyMax": 164,
+  "photonArts": [
+    {
+      "name": "Bright Sign",
+      "attackMod": 110,
+      "accuracyMod": 120,
+      "ppUsed": 14,
+      "element": "Level 3 Stun"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 417,
+  "modelId": "wslr03",
+  "variantId": "wslr03_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Slicers_(Phantasy_Star_Zero)"
+}

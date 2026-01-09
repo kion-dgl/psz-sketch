@@ -1,0 +1,49 @@
+{
+  "name": "Blue Saber",
+  "japaneseName": "青のセイバー",
+  "rarity": 5,
+  "weaponType": "Saber",
+  "elementLevel": 1,
+  "element": "Heart",
+  "maxGrind": 30,
+  "level": 26,
+  "resaleValue": 10,
+  "attackBase": 155,
+  "attackMax": 215,
+  "accuracyBase": 177,
+  "accuracyMax": 177,
+  "photonArts": [
+    {
+      "name": "Cross Rave",
+      "attackMod": 160,
+      "accuracyMod": 120,
+      "ppUsed": 13,
+      "element": "-"
+    },
+    {
+      "name": "Force Ride",
+      "attackMod": 125,
+      "accuracyMod": 100,
+      "ppUsed": 15,
+      "element": "-"
+    },
+    {
+      "name": "Zeta Cutlass",
+      "attackMod": 130,
+      "accuracyMod": 140,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 13,
+  "modelId": "wsar01",
+  "variantId": "wsar01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Sabers_(Phantasy_Star_Zero)"
+}

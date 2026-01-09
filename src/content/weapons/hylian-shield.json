@@ -1,0 +1,34 @@
+{
+  "name": "Hylian Shield",
+  "japaneseName": "ハイリアシールド",
+  "rarity": 6,
+  "weaponType": "Shield",
+  "elementLevel": 1,
+  "element": "Stun",
+  "maxGrind": 40,
+  "level": 30,
+  "resaleValue": 10,
+  "attackBase": 154,
+  "attackMax": 234,
+  "accuracyBase": 287,
+  "accuracyMax": 287,
+  "photonArts": [
+    {
+      "name": "Bull Smash",
+      "attackMod": 210,
+      "accuracyMod": 200,
+      "ppUsed": 18,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 117
+}

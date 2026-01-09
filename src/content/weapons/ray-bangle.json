@@ -1,0 +1,32 @@
+{
+  "name": "Ray Bangle",
+  "japaneseName": "レイバングル",
+  "rarity": 2,
+  "weaponType": "Shield",
+  "maxGrind": 35,
+  "level": 2,
+  "resaleValue": 75,
+  "attackBase": 40,
+  "attackMax": 110,
+  "accuracyBase": 140,
+  "accuracyMax": 140,
+  "photonArts": [
+    {
+      "name": "Barrier Shift",
+      "attackMod": 0,
+      "accuracyMod": 0,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Force Newman"
+  ],
+  "psoWorldId": 113,
+  "modelId": "wshn01",
+  "variantId": "wshn01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Shields_(Phantasy_Star_Zero)"
+}

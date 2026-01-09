@@ -1,0 +1,32 @@
+{
+  "name": "Slicer",
+  "japaneseName": "スライサー",
+  "rarity": 3,
+  "weaponType": "Slicer",
+  "maxGrind": 50,
+  "level": 5,
+  "resaleValue": 208,
+  "accuracyBase": 89,
+  "accuracyMax": 89,
+  "photonArts": [
+    {
+      "name": "Edge Riser",
+      "attackMod": 150,
+      "accuracyMod": 200,
+      "ppUsed": 15,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 399,
+  "modelId": "wslc01",
+  "variantId": "wslc01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Slicers_(Phantasy_Star_Zero)"
+}

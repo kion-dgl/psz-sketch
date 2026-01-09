@@ -1,0 +1,32 @@
+{
+  "name": "Lieucon Stihl",
+  "japaneseName": "レウコンスティル",
+  "rarity": 5,
+  "weaponType": "Shield",
+  "maxGrind": 60,
+  "level": 28,
+  "resaleValue": 10,
+  "attackBase": 120,
+  "attackMax": 240,
+  "accuracyBase": 266,
+  "accuracyMax": 266,
+  "photonArts": [
+    {
+      "name": "Barrier Shift",
+      "attackMod": 0,
+      "accuracyMod": 0,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 124,
+  "modelId": "wshr05",
+  "variantId": "wshr05_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Shields_(Phantasy_Star_Zero)"
+}

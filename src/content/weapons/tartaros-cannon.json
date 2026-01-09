@@ -1,0 +1,34 @@
+{
+  "name": "Tartaros Cannon",
+  "japaneseName": "タルタロスカノン",
+  "rarity": 7,
+  "weaponType": "Laser Cannon",
+  "elementLevel": 3,
+  "element": "Ice",
+  "maxGrind": 20,
+  "level": 64,
+  "resaleValue": 10,
+  "attackBase": 325,
+  "attackMax": 365,
+  "accuracyBase": 280,
+  "accuracyMax": 280,
+  "photonArts": [
+    {
+      "name": "Divine Ray",
+      "attackMod": 250,
+      "accuracyMod": 200,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 272,
+  "modelId": "wlcr01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wlcr01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Laser_Cannons_(Phantasy_Star_Zero)"
+}

@@ -1,0 +1,53 @@
+{
+  "name": "Bangasa Jikomi",
+  "japaneseName": "バンガサジコミ",
+  "rarity": 6,
+  "weaponType": "Gun Blade",
+  "elementLevel": 3,
+  "element": "Light",
+  "maxGrind": 30,
+  "level": 40,
+  "resaleValue": 10,
+  "attackBase": 170,
+  "attackMax": 230,
+  "accuracyBase": 159,
+  "accuracyMax": 159,
+  "photonArts": [
+    {
+      "name": "Bullet Dance",
+      "attackMod": 125,
+      "accuracyMod": 70,
+      "ppUsed": 16,
+      "element": "-"
+    },
+    {
+      "name": "Impact Zero",
+      "attackMod": 180,
+      "accuracyMod": 135,
+      "ppUsed": 17,
+      "element": "-"
+    },
+    {
+      "name": "Earth Bullet",
+      "attackMod": 170,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 220,
+  "modelId": "wgbr03",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wgbr03_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Gun_Blades_(Phantasy_Star_Zero)"
+}

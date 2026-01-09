@@ -1,0 +1,7 @@
+{
+  "name": "Stun Element",
+  "japaneseName": "スタンエレメンント",
+  "details": "Grants a weapon the element of \"Stun\", allowing you to inflict Stun on enemies. Under the effects of Stun, the enemy can take no action.\n\nThe strength of Stun increases with the element level.",
+  "rarity": 4,
+  "psoWorldId": 538
+}

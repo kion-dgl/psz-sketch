@@ -1,0 +1,43 @@
+{
+  "name": "Sasarai",
+  "japaneseName": "サーサライ",
+  "rarity": 4,
+  "weaponType": "Rod",
+  "maxGrind": 25,
+  "level": 12,
+  "resaleValue": 623,
+  "accuracyBase": 128,
+  "accuracyMax": 128,
+  "photonArts": [
+    {
+      "name": "Beat Quake",
+      "attackMod": 140,
+      "accuracyMod": 150,
+      "ppUsed": 19,
+      "element": "-"
+    },
+    {
+      "name": "Rolling Bar",
+      "attackMod": 90,
+      "accuracyMod": 100,
+      "ppUsed": 21,
+      "element": "-"
+    },
+    {
+      "name": "Rodeo Drive",
+      "attackMod": 120,
+      "accuracyMod": 130,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Newman",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 287,
+  "modelId": "wron01",
+  "variantId": "wron01_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rods_(Phantasy_Star_Zero)"
+}

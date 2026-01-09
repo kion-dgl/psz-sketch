@@ -1,0 +1,34 @@
+{
+  "name": "Blaze Roar",
+  "japaneseName": "ブレイズロアー",
+  "rarity": 5,
+  "weaponType": "Shield",
+  "elementLevel": 5,
+  "element": "Heat",
+  "maxGrind": 25,
+  "level": 24,
+  "resaleValue": 175,
+  "attackBase": 151,
+  "attackMax": 201,
+  "accuracyBase": 243,
+  "accuracyMax": 243,
+  "photonArts": [
+    {
+      "name": "Bull Smash",
+      "attackMod": 210,
+      "accuracyMod": 200,
+      "ppUsed": 18,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Force Human"
+  ],
+  "psoWorldId": 110,
+  "modelId": "wshh02",
+  "variantId": "wshh02_2_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Shields_(Phantasy_Star_Zero)"
+}

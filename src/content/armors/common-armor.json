@@ -1,0 +1,13 @@
+{
+  "name": "Common Armor",
+  "japaneseName": "コモンアーマー",
+  "rarity": 1,
+  "maxGrind": 50,
+  "level": 1,
+  "resaleValue": 42,
+  "defenseBase": 33,
+  "defenseMax": 133,
+  "evasionBase": 21,
+  "evasionMax": 121,
+  "psoWorldId": 483
+}

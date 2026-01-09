@@ -1,0 +1,45 @@
+{
+  "name": "Edu Limit",
+  "japaneseName": "エドゥリミット",
+  "rarity": 5,
+  "weaponType": "Double Saber",
+  "maxGrind": 40,
+  "level": 24,
+  "resaleValue": 932,
+  "attackBase": 206,
+  "attackMax": 286,
+  "accuracyBase": 199,
+  "accuracyMax": 199,
+  "photonArts": [
+    {
+      "name": "Cyclone Run",
+      "attackMod": 100,
+      "accuracyMod": 80,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Tornado Dance",
+      "attackMod": 130,
+      "accuracyMod": 120,
+      "ppUsed": 30,
+      "element": "-"
+    },
+    {
+      "name": "Million Rave",
+      "attackMod": 135,
+      "accuracyMod": 100,
+      "ppUsed": 25,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 141,
+  "modelId": "wdsc01",
+  "variantId": "wdsc01_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Double_Sabers_(Phantasy_Star_Zero)"
+}

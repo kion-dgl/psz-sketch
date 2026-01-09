@@ -1,0 +1,45 @@
+{
+  "name": "Milias Sword",
+  "japaneseName": "ミリアスソード",
+  "rarity": 6,
+  "weaponType": "Sword",
+  "maxGrind": 30,
+  "level": 42,
+  "resaleValue": 10,
+  "attackBase": 429,
+  "attackMax": 489,
+  "accuracyBase": 218,
+  "accuracyMax": 218,
+  "photonArts": [
+    {
+      "name": "Dynamo Spin",
+      "attackMod": 80,
+      "accuracyMod": 80,
+      "ppUsed": 21,
+      "element": "-"
+    },
+    {
+      "name": "Sonic Raid",
+      "attackMod": 120,
+      "accuracyMod": 75,
+      "ppUsed": 23,
+      "element": "-"
+    },
+    {
+      "name": "Over-end",
+      "attackMod": 250,
+      "accuracyMod": 255,
+      "ppUsed": 45,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 48,
+  "modelId": "wswr04",
+  "variantId": "wswr04_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Swords_(Phantasy_Star_Zero)"
+}

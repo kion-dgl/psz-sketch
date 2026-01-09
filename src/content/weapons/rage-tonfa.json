@@ -1,0 +1,53 @@
+{
+  "name": "Rage Tonfa",
+  "japaneseName": "レイジトンファー",
+  "rarity": 7,
+  "weaponType": "Daggers",
+  "elementLevel": 4,
+  "element": "Heat",
+  "maxGrind": 30,
+  "level": 56,
+  "resaleValue": 10,
+  "attackBase": 211,
+  "attackMax": 271,
+  "accuracyBase": 331,
+  "accuracyMax": 331,
+  "photonArts": [
+    {
+      "name": "Air Ride",
+      "attackMod": 95,
+      "accuracyMod": 80,
+      "ppUsed": 19,
+      "element": "-"
+    },
+    {
+      "name": "Reverse Kill",
+      "attackMod": 80,
+      "accuracyMod": 80,
+      "ppUsed": 25,
+      "element": "-"
+    },
+    {
+      "name": "Huge Cross",
+      "attackMod": 90,
+      "accuracyMod": 130,
+      "ppUsed": 22,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 58,
+  "modelId": "wdar01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wdar01_1_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Daggers_(Phantasy_Star_Zero)"
+}

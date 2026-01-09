@@ -1,0 +1,32 @@
+{
+  "name": "Chaos Cannon",
+  "japaneseName": "ケイオスカノン",
+  "rarity": 4,
+  "weaponType": "Laser Cannon",
+  "elementLevel": 2,
+  "element": "Slow",
+  "maxGrind": 60,
+  "level": 20,
+  "resaleValue": 10,
+  "attackBase": 116,
+  "attackMax": 236,
+  "accuracyBase": 186,
+  "accuracyMax": 186,
+  "photonArts": [
+    {
+      "name": "Divine Ray",
+      "attackMod": 250,
+      "accuracyMod": 200,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 271,
+  "modelId": "wlcr01",
+  "variantId": "wlcr01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Laser_Cannons_(Phantasy_Star_Zero)"
+}

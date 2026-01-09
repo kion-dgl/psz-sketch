@@ -1,0 +1,35 @@
+{
+  "name": "Ein Pistol",
+  "japaneseName": "アインピストル",
+  "rarity": 1,
+  "weaponType": "Handgun",
+  "maxGrind": 60,
+  "level": 1,
+  "resaleValue": 26,
+  "attackBase": 29,
+  "attackMax": 149,
+  "accuracyBase": 72,
+  "accuracyMax": 72,
+  "photonArts": [
+    {
+      "name": "Quick Draw",
+      "attackMod": 80,
+      "accuracyMod": 75,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 155,
+  "modelId": "whgc01",
+  "variantId": "whgc01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Handguns_(Phantasy_Star_Zero)"
+}

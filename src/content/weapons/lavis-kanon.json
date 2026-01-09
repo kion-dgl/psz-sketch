@@ -1,0 +1,47 @@
+{
+  "name": "Lavis Kanon",
+  "japaneseName": "ラヴィス＝カノン",
+  "rarity": 7,
+  "weaponType": "Saber",
+  "elementLevel": 3,
+  "element": "Soul",
+  "maxGrind": 40,
+  "level": 90,
+  "resaleValue": 10,
+  "attackBase": 283,
+  "attackMax": 363,
+  "accuracyBase": 245,
+  "accuracyMax": 245,
+  "photonArts": [
+    {
+      "name": "Cross Rave",
+      "attackMod": 160,
+      "accuracyMod": 120,
+      "ppUsed": 13,
+      "element": "-"
+    },
+    {
+      "name": "Force Ride",
+      "attackMod": 125,
+      "accuracyMod": 100,
+      "ppUsed": 15,
+      "element": "-"
+    },
+    {
+      "name": "Zeta Cutlass",
+      "attackMod": 130,
+      "accuracyMod": 140,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 17,
+  "modelId": "wsar01",
+  "variantId": "wsar01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Sabers_(Phantasy_Star_Zero)"
+}

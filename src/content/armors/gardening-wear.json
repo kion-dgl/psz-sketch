@@ -1,0 +1,13 @@
+{
+  "name": "Gardening Wear",
+  "japaneseName": "ガーデニングウェア",
+  "rarity": 4,
+  "maxGrind": 50,
+  "level": 10,
+  "resaleValue": 10,
+  "defenseBase": 68,
+  "defenseMax": 168,
+  "evasionBase": 80,
+  "evasionMax": 180,
+  "psoWorldId": 504
+}

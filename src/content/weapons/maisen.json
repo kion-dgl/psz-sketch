@@ -1,0 +1,47 @@
+{
+  "name": "Maisen",
+  "japaneseName": "マイセン",
+  "rarity": 6,
+  "weaponType": "Slicer",
+  "elementLevel": 3,
+  "element": "Ice",
+  "maxGrind": 30,
+  "level": 42,
+  "resaleValue": 10,
+  "accuracyBase": 145,
+  "accuracyMax": 145,
+  "photonArts": [
+    {
+      "name": "Edge Riser",
+      "attackMod": 150,
+      "accuracyMod": 200,
+      "ppUsed": 15,
+      "element": "-"
+    },
+    {
+      "name": "Bright Sign",
+      "attackMod": 110,
+      "accuracyMod": 120,
+      "ppUsed": 14,
+      "element": "Level 3 Stun"
+    },
+    {
+      "name": "Say Goodbye",
+      "attackMod": 100,
+      "accuracyMod": 210,
+      "ppUsed": 15,
+      "element": "Level 3 Light"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 420,
+  "modelId": "wslr01",
+  "variantId": "wslr01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Slicers_(Phantasy_Star_Zero)"
+}

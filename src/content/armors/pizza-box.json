@@ -1,0 +1,13 @@
+{
+  "name": "Pizza Box",
+  "japaneseName": "ピッツァボックス",
+  "rarity": 4,
+  "maxGrind": 99,
+  "level": 14,
+  "resaleValue": 10,
+  "defenseBase": 47,
+  "defenseMax": 245,
+  "evasionBase": 82,
+  "evasionMax": 280,
+  "psoWorldId": 506
+}

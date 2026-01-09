@@ -1,0 +1,33 @@
+{
+  "name": "Clear Duplex",
+  "japaneseName": "クリアデュプル",
+  "rarity": 4,
+  "weaponType": "Gun Blade",
+  "maxGrind": 25,
+  "level": 12,
+  "resaleValue": 553,
+  "attackBase": 107,
+  "attackMax": 157,
+  "accuracyBase": 136,
+  "accuracyMax": 136,
+  "photonArts": [
+    {
+      "name": "Bullet Dance",
+      "attackMod": 125,
+      "accuracyMod": 70,
+      "ppUsed": 16,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Newman",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 211,
+  "modelId": "wgbn01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wgbn01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Gun_Blades_(Phantasy_Star_Zero)"
+}

@@ -1,0 +1,35 @@
+{
+  "name": "Deo Ripper",
+  "japaneseName": "デオリッパー",
+  "rarity": 3,
+  "weaponType": "Daggers",
+  "maxGrind": 50,
+  "level": 5,
+  "resaleValue": 192,
+  "attackBase": 73,
+  "attackMax": 173,
+  "accuracyBase": 165,
+  "accuracyMax": 165,
+  "photonArts": [
+    {
+      "name": "Reverse Kill",
+      "attackMod": 80,
+      "accuracyMod": 80,
+      "ppUsed": 25,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 53,
+  "modelId": "wdac01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wdac01_1_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Daggers_(Phantasy_Star_Zero)"
+}

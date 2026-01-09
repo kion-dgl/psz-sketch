@@ -1,0 +1,33 @@
+{
+  "name": "Diabolic Gauntlet",
+  "japaneseName": "デアボリックガント",
+  "rarity": 5,
+  "weaponType": "Claw",
+  "elementLevel": 4,
+  "element": "Slow",
+  "maxGrind": 50,
+  "level": 28,
+  "resaleValue": 10,
+  "attackBase": 206,
+  "attackMax": 306,
+  "accuracyBase": 233,
+  "accuracyMax": 233,
+  "photonArts": [
+    {
+      "name": "Slide End",
+      "attackMod": 75,
+      "accuracyMod": 120,
+      "ppUsed": 21,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 103,
+  "modelId": "wclr01",
+  "variantId": "wclr01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Claws_(Phantasy_Star_Zero)"
+}

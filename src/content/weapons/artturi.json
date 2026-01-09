@@ -1,0 +1,49 @@
+{
+  "name": "Artturi",
+  "japaneseName": "アルトゥーリ",
+  "rarity": 4,
+  "weaponType": "Saber",
+  "maxGrind": 45,
+  "level": 12,
+  "resaleValue": 426,
+  "attackBase": 125,
+  "attackMax": 215,
+  "accuracyBase": 187,
+  "accuracyMax": 187,
+  "photonArts": [
+    {
+      "name": "Cross Rave",
+      "attackMod": 160,
+      "accuracyMod": 120,
+      "ppUsed": 13,
+      "element": "-"
+    },
+    {
+      "name": "Force Ride",
+      "attackMod": 125,
+      "accuracyMod": 100,
+      "ppUsed": 15,
+      "element": "-"
+    },
+    {
+      "name": "Zeta Cutlass",
+      "attackMod": 130,
+      "accuracyMod": 140,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 14,
+  "modelId": "wsac01",
+  "variantId": "wsac01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Sabers_(Phantasy_Star_Zero)"
+}

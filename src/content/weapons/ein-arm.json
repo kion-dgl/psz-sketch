@@ -1,0 +1,32 @@
+{
+  "name": "Ein Arm",
+  "japaneseName": "アインアーム",
+  "rarity": 2,
+  "weaponType": "Claw",
+  "maxGrind": 55,
+  "level": 2,
+  "resaleValue": 81,
+  "attackBase": 65,
+  "attackMax": 175,
+  "accuracyBase": 128,
+  "accuracyMax": 128,
+  "photonArts": [
+    {
+      "name": "Bite Stamp",
+      "attackMod": 180,
+      "accuracyMod": 75,
+      "ppUsed": 26,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 78,
+  "modelId": "wclc01",
+  "variantId": "wclc01_1_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Claws_(Phantasy_Star_Zero)"
+}

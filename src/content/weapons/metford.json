@@ -1,0 +1,44 @@
+{
+  "name": "Metford",
+  "japaneseName": "メトフォード",
+  "rarity": 4,
+  "weaponType": "Rifle",
+  "maxGrind": 35,
+  "level": 12,
+  "resaleValue": 477,
+  "attackBase": 106,
+  "attackMax": 176,
+  "accuracyBase": 141,
+  "accuracyMax": 141,
+  "photonArts": [
+    {
+      "name": "Wipeout",
+      "attackMod": 75,
+      "accuracyMod": 80,
+      "ppUsed": 21,
+      "element": "Level 4 Heat"
+    },
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    },
+    {
+      "name": "Mine Sneak",
+      "attackMod": 160,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 176,
+  "modelId": "wrfh01",
+  "variantId": "wrfh01_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

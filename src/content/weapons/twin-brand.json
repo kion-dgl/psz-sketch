@@ -1,0 +1,51 @@
+{
+  "name": "Twin Brand",
+  "japaneseName": "ツインブランド",
+  "rarity": 5,
+  "weaponType": "Double Saber",
+  "elementLevel": 3,
+  "element": "Ice",
+  "maxGrind": 40,
+  "level": 28,
+  "resaleValue": 10,
+  "attackBase": 229,
+  "attackMax": 309,
+  "accuracyBase": 194,
+  "accuracyMax": 194,
+  "photonArts": [
+    {
+      "name": "Cyclone Run",
+      "attackMod": 100,
+      "accuracyMod": 80,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Tornado Dance",
+      "attackMod": 130,
+      "accuracyMod": 120,
+      "ppUsed": 30,
+      "element": "-"
+    },
+    {
+      "name": "Million Rave",
+      "attackMod": 135,
+      "accuracyMod": 100,
+      "ppUsed": 25,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 133,
+  "modelId": "wdsr02",
+  "variantId": "wdsr02_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Double_Sabers_(Phantasy_Star_Zero)"
+}

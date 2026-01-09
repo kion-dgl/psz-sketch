@@ -1,0 +1,37 @@
+{
+  "name": "Berry Ice Beam",
+  "japaneseName": "ベリーアイスビーム",
+  "rarity": 3,
+  "weaponType": "Laser Cannon",
+  "elementLevel": 2,
+  "element": "Ice",
+  "maxGrind": 70,
+  "level": 6,
+  "resaleValue": 10,
+  "attackBase": 67,
+  "attackMax": 207,
+  "accuracyBase": 138,
+  "accuracyMax": 138,
+  "photonArts": [
+    {
+      "name": "Sector Line",
+      "attackMod": 150,
+      "accuracyMod": 80,
+      "ppUsed": 22,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 275,
+  "modelId": "wlcr03",
+  "variantId": "wlcr03_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Laser_Cannons_(Phantasy_Star_Zero)"
+}

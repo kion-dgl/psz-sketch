@@ -1,0 +1,34 @@
+{
+  "name": "Warp Pipe Bazooka",
+  "japaneseName": "ドッカンバズーカ",
+  "rarity": 6,
+  "weaponType": "Bazooka",
+  "elementLevel": 3,
+  "element": "Celeb",
+  "maxGrind": 40,
+  "level": 30,
+  "resaleValue": 10,
+  "attackBase": 325,
+  "attackMax": 405,
+  "accuracyBase": 202,
+  "accuracyMax": 202,
+  "photonArts": [
+    {
+      "name": "Crush Bomb",
+      "attackMod": 210,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 258
+}

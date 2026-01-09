@@ -1,0 +1,48 @@
+{
+  "name": "Curse Answerer",
+  "japaneseName": "カースアンサラー",
+  "rarity": 6,
+  "weaponType": "Rifle",
+  "elementLevel": 4,
+  "element": "Zalure",
+  "maxGrind": 20,
+  "level": 40,
+  "resaleValue": 10,
+  "attackBase": 226,
+  "attackMax": 266,
+  "accuracyBase": 207,
+  "accuracyMax": 207,
+  "photonArts": [
+    {
+      "name": "Wipeout",
+      "attackMod": 75,
+      "accuracyMod": 80,
+      "ppUsed": 21,
+      "element": "Level 4 Heat"
+    },
+    {
+      "name": "Hollow Snipe",
+      "attackMod": 80,
+      "accuracyMod": 255,
+      "ppUsed": 26,
+      "element": "-"
+    },
+    {
+      "name": "Mine Sneak",
+      "attackMod": 160,
+      "accuracyMod": 200,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 191,
+  "modelId": "wrfr03",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wrfr03_3_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rifles_(Phantasy_Star_Zero)"
+}

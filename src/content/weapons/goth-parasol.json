@@ -1,0 +1,37 @@
+{
+  "name": "Goth Parasol",
+  "japaneseName": "ゴスノアマヨケ",
+  "rarity": 7,
+  "weaponType": "Rod",
+  "elementLevel": 3,
+  "element": "Heat",
+  "maxGrind": 20,
+  "level": 58,
+  "resaleValue": 10,
+  "accuracyBase": 201,
+  "accuracyMax": 201,
+  "photonArts": [
+    {
+      "name": "Rodeo Drive",
+      "attackMod": 120,
+      "accuracyMod": 130,
+      "ppUsed": 19,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 291,
+  "modelId": "wror03",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wror03_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Rods_(Phantasy_Star_Zero)"
+}

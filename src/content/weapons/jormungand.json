@@ -1,0 +1,47 @@
+{
+  "name": "Jormungand",
+  "japaneseName": "ヨルムンガルド",
+  "rarity": 5,
+  "weaponType": "Daggers",
+  "maxGrind": 40,
+  "level": 20,
+  "resaleValue": 817,
+  "attackBase": 143,
+  "attackMax": 223,
+  "accuracyBase": 237,
+  "accuracyMax": 237,
+  "photonArts": [
+    {
+      "name": "Air Ride",
+      "attackMod": 95,
+      "accuracyMod": 80,
+      "ppUsed": 19,
+      "element": "-"
+    },
+    {
+      "name": "Reverse Kill",
+      "attackMod": 80,
+      "accuracyMod": 80,
+      "ppUsed": 25,
+      "element": "-"
+    },
+    {
+      "name": "Huge Cross",
+      "attackMod": 90,
+      "accuracyMod": 130,
+      "ppUsed": 22,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 60,
+  "modelId": "wdac01",
+  "variantId": "wdac01_3_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Daggers_(Phantasy_Star_Zero)"
+}

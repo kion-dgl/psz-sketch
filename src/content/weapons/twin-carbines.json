@@ -1,0 +1,31 @@
+{
+  "name": "Twin Carbines",
+  "japaneseName": "ツインカービン",
+  "rarity": 3,
+  "weaponType": "Mech Gun",
+  "maxGrind": 50,
+  "level": 5,
+  "resaleValue": 180,
+  "attackBase": 42,
+  "attackMax": 142,
+  "accuracyBase": 94,
+  "accuracyMax": 94,
+  "photonArts": [
+    {
+      "name": "Acro Step",
+      "attackMod": 85,
+      "accuracyMod": 100,
+      "ppUsed": 24,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human"
+  ],
+  "psoWorldId": 226,
+  "modelId": "wmgh02",
+  "variantId": "wmgh02_1_r",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Mech_Guns_(Phantasy_Star_Zero)"
+}

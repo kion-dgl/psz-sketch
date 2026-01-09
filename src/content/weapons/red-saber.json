@@ -1,0 +1,19 @@
+{
+  "name": "Red Saber",
+  "japaneseName": "赤のセイバー",
+  "rarity": 4,
+  "weaponType": "Saber",
+  "maxGrind": 40,
+  "level": 14,
+  "resaleValue": 10,
+  "attackBase": 111,
+  "attackMax": 191,
+  "accuracyBase": 148,
+  "accuracyMax": 148,
+  "psoWorldId": 9,
+  "modelId": "wsar01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wsar01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Sabers_(Phantasy_Star_Zero)"
+}

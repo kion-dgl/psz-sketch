@@ -1,0 +1,47 @@
+{
+  "name": "Magi Processor",
+  "japaneseName": "マギプロセッサ",
+  "rarity": 4,
+  "weaponType": "Wand",
+  "maxGrind": 45,
+  "level": 12,
+  "resaleValue": 440,
+  "accuracyBase": 161,
+  "accuracyMax": 161,
+  "photonArts": [
+    {
+      "name": "Funny Dive",
+      "attackMod": 125,
+      "accuracyMod": 200,
+      "ppUsed": 11,
+      "element": "-"
+    },
+    {
+      "name": "Magical Sign",
+      "attackMod": 140,
+      "accuracyMod": 160,
+      "ppUsed": 13,
+      "element": "Level 3 Slow"
+    },
+    {
+      "name": "Act Trick",
+      "attackMod": 0,
+      "accuracyMod": 0,
+      "ppUsed": 2,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 406,
+  "modelId": "wwac01",
+  "variantId": "wwac01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Wands_(Phantasy_Star_Zero)"
+}

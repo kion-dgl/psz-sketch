@@ -1,0 +1,33 @@
+{
+  "name": "Doppel Scythe",
+  "japaneseName": "ドッペルサイズ",
+  "rarity": 4,
+  "weaponType": "Double Saber",
+  "elementLevel": 1,
+  "element": "Risk",
+  "maxGrind": 10,
+  "level": 14,
+  "resaleValue": 10,
+  "attackBase": 183,
+  "attackMax": 203,
+  "accuracyBase": 135,
+  "accuracyMax": 135,
+  "photonArts": [
+    {
+      "name": "Tornado Dance",
+      "attackMod": 130,
+      "accuracyMod": 120,
+      "ppUsed": 30,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast"
+  ],
+  "psoWorldId": 147,
+  "modelId": "wdsr01",
+  "variantId": "wdsr01_1_b",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Double_Sabers_(Phantasy_Star_Zero)"
+}

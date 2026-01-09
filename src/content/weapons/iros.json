@@ -1,0 +1,48 @@
+{
+  "name": "Iros",
+  "japaneseName": "アイアス",
+  "rarity": 7,
+  "weaponType": "Shield",
+  "maxGrind": 20,
+  "level": 54,
+  "resaleValue": 3414,
+  "attackBase": 191,
+  "attackMax": 231,
+  "accuracyBase": 304,
+  "accuracyMax": 304,
+  "photonArts": [
+    {
+      "name": "Linear Shave",
+      "attackMod": 160,
+      "accuracyMod": 160,
+      "ppUsed": 18,
+      "element": "-"
+    },
+    {
+      "name": "Barrier Shift",
+      "attackMod": 0,
+      "accuracyMod": 0,
+      "ppUsed": 20,
+      "element": "-"
+    },
+    {
+      "name": "Bull Smash",
+      "attackMod": 210,
+      "accuracyMod": 200,
+      "ppUsed": 18,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Force Human"
+  ],
+  "psoWorldId": 108,
+  "modelId": "wshh01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "wshh01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Shields_(Phantasy_Star_Zero)"
+}

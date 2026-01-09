@@ -1,0 +1,51 @@
+{
+  "name": "Radiant",
+  "japaneseName": "レイディアント",
+  "rarity": 5,
+  "weaponType": "Handgun",
+  "maxGrind": 25,
+  "level": 20,
+  "resaleValue": 677,
+  "attackBase": 119,
+  "attackMax": 169,
+  "accuracyBase": 160,
+  "accuracyMax": 160,
+  "photonArts": [
+    {
+      "name": "Quick Draw",
+      "attackMod": 80,
+      "accuracyMod": 75,
+      "ppUsed": 24,
+      "element": "-"
+    },
+    {
+      "name": "Flame Hit",
+      "attackMod": 145,
+      "accuracyMod": 100,
+      "ppUsed": 19,
+      "element": "Level 4 Heat"
+    },
+    {
+      "name": "Thriller Combo",
+      "attackMod": 150,
+      "accuracyMod": 120,
+      "ppUsed": 15,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Human",
+    "Hunter Newman",
+    "Hunter Cast",
+    "Ranger Human",
+    "Ranger Cast",
+    "Force Human",
+    "Force Newman"
+  ],
+  "psoWorldId": 154,
+  "modelId": "whgh01",
+  "variantId": null,
+  "missingTexture": true,
+  "useModelFrom": "whgh01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Handguns_(Phantasy_Star_Zero)"
+}

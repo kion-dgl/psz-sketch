@@ -1,0 +1,45 @@
+{
+  "name": "Nersir",
+  "japaneseName": "ネルシール",
+  "rarity": 6,
+  "weaponType": "Gun Blade",
+  "maxGrind": 15,
+  "level": 36,
+  "resaleValue": 1599,
+  "attackBase": 203,
+  "attackMax": 233,
+  "accuracyBase": 187,
+  "accuracyMax": 187,
+  "photonArts": [
+    {
+      "name": "Bullet Dance",
+      "attackMod": 125,
+      "accuracyMod": 70,
+      "ppUsed": 16,
+      "element": "-"
+    },
+    {
+      "name": "Impact Zero",
+      "attackMod": 180,
+      "accuracyMod": 135,
+      "ppUsed": 17,
+      "element": "-"
+    },
+    {
+      "name": "Earth Bullet",
+      "attackMod": 170,
+      "accuracyMod": 150,
+      "ppUsed": 20,
+      "element": "-"
+    }
+  ],
+  "usableBy": [
+    "Hunter Newman",
+    "Ranger Human",
+    "Ranger Cast"
+  ],
+  "psoWorldId": 212,
+  "modelId": "wgbn01",
+  "variantId": "wgbn01_3_o",
+  "wikiUrl": "https://phantasystar.fandom.com/wiki/Gun_Blades_(Phantasy_Star_Zero)"
+}
