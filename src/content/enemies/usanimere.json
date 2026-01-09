@@ -1,0 +1,7 @@
+{
+  "name": "Usanimere",
+  "element": "Native",
+  "locations": ["Rioh Snowfield", "Eternal Tower"],
+  "isRare": true,
+  "modelId": "rabbit_rare"
+}

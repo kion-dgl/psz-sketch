@@ -1,0 +1,7 @@
+{
+  "name": "Goldix",
+  "element": "Native",
+  "locations": ["Oblivion City Paru", "Eternal Tower"],
+  "isRare": true,
+  "modelId": "shrimp_rare"
+}

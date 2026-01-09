@@ -1,0 +1,7 @@
+{
+  "name": "Vespao",
+  "element": "Native",
+  "locations": ["Ozette Wetland", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "seal_rare"
+}

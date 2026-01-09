@@ -1,0 +1,8 @@
+{
+  "name": "Octo Diablo",
+  "element": "Beast",
+  "locations": ["Ozette Wetland"],
+  "isRare": false,
+  "isBoss": true,
+  "modelId": "boss_octopus"
+}

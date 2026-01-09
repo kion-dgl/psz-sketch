@@ -1,0 +1,8 @@
+{
+  "name": "Dark Falz",
+  "element": "Dark",
+  "locations": ["Dark Shrine"],
+  "isRare": false,
+  "isBoss": true,
+  "modelId": "boss_darkfalz"
+}

@@ -218,6 +218,51 @@ const questAreas = defineCollection({
   })
 });
 
+// ============================================================================
+// ENEMY COLLECTIONS
+// ============================================================================
+
+// Drop table entry schema
+const dropEntrySchema = z.object({
+  itemName: z.string(),
+  dropRate: z.string().optional(), // e.g., "1/128", "Common", etc.
+  difficulty: z.enum(['Normal', 'Hard', 'Super Hard', 'Ultimate']).optional()
+});
+
+// Enemies collection
+const enemies = defineCollection({
+  type: 'data',
+  schema: z.object({
+    name: z.string(),
+    japaneseName: z.string().optional(),
+    description: z.string().optional(),
+    element: z.enum(['Native', 'Beast', 'Machine', 'Dark']),
+    locations: z.array(z.enum([
+      'Gurhacia Valley',
+      'Rioh Snowfield',
+      'Ozette Wetland',
+      'Oblivion City Paru',
+      'Makara Ruins',
+      'Arca Plant',
+      'Dark Shrine',
+      'Eternal Tower'
+    ])),
+    isRare: z.boolean().default(false),
+    isBoss: z.boolean().default(false),
+    // PSO-World reference
+    psoWorldId: z.number().optional(),
+    // 3D Model reference (folder name in /public/enemies/)
+    modelId: z.string().optional(),
+    // Drop tables by difficulty
+    drops: z.object({
+      normal: z.array(dropEntrySchema).optional(),
+      hard: z.array(dropEntrySchema).optional(),
+      superHard: z.array(dropEntrySchema).optional(),
+      ultimate: z.array(dropEntrySchema).optional()
+    }).optional()
+  })
+});
+
 export const collections = {
   docs: defineCollection({ schema: docsSchema() }),
   'quest-definitions': questDefinitions,
@@ -229,5 +274,7 @@ export const collections = {
   consumables,
   materials,
   modifiers,
-  weapons
+  weapons,
+  // Enemy collection
+  enemies
 };

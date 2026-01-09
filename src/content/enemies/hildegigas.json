@@ -1,0 +1,7 @@
+{
+  "name": "Hildegigas",
+  "element": "Beast",
+  "locations": ["Rioh Snowfield", "Eternal Tower"],
+  "isRare": true,
+  "modelId": "gorilla_rare"
+}

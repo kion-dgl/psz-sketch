@@ -1,0 +1,7 @@
+{
+  "name": "Pobomma",
+  "element": "Native",
+  "locations": ["Oblivion City Paru", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "frog_bomb"
+}

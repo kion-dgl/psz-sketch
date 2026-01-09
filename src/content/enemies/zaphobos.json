@@ -1,0 +1,7 @@
+{
+  "name": "Zaphobos",
+  "element": "Dark",
+  "locations": ["Dark Shrine", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "swordman_b"
+}

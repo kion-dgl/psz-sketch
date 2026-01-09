@@ -1,0 +1,7 @@
+{
+  "name": "Blade Mother",
+  "element": "Dark",
+  "locations": ["Eternal Tower"],
+  "isRare": false,
+  "modelId": "mother_sword"
+}

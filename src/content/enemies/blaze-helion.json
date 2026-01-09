@@ -1,0 +1,7 @@
+{
+  "name": "Blaze Helion",
+  "element": "Beast",
+  "locations": ["Gurhacia Valley", "Eternal Tower"],
+  "isRare": true,
+  "modelId": "lion_rare"
+}

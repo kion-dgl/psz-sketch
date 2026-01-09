@@ -1,0 +1,7 @@
+{
+  "name": "Vulkure",
+  "element": "Native",
+  "locations": ["Gurhacia Valley", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "vulture"
+}

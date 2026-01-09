@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import EnemyGallery from '../../components/enemies/EnemyGallery';
+
+export const prerender = false;
+---
+
+<Layout title="Enemy Gallery - PSZ Sketch">
+  <EnemyGallery client:load />
+</Layout>

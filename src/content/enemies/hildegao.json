@@ -1,0 +1,7 @@
+{
+  "name": "Hildegao",
+  "element": "Beast",
+  "locations": ["Rioh Snowfield", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "gorilla"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "Rohcrysta",
+  "element": "Beast",
+  "locations": ["Makara Ruins", "Eternal Tower"],
+  "isRare": true,
+  "modelId": "armadillo_rare"
+}

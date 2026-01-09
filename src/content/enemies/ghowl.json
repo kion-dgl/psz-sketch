@@ -1,0 +1,7 @@
+{
+  "name": "Ghowl",
+  "element": "Native",
+  "locations": ["Gurhacia Valley", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "lizard"
+}

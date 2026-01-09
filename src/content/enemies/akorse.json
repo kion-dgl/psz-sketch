@@ -1,0 +1,7 @@
+{
+  "name": "Akorse",
+  "element": "Machine",
+  "locations": ["Arca Plant", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "shooter_leader"
+}

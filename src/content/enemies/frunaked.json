@@ -1,0 +1,7 @@
+{
+  "name": "Frunaked",
+  "element": "Beast",
+  "locations": ["Oblivion City Paru", "Eternal Tower"],
+  "isRare": true,
+  "modelId": "orangutan_rare"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "Pelcatraz",
+  "element": "Beast",
+  "locations": ["Ozette Wetland", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "roc"
+}

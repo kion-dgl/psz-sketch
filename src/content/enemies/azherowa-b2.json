@@ -1,0 +1,7 @@
+{
+  "name": "Azherowa-B2",
+  "element": "Machine",
+  "locations": ["Oblivion City Paru", "Eternal Tower"],
+  "isRare": true,
+  "modelId": "quad_rare"
+}

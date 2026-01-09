@@ -1,0 +1,7 @@
+{
+  "name": "Finjer G",
+  "element": "Machine",
+  "locations": ["Arca Plant", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "board_green"
+}

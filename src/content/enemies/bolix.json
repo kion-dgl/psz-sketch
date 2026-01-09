@@ -1,0 +1,7 @@
+{
+  "name": "Bolix",
+  "element": "Native",
+  "locations": ["Oblivion City Paru", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "shrimp"
+}

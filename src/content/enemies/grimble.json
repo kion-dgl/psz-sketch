@@ -1,0 +1,7 @@
+{
+  "name": "Grimble",
+  "element": "Native",
+  "locations": ["Gurhacia Valley", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "hyena"
+}

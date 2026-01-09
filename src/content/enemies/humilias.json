@@ -1,0 +1,8 @@
+{
+  "name": "Humilias",
+  "element": "Machine",
+  "locations": ["Arca Plant"],
+  "isRare": false,
+  "isBoss": true,
+  "modelId": "boss_mother"
+}

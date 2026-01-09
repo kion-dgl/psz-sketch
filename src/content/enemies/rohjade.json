@@ -1,0 +1,7 @@
+{
+  "name": "Rohjade",
+  "element": "Beast",
+  "locations": ["Makara Ruins", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "armadillo"
+}

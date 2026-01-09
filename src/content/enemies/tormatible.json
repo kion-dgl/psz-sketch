@@ -1,0 +1,7 @@
+{
+  "name": "Tormatible",
+  "element": "Native",
+  "locations": ["Gurhacia Valley", "Eternal Tower"],
+  "isRare": true,
+  "modelId": "hyena_rare"
+}

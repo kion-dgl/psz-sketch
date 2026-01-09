@@ -1,0 +1,7 @@
+{
+  "name": "Izhirak-S6",
+  "element": "Machine",
+  "locations": ["Oblivion City Paru", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "quad"
+}

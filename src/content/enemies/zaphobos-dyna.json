@@ -1,0 +1,7 @@
+{
+  "name": "Zaphobos Dyna",
+  "element": "Dark",
+  "locations": ["Dark Shrine", "Eternal Tower"],
+  "isRare": true,
+  "modelId": "swordman_rare_b"
+}

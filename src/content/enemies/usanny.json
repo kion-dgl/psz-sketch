@@ -1,0 +1,7 @@
+{
+  "name": "Usanny",
+  "element": "Native",
+  "locations": ["Rioh Snowfield", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "rabbit"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "Helion",
+  "element": "Beast",
+  "locations": ["Gurhacia Valley", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "lion"
+}

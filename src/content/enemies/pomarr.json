@@ -1,0 +1,7 @@
+{
+  "name": "Pomarr",
+  "element": "Native",
+  "locations": ["Ozette Wetland", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "frog_rare"
+}

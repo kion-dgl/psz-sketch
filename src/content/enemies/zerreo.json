@@ -1,0 +1,7 @@
+{
+  "name": "Zerreo",
+  "element": "Dark",
+  "locations": ["Dark Shrine", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "leg_black"
+}

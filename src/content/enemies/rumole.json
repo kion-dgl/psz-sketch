@@ -1,0 +1,7 @@
+{
+  "name": "Rumole",
+  "element": "Native",
+  "locations": ["Makara Ruins", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "mole"
+}

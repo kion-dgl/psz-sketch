@@ -1,0 +1,7 @@
+{
+  "name": "Bullbatt",
+  "element": "Native",
+  "locations": ["Makara Ruins", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "bat_blue"
+}

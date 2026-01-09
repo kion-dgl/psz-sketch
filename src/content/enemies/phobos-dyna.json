@@ -1,0 +1,7 @@
+{
+  "name": "Phobos Dyna",
+  "element": "Dark",
+  "locations": ["Dark Shrine", "Eternal Tower"],
+  "isRare": true,
+  "modelId": "tank_rare"
+}

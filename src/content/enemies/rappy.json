@@ -1,0 +1,7 @@
+{
+  "name": "Rappy",
+  "element": "Native",
+  "locations": ["Gurhacia Valley", "Rioh Snowfield", "Ozette Wetland", "Eternal Tower"],
+  "isRare": true,
+  "modelId": "rappy"
+}

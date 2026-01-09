@@ -1,0 +1,7 @@
+{
+  "name": "Froutang",
+  "element": "Beast",
+  "locations": ["Oblivion City Paru", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "orangutan"
+}
