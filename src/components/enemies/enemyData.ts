@@ -361,6 +361,8 @@ const ANIMATION_SOURCE_MAP: Record<string, string> = {
   lower_black: 'lower',
   // Zerreo uses Derreo animations
   leg_black: 'leg',
+  // Grimble uses Tormatible animations
+  hyena: 'hyena_rare',
 };
 
 /**
