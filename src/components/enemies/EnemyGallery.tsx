@@ -11,6 +11,7 @@ import {
   getEnemyInfoPath,
   getEnemyDisplayName,
   getEnemyElement,
+  getBaseEnemyId,
   isEnemyBoss,
   isEnemyRare,
   type EnemyInfo,
@@ -67,18 +68,27 @@ function EffectModel({
 function EnemyModel({
   enemyId,
   modelBaseName,
+  animationSourcePath,
   selectedAnimation,
   isPlaying,
   onAnimationsLoaded,
 }: {
   enemyId: string;
   modelBaseName: string;
+  animationSourcePath: string | null; // Path to GLB with animations (if different from model)
   selectedAnimation: string | null;
   isPlaying: boolean;
   onAnimationsLoaded?: (animationNames: string[]) => void;
 }) {
   const glbPath = getEnemyGlbPath(enemyId, modelBaseName);
-  const { scene, animations } = useGLTF(glbPath);
+  const { scene, animations: modelAnimations } = useGLTF(glbPath);
+
+  // Load animations from a different source if provided
+  const animSourceGltf = useGLTF(animationSourcePath || glbPath);
+
+  // Use animations from the source (either own model or base enemy)
+  const animations = animationSourcePath ? animSourceGltf.animations : modelAnimations;
+
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
   const actionRef = useRef<THREE.AnimationAction | null>(null);
 
@@ -391,6 +401,21 @@ export default function EnemyGallery() {
 
   const selectedEnemyInfo = selectedEnemy ? enemyInfoMap[selectedEnemy] : null;
 
+  // For rare variants without animations, use animations from the base enemy
+  const animationSourcePath = useMemo(() => {
+    if (!selectedEnemy || !selectedEnemyInfo) return null;
+
+    // Check if this enemy has a base enemy (i.e., it's a rare variant)
+    const baseEnemyId = getBaseEnemyId(selectedEnemy);
+    if (!baseEnemyId) return null;
+
+    // Get the base enemy's info to find its modelBaseName
+    const baseEnemyInfo = enemyInfoMap[baseEnemyId];
+    if (!baseEnemyInfo) return null;
+
+    // Return the path to the base enemy's GLB (which contains the animations)
+    return getEnemyGlbPath(baseEnemyId, baseEnemyInfo.modelBaseName);
+  }, [selectedEnemy, selectedEnemyInfo, enemyInfoMap]);
 
   return (
     <div
@@ -548,6 +573,7 @@ export default function EnemyGallery() {
                   key={selectedEnemy}
                   enemyId={selectedEnemy}
                   modelBaseName={selectedEnemyInfo.modelBaseName}
+                  animationSourcePath={animationSourcePath}
                   selectedAnimation={selectedAnimation}
                   isPlaying={isPlaying}
                   onAnimationsLoaded={setGlbAnimationNames}

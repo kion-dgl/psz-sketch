@@ -342,6 +342,23 @@ export function getEnemyElement(enemyId: string): EnemyElement | null {
 }
 
 /**
+ * Get the base enemy ID for a rare variant
+ * e.g., 'snake_rare' -> 'snake', 'hyena_rare' -> 'hyena'
+ * Returns null if not a rare variant or base doesn't exist
+ */
+export function getBaseEnemyId(enemyId: string): string | null {
+  if (!enemyId.endsWith('_rare')) {
+    return null;
+  }
+  const baseId = enemyId.replace(/_rare$/, '');
+  // Check if the base enemy exists in ALL_ENEMY_IDS
+  if (ALL_ENEMY_IDS.includes(baseId)) {
+    return baseId;
+  }
+  return null;
+}
+
+/**
  * Get enemy location
  */
 export function getEnemyLocation(enemyId: string): string | null {
