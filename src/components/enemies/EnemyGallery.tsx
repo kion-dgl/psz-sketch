@@ -1,7 +1,8 @@
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Environment } from '@react-three/drei';
-import { Suspense, useState, useEffect, useMemo } from 'react';
+import { Suspense, useState, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 import {
   ENEMY_CATEGORIES,
   ALL_ENEMY_IDS,
@@ -17,19 +18,73 @@ import {
   type EnemyElement,
 } from './enemyData';
 
-// Enemy 3D Preview Component
-function EnemyModel({
+interface EffectData {
+  name: string;
+  file: string;
+}
+
+interface AnimationData {
+  name: string;
+  file: string;
+}
+
+// Effect 3D Model Component
+function EffectModel({
   enemyId,
-  modelBaseName,
+  effectName,
+  offset,
 }: {
   enemyId: string;
-  modelBaseName: string;
+  effectName: string;
+  offset: number;
 }) {
-  const glbPath = getEnemyGlbPath(enemyId, modelBaseName);
+  const glbPath = `/enemies/${enemyId}/effects/${effectName}/${effectName}.glb`;
   const { scene } = useGLTF(glbPath);
 
   const clonedScene = useMemo(() => {
     const clone = scene.clone();
+
+    clone.traverse((obj) => {
+      if (obj instanceof THREE.Mesh && obj.geometry) {
+        obj.geometry.computeVertexNormals();
+      }
+      if (obj instanceof THREE.Mesh && obj.material instanceof THREE.Material) {
+        obj.material = obj.material.clone();
+        obj.material.side = THREE.FrontSide;
+      }
+    });
+
+    // Position effects to the side
+    clone.position.x = offset * 2;
+
+    return clone;
+  }, [scene, offset]);
+
+  return <primitive object={clonedScene} />;
+}
+
+// Enemy 3D Preview Component with Animation Support
+function EnemyModel({
+  enemyId,
+  modelBaseName,
+  selectedAnimation,
+  isPlaying,
+  onAnimationsLoaded,
+}: {
+  enemyId: string;
+  modelBaseName: string;
+  selectedAnimation: string | null;
+  isPlaying: boolean;
+  onAnimationsLoaded?: (animationNames: string[]) => void;
+}) {
+  const glbPath = getEnemyGlbPath(enemyId, modelBaseName);
+  const { scene, animations } = useGLTF(glbPath);
+  const mixerRef = useRef<THREE.AnimationMixer | null>(null);
+  const actionRef = useRef<THREE.AnimationAction | null>(null);
+
+  const clonedScene = useMemo(() => {
+    // Use SkeletonUtils.clone for proper skeleton cloning
+    const clone = SkeletonUtils.clone(scene);
 
     // Compute vertex normals for proper lighting
     clone.traverse((obj) => {
@@ -63,6 +118,59 @@ function EnemyModel({
 
     return clone;
   }, [scene]);
+
+  // Create mixer for the cloned scene
+  useEffect(() => {
+    mixerRef.current = new THREE.AnimationMixer(clonedScene);
+
+    return () => {
+      if (mixerRef.current) {
+        mixerRef.current.stopAllAction();
+        mixerRef.current = null;
+      }
+    };
+  }, [clonedScene]);
+
+  // Handle animation playback
+  useEffect(() => {
+    if (!mixerRef.current) return;
+
+    // Stop current animation
+    if (actionRef.current) {
+      actionRef.current.stop();
+      actionRef.current = null;
+    }
+
+    if (selectedAnimation && isPlaying) {
+      // Find the animation clip by name
+      const clip = animations.find((c) => c.name === selectedAnimation);
+      if (clip) {
+        const action = mixerRef.current.clipAction(clip);
+        action.reset();
+        action.setLoop(THREE.LoopRepeat, Infinity);
+        action.play();
+        actionRef.current = action;
+      }
+    }
+  }, [selectedAnimation, isPlaying, animations]);
+
+  // Update mixer every frame
+  useFrame((_, delta) => {
+    if (mixerRef.current && isPlaying) {
+      mixerRef.current.update(delta);
+    }
+  });
+
+  // Report available animations
+  useEffect(() => {
+    const animNames = animations.map((a) => a.name);
+    if (animNames.length > 0) {
+      console.log(`Available animations for ${enemyId}:`, animNames);
+    }
+    if (onAnimationsLoaded) {
+      onAnimationsLoaded(animNames);
+    }
+  }, [animations, enemyId, onAnimationsLoaded]);
 
   return <primitive object={clonedScene} />;
 }
@@ -177,6 +285,14 @@ export default function EnemyGallery() {
   const [enemyInfoMap, setEnemyInfoMap] = useState<Record<string, EnemyInfo>>({});
   const [loading, setLoading] = useState(true);
 
+  // Effects and animations state
+  const [effects, setEffects] = useState<EffectData[]>([]);
+  const [animations, setAnimations] = useState<AnimationData[]>([]);
+  const [glbAnimationNames, setGlbAnimationNames] = useState<string[]>([]);
+  const [selectedEffect, setSelectedEffect] = useState<string | null>(null);
+  const [selectedAnimation, setSelectedAnimation] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
   // Load enemy info files
   useEffect(() => {
     async function loadAllEnemies() {
@@ -207,6 +323,46 @@ export default function EnemyGallery() {
     loadAllEnemies();
   }, []);
 
+  // Load effects and animations when enemy changes
+  useEffect(() => {
+    if (!selectedEnemy) {
+      setEffects([]);
+      setAnimations([]);
+      setGlbAnimationNames([]);
+      setSelectedEffect(null);
+      setSelectedAnimation(null);
+      setIsPlaying(false);
+      return;
+    }
+
+    async function loadEnemyData() {
+      // Load effects
+      try {
+        const effectsRes = await fetch(`/enemies/${selectedEnemy}/effects.json`);
+        const effectsData = await effectsRes.json();
+        setEffects(effectsData);
+      } catch (err) {
+        setEffects([]);
+      }
+
+      // Load animations
+      try {
+        const animRes = await fetch(`/enemies/${selectedEnemy}/animations.json`);
+        const animData = await animRes.json();
+        setAnimations(animData);
+      } catch (err) {
+        setAnimations([]);
+      }
+
+      // Reset state
+      setSelectedEffect(null);
+      setSelectedAnimation(null);
+      setIsPlaying(false);
+    }
+
+    loadEnemyData();
+  }, [selectedEnemy]);
+
   // Group enemies by category
   const enemiesByCategory = useMemo(() => {
     const grouped: Record<string, string[]> = {};
@@ -234,6 +390,7 @@ export default function EnemyGallery() {
   }, [selectedCategory, enemiesByCategory]);
 
   const selectedEnemyInfo = selectedEnemy ? enemyInfoMap[selectedEnemy] : null;
+
 
   return (
     <div
@@ -374,6 +531,7 @@ export default function EnemyGallery() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '10px', color: '#666' }}>
               <span>Model: {selectedEnemy}</span>
               <span>Animations: {selectedEnemyInfo.animationCount}</span>
+              <span>Effects: {selectedEnemyInfo.effectCount}</span>
             </div>
           </div>
         )}
@@ -390,7 +548,19 @@ export default function EnemyGallery() {
                   key={selectedEnemy}
                   enemyId={selectedEnemy}
                   modelBaseName={selectedEnemyInfo.modelBaseName}
+                  selectedAnimation={selectedAnimation}
+                  isPlaying={isPlaying}
+                  onAnimationsLoaded={setGlbAnimationNames}
                 />
+                {/* Render selected effect */}
+                {selectedEffect && (
+                  <EffectModel
+                    key={selectedEffect}
+                    enemyId={selectedEnemy}
+                    effectName={selectedEffect}
+                    offset={1}
+                  />
+                )}
               </Suspense>
               <OrbitControls makeDefault />
               <Environment preset="studio" />
@@ -411,6 +581,144 @@ export default function EnemyGallery() {
           )}
         </div>
       </div>
+
+      {/* Right Panel - Effects & Animations */}
+      {selectedEnemy && selectedEnemyInfo && (
+        <div
+          style={{
+            width: '200px',
+            flexShrink: 0,
+            borderLeft: '1px solid #333',
+            padding: '8px',
+            overflowY: 'auto',
+          }}
+        >
+          {/* Animations Section */}
+          <div style={{ marginBottom: '16px' }}>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '12px', color: '#4a9eff' }}>
+              Animations
+              <span style={{ color: '#666', fontWeight: 'normal', marginLeft: '4px' }}>
+                ({glbAnimationNames.length})
+              </span>
+            </h3>
+
+            {glbAnimationNames.length > 0 ? (
+              <>
+                <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
+                  <button
+                    onClick={() => setIsPlaying(!isPlaying)}
+                    disabled={!selectedAnimation}
+                    style={{
+                      padding: '4px 8px',
+                      background: isPlaying ? '#ff4444' : '#4a9eff',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: selectedAnimation ? 'pointer' : 'not-allowed',
+                      fontSize: '10px',
+                      opacity: selectedAnimation ? 1 : 0.5,
+                    }}
+                  >
+                    {isPlaying ? 'Stop' : 'Play'}
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  {glbAnimationNames.map((animName) => (
+                    <button
+                      key={animName}
+                      onClick={() => {
+                        setSelectedAnimation(animName);
+                        setIsPlaying(true);
+                      }}
+                      style={{
+                        display: 'block',
+                        width: '100%',
+                        padding: '4px 8px',
+                        background: selectedAnimation === animName ? '#2a3a5e' : 'transparent',
+                        border: selectedAnimation === animName ? '1px solid #4a9eff' : '1px solid transparent',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontSize: '10px',
+                        color: selectedAnimation === animName ? '#4a9eff' : '#ccc',
+                      }}
+                    >
+                      {animName}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div style={{ color: '#666', fontSize: '10px' }}>No animations</div>
+            )}
+          </div>
+
+          {/* Effects Section */}
+          <div>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '12px', color: '#4a9eff' }}>
+              Effects
+              <span style={{ color: '#666', fontWeight: 'normal', marginLeft: '4px' }}>
+                ({effects.length})
+              </span>
+            </h3>
+
+            {effects.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '4px 8px',
+                    background: selectedEffect === null ? '#2a3a5e' : 'transparent',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '10px',
+                    color: selectedEffect === null ? '#4a9eff' : '#ccc',
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="effect"
+                    checked={selectedEffect === null}
+                    onChange={() => setSelectedEffect(null)}
+                    style={{ margin: 0 }}
+                  />
+                  None
+                </label>
+                {effects.map((effect) => (
+                  <label
+                    key={effect.name}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '4px 8px',
+                      background: selectedEffect === effect.name ? '#2a3a5e' : 'transparent',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '10px',
+                      color: selectedEffect === effect.name ? '#4a9eff' : '#ccc',
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="effect"
+                      checked={selectedEffect === effect.name}
+                      onChange={() => setSelectedEffect(effect.name)}
+                      style={{ margin: 0 }}
+                    />
+                    {effect.name}
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <div style={{ color: '#666', fontSize: '10px' }}>No effects</div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
