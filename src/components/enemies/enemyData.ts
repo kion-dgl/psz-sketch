@@ -342,11 +342,42 @@ export function getEnemyElement(enemyId: string): EnemyElement | null {
 }
 
 /**
- * Get the base enemy ID for a rare variant
- * e.g., 'snake_rare' -> 'snake', 'hyena_rare' -> 'hyena'
- * Returns null if not a rare variant or base doesn't exist
+ * Manual mapping for enemies that share animations with another enemy
+ * but don't follow the simple _rare suffix pattern
+ */
+const ANIMATION_SOURCE_MAP: Record<string, string> = {
+  // Hildeghana uses Hildegao animations
+  gorilla_female: 'gorilla',
+  // Pobomma (bomb frog) uses Porel (frog) animations
+  frog_bomb: 'frog',
+  // Bullbatt uses Batt animations
+  bat_blue: 'bat',
+  // Euladaveil uses Eulada animations
+  circle_black: 'circle',
+  // Ar Rappy and Rab Rappy use Rappy animations
+  rappy_blue: 'rappy',
+  rappy_red: 'rappy',
+  // Eulidveil uses Eulid animations
+  lower_black: 'lower',
+  // Zerreo uses Derreo animations
+  leg_black: 'leg',
+};
+
+/**
+ * Get the base enemy ID for animation sharing
+ * Checks manual mapping first, then falls back to _rare suffix pattern
+ * Returns null if no animation source mapping exists
  */
 export function getBaseEnemyId(enemyId: string): string | null {
+  // Check manual mapping first
+  if (ANIMATION_SOURCE_MAP[enemyId]) {
+    const baseId = ANIMATION_SOURCE_MAP[enemyId];
+    if (ALL_ENEMY_IDS.includes(baseId)) {
+      return baseId;
+    }
+  }
+
+  // Fall back to _rare suffix pattern
   if (!enemyId.endsWith('_rare')) {
     return null;
   }
