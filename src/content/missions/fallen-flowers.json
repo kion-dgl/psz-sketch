@@ -1,0 +1,11 @@
+{
+  "name": "Fallen Flowers",
+  "area": "Makura Ruins",
+  "main": false,
+  "requires": [],
+  "rewards": {
+    "normal": { "item": "Doppel Scythe", "quantity": 1, "meseta": 2000 },
+    "hard": { "item": "Chronos Scythe", "quantity": 1, "meseta": 4000 },
+    "superHard": { "item": "Chronos Scythe", "quantity": 1, "meseta": 8000 }
+  }
+}

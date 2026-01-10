@@ -1,0 +1,12 @@
+{
+  "name": "Third Daughter",
+  "area": "Rioh Snowfield",
+  "main": false,
+  "isSecret": true,
+  "requires": [],
+  "rewards": {
+    "normal": { "item": "Chef Apron", "quantity": 1, "meseta": 5000 },
+    "hard": { "item": "Chef Apron", "quantity": 1, "meseta": 10000 },
+    "superHard": { "item": "Chef Apron", "quantity": 1, "meseta": 20000 }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "armor": "Miyabi Hakama",
+  "weapons": ["Bangasa Jikomi", "Karakasa Jikomi"],
+  "bonuses": { "attack": 25, "mental": 0, "accuracy": 50, "defense": 0, "evasion": 0 }
+}

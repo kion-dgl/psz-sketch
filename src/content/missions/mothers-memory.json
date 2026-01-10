@@ -1,0 +1,11 @@
+{
+  "name": "Mother's Memory",
+  "area": "Dark Shrine",
+  "main": false,
+  "requires": [],
+  "rewards": {
+    "normal": { "item": "Spirit Garb", "quantity": 1, "meseta": 2500 },
+    "hard": { "item": "Spirit Garb", "quantity": 1, "meseta": 5000 },
+    "superHard": { "item": "Spirit Garb", "quantity": 1, "meseta": 10000 }
+  }
+}

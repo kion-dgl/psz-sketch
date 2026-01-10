@@ -1,0 +1,13 @@
+{
+  "name": "Hollow Swipe",
+  "weaponType": "Rifle",
+  "classType": "Ranger",
+  "attackMod": 80,
+  "accuracyMod": 255,
+  "ppCost": 26,
+  "targets": 0,
+  "range": "20m",
+  "area": 60,
+  "hits": 7,
+  "notes": null
+}

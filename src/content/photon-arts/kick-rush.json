@@ -1,0 +1,13 @@
+{
+  "name": "Kick Rush",
+  "weaponType": "Bare-Handed",
+  "classType": "Hunter",
+  "attackMod": 180,
+  "accuracyMod": 180,
+  "ppCost": 10,
+  "targets": 0,
+  "range": "2m",
+  "area": 60,
+  "hits": 5,
+  "notes": null
+}

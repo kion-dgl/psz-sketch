@@ -1,0 +1,13 @@
+{
+  "name": "Sector Line",
+  "weaponType": "Laser Cannon",
+  "classType": "Ranger",
+  "attackMod": 150,
+  "accuracyMod": 80,
+  "ppCost": 22,
+  "targets": 3,
+  "range": "16m",
+  "area": 240,
+  "hits": 1,
+  "notes": null
+}

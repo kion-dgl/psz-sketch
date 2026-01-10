@@ -1,0 +1,13 @@
+{
+  "name": "Rodeo Drive",
+  "weaponType": "Rod",
+  "classType": "Force",
+  "attackMod": 120,
+  "accuracyMod": 130,
+  "ppCost": 19,
+  "targets": 2,
+  "range": "3.5m",
+  "area": 360,
+  "hits": 3,
+  "notes": null
+}

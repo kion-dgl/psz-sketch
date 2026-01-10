@@ -1,0 +1,13 @@
+{
+  "name": "Force Ride",
+  "weaponType": "Saber",
+  "classType": "Hunter",
+  "attackMod": 125,
+  "accuracyMod": 100,
+  "ppCost": 15,
+  "targets": 1,
+  "range": "2.5m",
+  "area": 220,
+  "hits": 5,
+  "notes": null
+}

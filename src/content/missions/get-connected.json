@@ -1,0 +1,11 @@
+{
+  "name": "Get Connected",
+  "area": "Gurhacia Valley",
+  "main": false,
+  "requires": [],
+  "rewards": {
+    "normal": { "item": "Ace/PP", "quantity": 1, "meseta": 1000 },
+    "hard": { "item": "Hero/PP", "quantity": 1, "meseta": 2000 },
+    "superHard": { "item": "Master/PP", "quantity": 1, "meseta": 4000 }
+  }
+}

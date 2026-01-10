@@ -1,0 +1,11 @@
+{
+  "name": "2 Sets of Heroes",
+  "area": "Arca Plant",
+  "main": false,
+  "requires": [],
+  "rewards": {
+    "normal": { "item": "Harisen", "quantity": 1, "meseta": 3000 },
+    "hard": { "item": "Goof Swatter", "quantity": 1, "meseta": 6000 },
+    "superHard": { "item": "Goof Swatter", "quantity": 1, "meseta": 12000 }
+  }
+}

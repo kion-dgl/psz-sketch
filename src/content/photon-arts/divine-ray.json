@@ -1,0 +1,13 @@
+{
+  "name": "Divine Ray",
+  "weaponType": "Laser Cannon",
+  "classType": "Ranger",
+  "attackMod": 250,
+  "accuracyMod": 200,
+  "ppCost": 24,
+  "targets": 3,
+  "range": "10m",
+  "area": 120,
+  "hits": 1,
+  "notes": null
+}

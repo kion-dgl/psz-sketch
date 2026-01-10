@@ -5,6 +5,59 @@ import { docsSchema } from '@astrojs/starlight/schema';
 // ITEM COLLECTIONS
 // ============================================================================
 
+// Photon Arts collection - special weapon attacks
+const photonArts = defineCollection({
+  type: 'data',
+  schema: z.object({
+    name: z.string(),
+    weaponType: z.string(),
+    classType: z.enum(['Hunter', 'Ranger', 'Force']),
+    attackMod: z.number().nullable(), // percentage, null for utility arts
+    accuracyMod: z.number().nullable(),
+    ppCost: z.number(),
+    targets: z.number(), // additional targets (+X)
+    range: z.string().nullable(), // e.g., "3m"
+    area: z.number().nullable(), // degrees
+    hits: z.number().nullable(),
+    notes: z.string().nullable()
+  })
+});
+
+// Shops collection - vendor data for Sewer Shop and other merchants
+const shops = defineCollection({
+  type: 'data',
+  schema: z.object({
+    name: z.string(),
+    description: z.string().optional(),
+    unlockCondition: z.string().optional(),
+    items: z.array(z.object({
+      item: z.string(),
+      category: z.string().optional(),
+      cost: z.number().optional(),
+      currency: z.enum(['Meseta', 'Photon Drop']).optional(),
+      tradeIn: z.string().optional(), // enemy part for Enemy Collector
+      code: z.string().optional(), // for Password Machine
+      notes: z.string().optional()
+    }))
+  })
+});
+
+// Set bonuses collection - armor+weapon combinations with hidden stat boosts
+const setBonuses = defineCollection({
+  type: 'data',
+  schema: z.object({
+    armor: z.string(),
+    weapons: z.array(z.string()),
+    bonuses: z.object({
+      attack: z.number().default(0),
+      mental: z.number().default(0),
+      accuracy: z.number().default(0),
+      defense: z.number().default(0),
+      evasion: z.number().default(0)
+    })
+  })
+});
+
 // Armors collection - defensive equipment
 const armors = defineCollection({
   type: 'data',
@@ -131,6 +184,102 @@ const weapons = defineCollection({
     useModelFrom: z.string().optional(),
     notes: z.string().optional(),
     wikiUrl: z.string().optional()
+  })
+});
+
+// ============================================================================
+// CHARACTER COLLECTIONS
+// ============================================================================
+
+// Stat progression schema - stats at key levels
+const statProgressionSchema = z.object({
+  1: z.number(),
+  20: z.number(),
+  40: z.number(),
+  60: z.number(),
+  80: z.number(),
+  100: z.number()
+});
+
+// Technique limit schema
+const techniqueLimitsSchema = z.object({
+  foieBartaZonde: z.number().nullable(), // null if class can't use
+  grants: z.number().nullable(),
+  megid: z.number().nullable(),
+  restaReverser: z.number().nullable(),
+  shiftaDeband: z.number().nullable(),
+  jellenZalure: z.number().nullable()
+});
+
+// Trap limit schema (for CAST classes)
+const trapLimitsSchema = z.object({
+  fire: z.array(z.number()).length(6), // limits at level ranges: 1-19, 20-39, 40-59, 60-79, 80-99, 100
+  freeze: z.array(z.number()).length(6),
+  confuse: z.array(z.number()).length(6),
+  heal: z.array(z.number()).length(6)
+});
+
+// Classes collection - character class data
+const classes = defineCollection({
+  type: 'data',
+  schema: z.object({
+    name: z.string(),
+    race: z.enum(['Human', 'Newman', 'Cast']),
+    gender: z.enum(['Male', 'Female']),
+    type: z.enum(['Hunter', 'Ranger', 'Force']),
+    // Bonuses
+    bonuses: z.array(z.string()),
+    materialLimit: z.number(), // 80 or 100
+    // Stats at key levels
+    stats: z.object({
+      hp: statProgressionSchema,
+      pp: statProgressionSchema,
+      attack: statProgressionSchema,
+      defense: statProgressionSchema,
+      accuracy: statProgressionSchema,
+      evasion: statProgressionSchema,
+      technique: statProgressionSchema
+    }),
+    // Technique limits (null for CAST classes)
+    techniqueLimits: techniqueLimitsSchema.nullable(),
+    // Trap limits (only for CAST classes)
+    trapLimits: trapLimitsSchema.nullable()
+  })
+});
+
+// Experience table collection
+const experience = defineCollection({
+  type: 'data',
+  schema: z.object({
+    levels: z.array(z.object({
+      level: z.number().min(1).max(100),
+      totalExp: z.number(),
+      expToNext: z.number().nullable() // null for level 100
+    }))
+  })
+});
+
+// Mission reward schema
+const missionRewardSchema = z.object({
+  item: z.string(),
+  quantity: z.number().default(1),
+  meseta: z.number()
+});
+
+// Missions collection - individual files per mission for progress tracking
+const missions = defineCollection({
+  type: 'data',
+  schema: z.object({
+    name: z.string(),
+    area: z.string(),
+    main: z.boolean().default(false), // true for main story quests
+    isSecret: z.boolean().default(false),
+    requires: z.array(z.string()).default([]), // mission file names (without .json)
+    rewards: z.object({
+      normal: missionRewardSchema.optional(),
+      hard: missionRewardSchema.optional(),
+      superHard: missionRewardSchema.optional()
+    }).optional()
   })
 });
 
@@ -307,6 +456,9 @@ export const collections = {
   'quest-definitions': questDefinitions,
   'quest-areas': questAreas,
   // Item collections
+  'photon-arts': photonArts,
+  shops,
+  'set-bonuses': setBonuses,
   armors,
   units,
   mags,
@@ -317,5 +469,9 @@ export const collections = {
   // Enemy collection
   enemies,
   // Drops collection (by difficulty)
-  drops
+  drops,
+  // Character collections
+  classes,
+  experience,
+  missions
 };

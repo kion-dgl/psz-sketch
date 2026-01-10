@@ -1,0 +1,5 @@
+{
+  "armor": "Chef Apron",
+  "weapons": ["Berry Ice Beam", "Bitter Berry", "Mellow Ice Beam", "Sweet Berry"],
+  "bonuses": { "attack": 25, "mental": 0, "accuracy": 50, "defense": 0, "evasion": 0 }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Bull Smash",
+  "weaponType": "Shield",
+  "classType": "Hunter",
+  "attackMod": 210,
+  "accuracyMod": 200,
+  "ppCost": 18,
+  "targets": 4,
+  "range": "4.5m",
+  "area": 180,
+  "hits": 2,
+  "notes": null
+}

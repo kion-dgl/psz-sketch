@@ -1,0 +1,13 @@
+{
+  "name": "Impact Zero",
+  "weaponType": "Gunblade",
+  "classType": "Ranger",
+  "attackMod": 180,
+  "accuracyMod": 135,
+  "ppCost": 17,
+  "targets": 3,
+  "range": "3m",
+  "area": 360,
+  "hits": 2,
+  "notes": null
+}

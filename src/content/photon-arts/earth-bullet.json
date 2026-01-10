@@ -1,0 +1,13 @@
+{
+  "name": "Earth Bullet",
+  "weaponType": "Gunblade",
+  "classType": "Ranger",
+  "attackMod": 170,
+  "accuracyMod": 150,
+  "ppCost": 20,
+  "targets": 4,
+  "range": "5m",
+  "area": 90,
+  "hits": 3,
+  "notes": null
+}

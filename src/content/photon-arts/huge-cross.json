@@ -1,0 +1,13 @@
+{
+  "name": "Huge Cross",
+  "weaponType": "Dagger",
+  "classType": "Hunter",
+  "attackMod": 90,
+  "accuracyMod": 130,
+  "ppCost": 22,
+  "targets": 3,
+  "range": "3.5m",
+  "area": 180,
+  "hits": 3,
+  "notes": null
+}

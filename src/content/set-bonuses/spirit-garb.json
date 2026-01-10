@@ -1,0 +1,5 @@
+{
+  "armor": "Spirit Garb",
+  "weapons": ["Calamity Soul", "White Disaster"],
+  "bonuses": { "attack": 0, "mental": 25, "accuracy": 50, "defense": 0, "evasion": 0 }
+}

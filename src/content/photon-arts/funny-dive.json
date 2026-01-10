@@ -1,0 +1,13 @@
+{
+  "name": "Funny Dive",
+  "weaponType": "Wand",
+  "classType": "Force",
+  "attackMod": 125,
+  "accuracyMod": 200,
+  "ppCost": 11,
+  "targets": 4,
+  "range": "4m",
+  "area": 360,
+  "hits": 1,
+  "notes": null
+}

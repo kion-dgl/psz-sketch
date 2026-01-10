@@ -1,0 +1,13 @@
+{
+  "name": "Spear Rider",
+  "weaponType": "Spear",
+  "classType": "Hunter",
+  "attackMod": 145,
+  "accuracyMod": 160,
+  "ppCost": 20,
+  "targets": 2,
+  "range": "3.5m",
+  "area": 180,
+  "hits": 3,
+  "notes": null
+}

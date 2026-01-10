@@ -1,0 +1,13 @@
+{
+  "name": "Serpent Air",
+  "weaponType": "Claw",
+  "classType": "Hunter",
+  "attackMod": 115,
+  "accuracyMod": 80,
+  "ppCost": 18,
+  "targets": 2,
+  "range": "3m",
+  "area": 360,
+  "hits": 5,
+  "notes": null
+}

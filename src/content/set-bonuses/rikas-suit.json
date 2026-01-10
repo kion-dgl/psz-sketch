@@ -1,0 +1,5 @@
+{
+  "armor": "Rika's Suit",
+  "weapons": ["Orgaclaw", "Rika's Claw"],
+  "bonuses": { "attack": 50, "mental": 0, "accuracy": 0, "defense": 0, "evasion": 25 }
+}

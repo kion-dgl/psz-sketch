@@ -1,0 +1,13 @@
+{
+  "name": "Million Rave",
+  "weaponType": "Double Saber",
+  "classType": "Hunter",
+  "attackMod": 135,
+  "accuracyMod": 100,
+  "ppCost": 25,
+  "targets": 2,
+  "range": "4.5m",
+  "area": 120,
+  "hits": 4,
+  "notes": null
+}

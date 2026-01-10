@@ -1,0 +1,13 @@
+{
+  "name": "Linear Shake",
+  "weaponType": "Shield",
+  "classType": "Hunter",
+  "attackMod": 160,
+  "accuracyMod": 160,
+  "ppCost": 18,
+  "targets": 3,
+  "range": "2.5m",
+  "area": 360,
+  "hits": 4,
+  "notes": null
+}

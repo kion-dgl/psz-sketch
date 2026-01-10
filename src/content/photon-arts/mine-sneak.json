@@ -1,0 +1,13 @@
+{
+  "name": "Mine Sneak",
+  "weaponType": "Rifle",
+  "classType": "Ranger",
+  "attackMod": 160,
+  "accuracyMod": 200,
+  "ppCost": 19,
+  "targets": 4,
+  "range": "8m",
+  "area": 360,
+  "hits": 4,
+  "notes": null
+}

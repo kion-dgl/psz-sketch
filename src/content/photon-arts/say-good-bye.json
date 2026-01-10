@@ -1,0 +1,13 @@
+{
+  "name": "Say Good-bye",
+  "weaponType": "Slicer",
+  "classType": "Force",
+  "attackMod": 100,
+  "accuracyMod": 210,
+  "ppCost": 15,
+  "targets": 5,
+  "range": "6m",
+  "area": 360,
+  "hits": 1,
+  "notes": "50% chance for Level 3 Confuse"
+}

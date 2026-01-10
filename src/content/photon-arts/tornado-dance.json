@@ -1,0 +1,13 @@
+{
+  "name": "Tornado Dance",
+  "weaponType": "Double Saber",
+  "classType": "Hunter",
+  "attackMod": 130,
+  "accuracyMod": 120,
+  "ppCost": 30,
+  "targets": 3,
+  "range": "3m",
+  "area": 180,
+  "hits": 4,
+  "notes": null
+}

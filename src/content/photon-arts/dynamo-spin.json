@@ -1,0 +1,13 @@
+{
+  "name": "Dynamo Spin",
+  "weaponType": "Sword",
+  "classType": "Hunter",
+  "attackMod": 80,
+  "accuracyMod": 80,
+  "ppCost": 21,
+  "targets": 0,
+  "range": "4m",
+  "area": 360,
+  "hits": 4,
+  "notes": null
+}

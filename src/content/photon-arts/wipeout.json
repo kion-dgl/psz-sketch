@@ -1,0 +1,13 @@
+{
+  "name": "Wipeout",
+  "weaponType": "Rifle",
+  "classType": "Ranger",
+  "attackMod": 75,
+  "accuracyMod": 80,
+  "ppCost": 21,
+  "targets": 0,
+  "range": "12.5m",
+  "area": 40,
+  "hits": 11,
+  "notes": "20% chance of Level 4 Burn"
+}

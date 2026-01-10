@@ -1,0 +1,13 @@
+{
+  "name": "Bright Sign",
+  "weaponType": "Slicer",
+  "classType": "Force",
+  "attackMod": 110,
+  "accuracyMod": 120,
+  "ppCost": 14,
+  "targets": 2,
+  "range": "6.5m",
+  "area": 90,
+  "hits": 3,
+  "notes": "15% chance for Level 3 Paralysis"
+}

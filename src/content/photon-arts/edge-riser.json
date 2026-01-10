@@ -1,0 +1,13 @@
+{
+  "name": "Edge Riser",
+  "weaponType": "Slicer",
+  "classType": "Force",
+  "attackMod": 150,
+  "accuracyMod": 200,
+  "ppCost": 15,
+  "targets": 3,
+  "range": "5m",
+  "area": 360,
+  "hits": 1,
+  "notes": null
+}

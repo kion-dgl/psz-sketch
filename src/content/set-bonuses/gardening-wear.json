@@ -1,0 +1,5 @@
+{
+  "armor": "Gardening Wear",
+  "weapons": ["Bloom Shower", "Grow Shower"],
+  "bonuses": { "attack": 0, "mental": 25, "accuracy": 50, "defense": 0, "evasion": 0 }
+}

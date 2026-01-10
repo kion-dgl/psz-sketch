@@ -1,0 +1,11 @@
+{
+  "name": "Devilish Return",
+  "area": "Ozette Wetland",
+  "main": false,
+  "requires": [],
+  "rewards": {
+    "normal": { "item": "Twin Ketchup", "quantity": 1, "meseta": 500 },
+    "hard": { "item": "Twin Mustard", "quantity": 1, "meseta": 1000 },
+    "superHard": { "item": "Twin Mustard", "quantity": 1, "meseta": 2000 }
+  }
+}

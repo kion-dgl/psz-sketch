@@ -1,0 +1,11 @@
+{
+  "name": "Mayor's Quest",
+  "area": "Ozette Wetland",
+  "main": false,
+  "requires": [],
+  "rewards": {
+    "normal": { "item": "Ace/HP", "quantity": 1, "meseta": 1500 },
+    "hard": { "item": "Hero/HP", "quantity": 1, "meseta": 3000 },
+    "superHard": { "item": "Master/HP", "quantity": 1, "meseta": 6000 }
+  }
+}

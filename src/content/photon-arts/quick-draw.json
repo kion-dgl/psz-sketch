@@ -1,0 +1,13 @@
+{
+  "name": "Quick Draw",
+  "weaponType": "Handgun",
+  "classType": "Ranger",
+  "attackMod": 80,
+  "accuracyMod": 75,
+  "ppCost": 24,
+  "targets": 0,
+  "range": "8m",
+  "area": 30,
+  "hits": 7,
+  "notes": null
+}

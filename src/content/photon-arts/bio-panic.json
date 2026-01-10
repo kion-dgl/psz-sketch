@@ -1,0 +1,13 @@
+{
+  "name": "Bio-Panic",
+  "weaponType": "Laser Cannon",
+  "classType": "Ranger",
+  "attackMod": 100,
+  "accuracyMod": 180,
+  "ppCost": 16,
+  "targets": 3,
+  "range": "12m",
+  "area": 180,
+  "hits": 3,
+  "notes": "50% chance of Level 3 Poison"
+}

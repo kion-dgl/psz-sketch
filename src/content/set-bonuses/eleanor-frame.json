@@ -1,0 +1,5 @@
+{
+  "armor": "Eleanor Frame",
+  "weapons": ["Cutie Beam", "Pinky Beam"],
+  "bonuses": { "attack": 0, "mental": 0, "accuracy": 50, "defense": 25, "evasion": 0 }
+}

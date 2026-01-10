@@ -1,0 +1,13 @@
+{
+  "name": "Crazy On",
+  "weaponType": "Bazooka",
+  "classType": "Ranger",
+  "attackMod": 130,
+  "accuracyMod": 200,
+  "ppCost": 19,
+  "targets": 2,
+  "range": "4.5m",
+  "area": 120,
+  "hits": 2,
+  "notes": null
+}

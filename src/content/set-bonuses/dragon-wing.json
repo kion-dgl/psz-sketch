@@ -1,0 +1,5 @@
+{
+  "armor": "Dragon Wing",
+  "weapons": ["Dragon Horn", "Scarred Horn"],
+  "bonuses": { "attack": 50, "mental": 0, "accuracy": 25, "defense": 0, "evasion": 0 }
+}

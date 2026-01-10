@@ -1,0 +1,13 @@
+{
+  "name": "Act Trick",
+  "weaponType": "Wand",
+  "classType": "Force",
+  "attackMod": null,
+  "accuracyMod": null,
+  "ppCost": 2,
+  "targets": 0,
+  "range": null,
+  "area": null,
+  "hits": null,
+  "notes": "Triggers a random technique"
+}

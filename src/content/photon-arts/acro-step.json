@@ -1,0 +1,13 @@
+{
+  "name": "Acro-Step",
+  "weaponType": "Mech Gun",
+  "classType": "Ranger",
+  "attackMod": 85,
+  "accuracyMod": 100,
+  "ppCost": 24,
+  "targets": 0,
+  "range": "6m",
+  "area": 90,
+  "hits": 15,
+  "notes": null
+}

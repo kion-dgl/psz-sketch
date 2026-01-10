@@ -1,0 +1,13 @@
+{
+  "name": "Cyclone Run",
+  "weaponType": "Double Saber",
+  "classType": "Hunter",
+  "attackMod": 100,
+  "accuracyMod": 80,
+  "ppCost": 20,
+  "targets": 4,
+  "range": "3.5m",
+  "area": 360,
+  "hits": 5,
+  "notes": null
+}

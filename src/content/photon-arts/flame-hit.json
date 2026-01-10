@@ -1,0 +1,13 @@
+{
+  "name": "Flame Hit",
+  "weaponType": "Handgun",
+  "classType": "Ranger",
+  "attackMod": 145,
+  "accuracyMod": 100,
+  "ppCost": 19,
+  "targets": 3,
+  "range": "6m",
+  "area": 120,
+  "hits": 3,
+  "notes": "20% chance for Level 4 Burn"
+}

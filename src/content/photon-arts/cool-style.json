@@ -1,0 +1,13 @@
+{
+  "name": "Cool Style",
+  "weaponType": "Mech Gun",
+  "classType": "Ranger",
+  "attackMod": 80,
+  "accuracyMod": 80,
+  "ppCost": 23,
+  "targets": 0,
+  "range": "6m",
+  "area": 90,
+  "hits": 30,
+  "notes": null
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Beat Quake",
+  "weaponType": "Rod",
+  "classType": "Force",
+  "attackMod": 140,
+  "accuracyMod": 150,
+  "ppCost": 19,
+  "targets": 4,
+  "range": "4m",
+  "area": 360,
+  "hits": 1,
+  "notes": null
+}

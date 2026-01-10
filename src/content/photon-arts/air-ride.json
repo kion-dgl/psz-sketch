@@ -1,0 +1,13 @@
+{
+  "name": "Air Ride",
+  "weaponType": "Dagger",
+  "classType": "Hunter",
+  "attackMod": 95,
+  "accuracyMod": 80,
+  "ppCost": 19,
+  "targets": 4,
+  "range": "3m",
+  "area": 240,
+  "hits": 5,
+  "notes": null
+}
