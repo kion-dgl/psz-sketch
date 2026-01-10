@@ -1,0 +1,8 @@
+{
+  "name": "Gigobooma Origin",
+  "japaneseName": "ジゴブーオリジン",
+  "element": "Native",
+  "locations": ["Ozette Wetland", "Oblivion City Paru", "Makara Ruins", "Arca Plant", "Dark Shrine", "Eternal Tower"],
+  "isRare": true,
+  "modelId": "jigobooma"
+}

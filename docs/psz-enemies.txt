@@ -1,0 +1,1549 @@
+Enemy: Ghowl
+
+Quick Jump: Description & Notes | Pictures
+
+Ghowl
+Item Summary
+Japanese Name:	ガウル
+Versions:	Phantasy Star Zero
+
+
+Ghowl Findings
+Item	Difficulty	Location	Version
+Chrome Cutlass	Normal	Gurhacia Valley	Phantasy Star Zero
+Chrome Cutlass	Normal	Eternal Tower	Phantasy Star Zero
+Cutlass	Normal	Gurhacia Valley	Phantasy Star Zero
+Cutlass	Normal	Eternal Tower	Phantasy Star Zero
+Goof Swatter	Hard	Gurhacia Valley	Phantasy Star Zero
+Goof Swatter	Hard	Eternal Tower	Phantasy Star Zero
+Kurtana	Hard	Gurhacia Valley	Phantasy Star Zero
+Kurtana	Hard	Eternal Tower	Phantasy Star Zero
+Kutune Sirka	Hard	Gurhacia Valley	Phantasy Star Zero
+Kutune Sirka	Hard	Eternal Tower	Phantasy Star Zero
+Eclamasach	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Eclamasach	Super Hard	Eternal Tower	Phantasy Star Zero
+Goof Swatter	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Goof Swatter	Super Hard	Eternal Tower	Phantasy Star Zero
+Kutune Sirka	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Kutune Sirka	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Vulkure
+
+Quick Jump: Description & Notes | Pictures
+
+Vulkure
+Item Summary
+Japanese Name:	ヴァルカー
+Description:	A raptor that attacks from behind. It is smart and attacks with its sharp beak.
+Versions:	Phantasy Star Zero
+
+
+Vulkure Findings
+Item	Difficulty	Location	Version
+Chrome Carbine	Normal	Gurhacia Valley	Phantasy Star Zero
+Chrome Carbine	Normal	Eternal Tower	Phantasy Star Zero
+Gun Slash	Normal	Gurhacia Valley	Phantasy Star Zero
+Gun Slash	Normal	Eternal Tower	Phantasy Star Zero
+Twin Fire	Normal	Gurhacia Valley	Phantasy Star Zero
+Twin Fire	Normal	Eternal Tower	Phantasy Star Zero
+Bergmann	Hard	Gurhacia Valley	Phantasy Star Zero
+Bergmann	Hard	Eternal Tower	Phantasy Star Zero
+Riverman Missouri	Hard	Gurhacia Valley	Phantasy Star Zero
+Riverman Missouri	Hard	Eternal Tower	Phantasy Star Zero
+Schmeisser	Hard	Gurhacia Valley	Phantasy Star Zero
+Schmeisser	Hard	Eternal Tower	Phantasy Star Zero
+Crimson Vis	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Crimson Vis	Super Hard	Eternal Tower	Phantasy Star Zero
+Riverman Missouri	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Riverman Missouri	Super Hard	Eternal Tower	Phantasy Star Zero
+Schmeisser	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Schmeisser	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Usanny
+
+Quick Jump: Description & Notes | Pictures
+
+Usanny
+Item Summary
+Japanese Name:	ウサニー
+Description:	A small creature with pure-white fur. It is prized as a pet for its cuteness.
+Versions:	Phantasy Star Zero
+
+
+Usanny Findings
+Item	Difficulty	Location	Version
+Deo Pistol	Normal	Rioh Snowfield	Phantasy Star Zero
+Deo Pistol	Normal	Eternal Tower	Phantasy Star Zero
+Ein Pistol	Normal	Rioh Snowfield	Phantasy Star Zero
+Ein Pistol	Normal	Eternal Tower	Phantasy Star Zero
+Ein Rifle	Normal	Rioh Snowfield	Phantasy Star Zero
+Ein Rifle	Normal	Eternal Tower	Phantasy Star Zero
+Delacquer	Hard	Rioh Snowfield	Phantasy Star Zero
+Delacquer	Hard	Eternal Tower	Phantasy Star Zero
+H10 Missouri	Hard	Rioh Snowfield	Phantasy Star Zero
+H10 Missouri	Hard	Eternal Tower	Phantasy Star Zero
+Ryjarg	Hard	Rioh Snowfield	Phantasy Star Zero
+Ryjarg	Hard	Eternal Tower	Phantasy Star Zero
+H10 Missouri	Super Hard	Rioh Snowfield	Phantasy Star Zero
+H10 Missouri	Super Hard	Eternal Tower	Phantasy Star Zero
+H44 Missouri	Super Hard	Rioh Snowfield	Phantasy Star Zero
+H44 Missouri	Super Hard	Eternal Tower	Phantasy Star Zero
+Ryjarg	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Ryjarg	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Usanimere
+
+Quick Jump: Description & Notes | Pictures
+
+Usanimere
+Item Summary
+Japanese Name:	ウサニーメア
+Rare Enemy:	Yes
+Description:	A black variant of Usanny. Because of its distinct color, it rarely appears.
+Versions:	Phantasy Star Zero
+
+
+Usanimere Findings
+Item	Difficulty	Location	Version
+Deo Twins	Normal	Rioh Snowfield	Phantasy Star Zero
+Deo Twins	Normal	Eternal Tower	Phantasy Star Zero
+Ein Rocket	Normal	Rioh Snowfield	Phantasy Star Zero
+Ein Rocket	Normal	Eternal Tower	Phantasy Star Zero
+Hero/Hit	Normal	Rioh Snowfield	Phantasy Star Zero
+Hero/Hit	Normal	Eternal Tower	Phantasy Star Zero
+Blue Danube	Hard	Rioh Snowfield	Phantasy Star Zero
+Blue Danube	Hard	Eternal Tower	Phantasy Star Zero
+Master/Hit	Hard	Rioh Snowfield	Phantasy Star Zero
+Master/Hit	Hard	Eternal Tower	Phantasy Star Zero
+Mellow Ice Beam	Hard	Rioh Snowfield	Phantasy Star Zero
+Mellow Ice Beam	Hard	Eternal Tower	Phantasy Star Zero
+Divine/Hit	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Divine/Hit	Super Hard	Eternal Tower	Phantasy Star Zero
+Yasminkov M95	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Yasminkov M95	Super Hard	Eternal Tower	Phantasy Star Zero
+Yellow Sun	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Yellow Sun	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Porel
+
+Quick Jump: Description & Notes | Pictures
+
+Porel
+Item Summary
+Japanese Name:	ポエル
+Description:	Native to wetlands, this enemy moves by bouncing its slimy body.
+Versions:	Phantasy Star Zero
+
+
+Porel Findings
+Item	Difficulty	Location	Version
+Cane	Normal	Ozette Wetland	Phantasy Star Zero
+Cane	Normal	Eternal Tower	Phantasy Star Zero
+Clear Cane	Normal	Ozette Wetland	Phantasy Star Zero
+Clear Cane	Normal	Eternal Tower	Phantasy Star Zero
+Ray Bangle	Normal	Ozette Wetland	Phantasy Star Zero
+Ray Bangle	Normal	Eternal Tower	Phantasy Star Zero
+Egalta	Hard	Ozette Wetland	Phantasy Star Zero
+Egalta	Hard	Eternal Tower	Phantasy Star Zero
+Ray Fin	Hard	Ozette Wetland	Phantasy Star Zero
+Ray Fin	Hard	Eternal Tower	Phantasy Star Zero
+Star Slicer	Hard	Ozette Wetland	Phantasy Star Zero
+Star Slicer	Hard	Eternal Tower	Phantasy Star Zero
+Egalta	Super Hard	Ozette Wetland	Phantasy Star Zero
+Egalta	Super Hard	Eternal Tower	Phantasy Star Zero
+Kouga Shuriken	Super Hard	Ozette Wetland	Phantasy Star Zero
+Kouga Shuriken	Super Hard	Eternal Tower	Phantasy Star Zero
+Star Slicer	Super Hard	Ozette Wetland	Phantasy Star Zero
+Star Slicer	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Pomarr
+
+Quick Jump: Description & Notes | Pictures
+
+Pomarr
+Item Summary
+Japanese Name:	ポマール
+Description:	This wetland monster spits poison that can cause paralysis.
+Versions:	Phantasy Star Zero
+
+
+Pomarr Findings
+Item	Difficulty	Location	Version
+Clear Saber	Normal	Ozette Wetland	Phantasy Star Zero
+Clear Saber	Normal	Eternal Tower	Phantasy Star Zero
+Saber	Normal	Ozette Wetland	Phantasy Star Zero
+Saber	Normal	Eternal Tower	Phantasy Star Zero
+Sabre	Normal	Ozette Wetland	Phantasy Star Zero
+Sabre	Normal	Eternal Tower	Phantasy Star Zero
+Alias	Hard	Ozette Wetland	Phantasy Star Zero
+Alias	Hard	Eternal Tower	Phantasy Star Zero
+Clear Sabre	Hard	Ozette Wetland	Phantasy Star Zero
+Clear Sabre	Hard	Eternal Tower	Phantasy Star Zero
+Stormer	Hard	Ozette Wetland	Phantasy Star Zero
+Stormer	Hard	Eternal Tower	Phantasy Star Zero
+Bangasa Jikomi	Super Hard	Ozette Wetland	Phantasy Star Zero
+Bangasa Jikomi	Super Hard	Eternal Tower	Phantasy Star Zero
+Luzparias	Super Hard	Ozette Wetland	Phantasy Star Zero
+Luzparias	Super Hard	Eternal Tower	Phantasy Star Zero
+Stormer	Super Hard	Ozette Wetland	Phantasy Star Zero
+Stormer	Super Hard	Eternal Tower	Phantasy Star Zero
+
+
+Enemy: Pobomma
+
+Quick Jump: Description & Notes | Pictures
+
+Pobomma
+Item Summary
+Japanese Name:	ポボマー
+Description:	A Porel mutation that swallows abandoned munitions and spits them up.
+Versions:	Phantasy Star Zero
+
+
+Pobomma Findings
+Item	Difficulty	Location	Version
+Ein Cutter	Normal	Oblivion City Paru	Phantasy Star Zero
+Ein Cutter	Normal	Eternal Tower	Phantasy Star Zero
+Magi Processor	Normal	Oblivion City Paru	Phantasy Star Zero
+Magi Processor	Normal	Eternal Tower	Phantasy Star Zero
+Pretty Parasol	Normal	Oblivion City Paru	Phantasy Star Zero
+Pretty Parasol	Normal	Eternal Tower	Phantasy Star Zero
+Diopside	Hard	Oblivion City Paru	Phantasy Star Zero
+Diopside	Hard	Eternal Tower	Phantasy Star Zero
+Pretty Parasol	Hard	Oblivion City Paru	Phantasy Star Zero
+Pretty Parasol	Hard	Eternal Tower	Phantasy Star Zero
+Salvador	Hard	Oblivion City Paru	Phantasy Star Zero
+Salvador	Hard	Eternal Tower	Phantasy Star Zero
+Diopside	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Diopside	Super Hard	Eternal Tower	Phantasy Star Zero
+Goth Parasol	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Goth Parasol	Super Hard	Eternal Tower	Phantasy Star Zero
+Salvador	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Salvador	Super Hard	Eternal Tower	Phantasy Star Zero
+
+
+Enemy: Bolix
+
+Quick Jump: Description & Notes | Pictures
+
+Bolix
+Item Summary
+Japanese Name:	ボリックス
+Versions:	Phantasy Star Zero
+
+
+Bolix Findings
+Item	Difficulty	Location	Version
+Deo Calibur	Normal	Oblivion City Paru	Phantasy Star Zero
+Deo Calibur	Normal	Eternal Tower	Phantasy Star Zero
+Iron Lance	Normal	Oblivion City Paru	Phantasy Star Zero
+Iron Lance	Normal	Eternal Tower	Phantasy Star Zero
+Tatami Mat	Normal	Oblivion City Paru	Phantasy Star Zero
+Tatami Mat	Normal	Eternal Tower	Phantasy Star Zero
+Abraham	Hard	Oblivion City Paru	Phantasy Star Zero
+Abraham	Hard	Eternal Tower	Phantasy Star Zero
+Grasiza	Hard	Oblivion City Paru	Phantasy Star Zero
+Grasiza	Hard	Eternal Tower	Phantasy Star Zero
+Scarred Tatami	Hard	Oblivion City Paru	Phantasy Star Zero
+Scarred Tatami	Hard	Eternal Tower	Phantasy Star Zero
+Abraham	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Abraham	Super Hard	Eternal Tower	Phantasy Star Zero
+Iros	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Iros	Super Hard	Eternal Tower	Phantasy Star Zero
+Scarred Tatami	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Scarred Tatami	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Goldix
+
+Quick Jump: Description & Notes | Pictures
+
+Goldix
+Item Summary
+Japanese Name:	ゴールディクス
+Rare Enemy:	Yes
+Versions:	Phantasy Star Zero
+
+
+Goldix Findings
+Item	Difficulty	Location	Version
+Chrome Shield	Normal	Oblivion City Paru	Phantasy Star Zero
+Chrome Shield	Normal	Eternal Tower	Phantasy Star Zero
+Crimsonfield	Normal	Oblivion City Paru	Phantasy Star Zero
+Crimsonfield	Normal	Eternal Tower	Phantasy Star Zero
+Tatami Mat	Normal	Oblivion City Paru	Phantasy Star Zero
+Tatami Mat	Normal	Eternal Tower	Phantasy Star Zero
+Crimsonfield	Hard	Oblivion City Paru	Phantasy Star Zero
+Crimsonfield	Hard	Eternal Tower	Phantasy Star Zero
+Scarred Tatami	Hard	Oblivion City Paru	Phantasy Star Zero
+Scarred Tatami	Hard	Eternal Tower	Phantasy Star Zero
+Vanguard	Hard	Oblivion City Paru	Phantasy Star Zero
+Vanguard	Hard	Eternal Tower	Phantasy Star Zero
+Emeraldfield	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Emeraldfield	Super Hard	Eternal Tower	Phantasy Star Zero
+Scarred Tatami	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Scarred Tatami	Super Hard	Eternal Tower	Phantasy Star Zero
+Vanguard	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Vanguard	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Batt
+
+Quick Jump: Description & Notes | Pictures
+
+Batt
+Item Summary
+Japanese Name:	バト
+Versions:	Phantasy Star Zero
+
+
+Batt Findings
+Item	Difficulty	Location	Version
+Bright Moon	Normal	Makara Ruins	Phantasy Star Zero
+Bright Moon	Normal	Eternal Tower	Phantasy Star Zero
+Chrome Rod	Normal	Makara Ruins	Phantasy Star Zero
+Chrome Rod	Normal	Eternal Tower	Phantasy Star Zero
+Clear Staff	Normal	Makara Ruins	Phantasy Star Zero
+Clear Staff	Normal	Eternal Tower	Phantasy Star Zero
+Bright Moon	Hard	Makara Ruins	Phantasy Star Zero
+Bright Moon	Hard	Eternal Tower	Phantasy Star Zero
+Fenrir	Hard	Makara Ruins	Phantasy Star Zero
+Fenrir	Hard	Eternal Tower	Phantasy Star Zero
+Magi Circuit	Hard	Makara Ruins	Phantasy Star Zero
+Magi Circuit	Hard	Eternal Tower	Phantasy Star Zero
+Fenrir	Super Hard	Makara Ruins	Phantasy Star Zero
+Fenrir	Super Hard	Eternal Tower	Phantasy Star Zero
+Magi Circuit	Super Hard	Makara Ruins	Phantasy Star Zero
+Magi Circuit	Super Hard	Eternal Tower	Phantasy Star Zero
+Starlight	Super Hard	Makara Ruins	Phantasy Star Zero
+Starlight	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Bullbatt
+
+Quick Jump: Description & Notes | Pictures
+
+Bullbatt
+Item Summary
+Japanese Name:	ブルバト
+Versions:	Phantasy Star Zero
+
+
+Bullbatt Findings
+Item	Difficulty	Location	Version
+Chrome Lance	Normal	Makara Ruins	Phantasy Star Zero
+Chrome Lance	Normal	Eternal Tower	Phantasy Star Zero
+Clear Bangle	Normal	Makara Ruins	Phantasy Star Zero
+Clear Bangle	Normal	Eternal Tower	Phantasy Star Zero
+Witch's Broom	Normal	Makara Ruins	Phantasy Star Zero
+Witch's Broom	Normal	Eternal Tower	Phantasy Star Zero
+Crescent Cast	Hard	Makara Ruins	Phantasy Star Zero
+Crescent Cast	Hard	Eternal Tower	Phantasy Star Zero
+Imperial Rod	Hard	Makara Ruins	Phantasy Star Zero
+Imperial Rod	Hard	Eternal Tower	Phantasy Star Zero
+Remjees	Hard	Makara Ruins	Phantasy Star Zero
+Remjees	Hard	Eternal Tower	Phantasy Star Zero
+Divine/Mind	Super Hard	Makara Ruins	Phantasy Star Zero
+Divine/Mind	Super Hard	Eternal Tower	Phantasy Star Zero
+Grand Chariot	Super Hard	Makara Ruins	Phantasy Star Zero
+Grand Chariot	Super Hard	Eternal Tower	Phantasy Star Zero
+Remjees	Super Hard	Makara Ruins	Phantasy Star Zero
+Remjees	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Rappy
+
+Quick Jump: Description & Notes | Pictures
+
+Rappy
+Item Summary
+Japanese Name:	ラッピー
+Rare Enemy:	Yes
+Description:	A native creature that adored by people from long ago. It is said to bring luck.
+Versions:	Phantasy Star Zero
+
+
+Rappy Findings
+Item	Difficulty	Location	Version
+PA save Lv1	Normal	Gurhacia Valley	Phantasy Star Zero
+PA save Lv1	Normal	Rioh Snowfield	Phantasy Star Zero
+PA save Lv1	Normal	Ozette Wetland	Phantasy Star Zero
+PA save Lv1	Normal	Eternal Tower	Phantasy Star Zero
+Rappy Soul	Normal	Gurhacia Valley	Phantasy Star Zero
+Rappy Soul	Normal	Rioh Snowfield	Phantasy Star Zero
+Rappy Soul	Normal	Ozette Wetland	Phantasy Star Zero
+Rappy Soul	Normal	Eternal Tower	Phantasy Star Zero
+Tech Save Lv1	Normal	Gurhacia Valley	Phantasy Star Zero
+Tech Save Lv1	Normal	Rioh Snowfield	Phantasy Star Zero
+Tech Save Lv1	Normal	Ozette Wetland	Phantasy Star Zero
+Tech Save Lv1	Normal	Eternal Tower	Phantasy Star Zero
+PA save Lv2	Hard	Gurhacia Valley	Phantasy Star Zero
+PA save Lv2	Hard	Rioh Snowfield	Phantasy Star Zero
+PA save Lv2	Hard	Ozette Wetland	Phantasy Star Zero
+PA save Lv2	Hard	Eternal Tower	Phantasy Star Zero
+Rappy Soul	Hard	Gurhacia Valley	Phantasy Star Zero
+Rappy Soul	Hard	Rioh Snowfield	Phantasy Star Zero
+Rappy Soul	Hard	Ozette Wetland	Phantasy Star Zero
+Rappy Soul	Hard	Eternal Tower	Phantasy Star Zero
+Tech Save Lv2	Hard	Gurhacia Valley	Phantasy Star Zero
+Tech Save Lv2	Hard	Rioh Snowfield	Phantasy Star Zero
+Tech Save Lv2	Hard	Ozette Wetland	Phantasy Star Zero
+Tech Save Lv2	Hard	Eternal Tower	Phantasy Star Zero
+PA save Lv3	Super Hard	Gurhacia Valley	Phantasy Star Zero
+PA save Lv3	Super Hard	Rioh Snowfield	Phantasy Star Zero
+PA save Lv3	Super Hard	Ozette Wetland	Phantasy Star Zero
+PA save Lv3	Super Hard	Eternal Tower	Phantasy Star Zero
+Rappy Soul	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Rappy Soul	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Rappy Soul	Super Hard	Ozette Wetland	Phantasy Star Zero
+Rappy Soul	Super Hard	Eternal Tower	Phantasy Star Zero
+Tech Save Lv3	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Tech Save Lv3	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Tech Save Lv3	Super Hard	Ozette Wetland	Phantasy Star Zero
+Tech Save Lv3	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Ar Rappy
+
+Quick Jump: Description & Notes | Pictures
+
+Ar Rappy
+Item Summary
+Japanese Name:	アル・ラッピー
+Rare Enemy:	Yes
+Versions:	Phantasy Star Zero
+
+
+Ar Rappy Findings
+Item	Difficulty	Location	Version
+PA save Lv1	Normal	Oblivion City Paru	Phantasy Star Zero
+PA save Lv1	Normal	Makara Ruins	Phantasy Star Zero
+PA save Lv1	Normal	Eternal Tower	Phantasy Star Zero
+Rappy Soul	Normal	Oblivion City Paru	Phantasy Star Zero
+Rappy Soul	Normal	Makara Ruins	Phantasy Star Zero
+Rappy Soul	Normal	Eternal Tower	Phantasy Star Zero
+Tech Save Lv1	Normal	Oblivion City Paru	Phantasy Star Zero
+Tech Save Lv1	Normal	Makara Ruins	Phantasy Star Zero
+Tech Save Lv1	Normal	Eternal Tower	Phantasy Star Zero
+PA save Lv2	Hard	Oblivion City Paru	Phantasy Star Zero
+PA save Lv2	Hard	Makara Ruins	Phantasy Star Zero
+PA save Lv2	Hard	Eternal Tower	Phantasy Star Zero
+Rappy Soul	Hard	Oblivion City Paru	Phantasy Star Zero
+Rappy Soul	Hard	Makara Ruins	Phantasy Star Zero
+Rappy Soul	Hard	Eternal Tower	Phantasy Star Zero
+Tech Save Lv2	Hard	Oblivion City Paru	Phantasy Star Zero
+Tech Save Lv2	Hard	Makara Ruins	Phantasy Star Zero
+Tech Save Lv2	Hard	Eternal Tower	Phantasy Star Zero
+PA save Lv3	Super Hard	Oblivion City Paru	Phantasy Star Zero
+PA save Lv3	Super Hard	Makara Ruins	Phantasy Star Zero
+PA save Lv3	Super Hard	Eternal Tower	Phantasy Star Zero
+Rappy Soul	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Rappy Soul	Super Hard	Makara Ruins	Phantasy Star Zero
+Rappy Soul	Super Hard	Eternal Tower	Phantasy Star Zero
+Tech Save Lv3	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Tech Save Lv3	Super Hard	Makara Ruins	Phantasy Star Zero
+Tech Save Lv3	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Rab Rappy
+
+Quick Jump: Description & Notes | Pictures
+
+Rab Rappy
+Item Summary
+Japanese Name:	ラブ・ラッピー
+Rare Enemy:	Yes
+Description:	A red-colored Rappy variant. It is said to make romance bloom if one is encountered.
+Versions:	Phantasy Star Zero
+
+
+Rab Rappy Findings
+Item	Difficulty	Location	Version
+PA save Lv1	Normal	Arca Plant	Phantasy Star Zero
+PA save Lv1	Normal	Dark Shrine	Phantasy Star Zero
+PA save Lv1	Normal	Eternal Tower	Phantasy Star Zero
+Rappy Soul	Normal	Arca Plant	Phantasy Star Zero
+Rappy Soul	Normal	Dark Shrine	Phantasy Star Zero
+Rappy Soul	Normal	Eternal Tower	Phantasy Star Zero
+Tech Save Lv1	Normal	Arca Plant	Phantasy Star Zero
+Tech Save Lv1	Normal	Dark Shrine	Phantasy Star Zero
+Tech Save Lv1	Normal	Eternal Tower	Phantasy Star Zero
+PA save Lv2	Hard	Arca Plant	Phantasy Star Zero
+PA save Lv2	Hard	Dark Shrine	Phantasy Star Zero
+PA save Lv2	Hard	Eternal Tower	Phantasy Star Zero
+Rappy Soul	Hard	Arca Plant	Phantasy Star Zero
+Rappy Soul	Hard	Dark Shrine	Phantasy Star Zero
+Rappy Soul	Hard	Eternal Tower	Phantasy Star Zero
+Tech Save Lv2	Hard	Arca Plant	Phantasy Star Zero
+Tech Save Lv2	Hard	Dark Shrine	Phantasy Star Zero
+Tech Save Lv2	Hard	Eternal Tower	Phantasy Star Zero
+PA save Lv3	Super Hard	Arca Plant	Phantasy Star Zero
+PA save Lv3	Super Hard	Dark Shrine	Phantasy Star Zero
+PA save Lv3	Super Hard	Eternal Tower	Phantasy Star Zero
+Rappy Soul	Super Hard	Arca Plant	Phantasy Star Zero
+Rappy Soul	Super Hard	Dark Shrine	Phantasy Star Zero
+Rappy Soul	Super Hard	Eternal Tower	Phantasy Star Zero
+Tech Save Lv3	Super Hard	Arca Plant	Phantasy Star Zero
+Tech Save Lv3	Super Hard	Dark Shrine	Phantasy Star Zero
+Tech Save Lv3	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Booma Origin
+
+Quick Jump: Description & Notes | Pictures
+
+Booma Origin
+Item Summary
+Japanese Name:	ブーマオリジン
+Rare Enemy:	Yes
+Versions:	Phantasy Star Zero
+
+
+Booma Origin Findings
+Item	Difficulty	Location	Version
+Element Boost	Normal	Gurhacia Valley	Phantasy Star Zero
+Element Boost	Normal	Rioh Snowfield	Phantasy Star Zero
+Element Boost	Normal	Ozette Wetland	Phantasy Star Zero
+Element Boost	Normal	Oblivion City Paru	Phantasy Star Zero
+Element Boost	Normal	Makara Ruins	Phantasy Star Zero
+Element Boost	Normal	Arca Plant	Phantasy Star Zero
+Element Boost	Normal	Dark Shrine	Phantasy Star Zero
+Element Boost	Normal	Eternal Tower	Phantasy Star Zero
+Element Boost	Hard	Gurhacia Valley	Phantasy Star Zero
+Element Boost	Hard	Rioh Snowfield	Phantasy Star Zero
+Element Boost	Hard	Ozette Wetland	Phantasy Star Zero
+Element Boost	Hard	Oblivion City Paru	Phantasy Star Zero
+Element Boost	Hard	Makara Ruins	Phantasy Star Zero
+Element Boost	Hard	Arca Plant	Phantasy Star Zero
+Element Boost	Hard	Dark Shrine	Phantasy Star Zero
+Element Boost	Hard	Eternal Tower	Phantasy Star Zero
+Element Boost	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Element Boost	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Element Boost	Super Hard	Ozette Wetland	Phantasy Star Zero
+Element Boost	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Element Boost	Super Hard	Makara Ruins	Phantasy Star Zero
+Element Boost	Super Hard	Arca Plant	Phantasy Star Zero
+Element Boost	Super Hard	Dark Shrine	Phantasy Star Zero
+Element Boost	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Gigobooma Origin
+Item Summary
+Japanese Name:	ジゴブーオリジン
+Rare Enemy:	Yes
+Versions:	Phantasy Star Zero
+
+
+Gigobooma Origin Findings
+Item	Difficulty	Location	Version
+Tech Level Boost	Normal	Ozette Wetland	Phantasy Star Zero
+Tech Level Boost	Normal	Oblivion City Paru	Phantasy Star Zero
+Tech Level Boost	Normal	Makara Ruins	Phantasy Star Zero
+Tech Level Boost	Normal	Arca Plant	Phantasy Star Zero
+Tech Level Boost	Normal	Dark Shrine	Phantasy Star Zero
+Tech Level Boost	Normal	Eternal Tower	Phantasy Star Zero
+Tech Level Boost	Hard	Ozette Wetland	Phantasy Star Zero
+Tech Level Boost	Hard	Oblivion City Paru	Phantasy Star Zero
+Tech Level Boost	Hard	Makara Ruins	Phantasy Star Zero
+Tech Level Boost	Hard	Arca Plant	Phantasy Star Zero
+Tech Level Boost	Hard	Dark Shrine	Phantasy Star Zero
+Tech Level Boost	Hard	Eternal Tower	Phantasy Star Zero
+Tech Level Boost	Super Hard	Ozette Wetland	Phantasy Star Zero
+Tech Level Boost	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Tech Level Boost	Super Hard	Makara Ruins	Phantasy Star Zero
+Tech Level Boost	Super Hard	Arca Plant	Phantasy Star Zero
+Tech Level Boost	Super Hard	Dark Shrine	Phantasy Star Zero
+Tech Level Boost	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Garapython
+
+Quick Jump: Description & Notes | Pictures
+
+Garapython
+Item Summary
+Japanese Name:	ガラパイソン
+Versions:	Phantasy Star Zero
+
+
+Garapython Findings
+Item	Difficulty	Location	Version
+Chrome Rod	Normal	Gurhacia Valley	Phantasy Star Zero
+Chrome Rod	Normal	Eternal Tower	Phantasy Star Zero
+Iron Spear	Normal	Gurhacia Valley	Phantasy Star Zero
+Iron Spear	Normal	Eternal Tower	Phantasy Star Zero
+Rod	Normal	Gurhacia Valley	Phantasy Star Zero
+Rod	Normal	Eternal Tower	Phantasy Star Zero
+Clear Fin	Hard	Gurhacia Valley	Phantasy Star Zero
+Clear Fin	Hard	Eternal Tower	Phantasy Star Zero
+Garapython Fang	Hard	Gurhacia Valley	Phantasy Star Zero
+Garapython Fang	Hard	Eternal Tower	Phantasy Star Zero
+Rose Quartz	Hard	Gurhacia Valley	Phantasy Star Zero
+Rose Quartz	Hard	Eternal Tower	Phantasy Star Zero
+Clear Fin	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Clear Fin	Super Hard	Eternal Tower	Phantasy Star Zero
+Fuuma Shuriken	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Fuuma Shuriken	Super Hard	Eternal Tower	Phantasy Star Zero
+Garapython Fang	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Garapython Fang	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Garahadan
+
+Quick Jump: Description & Notes | Pictures
+
+Garahadan
+Item Summary
+Japanese Name:	ガラハダン
+Versions:	Phantasy Star Zero
+
+
+Garahadan Findings
+Item	Difficulty	Location	Version
+Chrome Gun	Normal	Gurhacia Valley	Phantasy Star Zero
+Chrome Gun	Normal	Eternal Tower	Phantasy Star Zero
+Chrome Wand	Normal	Gurhacia Valley	Phantasy Star Zero
+Chrome Wand	Normal	Eternal Tower	Phantasy Star Zero
+Wand	Normal	Gurhacia Valley	Phantasy Star Zero
+Wand	Normal	Eternal Tower	Phantasy Star Zero
+Clear Staff	Hard	Gurhacia Valley	Phantasy Star Zero
+Clear Staff	Hard	Eternal Tower	Phantasy Star Zero
+Gallanhorne	Hard	Gurhacia Valley	Phantasy Star Zero
+Gallanhorne	Hard	Eternal Tower	Phantasy Star Zero
+M14 Missouri	Hard	Gurhacia Valley	Phantasy Star Zero
+M14 Missouri	Hard	Eternal Tower	Phantasy Star Zero
+Gallanhorne	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Gallanhorne	Super Hard	Eternal Tower	Phantasy Star Zero
+Garahadan Fang	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Garahadan Fang	Super Hard	Eternal Tower	Phantasy Star Zero
+M14 Missouri	Super Hard	Gurhacia Valley	Phantasy Star Zero
+M14 Missouri	Super Hard	Eternal Tower	Phantasy Star Zero
+
+
+Enemy: Grimble
+
+Quick Jump: Description & Notes | Pictures
+
+Grimble
+Item Summary
+Japanese Name:	グリンブル
+Versions:	Phantasy Star Zero
+
+
+Grimble Findings
+Item	Difficulty	Location	Version
+Cannon	Normal	Gurhacia Valley	Phantasy Star Zero
+Cannon	Normal	Eternal Tower	Phantasy Star Zero
+Carbine	Normal	Gurhacia Valley	Phantasy Star Zero
+Carbine	Normal	Eternal Tower	Phantasy Star Zero
+Gun Braver	Normal	Gurhacia Valley	Phantasy Star Zero
+Gun Braver	Normal	Eternal Tower	Phantasy Star Zero
+Carl Gustav	Hard	Gurhacia Valley	Phantasy Star Zero
+Carl Gustav	Hard	Eternal Tower	Phantasy Star Zero
+Gun Diva	Hard	Gurhacia Valley	Phantasy Star Zero
+Gun Diva	Hard	Eternal Tower	Phantasy Star Zero
+Pinky Beam	Hard	Gurhacia Valley	Phantasy Star Zero
+Pinky Beam	Hard	Eternal Tower	Phantasy Star Zero
+Frigiand	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Frigiand	Super Hard	Eternal Tower	Phantasy Star Zero
+Gun Diva	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Gun Diva	Super Hard	Eternal Tower	Phantasy Star Zero
+Pinky Beam	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Pinky Beam	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Tormatible
+
+Quick Jump: Description & Notes | Pictures
+
+Tormatible
+Item Summary
+Japanese Name:	トマトゥマブル
+Rare Enemy:	Yes
+Description:	A nasty Grimble variant. Not noticing the different striping can be fatal.
+Versions:	Phantasy Star Zero
+
+
+Tormatible Findings
+Item	Difficulty	Location	Version
+Gun Braver	Normal	Gurhacia Valley	Phantasy Star Zero
+Gun Braver	Normal	Eternal Tower	Phantasy Star Zero
+Gun Slash	Normal	Gurhacia Valley	Phantasy Star Zero
+Gun Slash	Normal	Eternal Tower	Phantasy Star Zero
+Hero/Swift	Normal	Gurhacia Valley	Phantasy Star Zero
+Hero/Swift	Normal	Eternal Tower	Phantasy Star Zero
+Gun Diva	Hard	Gurhacia Valley	Phantasy Star Zero
+Gun Diva	Hard	Eternal Tower	Phantasy Star Zero
+Master/Swift	Hard	Gurhacia Valley	Phantasy Star Zero
+Master/Swift	Hard	Eternal Tower	Phantasy Star Zero
+Pinky Beam	Hard	Gurhacia Valley	Phantasy Star Zero
+Pinky Beam	Hard	Eternal Tower	Phantasy Star Zero
+Divine/Swift	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Divine/Swift	Super Hard	Eternal Tower	Phantasy Star Zero
+Eridanus	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Eridanus	Super Hard	Eternal Tower	Phantasy Star Zero
+Pinky Beam	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Pinky Beam	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Reyhound
+
+Quick Jump: Description & Notes | Pictures
+
+Reyhound
+Item Summary
+Japanese Name:	レイハウンド
+Description:	A mammal that lives on snowy mountains. It often attacks in a pack of two or more.
+Versions:	Phantasy Star Zero
+
+
+Reyhound Findings
+Item	Difficulty	Location	Version
+Chrome Rod	Normal	Rioh Snowfield	Phantasy Star Zero
+Chrome Rod	Normal	Eternal Tower	Phantasy Star Zero
+Ein Tact	Normal	Rioh Snowfield	Phantasy Star Zero
+Ein Tact	Normal	Eternal Tower	Phantasy Star Zero
+Tact	Normal	Rioh Snowfield	Phantasy Star Zero
+Tact	Normal	Eternal Tower	Phantasy Star Zero
+Magi Circuit	Hard	Rioh Snowfield	Phantasy Star Zero
+Magi Circuit	Hard	Eternal Tower	Phantasy Star Zero
+Magi Processor	Hard	Rioh Snowfield	Phantasy Star Zero
+Magi Processor	Hard	Eternal Tower	Phantasy Star Zero
+Tri-Magenta	Hard	Rioh Snowfield	Phantasy Star Zero
+Tri-Magenta	Hard	Eternal Tower	Phantasy Star Zero
+Al Azif	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Al Azif	Super Hard	Eternal Tower	Phantasy Star Zero
+Magi Circuit	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Magi Circuit	Super Hard	Eternal Tower	Phantasy Star Zero
+Tri-Magenta	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Tri-Magenta	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Stagg
+
+Quick Jump: Description & Notes | Pictures
+
+Stagg
+Item Summary
+Japanese Name:	スタッグ
+Description:	A snowfield native with two rugged antlers for smashing foes.
+Versions:	Phantasy Star Zero
+
+
+Stagg Findings
+Item	Difficulty	Location	Version
+Blade	Normal	Rioh Snowfield	Phantasy Star Zero
+Blade	Normal	Eternal Tower	Phantasy Star Zero
+Ein Arm	Normal	Rioh Snowfield	Phantasy Star Zero
+Ein Arm	Normal	Eternal Tower	Phantasy Star Zero
+Ein Blade	Normal	Rioh Snowfield	Phantasy Star Zero
+Ein Blade	Normal	Eternal Tower	Phantasy Star Zero
+Argares	Hard	Rioh Snowfield	Phantasy Star Zero
+Argares	Hard	Eternal Tower	Phantasy Star Zero
+Artturi	Hard	Rioh Snowfield	Phantasy Star Zero
+Artturi	Hard	Eternal Tower	Phantasy Star Zero
+Filamare	Hard	Rioh Snowfield	Phantasy Star Zero
+Filamare	Hard	Eternal Tower	Phantasy Star Zero
+Argares	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Argares	Super Hard	Eternal Tower	Phantasy Star Zero
+Filamare	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Filamare	Super Hard	Eternal Tower	Phantasy Star Zero
+Foie Haze	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Foie Haze	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Hypao
+
+Quick Jump: Description & Notes | Pictures
+
+Hypao
+Item Summary
+Japanese Name:	ハイパオ
+Description:	A mid-sized monster that uses lightning. It appears docile, but can turn savage.
+Versions:	Phantasy Star Zero
+
+
+Hypao Findings
+Item	Difficulty	Location	Version
+Ray Duplex	Normal	Ozette Wetland	Phantasy Star Zero
+Ray Duplex	Normal	Eternal Tower	Phantasy Star Zero
+Ray Shot	Normal	Ozette Wetland	Phantasy Star Zero
+Ray Shot	Normal	Eternal Tower	Phantasy Star Zero
+Clear Scissor Twins	Hard	Ozette Wetland	Phantasy Star Zero
+Clear Scissor Twins	Hard	Eternal Tower	Phantasy Star Zero
+Gerhilde	Hard	Ozette Wetland	Phantasy Star Zero
+Gerhilde	Hard	Eternal Tower	Phantasy Star Zero
+Nersir	Hard	Ozette Wetland	Phantasy Star Zero
+Nersir	Hard	Eternal Tower	Phantasy Star Zero
+Clear Scissor Twins	Super Hard	Ozette Wetland	Phantasy Star Zero
+Clear Scissor Twins	Super Hard	Eternal Tower	Phantasy Star Zero
+M25SE Missouri	Super Hard	Ozette Wetland	Phantasy Star Zero
+M25SE Missouri	Super Hard	Eternal Tower	Phantasy Star Zero
+Nersir	Super Hard	Ozette Wetland	Phantasy Star Zero
+Nersir	Super Hard	Eternal Tower	Phantasy Star Zero
+
+
+Enemy: Vespao
+
+Quick Jump: Description & Notes | Pictures
+
+Vespao
+Item Summary
+Japanese Name:	ベスパオ
+Description:	A Hypao variant with gray coloring and pointed ears. It is very violent.
+Versions:	Phantasy Star Zero
+
+
+Vespao Findings
+Item	Difficulty	Location	Version
+Clear Pulse	Normal	Ozette Wetland	Phantasy Star Zero
+Clear Pulse	Normal	Eternal Tower	Phantasy Star Zero
+Hero/Guard	Normal	Ozette Wetland	Phantasy Star Zero
+Hero/Guard	Normal	Eternal Tower	Phantasy Star Zero
+Ray Duplex	Normal	Ozette Wetland	Phantasy Star Zero
+Ray Duplex	Normal	Eternal Tower	Phantasy Star Zero
+Clear Scissor Twins	Hard	Ozette Wetland	Phantasy Star Zero
+Clear Scissor Twins	Hard	Eternal Tower	Phantasy Star Zero
+Holy Sort	Hard	Ozette Wetland	Phantasy Star Zero
+Holy Sort	Hard	Eternal Tower	Phantasy Star Zero
+Master/Guard	Hard	Ozette Wetland	Phantasy Star Zero
+Master/Guard	Hard	Eternal Tower	Phantasy Star Zero
+Clear Scissor Twins	Super Hard	Ozette Wetland	Phantasy Star Zero
+Clear Scissor Twins	Super Hard	Eternal Tower	Phantasy Star Zero
+Divine/Guard	Super Hard	Ozette Wetland	Phantasy Star Zero
+Divine/Guard	Super Hard	Eternal Tower	Phantasy Star Zero
+M25SE Missouri	Super Hard	Ozette Wetland	Phantasy Star Zero
+M25SE Missouri	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Rumole
+
+Quick Jump: Description & Notes | Pictures
+
+Rumole
+Item Summary
+Japanese Name:	ルモール
+Description:	It lures prey with a flower like nose. It hunts by scrent rather than its weak sight.
+Versions:	Phantasy Star Zero
+
+
+Rumole Findings
+Item	Difficulty	Location	Version
+Deo Ripper	Normal	Makara Ruins	Phantasy Star Zero
+Deo Ripper	Normal	Eternal Tower	Phantasy Star Zero
+Hollow Gimlet	Normal	Makara Ruins	Phantasy Star Zero
+Hollow Gimlet	Normal	Eternal Tower	Phantasy Star Zero
+Ray Knife	Normal	Makara Ruins	Phantasy Star Zero
+Ray Knife	Normal	Eternal Tower	Phantasy Star Zero
+Featherhand	Hard	Makara Ruins	Phantasy Star Zero
+Featherhand	Hard	Eternal Tower	Phantasy Star Zero
+Jasper Roar	Hard	Makara Ruins	Phantasy Star Zero
+Jasper Roar	Hard	Eternal Tower	Phantasy Star Zero
+Tonfa	Hard	Makara Ruins	Phantasy Star Zero
+Tonfa	Hard	Eternal Tower	Phantasy Star Zero
+Featherhand	Super Hard	Makara Ruins	Phantasy Star Zero
+Featherhand	Super Hard	Eternal Tower	Phantasy Star Zero
+Jasper Roar	Super Hard	Makara Ruins	Phantasy Star Zero
+Jasper Roar	Super Hard	Eternal Tower	Phantasy Star Zero
+Rage Tonfa	Super Hard	Makara Ruins	Phantasy Star Zero
+Rage Tonfa	Super Hard	Eternal Tower	Phantasy Star Zero
+
+
+Enemy: Kapantha
+
+Quick Jump: Description & Notes | Pictures
+
+Kapantha
+Item Summary
+Japanese Name:	ケイパンサー
+Description:	A creature cloaked in black fur. The sparse white hair serves as antennas.
+Versions:	Phantasy Star Zero
+
+
+Kapantha Findings
+Item	Difficulty	Location	Version
+Binary Saber	Normal	Makara Ruins	Phantasy Star Zero
+Binary Saber	Normal	Eternal Tower	Phantasy Star Zero
+Chrome Twins	Normal	Makara Ruins	Phantasy Star Zero
+Chrome Twins	Normal	Eternal Tower	Phantasy Star Zero
+Clear Shot	Normal	Makara Ruins	Phantasy Star Zero
+Clear Shot	Normal	Eternal Tower	Phantasy Star Zero
+Chrome Twins	Hard	Makara Ruins	Phantasy Star Zero
+Chrome Twins	Hard	Eternal Tower	Phantasy Star Zero
+Chronos Scythe	Hard	Makara Ruins	Phantasy Star Zero
+Chronos Scythe	Hard	Eternal Tower	Phantasy Star Zero
+Grifone	Hard	Makara Ruins	Phantasy Star Zero
+Grifone	Hard	Eternal Tower	Phantasy Star Zero
+Chronos Scythe	Super Hard	Makara Ruins	Phantasy Star Zero
+Chronos Scythe	Super Hard	Eternal Tower	Phantasy Star Zero
+Grifone	Super Hard	Makara Ruins	Phantasy Star Zero
+Grifone	Super Hard	Eternal Tower	Phantasy Star Zero
+Rouge Pulse	Super Hard	Makara Ruins	Phantasy Star Zero
+Rouge Pulse	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Helion
+
+Quick Jump: Description & Notes | Pictures
+
+Helion
+Item Summary
+Japanese Name:	ヘリオン
+Versions:	Phantasy Star Zero
+
+
+Helion Findings
+Item	Difficulty	Location	Version
+Chrome Sword	Normal	Gurhacia Valley	Phantasy Star Zero
+Chrome Sword	Normal	Eternal Tower	Phantasy Star Zero
+Ein Calibur	Normal	Gurhacia Valley	Phantasy Star Zero
+Ein Calibur	Normal	Eternal Tower	Phantasy Star Zero
+Ein Glaive	Normal	Gurhacia Valley	Phantasy Star Zero
+Ein Glaive	Normal	Eternal Tower	Phantasy Star Zero
+Helion's Mane	Normal	Gurhacia Valley	Phantasy Star Zero
+Helion's Mane	Normal	Eternal Tower	Phantasy Star Zero
+Rookie/Guard	Normal	Gurhacia Valley	Phantasy Star Zero
+Rookie/Guard	Normal	Eternal Tower	Phantasy Star Zero
+Ace/Guard	Hard	Gurhacia Valley	Phantasy Star Zero
+Ace/Guard	Hard	Eternal Tower	Phantasy Star Zero
+Askalon	Hard	Gurhacia Valley	Phantasy Star Zero
+Askalon	Hard	Eternal Tower	Phantasy Star Zero
+Chrome Shield	Hard	Gurhacia Valley	Phantasy Star Zero
+Chrome Shield	Hard	Eternal Tower	Phantasy Star Zero
+Hero/Power	Hard	Gurhacia Valley	Phantasy Star Zero
+Hero/Power	Hard	Eternal Tower	Phantasy Star Zero
+Zahhak	Hard	Gurhacia Valley	Phantasy Star Zero
+Zahhak	Hard	Eternal Tower	Phantasy Star Zero
+Ainsraiffe	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Ainsraiffe	Super Hard	Eternal Tower	Phantasy Star Zero
+Askalon	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Askalon	Super Hard	Eternal Tower	Phantasy Star Zero
+Hero/Guard	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Hero/Guard	Super Hard	Eternal Tower	Phantasy Star Zero
+Zahhak	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Zahhak	Super Hard	Eternal Tower	Phantasy Star Zero
+
+
+Enemy: Blaze Helion
+
+Quick Jump: Description & Notes | Pictures
+
+Blaze Helion
+Item Summary
+Japanese Name:	ブレイズヘリオン
+Rare Enemy:	Yes
+Versions:	Phantasy Star Zero
+
+
+Blaze Helion Findings
+Item	Difficulty	Location	Version
+Chrome Sword	Normal	Gurhacia Valley	Phantasy Star Zero
+Chrome Sword	Normal	Eternal Tower	Phantasy Star Zero
+Ein Calibur	Normal	Gurhacia Valley	Phantasy Star Zero
+Ein Calibur	Normal	Eternal Tower	Phantasy Star Zero
+Ein Glaive	Normal	Gurhacia Valley	Phantasy Star Zero
+Ein Glaive	Normal	Eternal Tower	Phantasy Star Zero
+Hero/HP	Normal	Gurhacia Valley	Phantasy Star Zero
+Hero/HP	Normal	Eternal Tower	Phantasy Star Zero
+Rookie/Power	Normal	Gurhacia Valley	Phantasy Star Zero
+Rookie/Power	Normal	Eternal Tower	Phantasy Star Zero
+Shield	Normal	Gurhacia Valley	Phantasy Star Zero
+Shield	Normal	Eternal Tower	Phantasy Star Zero
+Ace/Power	Hard	Gurhacia Valley	Phantasy Star Zero
+Ace/Power	Hard	Eternal Tower	Phantasy Star Zero
+Askalon	Hard	Gurhacia Valley	Phantasy Star Zero
+Askalon	Hard	Eternal Tower	Phantasy Star Zero
+Burning Mane	Hard	Gurhacia Valley	Phantasy Star Zero
+Burning Mane	Hard	Eternal Tower	Phantasy Star Zero
+Master/HP	Hard	Gurhacia Valley	Phantasy Star Zero
+Master/HP	Hard	Eternal Tower	Phantasy Star Zero
+Zahhak	Hard	Gurhacia Valley	Phantasy Star Zero
+Zahhak	Hard	Eternal Tower	Phantasy Star Zero
+Ainsraiffe	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Ainsraiffe	Super Hard	Eternal Tower	Phantasy Star Zero
+Askalon	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Askalon	Super Hard	Eternal Tower	Phantasy Star Zero
+Burning Mane	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Burning Mane	Super Hard	Eternal Tower	Phantasy Star Zero
+Divine/HP	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Divine/HP	Super Hard	Eternal Tower	Phantasy Star Zero
+Hero/Power	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Hero/Power	Super Hard	Eternal Tower	Phantasy Star Zero
+Zahhak	Super Hard	Gurhacia Valley	Phantasy Star Zero
+Zahhak	Super Hard	Eternal Tower	Phantasy Star Zero
+
+
+Enemy: Hildegao
+
+Quick Jump: Description & Notes | Pictures
+
+Hildegao
+Item Summary
+Japanese Name:	ヒルデガオ
+Versions:	Phantasy Star Zero
+
+
+Hildegao Findings
+Item	Difficulty	Location	Version
+Deo Ripper	Normal	Rioh Snowfield	Phantasy Star Zero
+Deo Ripper	Normal	Eternal Tower	Phantasy Star Zero
+Ein Bazooka	Normal	Rioh Snowfield	Phantasy Star Zero
+Ein Bazooka	Normal	Eternal Tower	Phantasy Star Zero
+Ein Ripper	Normal	Rioh Snowfield	Phantasy Star Zero
+Ein Ripper	Normal	Eternal Tower	Phantasy Star Zero
+Rookie/HP	Normal	Rioh Snowfield	Phantasy Star Zero
+Rookie/HP	Normal	Eternal Tower	Phantasy Star Zero
+Ace/HP	Hard	Rioh Snowfield	Phantasy Star Zero
+Ace/HP	Hard	Eternal Tower	Phantasy Star Zero
+Avenlote	Hard	Rioh Snowfield	Phantasy Star Zero
+Avenlote	Hard	Eternal Tower	Phantasy Star Zero
+Lapis Fang	Hard	Rioh Snowfield	Phantasy Star Zero
+Lapis Fang	Hard	Eternal Tower	Phantasy Star Zero
+Pinky Hand	Hard	Rioh Snowfield	Phantasy Star Zero
+Pinky Hand	Hard	Eternal Tower	Phantasy Star Zero
+Adoralphs	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Adoralphs	Super Hard	Eternal Tower	Phantasy Star Zero
+Avenlote	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Avenlote	Super Hard	Eternal Tower	Phantasy Star Zero
+Hero/HP	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Hero/HP	Super Hard	Eternal Tower	Phantasy Star Zero
+Pinky Hand	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Pinky Hand	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Hildegao
+
+Quick Jump: Description & Notes | Pictures
+
+Hildegao
+Item Summary
+Japanese Name:	ヒルデガオ
+Versions:	Phantasy Star Zero
+
+
+Hildegao Findings
+Item	Difficulty	Location	Version
+Deo Ripper	Normal	Rioh Snowfield	Phantasy Star Zero
+Deo Ripper	Normal	Eternal Tower	Phantasy Star Zero
+Ein Bazooka	Normal	Rioh Snowfield	Phantasy Star Zero
+Ein Bazooka	Normal	Eternal Tower	Phantasy Star Zero
+Ein Ripper	Normal	Rioh Snowfield	Phantasy Star Zero
+Ein Ripper	Normal	Eternal Tower	Phantasy Star Zero
+Rookie/HP	Normal	Rioh Snowfield	Phantasy Star Zero
+Rookie/HP	Normal	Eternal Tower	Phantasy Star Zero
+Ace/HP	Hard	Rioh Snowfield	Phantasy Star Zero
+Ace/HP	Hard	Eternal Tower	Phantasy Star Zero
+Avenlote	Hard	Rioh Snowfield	Phantasy Star Zero
+Avenlote	Hard	Eternal Tower	Phantasy Star Zero
+Lapis Fang	Hard	Rioh Snowfield	Phantasy Star Zero
+Lapis Fang	Hard	Eternal Tower	Phantasy Star Zero
+Pinky Hand	Hard	Rioh Snowfield	Phantasy Star Zero
+Pinky Hand	Hard	Eternal Tower	Phantasy Star Zero
+Adoralphs	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Adoralphs	Super Hard	Eternal Tower	Phantasy Star Zero
+Avenlote	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Avenlote	Super Hard	Eternal Tower	Phantasy Star Zero
+Hero/HP	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Hero/HP	Super Hard	Eternal Tower	Phantasy Star Zero
+Pinky Hand	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Pinky Hand	Super Hard	Eternal Tower	Phantasy Star Zero
+
+
+Enemy: Hildegigas
+
+Quick Jump: Description & Notes | Pictures
+
+Hildegigas
+Item Summary
+Japanese Name:	ヒルデギガス
+Rare Enemy:	Yes
+Versions:	Phantasy Star Zero
+
+
+Hildegigas Findings
+Item	Difficulty	Location	Version
+All Resist Lv3	Normal	Rioh Snowfield	Phantasy Star Zero
+All Resist Lv3	Normal	Eternal Tower	Phantasy Star Zero
+Chrome Wand	Normal	Rioh Snowfield	Phantasy Star Zero
+Chrome Wand	Normal	Eternal Tower	Phantasy Star Zero
+Deo Ripper	Normal	Rioh Snowfield	Phantasy Star Zero
+Deo Ripper	Normal	Eternal Tower	Phantasy Star Zero
+Ein Bazooka	Normal	Rioh Snowfield	Phantasy Star Zero
+Ein Bazooka	Normal	Eternal Tower	Phantasy Star Zero
+Rookie/Mind	Normal	Rioh Snowfield	Phantasy Star Zero
+Rookie/Mind	Normal	Eternal Tower	Phantasy Star Zero
+Twin Assault	Normal	Rioh Snowfield	Phantasy Star Zero
+Twin Assault	Normal	Eternal Tower	Phantasy Star Zero
+Ace/Mind	Hard	Rioh Snowfield	Phantasy Star Zero
+Ace/Mind	Hard	Eternal Tower	Phantasy Star Zero
+All Resist Lv4	Hard	Rioh Snowfield	Phantasy Star Zero
+All Resist Lv4	Hard	Eternal Tower	Phantasy Star Zero
+Avenlote	Hard	Rioh Snowfield	Phantasy Star Zero
+Avenlote	Hard	Eternal Tower	Phantasy Star Zero
+Blackhawk	Hard	Rioh Snowfield	Phantasy Star Zero
+Blackhawk	Hard	Eternal Tower	Phantasy Star Zero
+Heavy Dumbbell	Hard	Rioh Snowfield	Phantasy Star Zero
+Heavy Dumbbell	Hard	Eternal Tower	Phantasy Star Zero
+Pinky Hand	Hard	Rioh Snowfield	Phantasy Star Zero
+Pinky Hand	Hard	Eternal Tower	Phantasy Star Zero
+Adoralphs	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Adoralphs	Super Hard	Eternal Tower	Phantasy Star Zero
+Alice Olivia	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Alice Olivia	Super Hard	Eternal Tower	Phantasy Star Zero
+All Resist Lv5	Super Hard	Rioh Snowfield	Phantasy Star Zero
+All Resist Lv5	Super Hard	Eternal Tower	Phantasy Star Zero
+Heavy Dumbbell	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Heavy Dumbbell	Super Hard	Eternal Tower	Phantasy Star Zero
+Hero/Mind	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Hero/Mind	Super Hard	Eternal Tower	Phantasy Star Zero
+Pinky Hand	Super Hard	Rioh Snowfield	Phantasy Star Zero
+Pinky Hand	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Pelcatraz
+
+Quick Jump: Description & Notes | Pictures
+
+Pelcatraz
+Item Summary
+Japanese Name:	ペルカトラズ
+Description:	A bird with broad wings. Its large tail is used as a balancer for flying.
+Versions:	Phantasy Star Zero
+
+
+Pelcatraz Findings
+Item	Difficulty	Location	Version
+Ray Staff	Normal	Ozette Wetland	Phantasy Star Zero
+Ray Staff	Normal	Eternal Tower	Phantasy Star Zero
+Ray Wandstick	Normal	Ozette Wetland	Phantasy Star Zero
+Ray Wandstick	Normal	Eternal Tower	Phantasy Star Zero
+Rookie/Swift	Normal	Ozette Wetland	Phantasy Star Zero
+Rookie/Swift	Normal	Eternal Tower	Phantasy Star Zero
+Ace/Swift	Hard	Ozette Wetland	Phantasy Star Zero
+Ace/Swift	Hard	Eternal Tower	Phantasy Star Zero
+Annasans	Hard	Ozette Wetland	Phantasy Star Zero
+Annasans	Hard	Eternal Tower	Phantasy Star Zero
+Caster Broom	Hard	Ozette Wetland	Phantasy Star Zero
+Caster Broom	Hard	Eternal Tower	Phantasy Star Zero
+Caster Broom	Super Hard	Ozette Wetland	Phantasy Star Zero
+Caster Broom	Super Hard	Eternal Tower	Phantasy Star Zero
+Hero/Swift	Super Hard	Ozette Wetland	Phantasy Star Zero
+Hero/Swift	Super Hard	Eternal Tower	Phantasy Star Zero
+Kerykeion	Super Hard	Ozette Wetland	Phantasy Star Zero
+Kerykeion	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Pelcatobur
+
+Quick Jump: Description & Notes | Pictures
+
+Pelcatobur
+Item Summary
+Japanese Name:	ペルカトブー
+Rare Enemy:	Yes
+Description:	A Pelcatraz variant with a large belly. The belly down is worn down to the skin.
+Versions:	Phantasy Star Zero
+
+
+Pelcatobur Findings
+Item	Difficulty	Location	Version
+Claymore	Normal	Ozette Wetland	Phantasy Star Zero
+Claymore	Normal	Eternal Tower	Phantasy Star Zero
+Hero/PP	Normal	Ozette Wetland	Phantasy Star Zero
+Hero/PP	Normal	Eternal Tower	Phantasy Star Zero
+Ray Staff	Normal	Ozette Wetland	Phantasy Star Zero
+Ray Staff	Normal	Eternal Tower	Phantasy Star Zero
+Rookie/Hit	Normal	Ozette Wetland	Phantasy Star Zero
+Rookie/Hit	Normal	Eternal Tower	Phantasy Star Zero
+Ace/Hit	Hard	Ozette Wetland	Phantasy Star Zero
+Ace/Hit	Hard	Eternal Tower	Phantasy Star Zero
+Annasans	Hard	Ozette Wetland	Phantasy Star Zero
+Annasans	Hard	Eternal Tower	Phantasy Star Zero
+Asclepios	Hard	Ozette Wetland	Phantasy Star Zero
+Asclepios	Hard	Eternal Tower	Phantasy Star Zero
+Caster Broom	Hard	Ozette Wetland	Phantasy Star Zero
+Caster Broom	Hard	Eternal Tower	Phantasy Star Zero
+Master/PP	Hard	Ozette Wetland	Phantasy Star Zero
+Master/PP	Hard	Eternal Tower	Phantasy Star Zero
+Asclepios	Super Hard	Ozette Wetland	Phantasy Star Zero
+Asclepios	Super Hard	Eternal Tower	Phantasy Star Zero
+Caster Broom	Super Hard	Ozette Wetland	Phantasy Star Zero
+Caster Broom	Super Hard	Eternal Tower	Phantasy Star Zero
+Divine/PP	Super Hard	Ozette Wetland	Phantasy Star Zero
+Divine/PP	Super Hard	Eternal Tower	Phantasy Star Zero
+Hero/Hit	Super Hard	Ozette Wetland	Phantasy Star Zero
+Hero/Hit	Super Hard	Eternal Tower	Phantasy Star Zero
+Kerykeion	Super Hard	Ozette Wetland	Phantasy Star Zero
+Kerykeion	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Froutang
+
+Quick Jump: Description & Notes | Pictures
+
+Froutang
+Item Summary
+Japanese Name:	フルーウータン
+Versions:	Phantasy Star Zero
+
+
+Froutang Findings
+Item	Difficulty	Location	Version
+Ace/PP	Normal	Oblivion City Paru	Phantasy Star Zero
+Ace/PP	Normal	Eternal Tower	Phantasy Star Zero
+Deo Slicer	Normal	Oblivion City Paru	Phantasy Star Zero
+Deo Slicer	Normal	Eternal Tower	Phantasy Star Zero
+Double Blade	Normal	Oblivion City Paru	Phantasy Star Zero
+Double Blade	Normal	Eternal Tower	Phantasy Star Zero
+Double Edge	Normal	Oblivion City Paru	Phantasy Star Zero
+Double Edge	Normal	Eternal Tower	Phantasy Star Zero
+Stag Cutlery	Normal	Oblivion City Paru	Phantasy Star Zero
+Stag Cutlery	Normal	Eternal Tower	Phantasy Star Zero
+Giacobini	Hard	Oblivion City Paru	Phantasy Star Zero
+Giacobini	Hard	Eternal Tower	Phantasy Star Zero
+Hero/HP	Hard	Oblivion City Paru	Phantasy Star Zero
+Hero/HP	Hard	Eternal Tower	Phantasy Star Zero
+Roche Limit	Hard	Oblivion City Paru	Phantasy Star Zero
+Roche Limit	Hard	Eternal Tower	Phantasy Star Zero
+Stag Cutlery	Hard	Oblivion City Paru	Phantasy Star Zero
+Stag Cutlery	Hard	Eternal Tower	Phantasy Star Zero
+Giacobini	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Giacobini	Super Hard	Eternal Tower	Phantasy Star Zero
+Master/HP	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Master/HP	Super Hard	Eternal Tower	Phantasy Star Zero
+Morgenlote	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Morgenlote	Super Hard	Eternal Tower	Phantasy Star Zero
+Roche Limit	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Roche Limit	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Frunaked
+
+Quick Jump: Description & Notes | Pictures
+
+Frunaked
+Item Summary
+Japanese Name:	フルーネイキッド
+Rare Enemy:	Yes
+Versions:	Phantasy Star Zero
+
+
+Frunaked Findings
+Item	Difficulty	Location	Version
+Ace/PP	Normal	Oblivion City Paru	Phantasy Star Zero
+Ace/PP	Normal	Eternal Tower	Phantasy Star Zero
+Deo Slicer	Normal	Oblivion City Paru	Phantasy Star Zero
+Deo Slicer	Normal	Eternal Tower	Phantasy Star Zero
+Double Edge	Normal	Oblivion City Paru	Phantasy Star Zero
+Double Edge	Normal	Eternal Tower	Phantasy Star Zero
+Hero/Power	Normal	Oblivion City Paru	Phantasy Star Zero
+Hero/Power	Normal	Eternal Tower	Phantasy Star Zero
+Stag Cutlery	Normal	Oblivion City Paru	Phantasy Star Zero
+Stag Cutlery	Normal	Eternal Tower	Phantasy Star Zero
+Giacobini	Hard	Oblivion City Paru	Phantasy Star Zero
+Giacobini	Hard	Eternal Tower	Phantasy Star Zero
+Hero/PP	Hard	Oblivion City Paru	Phantasy Star Zero
+Hero/PP	Hard	Eternal Tower	Phantasy Star Zero
+Master/Power	Hard	Oblivion City Paru	Phantasy Star Zero
+Master/Power	Hard	Eternal Tower	Phantasy Star Zero
+Roche Limit	Hard	Oblivion City Paru	Phantasy Star Zero
+Roche Limit	Hard	Eternal Tower	Phantasy Star Zero
+Stag Cutlery	Hard	Oblivion City Paru	Phantasy Star Zero
+Stag Cutlery	Hard	Eternal Tower	Phantasy Star Zero
+Clair Doubles	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Clair Doubles	Super Hard	Eternal Tower	Phantasy Star Zero
+Divine/Power	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Divine/Power	Super Hard	Eternal Tower	Phantasy Star Zero
+Master/PP	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Master/PP	Super Hard	Eternal Tower	Phantasy Star Zero
+Morgenlote	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Morgenlote	Super Hard	Eternal Tower	Phantasy Star Zero
+Roche Limit	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Roche Limit	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Rohjade
+
+Quick Jump: Description & Notes | Pictures
+
+Rohjade
+Item Summary
+Japanese Name:	ロージェイド
+Description:	A monster that wears an armor of crystals. It curls and tackles when enraged.
+Versions:	Phantasy Star Zero
+
+
+Rohjade Findings
+Item	Difficulty	Location	Version
+Ace/Swift	Normal	Makara Ruins	Phantasy Star Zero
+Ace/Swift	Normal	Eternal Tower	Phantasy Star Zero
+Clear Beam	Normal	Makara Ruins	Phantasy Star Zero
+Clear Beam	Normal	Eternal Tower	Phantasy Star Zero
+Ray Maser	Normal	Makara Ruins	Phantasy Star Zero
+Ray Maser	Normal	Eternal Tower	Phantasy Star Zero
+Rohjade Scales	Normal	Makara Ruins	Phantasy Star Zero
+Rohjade Scales	Normal	Eternal Tower	Phantasy Star Zero
+Slicer	Normal	Makara Ruins	Phantasy Star Zero
+Slicer	Normal	Eternal Tower	Phantasy Star Zero
+Egalta	Hard	Makara Ruins	Phantasy Star Zero
+Egalta	Hard	Eternal Tower	Phantasy Star Zero
+Hero/Swift	Hard	Makara Ruins	Phantasy Star Zero
+Hero/Swift	Hard	Eternal Tower	Phantasy Star Zero
+St. Kilda	Hard	Makara Ruins	Phantasy Star Zero
+St. Kilda	Hard	Eternal Tower	Phantasy Star Zero
+Vthraghna	Hard	Makara Ruins	Phantasy Star Zero
+Vthraghna	Hard	Eternal Tower	Phantasy Star Zero
+Egalta	Super Hard	Makara Ruins	Phantasy Star Zero
+Egalta	Super Hard	Eternal Tower	Phantasy Star Zero
+Gallatin	Super Hard	Makara Ruins	Phantasy Star Zero
+Gallatin	Super Hard	Eternal Tower	Phantasy Star Zero
+Master/Swift	Super Hard	Makara Ruins	Phantasy Star Zero
+Master/Swift	Super Hard	Eternal Tower	Phantasy Star Zero
+St. Kilda	Super Hard	Makara Ruins	Phantasy Star Zero
+St. Kilda	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Rohcrysta
+
+Quick Jump: Description & Notes | Pictures
+
+Rohcrysta
+Item Summary
+Japanese Name:	ロークリスタ
+Rare Enemy:	Yes
+Description:	A Rohjade variant that is nearly encased in crystals. It is extremely durable.
+Versions:	Phantasy Star Zero
+
+
+Rohcrysta Findings
+Item	Difficulty	Location	Version
+Ace/Guard	Normal	Makara Ruins	Phantasy Star Zero
+Ace/Guard	Normal	Eternal Tower	Phantasy Star Zero
+Chrome Shield	Normal	Makara Ruins	Phantasy Star Zero
+Chrome Shield	Normal	Eternal Tower	Phantasy Star Zero
+Clear Beam	Normal	Makara Ruins	Phantasy Star Zero
+Clear Beam	Normal	Eternal Tower	Phantasy Star Zero
+Hero/Mind	Normal	Makara Ruins	Phantasy Star Zero
+Hero/Mind	Normal	Eternal Tower	Phantasy Star Zero
+Rohcrysta Scales	Normal	Makara Ruins	Phantasy Star Zero
+Rohcrysta Scales	Normal	Eternal Tower	Phantasy Star Zero
+Slicer	Normal	Makara Ruins	Phantasy Star Zero
+Slicer	Normal	Eternal Tower	Phantasy Star Zero
+Hero/Guard	Hard	Makara Ruins	Phantasy Star Zero
+Hero/Guard	Hard	Eternal Tower	Phantasy Star Zero
+Master/Mind	Hard	Makara Ruins	Phantasy Star Zero
+Master/Mind	Hard	Eternal Tower	Phantasy Star Zero
+Rohcrysta Scales	Hard	Makara Ruins	Phantasy Star Zero
+Rohcrysta Scales	Hard	Eternal Tower	Phantasy Star Zero
+St. Kilda	Hard	Makara Ruins	Phantasy Star Zero
+St. Kilda	Hard	Eternal Tower	Phantasy Star Zero
+Crescent Cast	Super Hard	Makara Ruins	Phantasy Star Zero
+Crescent Cast	Super Hard	Eternal Tower	Phantasy Star Zero
+Lavateinn	Super Hard	Makara Ruins	Phantasy Star Zero
+Lavateinn	Super Hard	Eternal Tower	Phantasy Star Zero
+Master/Guard	Super Hard	Makara Ruins	Phantasy Star Zero
+Master/Guard	Super Hard	Eternal Tower	Phantasy Star Zero
+Rohcrysta Scales	Super Hard	Makara Ruins	Phantasy Star Zero
+Rohcrysta Scales	Super Hard	Eternal Tower	Phantasy Star Zero
+St. Kilda	Super Hard	Makara Ruins	Phantasy Star Zero
+St. Kilda	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Korse
+
+Quick Jump: Description & Notes | Pictures
+
+Korse
+Item Summary
+Japanese Name:	コース
+Description:	A recon-security robot. Boosters at its rear let it maneuver freely in air.
+Versions:	Phantasy Star Zero
+
+
+Korse Findings
+Item	Difficulty	Location	Version
+Clear Knife	Normal	Arca Plant	Phantasy Star Zero
+Clear Knife	Normal	Eternal Tower	Phantasy Star Zero
+Deo Twins	Normal	Arca Plant	Phantasy Star Zero
+Deo Twins	Normal	Eternal Tower	Phantasy Star Zero
+Sonic Laser	Normal	Arca Plant	Phantasy Star Zero
+Sonic Laser	Normal	Eternal Tower	Phantasy Star Zero
+Blue Bulletta	Hard	Arca Plant	Phantasy Star Zero
+Blue Bulletta	Hard	Eternal Tower	Phantasy Star Zero
+Rose Quartz	Hard	Arca Plant	Phantasy Star Zero
+Rose Quartz	Hard	Eternal Tower	Phantasy Star Zero
+Sonic Laser	Hard	Arca Plant	Phantasy Star Zero
+Sonic Laser	Hard	Eternal Tower	Phantasy Star Zero
+Blue Bulletta	Super Hard	Arca Plant	Phantasy Star Zero
+Blue Bulletta	Super Hard	Eternal Tower	Phantasy Star Zero
+Celesta Laser	Super Hard	Arca Plant	Phantasy Star Zero
+Celesta Laser	Super Hard	Eternal Tower	Phantasy Star Zero
+Magi Circuit	Super Hard	Arca Plant	Phantasy Star Zero
+Magi Circuit	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Akorse
+
+Quick Jump: Description & Notes | Pictures
+
+Akorse
+Item Summary
+Japanese Name:	アコース
+Description:	A recon-security robot. It leads others with a special, Photon-based signal.
+Versions:	Phantasy Star Zero
+
+
+Akorse Findings
+Item	Difficulty	Location	Version
+Magi Processor	Normal	Arca Plant	Phantasy Star Zero
+Magi Processor	Normal	Eternal Tower	Phantasy Star Zero
+Sasarai	Normal	Arca Plant	Phantasy Star Zero
+Sasarai	Normal	Eternal Tower	Phantasy Star Zero
+Slicer	Normal	Arca Plant	Phantasy Star Zero
+Slicer	Normal	Eternal Tower	Phantasy Star Zero
+Salvador	Hard	Arca Plant	Phantasy Star Zero
+Salvador	Hard	Eternal Tower	Phantasy Star Zero
+Sasarai	Hard	Arca Plant	Phantasy Star Zero
+Sasarai	Hard	Eternal Tower	Phantasy Star Zero
+Starfish Slicer	Hard	Arca Plant	Phantasy Star Zero
+Starfish Slicer	Hard	Eternal Tower	Phantasy Star Zero
+Salvador	Super Hard	Arca Plant	Phantasy Star Zero
+Salvador	Super Hard	Eternal Tower	Phantasy Star Zero
+Starfish Slicer	Super Hard	Arca Plant	Phantasy Star Zero
+Starfish Slicer	Super Hard	Eternal Tower	Phantasy Star Zero
+Trois Souther	Super Hard	Arca Plant	Phantasy Star Zero
+Trois Souther	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Izhirak-S6
+
+Quick Jump: Description & Notes | Pictures
+
+Izhirak-S6
+Item Summary
+Japanese Name:	イジラク-Ｓ６
+Description:	A four-legged security robot from long ago. It attacks with confounding speed.
+Versions:	Phantasy Star Zero
+
+
+Izhirak-S6 Findings
+Item	Difficulty	Location	Version
+Chrome Gun	Normal	Oblivion City Paru	Phantasy Star Zero
+Chrome Gun	Normal	Eternal Tower	Phantasy Star Zero
+Clear Pulse	Normal	Oblivion City Paru	Phantasy Star Zero
+Clear Pulse	Normal	Eternal Tower	Phantasy Star Zero
+Parpua	Normal	Oblivion City Paru	Phantasy Star Zero
+Parpua	Normal	Eternal Tower	Phantasy Star Zero
+Kleingold	Hard	Oblivion City Paru	Phantasy Star Zero
+Kleingold	Hard	Eternal Tower	Phantasy Star Zero
+Parpua	Hard	Oblivion City Paru	Phantasy Star Zero
+Parpua	Hard	Eternal Tower	Phantasy Star Zero
+Radiant	Hard	Oblivion City Paru	Phantasy Star Zero
+Radiant	Hard	Eternal Tower	Phantasy Star Zero
+Kleingold	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Kleingold	Super Hard	Eternal Tower	Phantasy Star Zero
+N-Tathlam	Super Hard	Oblivion City Paru	Phantasy Star Zero
+N-Tathlam	Super Hard	Eternal Tower	Phantasy Star Zero
+Radiant	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Radiant	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Azherowa-B2
+
+Quick Jump: Description & Notes | Pictures
+
+Azherowa-B2
+Item Summary
+Japanese Name:	アゼロワ-Ｂ２
+Rare Enemy:	Yes
+Versions:	Phantasy Star Zero
+
+
+Azherowa-B2 Findings
+Item	Difficulty	Location	Version
+Deo Rifle	Normal	Oblivion City Paru	Phantasy Star Zero
+Deo Rifle	Normal	Eternal Tower	Phantasy Star Zero
+Ein Mazurka	Normal	Oblivion City Paru	Phantasy Star Zero
+Ein Mazurka	Normal	Eternal Tower	Phantasy Star Zero
+Liese Garland	Normal	Oblivion City Paru	Phantasy Star Zero
+Liese Garland	Normal	Eternal Tower	Phantasy Star Zero
+Enfield	Hard	Oblivion City Paru	Phantasy Star Zero
+Enfield	Hard	Eternal Tower	Phantasy Star Zero
+M&amp;A33	Hard	Oblivion City Paru	Phantasy Star Zero
+M&amp;A33	Hard	Eternal Tower	Phantasy Star Zero
+Vraolet	Hard	Oblivion City Paru	Phantasy Star Zero
+Vraolet	Hard	Eternal Tower	Phantasy Star Zero
+Enfield	Super Hard	Oblivion City Paru	Phantasy Star Zero
+Enfield	Super Hard	Eternal Tower	Phantasy Star Zero
+M&amp;A33	Super Hard	Oblivion City Paru	Phantasy Star Zero
+M&amp;A33	Super Hard	Eternal Tower	Phantasy Star Zero
+M&amp;A41	Super Hard	Oblivion City Paru	Phantasy Star Zero
+M&amp;A41	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Finjer R
+
+Quick Jump: Description & Notes | Pictures
+
+Finjer R
+Item Summary
+Japanese Name:	フィンジェＲ
+Versions:	Phantasy Star Zero
+
+
+Finjer R Findings
+Item	Difficulty	Location	Version
+Chrome Sword	Normal	Arca Plant	Phantasy Star Zero
+Chrome Sword	Normal	Eternal Tower	Phantasy Star Zero
+Jamshid	Normal	Arca Plant	Phantasy Star Zero
+Jamshid	Normal	Eternal Tower	Phantasy Star Zero
+Orgaclaw	Normal	Arca Plant	Phantasy Star Zero
+Orgaclaw	Normal	Eternal Tower	Phantasy Star Zero
+Gale Bringer	Hard	Arca Plant	Phantasy Star Zero
+Gale Bringer	Hard	Eternal Tower	Phantasy Star Zero
+Ka Vorg	Hard	Arca Plant	Phantasy Star Zero
+Ka Vorg	Hard	Eternal Tower	Phantasy Star Zero
+Orgaclaw	Hard	Arca Plant	Phantasy Star Zero
+Orgaclaw	Hard	Eternal Tower	Phantasy Star Zero
+Gale Bringer	Super Hard	Arca Plant	Phantasy Star Zero
+Gale Bringer	Super Hard	Eternal Tower	Phantasy Star Zero
+Ka Vorg	Super Hard	Arca Plant	Phantasy Star Zero
+Ka Vorg	Super Hard	Eternal Tower	Phantasy Star Zero
+Rika's Claw	Super Hard	Arca Plant	Phantasy Star Zero
+Rika's Claw	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Finjer G
+
+Quick Jump: Description & Notes | Pictures
+
+Finjer G
+Item Summary
+Japanese Name:	フィンジェＧ
+Versions:	Phantasy Star Zero
+
+
+Finjer G Findings
+Item	Difficulty	Location	Version
+Chrome Carbine	Normal	Arca Plant	Phantasy Star Zero
+Chrome Carbine	Normal	Eternal Tower	Phantasy Star Zero
+Delacquer	Normal	Arca Plant	Phantasy Star Zero
+Delacquer	Normal	Eternal Tower	Phantasy Star Zero
+Deo Bazooka	Normal	Arca Plant	Phantasy Star Zero
+Deo Bazooka	Normal	Eternal Tower	Phantasy Star Zero
+Curse Answerer	Hard	Arca Plant	Phantasy Star Zero
+Curse Answerer	Hard	Eternal Tower	Phantasy Star Zero
+Deo Bazooka	Hard	Arca Plant	Phantasy Star Zero
+Deo Bazooka	Hard	Eternal Tower	Phantasy Star Zero
+Emerald Sin	Hard	Arca Plant	Phantasy Star Zero
+Emerald Sin	Hard	Eternal Tower	Phantasy Star Zero
+Curse Answerer	Super Hard	Arca Plant	Phantasy Star Zero
+Curse Answerer	Super Hard	Eternal Tower	Phantasy Star Zero
+Emerald Sin	Super Hard	Arca Plant	Phantasy Star Zero
+Emerald Sin	Super Hard	Eternal Tower	Phantasy Star Zero
+Nemesis	Super Hard	Arca Plant	Phantasy Star Zero
+Nemesis	Super Hard	Eternal Tower	Phantasy Star Zero
+
+Enemy: Finjer B
+
+Quick Jump: Description & Notes | Pictures
+
+Finjer B
+Item Summary
+Japanese Name:	フィンジェＢ
+Versions:	Phantasy Star Zero
+
+
+Finjer B Findings
+Item	Difficulty	Location	Version
+Chrome Spear	Normal	Arca Plant	Phantasy Star Zero
+Chrome Spear	Normal	Eternal Tower	Phantasy Star Zero
+Deo Cutter	Normal	Arca Plant	Phantasy Star Zero
+Deo Cutter	Normal	Eternal Tower	Phantasy Star Zero
+Tonfa	Normal	Arca Plant	Phantasy Star Zero
+Tonfa	Normal	Eternal Tower	Phantasy Star Zero
+Alucart	Hard	Arca Plant	Phantasy Star Zero
+Alucart	Hard	Eternal Tower	Phantasy Star Zero
+Schwarz Stihl	Hard	Arca Plant	Phantasy Star Zero
+Schwarz Stihl	Hard	Eternal Tower	Phantasy Star Zero
+Undulate	Hard	Arca Plant	Phantasy Star Zero
+Undulate	Hard	Eternal Tower	Phantasy Star Zero
+Ajax	Super Hard	Arca Plant	Phantasy Star Zero
+Ajax	Super Hard	Eternal Tower	Phantasy Star Zero
+Schwarz Stihl	Super Hard	Arca Plant	Phantasy Star Zero
+Schwarz Stihl	Super Hard	Eternal Tower	Phantasy Star Zero
+Undulate	Super Hard	Arca Plant	Phantasy Star Zero
+Undulate	Super Hard	Eternal Tower	Phantasy Star Zero
+
+

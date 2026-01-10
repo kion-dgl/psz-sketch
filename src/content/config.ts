@@ -5,6 +5,59 @@ import { docsSchema } from '@astrojs/starlight/schema';
 // ITEM COLLECTIONS
 // ============================================================================
 
+// Photon Arts collection - special weapon attacks
+const photonArts = defineCollection({
+  type: 'data',
+  schema: z.object({
+    name: z.string(),
+    weaponType: z.string(),
+    classType: z.enum(['Hunter', 'Ranger', 'Force']),
+    attackMod: z.number().nullable(), // percentage, null for utility arts
+    accuracyMod: z.number().nullable(),
+    ppCost: z.number(),
+    targets: z.number(), // additional targets (+X)
+    range: z.string().nullable(), // e.g., "3m"
+    area: z.number().nullable(), // degrees
+    hits: z.number().nullable(),
+    notes: z.string().nullable()
+  })
+});
+
+// Shops collection - vendor data for Sewer Shop and other merchants
+const shops = defineCollection({
+  type: 'data',
+  schema: z.object({
+    name: z.string(),
+    description: z.string().optional(),
+    unlockCondition: z.string().optional(),
+    items: z.array(z.object({
+      item: z.string(),
+      category: z.string().optional(),
+      cost: z.number().optional(),
+      currency: z.enum(['Meseta', 'Photon Drop']).optional(),
+      tradeIn: z.string().optional(), // enemy part for Enemy Collector
+      code: z.string().optional(), // for Password Machine
+      notes: z.string().optional()
+    }))
+  })
+});
+
+// Set bonuses collection - armor+weapon combinations with hidden stat boosts
+const setBonuses = defineCollection({
+  type: 'data',
+  schema: z.object({
+    armor: z.string(),
+    weapons: z.array(z.string()),
+    bonuses: z.object({
+      attack: z.number().default(0),
+      mental: z.number().default(0),
+      accuracy: z.number().default(0),
+      defense: z.number().default(0),
+      evasion: z.number().default(0)
+    })
+  })
+});
+
 // Armors collection - defensive equipment
 const armors = defineCollection({
   type: 'data',
@@ -135,6 +188,102 @@ const weapons = defineCollection({
 });
 
 // ============================================================================
+// CHARACTER COLLECTIONS
+// ============================================================================
+
+// Stat progression schema - stats at key levels
+const statProgressionSchema = z.object({
+  1: z.number(),
+  20: z.number(),
+  40: z.number(),
+  60: z.number(),
+  80: z.number(),
+  100: z.number()
+});
+
+// Technique limit schema
+const techniqueLimitsSchema = z.object({
+  foieBartaZonde: z.number().nullable(), // null if class can't use
+  grants: z.number().nullable(),
+  megid: z.number().nullable(),
+  restaReverser: z.number().nullable(),
+  shiftaDeband: z.number().nullable(),
+  jellenZalure: z.number().nullable()
+});
+
+// Trap limit schema (for CAST classes)
+const trapLimitsSchema = z.object({
+  fire: z.array(z.number()).length(6), // limits at level ranges: 1-19, 20-39, 40-59, 60-79, 80-99, 100
+  freeze: z.array(z.number()).length(6),
+  confuse: z.array(z.number()).length(6),
+  heal: z.array(z.number()).length(6)
+});
+
+// Classes collection - character class data
+const classes = defineCollection({
+  type: 'data',
+  schema: z.object({
+    name: z.string(),
+    race: z.enum(['Human', 'Newman', 'Cast']),
+    gender: z.enum(['Male', 'Female']),
+    type: z.enum(['Hunter', 'Ranger', 'Force']),
+    // Bonuses
+    bonuses: z.array(z.string()),
+    materialLimit: z.number(), // 80 or 100
+    // Stats at key levels
+    stats: z.object({
+      hp: statProgressionSchema,
+      pp: statProgressionSchema,
+      attack: statProgressionSchema,
+      defense: statProgressionSchema,
+      accuracy: statProgressionSchema,
+      evasion: statProgressionSchema,
+      technique: statProgressionSchema
+    }),
+    // Technique limits (null for CAST classes)
+    techniqueLimits: techniqueLimitsSchema.nullable(),
+    // Trap limits (only for CAST classes)
+    trapLimits: trapLimitsSchema.nullable()
+  })
+});
+
+// Experience table collection
+const experience = defineCollection({
+  type: 'data',
+  schema: z.object({
+    levels: z.array(z.object({
+      level: z.number().min(1).max(100),
+      totalExp: z.number(),
+      expToNext: z.number().nullable() // null for level 100
+    }))
+  })
+});
+
+// Mission reward schema
+const missionRewardSchema = z.object({
+  item: z.string(),
+  quantity: z.number().default(1),
+  meseta: z.number()
+});
+
+// Missions collection - individual files per mission for progress tracking
+const missions = defineCollection({
+  type: 'data',
+  schema: z.object({
+    name: z.string(),
+    area: z.string(),
+    main: z.boolean().default(false), // true for main story quests
+    isSecret: z.boolean().default(false),
+    requires: z.array(z.string()).default([]), // mission file names (without .json)
+    rewards: z.object({
+      normal: missionRewardSchema.optional(),
+      hard: missionRewardSchema.optional(),
+      superHard: missionRewardSchema.optional()
+    }).optional()
+  })
+});
+
+// ============================================================================
 // QUEST COLLECTIONS
 // ============================================================================
 
@@ -218,16 +367,111 @@ const questAreas = defineCollection({
   })
 });
 
+// ============================================================================
+// ENEMY COLLECTIONS
+// ============================================================================
+
+// Area enum for drop locations
+const areaEnum = z.enum([
+  'gurhacia-valley',
+  'rioh-snowfield',
+  'ozette-wetland',
+  'oblivion-city-paru',
+  'makara-ruins',
+  'arca-plant',
+  'dark-shrine',
+  'eternal-tower'
+]);
+
+// Enemy name enum for drops validation
+const enemyNameEnum = z.enum([
+  'Ghowl', 'Vulkure', 'Usanny', 'Usanimere', 'Porel', 'Pomarr', 'Pobomma',
+  'Bolix', 'Goldix', 'Batt', 'Bullbatt', 'Rappy', 'Ar Rappy', 'Rab Rappy',
+  'Booma Origin', 'Gigobooma Origin', 'Garapython', 'Garahadan', 'Grimble',
+  'Tormatible', 'Reyhound', 'Stagg', 'Hypao', 'Vespao', 'Rumole', 'Kapantha',
+  'Helion', 'Blaze Helion', 'Hildegao', 'Hildeghana', 'Hildegigas',
+  'Pelcatraz', 'Pelcatobur', 'Froutang', 'Frunaked', 'Rohjade', 'Rohcrysta',
+  'Korse', 'Akorse', 'Izhirak-S6', 'Azherowa-B2', 'Finjer R', 'Finjer G', 'Finjer B',
+  'Arkzein', 'Arkzein R', 'Derreo', 'Zerreo', 'Eulada', 'Euladaveil',
+  'Eulid', 'Eulidveil', 'Phobos', 'Phobos Dyna', 'Zaphobos', 'Zaphobos Dyna',
+  'Blade Mother', 'Force Mother', 'Shot Mother'
+]);
+
+// Drops collection - organized by difficulty level
+// Each file (normal.json, hard.json, super-hard.json) contains drops by area and enemy
+const drops = defineCollection({
+  type: 'data',
+  schema: z.record(
+    areaEnum,
+    z.record(
+      enemyNameEnum,
+      z.array(z.string()) // Array of item names that drop from this enemy
+    )
+  )
+});
+
+// Drop table entry schema
+const dropEntrySchema = z.object({
+  itemName: z.string(),
+  dropRate: z.string().optional(), // e.g., "1/128", "Common", etc.
+  difficulty: z.enum(['Normal', 'Hard', 'Super Hard', 'Ultimate']).optional()
+});
+
+// Enemies collection
+const enemies = defineCollection({
+  type: 'data',
+  schema: z.object({
+    name: z.string(),
+    japaneseName: z.string().optional(),
+    description: z.string().optional(),
+    element: z.enum(['Native', 'Beast', 'Machine', 'Dark']),
+    locations: z.array(z.enum([
+      'Gurhacia Valley',
+      'Rioh Snowfield',
+      'Ozette Wetland',
+      'Oblivion City Paru',
+      'Makara Ruins',
+      'Arca Plant',
+      'Dark Shrine',
+      'Eternal Tower'
+    ])),
+    isRare: z.boolean().default(false),
+    isBoss: z.boolean().default(false),
+    // PSO-World reference
+    psoWorldId: z.number().optional(),
+    // 3D Model reference (folder name in /public/enemies/)
+    modelId: z.string().optional(),
+    // Drop tables by difficulty
+    drops: z.object({
+      normal: z.array(dropEntrySchema).optional(),
+      hard: z.array(dropEntrySchema).optional(),
+      superHard: z.array(dropEntrySchema).optional(),
+      ultimate: z.array(dropEntrySchema).optional()
+    }).optional()
+  })
+});
+
 export const collections = {
   docs: defineCollection({ schema: docsSchema() }),
   'quest-definitions': questDefinitions,
   'quest-areas': questAreas,
   // Item collections
+  'photon-arts': photonArts,
+  shops,
+  'set-bonuses': setBonuses,
   armors,
   units,
   mags,
   consumables,
   materials,
   modifiers,
-  weapons
+  weapons,
+  // Enemy collection
+  enemies,
+  // Drops collection (by difficulty)
+  drops,
+  // Character collections
+  classes,
+  experience,
+  missions
 };

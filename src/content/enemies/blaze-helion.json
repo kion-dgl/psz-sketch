@@ -1,0 +1,8 @@
+{
+  "name": "Blaze Helion",
+  "japaneseName": "ブレイズヘリオン",
+  "element": "Beast",
+  "locations": ["Gurhacia Valley", "Eternal Tower"],
+  "isRare": true,
+  "modelId": "lion_rare"
+}

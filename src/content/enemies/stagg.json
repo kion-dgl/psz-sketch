@@ -1,0 +1,8 @@
+{
+  "name": "Stagg",
+  "japaneseName": "スタッグ",
+  "element": "Native",
+  "locations": ["Rioh Snowfield", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "deer"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Hopping Run",
+  "weaponType": "Spear",
+  "classType": "Hunter",
+  "attackMod": 90,
+  "accuracyMod": 130,
+  "ppCost": 24,
+  "targets": 3,
+  "range": "2.5m",
+  "area": 360,
+  "hits": 4,
+  "notes": null
+}

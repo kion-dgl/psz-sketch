@@ -1,0 +1,13 @@
+{
+  "name": "Over-end",
+  "weaponType": "Sword",
+  "classType": "Hunter",
+  "attackMod": 250,
+  "accuracyMod": 255,
+  "ppCost": 45,
+  "targets": -1,
+  "range": "8m",
+  "area": 50,
+  "hits": 3,
+  "notes": null
+}

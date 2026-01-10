@@ -1,0 +1,7 @@
+{
+  "name": "Euladaveil",
+  "element": "Dark",
+  "locations": ["Dark Shrine", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "circle_black"
+}

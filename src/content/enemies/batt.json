@@ -1,0 +1,8 @@
+{
+  "name": "Batt",
+  "japaneseName": "バト",
+  "element": "Native",
+  "locations": ["Makara Ruins", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "bat"
+}

@@ -1,0 +1,5 @@
+{
+  "armor": "Keplar Suit",
+  "weapons": ["H10 Missouri", "H44 Missouri", "M&A33", "M&A41", "M14 Missouri", "M25SE Missouri", "Missouri CX4", "Missouri RX4", "Riverman Missouri", "Yasminkov M95", "Yasminkov M109"],
+  "bonuses": { "attack": 0, "mental": 0, "accuracy": 25, "defense": 0, "evasion": 50 }
+}

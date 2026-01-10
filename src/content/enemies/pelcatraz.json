@@ -1,0 +1,8 @@
+{
+  "name": "Pelcatraz",
+  "japaneseName": "ペルカトラズ",
+  "element": "Beast",
+  "locations": ["Ozette Wetland", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "roc"
+}

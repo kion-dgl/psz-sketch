@@ -1,0 +1,7 @@
+{
+  "name": "Arkzein R",
+  "element": "Machine",
+  "locations": ["Arca Plant", "Eternal Tower"],
+  "isRare": true,
+  "modelId": "swordman_rare"
+}

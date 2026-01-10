@@ -1,0 +1,13 @@
+{
+  "name": "Crush Bomb",
+  "weaponType": "Bazooka",
+  "classType": "Ranger",
+  "attackMod": 210,
+  "accuracyMod": 100,
+  "ppCost": 24,
+  "targets": 5,
+  "range": "3m",
+  "area": 360,
+  "hits": 1,
+  "notes": null
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Cross Rave",
+  "weaponType": "Saber",
+  "classType": "Hunter",
+  "attackMod": 160,
+  "accuracyMod": 120,
+  "ppCost": 13,
+  "targets": 2,
+  "range": "3m",
+  "area": 120,
+  "hits": 3,
+  "notes": null
+}

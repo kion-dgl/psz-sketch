@@ -1,0 +1,7 @@
+{
+  "name": "Force Mother",
+  "element": "Native",
+  "locations": ["Eternal Tower"],
+  "isRare": false,
+  "modelId": "mother_tech"
+}

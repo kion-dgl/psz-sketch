@@ -1,0 +1,5 @@
+{
+  "armor": "Dymos Armor",
+  "weapons": ["Black Phobos", "Phobos Shoot"],
+  "bonuses": { "attack": 0, "mental": 0, "accuracy": 50, "defense": 0, "evasion": 25 }
+}

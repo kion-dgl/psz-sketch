@@ -1,0 +1,16 @@
+{
+  "name": "Item Shop",
+  "description": "Sells consumable items like healing mates, fluids, and atomizers.",
+  "items": [
+    { "item": "Monomate", "category": "Healing", "cost": 50, "currency": "Meseta" },
+    { "item": "Dimate", "category": "Healing", "cost": 500, "currency": "Meseta" },
+    { "item": "Trimate", "category": "Healing", "cost": 2500, "currency": "Meseta" },
+    { "item": "Monofluid", "category": "PP Recovery", "cost": 100, "currency": "Meseta" },
+    { "item": "Difluid", "category": "PP Recovery", "cost": 1000, "currency": "Meseta" },
+    { "item": "Sol Atomizer", "category": "Atomizers", "cost": 50, "currency": "Meseta" },
+    { "item": "Moon Atomizer", "category": "Atomizers", "cost": 300, "currency": "Meseta" },
+    { "item": "Star Atomizer", "category": "Atomizers", "cost": 1200, "currency": "Meseta" },
+    { "item": "Trap Vision", "category": "Utility", "cost": 50, "currency": "Meseta" },
+    { "item": "Telepipe", "category": "Utility", "cost": 100, "currency": "Meseta" }
+  ]
+}

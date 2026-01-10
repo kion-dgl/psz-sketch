@@ -1,0 +1,13 @@
+{
+  "name": "Barrier Shift",
+  "weaponType": "Shield",
+  "classType": "Hunter",
+  "attackMod": null,
+  "accuracyMod": null,
+  "ppCost": 20,
+  "targets": 0,
+  "range": null,
+  "area": null,
+  "hits": null,
+  "notes": "Short Invincibility Period"
+}

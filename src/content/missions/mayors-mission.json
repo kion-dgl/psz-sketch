@@ -1,0 +1,11 @@
+{
+  "name": "Mayor's Mission",
+  "area": "Gurhacia Valley",
+  "main": false,
+  "requires": [],
+  "rewards": {
+    "normal": { "item": "Grow Shower", "quantity": 1, "meseta": 500 },
+    "hard": { "item": "Bloom Shower", "quantity": 1, "meseta": 1000 },
+    "superHard": { "item": "Bloom Shower", "quantity": 1, "meseta": 2000 }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Slide End",
+  "weaponType": "Claw",
+  "classType": "Hunter",
+  "attackMod": 75,
+  "accuracyMod": 120,
+  "ppCost": 21,
+  "targets": 3,
+  "range": "3m",
+  "area": 360,
+  "hits": 4,
+  "notes": null
+}

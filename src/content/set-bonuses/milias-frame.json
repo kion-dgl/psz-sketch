@@ -1,0 +1,5 @@
+{
+  "armor": "Milias Frame",
+  "weapons": ["Chaos Cannon", "Milias Breaker", "Milias Sword", "Tartaros Cannon"],
+  "bonuses": { "attack": 25, "mental": 0, "accuracy": 50, "defense": 0, "evasion": 0 }
+}

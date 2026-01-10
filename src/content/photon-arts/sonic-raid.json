@@ -1,0 +1,13 @@
+{
+  "name": "Sonic Raid",
+  "weaponType": "Sword",
+  "classType": "Hunter",
+  "attackMod": 120,
+  "accuracyMod": 75,
+  "ppCost": 23,
+  "targets": -2,
+  "range": "3.5m",
+  "area": 90,
+  "hits": 4,
+  "notes": null
+}

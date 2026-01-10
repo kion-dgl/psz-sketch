@@ -1,0 +1,13 @@
+{
+  "name": "Zeta Cutlass",
+  "weaponType": "Saber",
+  "classType": "Hunter",
+  "attackMod": 130,
+  "accuracyMod": 140,
+  "ppCost": 19,
+  "targets": 3,
+  "range": "4m",
+  "area": 200,
+  "hits": 4,
+  "notes": null
+}

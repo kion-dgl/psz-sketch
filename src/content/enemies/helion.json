@@ -1,0 +1,8 @@
+{
+  "name": "Helion",
+  "japaneseName": "ヘリオン",
+  "element": "Beast",
+  "locations": ["Gurhacia Valley", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "lion"
+}

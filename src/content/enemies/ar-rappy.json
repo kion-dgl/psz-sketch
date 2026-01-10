@@ -1,0 +1,8 @@
+{
+  "name": "Ar Rappy",
+  "japaneseName": "アル・ラッピー",
+  "element": "Native",
+  "locations": ["Oblivion City Paru", "Makara Ruins", "Eternal Tower"],
+  "isRare": true,
+  "modelId": "rappy_blue"
+}

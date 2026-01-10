@@ -1,0 +1,8 @@
+{
+  "name": "Hildeghana",
+  "japaneseName": "ヒルデガーナ",
+  "element": "Beast",
+  "locations": ["Rioh Snowfield", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "gorilla_female"
+}

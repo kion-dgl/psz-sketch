@@ -1,0 +1,5 @@
+{
+  "armor": "Workout Wear",
+  "weapons": ["Dumbbell", "Heavy Dumbbell"],
+  "bonuses": { "attack": 0, "mental": 25, "accuracy": 0, "defense": 50, "evasion": 0 }
+}

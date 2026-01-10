@@ -1,0 +1,5 @@
+{
+  "armor": "Hunter Shell",
+  "weapons": ["Binary Saber", "Clair Doubles", "Stag Cutlery", "Twin Brand"],
+  "bonuses": { "attack": 50, "mental": 0, "accuracy": 0, "defense": 25, "evasion": 0 }
+}

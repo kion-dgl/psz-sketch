@@ -1,0 +1,13 @@
+{
+  "name": "Thriller Combo",
+  "weaponType": "Handgun",
+  "classType": "Ranger",
+  "attackMod": 150,
+  "accuracyMod": 120,
+  "ppCost": 15,
+  "targets": 0,
+  "range": "8m",
+  "area": 120,
+  "hits": 4,
+  "notes": null
+}

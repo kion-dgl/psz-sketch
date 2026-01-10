@@ -1,0 +1,11 @@
+{
+  "name": "To the Future",
+  "area": "Dark Shrine",
+  "main": false,
+  "requires": [],
+  "rewards": {
+    "normal": { "item": "Taxion Gun", "quantity": 1, "meseta": 3000 },
+    "hard": { "item": "Luxion Gun", "quantity": 1, "meseta": 6000 },
+    "superHard": { "item": "Tachyon Gun", "quantity": 1, "meseta": 12000 }
+  }
+}

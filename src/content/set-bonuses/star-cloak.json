@@ -1,0 +1,5 @@
+{
+  "armor": "Star Cloak",
+  "weapons": ["Bright Moon", "Caster Broom", "Crescent Cast", "Eclipse Star", "Imperial Rod", "Starlight", "Twinkle Star", "Witch Broom"],
+  "bonuses": { "attack": 0, "mental": 50, "accuracy": 0, "defense": 0, "evasion": 25 }
+}

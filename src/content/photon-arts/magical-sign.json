@@ -1,0 +1,13 @@
+{
+  "name": "Magical Sign",
+  "weaponType": "Wand",
+  "classType": "Force",
+  "attackMod": 140,
+  "accuracyMod": 160,
+  "ppCost": 13,
+  "targets": 3,
+  "range": "3.5m",
+  "area": 360,
+  "hits": 2,
+  "notes": "Causes Slow Effect"
+}

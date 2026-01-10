@@ -1,0 +1,8 @@
+{
+  "name": "Pomarr",
+  "japaneseName": "ポマール",
+  "element": "Native",
+  "locations": ["Ozette Wetland", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "frog_rare"
+}

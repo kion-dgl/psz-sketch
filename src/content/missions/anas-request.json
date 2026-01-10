@@ -1,0 +1,11 @@
+{
+  "name": "Ana's Request",
+  "area": "Arca Plant",
+  "main": false,
+  "requires": [],
+  "rewards": {
+    "normal": { "item": "Lieucon Stihl", "quantity": 1, "meseta": 2000 },
+    "hard": { "item": "Schwarz Stihl", "quantity": 1, "meseta": 4000 },
+    "superHard": { "item": "Schwarz Stihl", "quantity": 1, "meseta": 8000 }
+  }
+}

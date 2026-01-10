@@ -1,0 +1,5 @@
+{
+  "armor": "Shinobi Suit",
+  "weapons": ["Fuuma Shuriken", "Kouga Shuriken", "Scarred Tatami", "Tatami Mat"],
+  "bonuses": { "attack": 0, "mental": 25, "accuracy": 50, "defense": 0, "evasion": 0 }
+}

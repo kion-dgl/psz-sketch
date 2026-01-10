@@ -1,0 +1,5 @@
+{
+  "armor": "Stage Outfit",
+  "weapons": ["Harisen", "Goof Swatter"],
+  "bonuses": { "attack": 50, "mental": 0, "accuracy": 25, "defense": 0, "evasion": 0 }
+}

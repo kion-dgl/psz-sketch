@@ -1,0 +1,13 @@
+{
+  "name": "Rolling Bar",
+  "weaponType": "Rod",
+  "classType": "Force",
+  "attackMod": 90,
+  "accuracyMod": 100,
+  "ppCost": 21,
+  "targets": 1,
+  "range": "3.5m",
+  "area": 120,
+  "hits": 5,
+  "notes": null
+}

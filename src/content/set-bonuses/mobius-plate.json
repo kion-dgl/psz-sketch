@@ -1,0 +1,5 @@
+{
+  "armor": "Mobius Plate",
+  "weapons": ["Big Hemera", "Big Mobius"],
+  "bonuses": { "attack": 50, "mental": 0, "accuracy": 0, "defense": 25, "evasion": 0 }
+}

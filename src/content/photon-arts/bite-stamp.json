@@ -1,0 +1,13 @@
+{
+  "name": "Bite Stamp",
+  "weaponType": "Claw",
+  "classType": "Hunter",
+  "attackMod": 180,
+  "accuracyMod": 75,
+  "ppCost": 26,
+  "targets": 3,
+  "range": "8m",
+  "area": 60,
+  "hits": 3,
+  "notes": null
+}

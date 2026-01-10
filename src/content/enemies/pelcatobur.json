@@ -1,0 +1,8 @@
+{
+  "name": "Pelcatobur",
+  "japaneseName": "ペルカトブー",
+  "element": "Beast",
+  "locations": ["Ozette Wetland", "Eternal Tower"],
+  "isRare": true,
+  "modelId": "roc_rare"
+}

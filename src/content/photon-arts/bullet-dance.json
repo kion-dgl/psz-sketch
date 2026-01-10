@@ -1,0 +1,13 @@
+{
+  "name": "Bullet Dance",
+  "weaponType": "Gunblade",
+  "classType": "Ranger",
+  "attackMod": 125,
+  "accuracyMod": 70,
+  "ppCost": 16,
+  "targets": 0,
+  "range": "10m",
+  "area": 360,
+  "hits": 15,
+  "notes": null
+}

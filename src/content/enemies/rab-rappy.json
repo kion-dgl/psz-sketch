@@ -1,0 +1,8 @@
+{
+  "name": "Rab Rappy",
+  "japaneseName": "ラブ・ラッピー",
+  "element": "Native",
+  "locations": ["Arca Plant", "Dark Shrine", "Eternal Tower"],
+  "isRare": true,
+  "modelId": "rappy_red"
+}

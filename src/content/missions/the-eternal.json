@@ -1,0 +1,11 @@
+{
+  "name": "The Eternal",
+  "area": "Eternal Tower",
+  "main": false,
+  "requires": [],
+  "rewards": {
+    "normal": { "item": "Monogrinder", "quantity": 20, "meseta": 4000 },
+    "hard": { "item": "Digrinder", "quantity": 20, "meseta": 8000 },
+    "superHard": { "item": "Trigrinder", "quantity": 20, "meseta": 16000 }
+  }
+}

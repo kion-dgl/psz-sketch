@@ -1,0 +1,7 @@
+{
+  "name": "Eulid",
+  "element": "Dark",
+  "locations": ["Dark Shrine", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "lower"
+}

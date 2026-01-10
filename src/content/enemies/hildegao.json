@@ -1,0 +1,8 @@
+{
+  "name": "Hildegao",
+  "japaneseName": "ヒルデガオ",
+  "element": "Beast",
+  "locations": ["Rioh Snowfield", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "gorilla"
+}

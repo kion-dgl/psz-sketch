@@ -1,0 +1,11 @@
+{
+  "name": "Future Hunters",
+  "area": "Oblivion City Paru",
+  "main": false,
+  "requires": [],
+  "rewards": {
+    "normal": { "item": "Rookie/Guard", "quantity": 1, "meseta": 2000 },
+    "hard": { "item": "Ace/Guard", "quantity": 1, "meseta": 4000 },
+    "superHard": { "item": "Hero/Guard", "quantity": 1, "meseta": 8000 }
+  }
+}

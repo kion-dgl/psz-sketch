@@ -1,0 +1,8 @@
+{
+  "name": "Garahadan",
+  "japaneseName": "ガラハダン",
+  "element": "Native",
+  "locations": ["Gurhacia Valley", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "snake_rare"
+}

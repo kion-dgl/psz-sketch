@@ -1,0 +1,5 @@
+{
+  "armor": "Mascot Suit",
+  "weapons": ["8-Ouncer", "12-Ouncer"],
+  "bonuses": { "attack": 50, "mental": 0, "accuracy": 0, "defense": 0, "evasion": 25 }
+}

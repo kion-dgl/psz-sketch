@@ -10,6 +10,7 @@
   "attackMax": 189,
   "accuracyBase": 156,
   "accuracyMax": 156,
+  "usableBy": ["Hunter Human", "Hunter Newman", "Hunter Cast", "Ranger Human", "Ranger Cast", "Force Human", "Force Newman"],
   "psoWorldId": 8,
   "modelId": "wsac01",
   "variantId": null,

@@ -1,0 +1,13 @@
+{
+  "name": "Wild Blow",
+  "weaponType": "Bazooka",
+  "classType": "Ranger",
+  "attackMod": 120,
+  "accuracyMod": 90,
+  "ppCost": 28,
+  "targets": 2,
+  "range": "3.5m",
+  "area": 120,
+  "hits": 4,
+  "notes": null
+}

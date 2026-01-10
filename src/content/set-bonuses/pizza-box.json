@@ -1,0 +1,5 @@
+{
+  "armor": "Pizza Box",
+  "weapons": ["Eaten Pizza", "Pizza", "Twin Ketchup", "Twin Mustard"],
+  "bonuses": { "attack": 0, "mental": 50, "accuracy": 0, "defense": 25, "evasion": 0 }
+}

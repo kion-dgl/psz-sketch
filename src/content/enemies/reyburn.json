@@ -1,0 +1,8 @@
+{
+  "name": "Reyburn",
+  "element": "Native",
+  "locations": ["Gurhacia Valley"],
+  "isRare": false,
+  "isBoss": true,
+  "modelId": "boss_dragon"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Porel",
+  "japaneseName": "ポエル",
+  "element": "Native",
+  "locations": ["Ozette Wetland", "Eternal Tower"],
+  "isRare": false,
+  "modelId": "frog"
+}

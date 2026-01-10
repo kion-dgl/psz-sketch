@@ -1,0 +1,11 @@
+{
+  "name": "I Love Ruins!",
+  "area": "Makura Ruins",
+  "main": false,
+  "requires": [],
+  "rewards": {
+    "normal": { "item": "Rookie/Swift", "quantity": 1, "meseta": 1500 },
+    "hard": { "item": "Ace/Swift", "quantity": 1, "meseta": 3000 },
+    "superHard": { "item": "Hero/Swift", "quantity": 1, "meseta": 6000 }
+  }
+}

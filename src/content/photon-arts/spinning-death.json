@@ -1,0 +1,13 @@
+{
+  "name": "Spinning Death",
+  "weaponType": "Mech Gun",
+  "classType": "Ranger",
+  "attackMod": 85,
+  "accuracyMod": 150,
+  "ppCost": 20,
+  "targets": 0,
+  "range": "8m",
+  "area": 120,
+  "hits": 12,
+  "notes": null
+}

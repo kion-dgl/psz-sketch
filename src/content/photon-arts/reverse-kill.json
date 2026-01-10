@@ -1,0 +1,13 @@
+{
+  "name": "Reverse Kill",
+  "weaponType": "Dagger",
+  "classType": "Hunter",
+  "attackMod": 80,
+  "accuracyMod": 80,
+  "ppCost": 25,
+  "targets": 3,
+  "range": "8.5m",
+  "area": 120,
+  "hits": 4,
+  "notes": null
+}
