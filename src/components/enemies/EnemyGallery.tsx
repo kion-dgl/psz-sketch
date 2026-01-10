@@ -103,18 +103,25 @@ function EnemyModel({
       }
     });
 
-    // Center the model
+    // Get bounding box
     const box = new THREE.Box3().setFromObject(clone);
     const center = box.getCenter(new THREE.Vector3());
-    clone.position.sub(center);
+    const size = box.getSize(new THREE.Vector3());
+
+    // Center horizontally (X and Z), but keep Y as-is for now
+    clone.position.x = -center.x;
+    clone.position.z = -center.z;
 
     // Scale to fit in view
-    const size = box.getSize(new THREE.Vector3());
     const maxDim = Math.max(size.x, size.y, size.z);
     if (maxDim > 3) {
       const scale = 3 / maxDim;
       clone.scale.setScalar(scale);
     }
+
+    // Recalculate bounding box after scaling and position the model on the ground
+    const scaledBox = new THREE.Box3().setFromObject(clone);
+    clone.position.y = -scaledBox.min.y; // Move up so bottom sits at y=0
 
     // Apply front-side rendering to all materials
     clone.traverse((obj) => {
