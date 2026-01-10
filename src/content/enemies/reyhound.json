@@ -1,5 +1,6 @@
 {
   "name": "Reyhound",
+  "japaneseName": "レイハウンド",
   "element": "Native",
   "locations": ["Rioh Snowfield", "Eternal Tower"],
   "isRare": false,

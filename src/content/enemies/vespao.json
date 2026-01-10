@@ -1,5 +1,6 @@
 {
   "name": "Vespao",
+  "japaneseName": "ベスパオ",
   "element": "Native",
   "locations": ["Ozette Wetland", "Eternal Tower"],
   "isRare": false,

@@ -1,5 +1,6 @@
 {
   "name": "Bolix",
+  "japaneseName": "ボリックス",
   "element": "Native",
   "locations": ["Oblivion City Paru", "Eternal Tower"],
   "isRare": false,

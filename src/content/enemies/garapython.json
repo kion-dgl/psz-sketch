@@ -1,5 +1,6 @@
 {
   "name": "Garapython",
+  "japaneseName": "ガラパイソン",
   "element": "Native",
   "locations": ["Gurhacia Valley", "Eternal Tower"],
   "isRare": false,

@@ -1,5 +1,6 @@
 {
   "name": "Pelcatobur",
+  "japaneseName": "ペルカトブー",
   "element": "Beast",
   "locations": ["Ozette Wetland", "Eternal Tower"],
   "isRare": true,

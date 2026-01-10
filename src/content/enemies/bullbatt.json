@@ -1,5 +1,6 @@
 {
   "name": "Bullbatt",
+  "japaneseName": "ブルバト",
   "element": "Native",
   "locations": ["Makara Ruins", "Eternal Tower"],
   "isRare": false,

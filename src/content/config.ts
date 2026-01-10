@@ -222,6 +222,45 @@ const questAreas = defineCollection({
 // ENEMY COLLECTIONS
 // ============================================================================
 
+// Area enum for drop locations
+const areaEnum = z.enum([
+  'gurhacia-valley',
+  'rioh-snowfield',
+  'ozette-wetland',
+  'oblivion-city-paru',
+  'makara-ruins',
+  'arca-plant',
+  'dark-shrine',
+  'eternal-tower'
+]);
+
+// Enemy name enum for drops validation
+const enemyNameEnum = z.enum([
+  'Ghowl', 'Vulkure', 'Usanny', 'Usanimere', 'Porel', 'Pomarr', 'Pobomma',
+  'Bolix', 'Goldix', 'Batt', 'Bullbatt', 'Rappy', 'Ar Rappy', 'Rab Rappy',
+  'Booma Origin', 'Gigobooma Origin', 'Garapython', 'Garahadan', 'Grimble',
+  'Tormatible', 'Reyhound', 'Stagg', 'Hypao', 'Vespao', 'Rumole', 'Kapantha',
+  'Helion', 'Blaze Helion', 'Hildegao', 'Hildeghana', 'Hildegigas',
+  'Pelcatraz', 'Pelcatobur', 'Froutang', 'Frunaked', 'Rohjade', 'Rohcrysta',
+  'Korse', 'Akorse', 'Izhirak-S6', 'Azherowa-B2', 'Finjer R', 'Finjer G', 'Finjer B',
+  'Arkzein', 'Arkzein R', 'Derreo', 'Zerreo', 'Eulada', 'Euladaveil',
+  'Eulid', 'Eulidveil', 'Phobos', 'Phobos Dyna', 'Zaphobos', 'Zaphobos Dyna',
+  'Blade Mother', 'Force Mother', 'Shot Mother'
+]);
+
+// Drops collection - organized by difficulty level
+// Each file (normal.json, hard.json, super-hard.json) contains drops by area and enemy
+const drops = defineCollection({
+  type: 'data',
+  schema: z.record(
+    areaEnum,
+    z.record(
+      enemyNameEnum,
+      z.array(z.string()) // Array of item names that drop from this enemy
+    )
+  )
+});
+
 // Drop table entry schema
 const dropEntrySchema = z.object({
   itemName: z.string(),
@@ -276,5 +315,7 @@ export const collections = {
   modifiers,
   weapons,
   // Enemy collection
-  enemies
+  enemies,
+  // Drops collection (by difficulty)
+  drops
 };

@@ -1,5 +1,6 @@
 {
   "name": "Finjer G",
+  "japaneseName": "フィンジェＧ",
   "element": "Machine",
   "locations": ["Arca Plant", "Eternal Tower"],
   "isRare": false,

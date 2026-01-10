@@ -1,5 +1,6 @@
 {
   "name": "Rumole",
+  "japaneseName": "ルモール",
   "element": "Native",
   "locations": ["Makara Ruins", "Eternal Tower"],
   "isRare": false,

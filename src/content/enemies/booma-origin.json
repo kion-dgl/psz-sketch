@@ -1,5 +1,6 @@
 {
   "name": "Booma Origin",
+  "japaneseName": "ブーマオリジン",
   "element": "Native",
   "locations": ["Gurhacia Valley", "Rioh Snowfield", "Ozette Wetland", "Oblivion City Paru", "Makara Ruins", "Arca Plant", "Dark Shrine", "Eternal Tower"],
   "isRare": true,

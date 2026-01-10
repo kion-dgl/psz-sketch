@@ -1,5 +1,6 @@
 {
   "name": "Kapantha",
+  "japaneseName": "ケイパンサー",
   "element": "Native",
   "locations": ["Makara Ruins", "Eternal Tower"],
   "isRare": false,

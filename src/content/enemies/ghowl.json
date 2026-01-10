@@ -1,5 +1,6 @@
 {
   "name": "Ghowl",
+  "japaneseName": "ガウル",
   "element": "Native",
   "locations": ["Gurhacia Valley", "Eternal Tower"],
   "isRare": false,

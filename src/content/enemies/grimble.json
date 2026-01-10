@@ -1,5 +1,6 @@
 {
   "name": "Grimble",
+  "japaneseName": "グリンブル",
   "element": "Native",
   "locations": ["Gurhacia Valley", "Eternal Tower"],
   "isRare": false,
