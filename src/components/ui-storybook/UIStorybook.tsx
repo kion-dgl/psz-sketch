@@ -10,9 +10,10 @@ import EquipStorybook from '../main-menu/EquipStorybook';
 import ItemShopStorybook from '../shops/ItemShopStorybook';
 import WeaponShopStorybook from '../shops/WeaponShopStorybook';
 import Shop3DStorybook from '../shops/Shop3DStorybook';
+import WeaponShop3DStorybook from '../shops/WeaponShop3DStorybook';
 import ScreenPreview from './ScreenPreview';
 
-type UIComponent = 'screen' | 'hud' | 'action-palette' | 'minimap' | 'tooltip' | 'stats' | 'main-menu' | 'items' | 'equip' | 'item-shop' | 'weapon-shop' | 'shop-3d';
+type UIComponent = 'screen' | 'hud' | 'action-palette' | 'minimap' | 'tooltip' | 'stats' | 'main-menu' | 'items' | 'equip' | 'item-shop' | 'weapon-shop' | 'shop-3d' | 'weapon-shop-3d';
 
 const UI_COMPONENTS: { id: UIComponent; label: string; available: boolean }[] = [
   { id: 'screen', label: 'Screen Preview', available: true },
@@ -26,7 +27,8 @@ const UI_COMPONENTS: { id: UIComponent; label: string; available: boolean }[] = 
   { id: 'equip', label: 'Equip', available: true },
   { id: 'item-shop', label: 'Item Shop', available: true },
   { id: 'weapon-shop', label: 'Weapon Shop', available: true },
-  { id: 'shop-3d', label: 'Shop 3D', available: true },
+  { id: 'shop-3d', label: 'Item Shop 3D', available: true },
+  { id: 'weapon-shop-3d', label: 'Weapon Shop 3D', available: true },
 ];
 
 export default function UIStorybook() {
@@ -70,6 +72,7 @@ export default function UIStorybook() {
         {selected === 'item-shop' && <ItemShopStorybook />}
         {selected === 'weapon-shop' && <WeaponShopStorybook />}
         {selected === 'shop-3d' && <Shop3DStorybook />}
+        {selected === 'weapon-shop-3d' && <WeaponShop3DStorybook />}
       </div>
     </div>
   );
