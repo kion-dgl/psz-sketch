@@ -1,6 +1,9 @@
 {
   "name": "Rappy",
   "japaneseName": "ラッピー",
-  "details": "Evolution conditions:\n-At least Lv60\n-Use the \"Rappy Soul\" item on your mag",
+  "stage": "rare",
+  "evolutionLevel": 60,
+  "evolutionRequirement": { "type": "soul", "item": "Rappy Soul" },
+  "photonBlast": "inherited",
   "psoWorldId": 374
 }

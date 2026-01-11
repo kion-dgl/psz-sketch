@@ -1,6 +1,9 @@
 {
   "name": "Wyn",
   "japaneseName": "ウィン",
-  "details": "Evolution conditions:\n-Lv60, 70, 80, 90, 100\n-Power > Hit > Other stats\n\nAcquired Photon Blast:\nPacifal",
+  "stage": 4,
+  "evolutionLevel": 60,
+  "evolutionRequirement": { "type": "stat", "primary": "Power", "secondary": "Hit" },
+  "photonBlast": "Pacifal",
   "psoWorldId": 365
 }

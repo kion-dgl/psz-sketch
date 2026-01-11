@@ -1,6 +1,9 @@
 {
   "name": "Yth",
   "japaneseName": "イース",
-  "details": "Evolution conditions:\n-Lv10\n-Hit > Other stats\n\nAcquired Photon Blast:\nPacifal",
+  "stage": 2,
+  "evolutionLevel": 10,
+  "evolutionRequirement": { "type": "stat", "primary": "Hit" },
+  "photonBlast": "Pacifal",
   "psoWorldId": 353
 }

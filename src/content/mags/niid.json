@@ -1,6 +1,9 @@
 {
   "name": "Niid",
   "japaneseName": "ニイド",
-  "details": "Evolution conditions:\n-Lv30\n-All stats 0 except Mind\n\nAcquired Photon Blast:\nFlozir",
+  "stage": 3,
+  "evolutionLevel": 30,
+  "evolutionRequirement": { "type": "pure", "stat": "Mind" },
+  "photonBlast": "Flozir",
   "psoWorldId": 363
 }

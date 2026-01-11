@@ -1,6 +1,9 @@
 {
   "name": "Maray",
   "japaneseName": "マレイ",
-  "details": "Evolution conditions:\n-Lv30\n-All stats 0 except Guard\n\nAcquired Photon Blast:\nMidgul",
+  "stage": 3,
+  "evolutionLevel": 30,
+  "evolutionRequirement": { "type": "pure", "stat": "Guard" },
+  "photonBlast": "Midgul",
   "psoWorldId": 361
 }

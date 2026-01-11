@@ -1,6 +1,9 @@
 {
   "name": "Radam",
   "japaneseName": "ラダム",
-  "details": "Evolution conditions:\n-At least Lv80\n-Use the \"Radam Soul\" item on your mag",
+  "stage": "rare",
+  "evolutionLevel": 80,
+  "evolutionRequirement": { "type": "soul", "item": "Radam Soul" },
+  "photonBlast": "inherited",
   "psoWorldId": 381
 }

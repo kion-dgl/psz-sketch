@@ -1,6 +1,9 @@
 {
   "name": "Toppi",
   "japaneseName": "トッピー",
-  "details": "Evolution conditions:\n-At least Lv60\n-Use the \"Toppi Soul\" item on your mag",
+  "stage": "rare",
+  "evolutionLevel": 60,
+  "evolutionRequirement": { "type": "soul", "item": "Toppi Soul" },
+  "photonBlast": "inherited",
   "psoWorldId": 377
 }

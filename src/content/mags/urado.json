@@ -1,6 +1,9 @@
 {
   "name": "Urado",
   "japaneseName": "ウラド",
-  "details": "Evolution conditions:\n-Lv60, 70, 80, 90, 100\n-Power > Guard > Other stats\n\nAcquired Photon Blast:\nMidgul",
+  "stage": 4,
+  "evolutionLevel": 60,
+  "evolutionRequirement": { "type": "stat", "primary": "Power", "secondary": "Guard" },
+  "photonBlast": "Midgul",
   "psoWorldId": 364
 }

@@ -1,6 +1,9 @@
 {
   "name": "Aio",
   "japaneseName": "エオー",
-  "details": "Evolution conditions:\n-Lv10\n-Guard > Other stats\n\nAcquired Photon Blast:\nMidgul",
+  "stage": 2,
+  "evolutionLevel": 10,
+  "evolutionRequirement": { "type": "stat", "primary": "Guard" },
+  "photonBlast": "Midgul",
   "psoWorldId": 352
 }

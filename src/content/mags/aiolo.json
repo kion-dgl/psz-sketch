@@ -1,6 +1,9 @@
 {
   "name": "Aiolo",
   "japaneseName": "エオロー",
-  "details": "Evolution conditions:\n-Lv30\n-Guard > Other stats\n\nAcquired Photon Blast:\nFlozir",
+  "stage": 3,
+  "evolutionLevel": 30,
+  "evolutionRequirement": { "type": "stat", "primary": "Guard" },
+  "photonBlast": "Flozir",
   "psoWorldId": 357
 }

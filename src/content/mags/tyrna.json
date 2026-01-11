@@ -1,6 +1,9 @@
 {
   "name": "Tyrna",
   "japaneseName": "ティルナ",
-  "details": "Evolution conditions:\n-Lv60, 70, 80, 90, 100\n-Guard > Power > Other stats\n\nAcquired Photon Blast:\nGranir",
+  "stage": 4,
+  "evolutionLevel": 60,
+  "evolutionRequirement": { "type": "stat", "primary": "Guard", "secondary": "Power" },
+  "photonBlast": "Granir",
   "psoWorldId": 367
 }

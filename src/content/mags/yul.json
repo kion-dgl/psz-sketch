@@ -1,6 +1,9 @@
 {
   "name": "Yul",
   "japaneseName": "ユル",
-  "details": "Evolution conditions:\n-Lv 10\n-Power > Other stats\n\nAcquired Photon Blast:\nGranir",
+  "stage": 2,
+  "evolutionLevel": 10,
+  "evolutionRequirement": { "type": "stat", "primary": "Power" },
+  "photonBlast": "Granir",
   "psoWorldId": 351
 }

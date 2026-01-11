@@ -1,6 +1,9 @@
 {
   "name": "Feo",
   "japaneseName": "フェオ",
-  "details": "Evolution conditions:\n-Lv60, 70, 80, 90, 100\n-Mind > Guard > Other stats\n\nAcquired Photon Blast:\nMidgul",
+  "stage": 4,
+  "evolutionLevel": 60,
+  "evolutionRequirement": { "type": "stat", "primary": "Mind", "secondary": "Guard" },
+  "photonBlast": "Midgul",
   "psoWorldId": 373
 }

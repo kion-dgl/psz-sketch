@@ -1,6 +1,9 @@
 {
   "name": "Puyo",
   "japaneseName": "ぷよぷよ",
-  "details": "Evolution conditions:\n-At least Lv60\n-Use the \"Puyo Soul\" item on your mag",
+  "stage": "rare",
+  "evolutionLevel": 60,
+  "evolutionRequirement": { "type": "soul", "item": "Puyo Soul" },
+  "photonBlast": "inherited",
   "psoWorldId": 375
 }

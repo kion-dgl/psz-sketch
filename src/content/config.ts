@@ -114,14 +114,41 @@ const units = defineCollection({
   })
 });
 
-// Mags collection - companion creatures
+// Evolution requirement types for mags
+const evolutionRequirementSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('stat'),
+    primary: z.enum(['Power', 'Guard', 'Hit', 'Mind']),
+    secondary: z.enum(['Power', 'Guard', 'Hit', 'Mind']).optional()
+  }),
+  z.object({
+    type: z.literal('pure'),
+    stat: z.enum(['Power', 'Guard', 'Hit', 'Mind'])
+  }),
+  z.object({
+    type: z.literal('soul'),
+    item: z.string()
+  })
+]);
+
+// Mag variant schema (for mags like Chato and Sig with color variants)
+const magVariantSchema = z.object({
+  name: z.string(),
+  evolutionRequirement: evolutionRequirementSchema,
+  photonBlast: z.enum(['Granir', 'Midgul', 'Pacifal', 'Flozir'])
+});
+
+// Mags collection - companion creatures with evolution system
 const mags = defineCollection({
   type: 'data',
   schema: z.object({
     name: z.string(),
     japaneseName: z.string(),
-    rarity: z.number().optional(),
-    details: z.string().optional(), // Evolution conditions, photon blast info
+    stage: z.union([z.number().min(1).max(4), z.literal('rare')]),
+    evolutionLevel: z.number(),
+    evolutionRequirement: evolutionRequirementSchema.optional(),
+    photonBlast: z.enum(['Granir', 'Midgul', 'Pacifal', 'Flozir', 'inherited']).nullable(),
+    variants: z.array(magVariantSchema).optional(),
     psoWorldId: z.number()
   })
 });
