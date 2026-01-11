@@ -1,0 +1,31 @@
+{
+  "name": "Playful",
+  "japaneseName": "やんちゃ",
+  "category": "offensive",
+  "tier": "basic",
+  "unlockLevel": 10,
+  "favoriteFood": "Hunter Weapons and Elements",
+  "triggers": {
+    "walking": {
+      "effect": "Offensive Boost",
+      "strength": "Small",
+      "chance": 10,
+      "duration": 30
+    },
+    "lowHealth": null,
+    "statusCondition": null,
+    "bossEncounter": {
+      "effect": "Offensive Boost",
+      "strength": "Small",
+      "chance": 50,
+      "duration": 30
+    },
+    "playerDeath": null,
+    "photonBlastFull": {
+      "effect": "Offensive Boost",
+      "strength": "Large",
+      "chance": 100,
+      "duration": 30
+    }
+  }
+}

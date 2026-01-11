@@ -153,6 +153,36 @@ const mags = defineCollection({
   })
 });
 
+// Mag trigger effect schema for personality behaviors
+const magTriggerEffectSchema = z.object({
+  effect: z.string(),
+  strength: z.string().optional(),
+  chance: z.union([z.number(), z.string()]).optional(),
+  duration: z.union([z.number(), z.string()]).optional()
+}).nullable();
+
+// Mag personalities collection - behavior/nature system
+const magPersonalities = defineCollection({
+  type: 'data',
+  schema: z.object({
+    name: z.string(),
+    japaneseName: z.string(),
+    category: z.enum(['offensive', 'defensive', 'recovery', 'special']),
+    tier: z.enum(['basic', 'advanced']),
+    unlockLevel: z.number(),
+    favoriteFood: z.string(),
+    switchFrom: z.string().optional(),
+    triggers: z.object({
+      walking: magTriggerEffectSchema,
+      lowHealth: magTriggerEffectSchema,
+      statusCondition: magTriggerEffectSchema,
+      bossEncounter: magTriggerEffectSchema,
+      playerDeath: magTriggerEffectSchema,
+      photonBlastFull: magTriggerEffectSchema
+    })
+  })
+});
+
 // Consumables collection - healing items, atomizers, traps, etc.
 const consumables = defineCollection({
   type: 'data',
@@ -506,6 +536,7 @@ export const collections = {
   armors,
   units,
   mags,
+  'mag-personalities': magPersonalities,
   consumables,
   materials,
   modifiers,

@@ -1,0 +1,31 @@
+{
+  "name": "Healing",
+  "japaneseName": "いやしけい",
+  "category": "recovery",
+  "tier": "basic",
+  "unlockLevel": 10,
+  "favoriteFood": "Force Weapons and Enemy Parts",
+  "triggers": {
+    "walking": {
+      "effect": "Resta",
+      "strength": "Weak",
+      "chance": "Low"
+    },
+    "lowHealth": {
+      "effect": "Resta",
+      "strength": "Weak",
+      "chance": "Low"
+    },
+    "statusCondition": {
+      "effect": "Anti",
+      "chance": 10
+    },
+    "bossEncounter": null,
+    "playerDeath": null,
+    "photonBlastFull": {
+      "effect": "Resta",
+      "strength": "Strong",
+      "chance": "Large"
+    }
+  }
+}

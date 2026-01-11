@@ -1,0 +1,35 @@
+{
+  "name": "Eccentric",
+  "japaneseName": "かわり",
+  "category": "special",
+  "tier": "advanced",
+  "unlockLevel": 60,
+  "favoriteFood": "Anything",
+  "switchFrom": "Feed 5 consecutive Ranger Weapons or Armors",
+  "triggers": {
+    "walking": {
+      "effect": "PP Recovery",
+      "strength": "Small",
+      "chance": 10
+    },
+    "lowHealth": {
+      "effect": "Resta",
+      "strength": "Weak",
+      "chance": 10
+    },
+    "statusCondition": {
+      "effect": "Anti",
+      "chance": 5
+    },
+    "bossEncounter": null,
+    "playerDeath": {
+      "effect": "Revival",
+      "chance": 8
+    },
+    "photonBlastFull": {
+      "effect": "Invincibility",
+      "chance": 100,
+      "duration": 15
+    }
+  }
+}

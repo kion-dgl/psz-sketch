@@ -1,0 +1,41 @@
+{
+  "name": "Cautious",
+  "japaneseName": "しんちょう",
+  "category": "offensive",
+  "tier": "advanced",
+  "unlockLevel": 60,
+  "favoriteFood": "Hunter Weapons and Elements",
+  "switchFrom": "Feed 5 consecutive Force Weapons or Armors",
+  "triggers": {
+    "walking": {
+      "effect": "Offensive Boost",
+      "strength": "Small",
+      "chance": 10,
+      "duration": 45
+    },
+    "lowHealth": {
+      "effect": "Resta",
+      "strength": "Weak"
+    },
+    "statusCondition": {
+      "effect": "Anti",
+      "chance": 12
+    },
+    "bossEncounter": {
+      "effect": "Offensive Boost",
+      "strength": "Small",
+      "chance": 50,
+      "duration": 45
+    },
+    "playerDeath": {
+      "effect": "Revival",
+      "chance": 5
+    },
+    "photonBlastFull": {
+      "effect": "Offensive Boost",
+      "strength": "Large",
+      "chance": 100,
+      "duration": 30
+    }
+  }
+}
