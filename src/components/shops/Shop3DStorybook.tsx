@@ -15,7 +15,6 @@ interface ShopItem {
 interface ShopPresets {
   itemShop: {
     baseItems: ShopItem[];
-    presets: { name: string; premiumItems: ShopItem[] }[];
   };
 }
 
@@ -52,10 +51,7 @@ export default function Shop3DStorybook() {
     return <div style={styles.loading}>Loading shop data...</div>;
   }
 
-  const itemShopItems = [
-    ...shopData.itemShop.baseItems,
-    ...shopData.itemShop.presets[2].premiumItems
-  ];
+  const itemShopItems = shopData.itemShop.baseItems;
 
   return (
     <div style={styles.container}>

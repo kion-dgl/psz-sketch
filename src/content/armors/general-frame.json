@@ -1,7 +1,7 @@
 {
   "name": "General Frame",
   "japaneseName": "ジェネラルフレーム",
-  "details": "Can have a maximum of 3 slots.",
+  "type": "Frame",
   "rarity": 4,
   "maxGrind": 25,
   "level": 10,
@@ -10,5 +10,7 @@
   "defenseMax": 136,
   "evasionBase": 82,
   "evasionMax": 132,
+  "maxSlots": 3,
+  "resistances": { "fire": 0, "ice": 0, "lightning": 0, "light": 10, "dark": 10 },
   "psoWorldId": 494
 }

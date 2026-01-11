@@ -1,0 +1,411 @@
+Guides - FOmar
+
+ Printer Friendly Version
+
+FOmar
+FOmar
+FOmar
+Human / Male / Force
+
+Bonuses
+Has a 75% damage reduction from technique attacks.
+20% boost to Foie, Barta, Zonde, Rafoie, Rabarta, and Razonde.
+Can use up to 100 materials.
+Technique Limits
+Foie/Barta/Zonde	Grants	Megid
+15	15	15
+Resta/Reverser	Shifta/Deband	Jellen/Zalure
+15	15	15
+
+Character Stats
+ 	1	20	40	60	80	100
+HP	73	234	366	460	548	602
+PP	102	297	438	511	582	633
+Attack	37	98	162	217	261	306
+Defense	7	54	93	122	144	167
+Accuracy	105	136	167	189	195	203
+Evasion	14	82	147	190	227	264
+Technique	49	136	228	309	381	452
+
+Guides - FOmarl
+
+ Printer Friendly Version
+
+FOmarl
+FOmarl
+FOmarl
+Human / Female / Force
+
+Bonuses
+Has a 75% damage reduction from technique attacks.
+25% boost to Grants and 30% boost to Resta.
+Can use up to 100 materials.
+Technique Limits
+Foie/Barta/Zonde	Grants	Megid
+15	15	15
+Resta/Reverser	Shifta/Deband	Jellen/Zalure
+15	15	15
+
+Character Stats
+ 	1	20	40	60	80	100
+HP	70	225	350	439	523	574
+PP	106	308	454	530	604	658
+Attack	35	94	156	208	250	292
+Defense	7	52	89	116	137	158
+Accuracy	109	141	173	197	203	212
+Evasion	14	85	151	196	235	273
+Technique	50	140	234	318	392	466
+
+Guides - FOnewearl
+
+ Printer Friendly Version
+
+FOnewearl
+FOnewearl
+FOnewearl
+Newman / Female / Force
+
+Bonuses
+Has a 75% damage reduction from technique attacks.
+25% boost to Megid and 30% boost to Resta.
+Can use up to 80 materials.
+Has natural PP recovery (+1% every 5 seconds; +5% at rest)
+Technique Limits
+Foie/Barta/Zonde	Grants	Megid
+15	15	15
+Resta/Reverser	Shifta/Deband	Jellen/Zalure
+15	15	15
+
+Character Stats
+ 	1	20	40	60	80	100
+HP	65	202	326	412	496	546
+PP	102	275	389	472	574	652
+Attack	32	73	111	149	212	270
+Defense	6	34	48	72	106	135
+Accuracy	97	120	139	159	164	169
+Evasion	15	75	123	170	226	278
+Technique	57	145	237	325	409	493
+
+Guides - FOnewm
+
+ Printer Friendly Version
+
+FOnewm
+FOnewm
+FOnewm
+Newman/ Male / Force
+
+Bonuses
+Has a 75% damage reduction from technique attacks.
+15% boost to ALL attack techniques and 30% reduction to Resta.
+Can use up to 80 materials.
+Has natural PP recovery (+1% every 5 seconds; +5% at rest)
+Technique Limits
+Foie/Barta/Zonde	Grants	Megid
+15	15	15
+Resta/Reverser	Shifta/Deband	Jellen/Zalure
+15	15	15
+
+Character Stats
+ 	1	20	40	60	80	100
+HP	68	209	338	427	515	568
+PP	97	261	368	447	544	618
+Attack	33	75	115	154	219	279
+Defense	6	35	50	75	109	140
+Accuracy	93	115	133	152	156	160
+Evasion	14	72	117	162	216	266
+Technique	56	142	233	319	402	484
+
+
+Guides - HUcaseal
+
+ Printer Friendly Version
+
+HUcaseal
+HUcaseal
+HUcaseal
+Cast / Female / Hunter
+
+Bonuses
+Can use up to 80 materials.
+Has natural HP recovery (+1% every 5 seconds ; +5% at rest)
+Immune to poison status attribute.
+Can see and destroy traps.
+Trap Limits
+Levels	1 to 19	20 to 39	40 to 59	60 to 79	80 to 99	100
+Fire	5	5	5	5	5	5
+Freeze	5	5	5	5	5	5
+Confuse	5	6	7	8	9	10
+Heal	5	6	7	8	9	10
+
+Character Stats
+ 	1	20	40	60	80	100
+HP	95	271	454	593	740	853
+PP	59	162	233	287	340	386
+Attack	58	141	228	316	403	490
+Defense	11	76	122	172	224	277
+Accuracy	138	172	220	260	277	294
+Evasion	8	44	76	102	128	153
+Technique	28	74	122	170	218	266
+
+
+Guides - HUcast
+
+ Printer Friendly Version
+
+HUcast
+HUcast
+HUcast
+Cast / Male / Hunter
+
+Bonuses
+Can use up to 80 materials.
+Has natural HP recovery (+1% every 5 seconds ; +5% at rest)
+Immune to poison status attribute.
+Can see and destroy traps.
+Trap Limits
+Levels	1 to 19	20 to 39	40 to 59	60 to 79	80 to 99	100
+Fire	5	5	5	5	5	5
+Freeze	5	6	7	8	9	10
+Confuse	5	6	7	8	9	10
+Heal	5	5	5	5	5	5
+
+Character Stats
+ 	1	20	40	60	80	100
+HP	98	280	470	614	766	882
+PP	52	144	207	255	312	354
+Attack	60	145	235	324	414	504
+Defense	12	79	127	180	236	292
+Accuracy	132	170	210	248	264	280
+Evasion	7	42	72	96	120	144
+Technique	25	66	110	153	196	239
+
+
+Guides - HUmar
+
+ Printer Friendly Version
+
+HUmar
+HUmar
+HUmar
+Human / Male / Hunter
+
+Bonuses
+Can use up to 100 materials.
+Technique Limits
+Foie/Barta/Zonde	Grants	Megid
+10	-	-
+Resta/Reverser	Shifta/Deband	Jellen/Zalure
+10	10	-
+
+Character Stats
+ 	1	20	40	60	80	100
+HP	82	258	432	532	630	700
+PP	67	200	299	339	378	408
+Attack	56	145	238	321	394	468
+Defense	10	76	129	171	208	244
+Accuracy	110	148	191	224	233	243
+Evasion	13	75	135	174	207	240
+Technique	33	84	135	186	237	288
+
+Guides - HUmarl
+
+ Printer Friendly Version
+
+HUmarl
+HUmarl
+HUmarl
+Human / Female / Hunter
+
+Bonuses
+Can use up to 100 materials.
+Technique Limits
+Foie/Barta/Zonde	Grants	Megid
+10	-	-
+Resta/Reverser	Shifta/Deband	Jellen/Zalure
+10	10	-
+
+Character Stats
+ 	1	20	40	60	80	100
+HP	80	253	424	521	617	685
+PP	70	209	311	354	396	428
+Attack	54	140	230	310	380	450
+Defense	10	72	123	163	196	230
+Accuracy	116	155	200	234	244	255
+Evasion	13	79	141	182	217	252
+Technique	35	89	143	197	251	306
+
+
+Guides - HUnewearl
+
+ Printer Friendly Version
+
+HUnewearl
+HUnewearl
+HUnewearl
+Newman / Female / Hunter
+
+Bonuses
+Can use up to 80 materials.
+Has natural PP recovery (+1% every 5 seconds; +5% at rest)
+Technique Limits
+Foie/Barta/Zonde	Grants	Megid
+10	-	-
+Resta/Reverser	Shifta/Deband	Jellen/Zalure
+10	10	-
+
+Character Stats
+ 	1	20	40	60	80	100
+HP	75	224	365	471	579	653
+PP	79	211	295	357	438	501
+Attack	48	112	174	236	323	405
+Defense	9	53	79	115	161	203
+Accuracy	126	157	186	224	253	278
+Evasion	21	99	168	224	279	327
+Technique	45	114	186	254	317	377
+
+
+Guides - HUnewm
+
+ Printer Friendly Version
+
+HUnewm
+HUnewm
+HUnewm
+Newman / Male / Hunter
+
+Bonuses
+Can use up to 80 materials.
+Has natural PP recovery (+1% every 5 seconds; +5% at rest)
+Technique Limits
+Foie/Barta/Zonde	Grants	Megid
+10	-	-
+Resta/Reverser	Shifta/Deband	Jellen/Zalure
+10	10	-
+
+Character Stats
+ 	1	20	40	60	80	100
+HP	77	231	376	486	598	674
+PP	75	202	282	341	419	480
+Attack	50	117	182	247	337	423
+Defense	9	56	84	121	169	212
+Accuracy	121	150	177	214	242	266
+Evasion	21	95	161	211	255	297
+Technique	43	109	178	242	302	359
+
+Guides - RAcaseal
+
+ Printer Friendly Version
+
+RAcaseal
+RAcaseal
+RAcaseal
+Cast / Female / Ranger
+
+Bonuses
+Can use up to 80 materials.
+Has natural HP recovery (+1% every 5 seconds ; +5% at rest)
+Immune to poison status attribute.
+Can see and destroy traps.
+Trap Limits
+Levels	1 to 19	20 to 39	40 to 59	60 to 79	80 to 99	100
+Fire	5	6	7	8	9	10
+Freeze	5	5	5	5	5	5
+Confuse	5	5	5	5	5	5
+Heal	5	6	7	8	9	10
+
+Character Stats
+ 	1	20	40	60	80	100
+HP	83	238	399	522	652	754
+PP	66	180	259	319	378	418
+Attack	44	106	172	237	303	369
+Defense	8	58	94	129	165	201
+Accuracy	171	221	273	321	339	357
+Evasion	9	52	90	120	150	180
+Technique	29	76	126	176	225	275
+
+
+Guides - RAcast
+
+ Printer Friendly Version
+
+RAcast
+RAcast
+RAcast
+Cast / Male / Ranger
+
+Bonuses
+Can use up to 80 materials.
+Has natural HP recovery (+1% every 5 seconds ; +5% at rest)
+Immune to poison status attribute.
+Can see and destroy traps.
+Trap Limits
+Levels	1 to 19	20 to 39	40 to 59	60 to 79	80 to 99	100
+Fire	5	6	7	8	9	10
+Freeze	5	6	7	8	9	10
+Confuse	5	5	5	5	5	5
+Heal	5	5	5	5	5	5
+
+Character Stats
+ 	1	20	40	60	80	100
+HP	86	245	411	537	671	775
+PP	62	171	246	303	359	397
+Attack	47	114	184	255	325	396
+Defense	9	60	97	134	171	207
+Accuracy	165	212	262	308	325	342
+Evasion	9	49	84	112	140	168
+Technique	27	71	118	164	211	257
+
+Guides - RAmar
+
+ Printer Friendly Version
+
+RAmar
+RAmar
+RAmar
+Human / Male / Ranger
+
+Bonuses
+Can use up to 100 materials.
+Technique Limits
+Foie/Barta/Zonde	Grants	Megid
+10	-	-
+Resta/Reverser	Shifta/Deband	Jellen/Zalure
+10	-	10
+
+Character Stats
+ 	1	20	40	60	80	100
+HP	72	232	362	455	542	595
+PP	73	218	324	370	415	449
+Attack	41	107	177	237	287	337
+Defense	8	58	100	130	155	180
+Accuracy	151	205	246	285	304	323
+Evasion	14	82	147	190	227	264
+Technique	31	90	152	204	246	288
+
+Guides - RAmarl
+
+ Printer Friendly Version
+
+RAmarl
+RAmarl
+RAmarl
+Human / Female / Ranger
+
+Bonuses
+Can use up to 100 materials.
+Technique Limits
+Foie/Barta/Zonde	Grants	Megid
+10	-	-
+Resta/Reverser	Shifta/Deband	Jellen/Zalure
+10	-	10
+
+Character Stats
+ 	1	20	40	60	80	100
+HP	71	227	354	445	529	581
+PP	76	225	335	383	430	466
+Attack	39	103	171	228	276	324
+Defense	7	56	96	126	150	174
+Accuracy	158	213	257	298	318	338
+Evasion	14	86	153	198	237	276
+Technique	33	94	158	213	257	301

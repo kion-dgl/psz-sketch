@@ -1,7 +1,9 @@
 {
   "name": "Light Protect",
   "japaneseName": "ライトプロテクト",
-  "details": "Grants immunity to Confuse status effect.",
   "rarity": 6,
+  "category": "Special",
+  "effect": "Immunity to Confusion",
+  "details": "Grants immunity to Confuse status effect.",
   "psoWorldId": 471
 }

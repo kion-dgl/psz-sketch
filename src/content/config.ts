@@ -63,17 +63,28 @@ const armors = defineCollection({
   type: 'data',
   schema: z.object({
     name: z.string(),
-    japaneseName: z.string(),
+    japaneseName: z.string().optional(),
+    type: z.enum(['Armor', 'Frame', 'Robe', 'Rare']),
     rarity: z.number().min(1).max(7),
     maxGrind: z.number().default(0),
-    level: z.number().optional(),
+    level: z.number().optional(), // required level to equip
     resaleValue: z.number().optional(),
     defenseBase: z.number(),
     defenseMax: z.number(),
     evasionBase: z.number(),
     evasionMax: z.number(),
-    details: z.string().optional(), // e.g., "Can have a maximum of 3 slots."
-    psoWorldId: z.number()
+    maxSlots: z.number().min(0).max(4), // max unit slots
+    resistances: z.object({
+      fire: z.number().default(0),
+      ice: z.number().default(0),
+      lightning: z.number().default(0),
+      light: z.number().default(0),
+      dark: z.number().default(0)
+    }).optional(),
+    usableBy: z.array(z.string()).optional(), // class restrictions, null = all
+    setBonus: z.string().optional(), // reference to set-bonus if applicable
+    details: z.string().optional(),
+    psoWorldId: z.number().optional()
   })
 });
 
@@ -82,18 +93,24 @@ const units = defineCollection({
   type: 'data',
   schema: z.object({
     name: z.string(),
-    japaneseName: z.string(),
+    japaneseName: z.string().optional(),
     rarity: z.number().min(1).max(7),
-    description: z.string().optional(),
+    category: z.enum([
+      'Power', 'Guard', 'Swift', 'Mind', 'Hit', 'HP', 'PP', // stat boost
+      'Resistance', // elemental resistance
+      'Special' // compress arts, element boost, tech boost, save, recovery, protection
+    ]),
+    // Effect details
+    effect: z.string(), // e.g., "ATK+15", "Fire Resist +6", "Reduces charge time"
+    effectValue: z.number().optional(), // numeric value of effect
+    resistType: z.enum(['Heat', 'Ice', 'Stun', 'Light', 'Dark', 'All']).optional(), // for resistance units
+    resistLevel: z.number().min(1).max(5).optional(), // for resistance units
+    // Stacking rules
+    stackable: z.boolean().default(true),
+    // Drop sources
+    dropSources: z.array(z.string()).optional(), // e.g., ["SH Fulnei Naked", "Title reward"]
     details: z.string().optional(),
-    // Stat bonuses (for stat units)
-    attackBase: z.number().optional(),
-    attackMax: z.number().optional(),
-    defenseBase: z.number().optional(),
-    defenseMax: z.number().optional(),
-    evasionBase: z.number().optional(),
-    evasionMax: z.number().optional(),
-    psoWorldId: z.number()
+    psoWorldId: z.number().optional()
   })
 });
 

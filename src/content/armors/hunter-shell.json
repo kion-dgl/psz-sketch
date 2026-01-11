@@ -1,6 +1,7 @@
 {
   "name": "Hunter Shell",
   "japaneseName": "ハンターズシェル",
+  "type": "Rare",
   "rarity": 5,
   "maxGrind": 35,
   "level": 20,
@@ -9,5 +10,8 @@
   "defenseMax": 196,
   "evasionBase": 97,
   "evasionMax": 167,
+  "maxSlots": 4,
+  "resistances": { "fire": 4, "ice": 4, "lightning": 4, "light": 4, "dark": 4 },
+  "usableBy": ["Human Hunter", "Newman Hunter", "Cast Hunter"],
   "psoWorldId": 521
 }

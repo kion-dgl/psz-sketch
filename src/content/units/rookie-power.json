@@ -1,9 +1,10 @@
 {
   "name": "Rookie/Power",
   "japaneseName": "ルーキー／パワー",
-  "description": "Slot into armor to use. Minutely raises ATP.",
   "rarity": 1,
-  "attackBase": 5,
-  "attackMax": 5,
+  "category": "Power",
+  "effect": "ATK+5",
+  "effectValue": 5,
+  "description": "Slot into armor to use. Minutely raises ATP.",
   "psoWorldId": 316
 }

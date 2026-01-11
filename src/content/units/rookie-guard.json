@@ -1,9 +1,10 @@
 {
   "name": "Rookie/Guard",
   "japaneseName": "ルーキー／ガード",
-  "description": "Slot into armor to use. Minutely raises DFP.",
   "rarity": 1,
-  "defenseBase": 5,
-  "defenseMax": 5,
+  "category": "Guard",
+  "effect": "DEF+5",
+  "effectValue": 5,
+  "description": "Slot into armor to use. Minutely raises DFP.",
   "psoWorldId": 321
 }

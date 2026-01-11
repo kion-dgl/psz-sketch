@@ -2,5 +2,8 @@
   "name": "Hero/PP",
   "japaneseName": "ヒーロー/PP",
   "rarity": 5,
+  "category": "PP",
+  "effect": "MaxPP+15",
+  "effectValue": 15,
   "psoWorldId": 348
 }

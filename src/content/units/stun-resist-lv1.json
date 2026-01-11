@@ -2,5 +2,10 @@
   "name": "Stun Resist Lv1",
   "japaneseName": "スタンレジストLv1",
   "rarity": 1,
+  "category": "Resistance",
+  "effect": "Stun Resist +4",
+  "effectValue": 4,
+  "resistType": "Stun",
+  "resistLevel": 1,
   "psoWorldId": 448
 }

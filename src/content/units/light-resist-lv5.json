@@ -2,5 +2,10 @@
   "name": "Light Resist Lv5",
   "japaneseName": "ライトレジストLv5",
   "rarity": 7,
+  "category": "Resistance",
+  "effect": "Light Resist +10",
+  "effectValue": 10,
+  "resistType": "Light",
+  "resistLevel": 5,
   "psoWorldId": 457
 }

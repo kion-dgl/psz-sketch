@@ -1,7 +1,7 @@
 {
   "name": "Keplar Suit",
   "japaneseName": "ケプラースーツ",
-  "details": "Can only be used by Male characters",
+  "type": "Rare",
   "rarity": 7,
   "maxGrind": 50,
   "level": 72,
@@ -10,5 +10,9 @@
   "defenseMax": 352,
   "evasionBase": 178,
   "evasionMax": 278,
+  "maxSlots": 4,
+  "resistances": { "fire": 12, "ice": 12, "lightning": 12, "light": 0, "dark": 0 },
+  "usableBy": ["Human Ranger", "Cast Ranger"],
+  "details": "Can only be used by Male characters",
   "psoWorldId": 512
 }

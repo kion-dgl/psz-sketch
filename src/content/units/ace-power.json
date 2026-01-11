@@ -2,7 +2,8 @@
   "name": "Ace/Power",
   "japaneseName": "エース／パワー",
   "rarity": 3,
-  "attackBase": 10,
-  "attackMax": 10,
+  "category": "Power",
+  "effect": "ATK+10",
+  "effectValue": 10,
   "psoWorldId": 317
 }

@@ -2,5 +2,8 @@
   "name": "Master/HP",
   "japaneseName": "マスター/HP",
   "rarity": 6,
+  "category": "HP",
+  "effect": "MaxHP+20",
+  "effectValue": 20,
   "psoWorldId": 344
 }

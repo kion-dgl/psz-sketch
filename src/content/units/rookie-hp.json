@@ -2,5 +2,8 @@
   "name": "Rookie/HP",
   "japaneseName": "ルーキー/HP",
   "rarity": 1,
+  "category": "HP",
+  "effect": "MaxHP+5",
+  "effectValue": 5,
   "psoWorldId": 341
 }

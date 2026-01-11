@@ -10,21 +10,14 @@ interface ShopItem {
   techLevel?: number;
 }
 
-interface ItemShopPreset {
-  name: string;
-  premiumItems: ShopItem[];
-}
-
 interface ShopPresets {
   itemShop: {
     baseItems: ShopItem[];
-    presets: ItemShopPreset[];
   };
 }
 
 export default function ItemShopStorybook() {
   const [shopPresets, setShopPresets] = useState<ShopPresets | null>(null);
-  const [presetIndex, setPresetIndex] = useState(0);
   const [playerMeseta, setPlayerMeseta] = useState(50000);
   const [actionLog, setActionLog] = useState<string[]>([]);
 
@@ -55,31 +48,11 @@ export default function ItemShopStorybook() {
     );
   }
 
-  const currentPreset = shopPresets.itemShop.presets[presetIndex];
-
   return (
     <div style={styles.container}>
       {/* Controls */}
       <div style={styles.controlSection}>
         <div style={styles.controlRow}>
-          <div style={styles.controlGroup}>
-            <div style={styles.controlLabel}>Shop Preset</div>
-            <div style={styles.presetButtons}>
-              {shopPresets.itemShop.presets.map((preset, idx) => (
-                <button
-                  key={preset.name}
-                  onClick={() => setPresetIndex(idx)}
-                  style={{
-                    ...styles.presetButton,
-                    ...(presetIndex === idx ? styles.presetButtonActive : {}),
-                  }}
-                >
-                  {preset.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
           <div style={styles.controlGroup}>
             <div style={styles.controlLabel}>Player Meseta</div>
             <div style={styles.mesetaControl}>
@@ -97,7 +70,7 @@ export default function ItemShopStorybook() {
       <div style={styles.shopContainer}>
         <ItemShop
           baseItems={shopPresets.itemShop.baseItems}
-          premiumItems={currentPreset.premiumItems}
+          premiumItems={[]}
           playerMeseta={playerMeseta}
           onPurchase={handlePurchase}
         />
@@ -154,27 +127,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '12px',
     color: '#4ade80',
     marginBottom: '8px',
-  },
-  presetButtons: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '6px',
-  },
-  presetButton: {
-    padding: '6px 12px',
-    background: '#3a3a5a',
-    borderWidth: '2px',
-    borderStyle: 'solid',
-    borderColor: '#4a4a6a',
-    borderRadius: '6px',
-    color: '#aaa',
-    fontSize: '11px',
-    cursor: 'pointer',
-  },
-  presetButtonActive: {
-    background: '#2d4a3e',
-    borderColor: '#4ade80',
-    color: '#4ade80',
   },
   mesetaControl: {
     display: 'flex',

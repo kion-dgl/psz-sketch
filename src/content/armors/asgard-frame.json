@@ -1,7 +1,7 @@
 {
   "name": "Asgard Frame",
   "japaneseName": "アースガルズフレーム",
-  "details": "Can have a maximum of 3 slots.",
+  "type": "Frame",
   "rarity": 7,
   "maxGrind": 10,
   "level": 50,
@@ -10,5 +10,7 @@
   "defenseMax": 239,
   "evasionBase": 209,
   "evasionMax": 229,
+  "maxSlots": 3,
+  "resistances": { "fire": 0, "ice": 0, "lightning": 0, "light": 16, "dark": 16 },
   "psoWorldId": 497
 }

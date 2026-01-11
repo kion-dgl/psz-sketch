@@ -1,6 +1,7 @@
 {
   "name": "Shinobi Suit",
   "japaneseName": "シノビショウゾク",
+  "type": "Rare",
   "rarity": 6,
   "maxGrind": 35,
   "level": 50,
@@ -9,5 +10,7 @@
   "defenseMax": 225,
   "evasionBase": 178,
   "evasionMax": 248,
+  "maxSlots": 4,
+  "resistances": { "fire": 0, "ice": 0, "lightning": 0, "light": 0, "dark": 24 },
   "psoWorldId": 517
 }

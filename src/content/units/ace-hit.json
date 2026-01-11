@@ -2,5 +2,8 @@
   "name": "Ace/Hit",
   "japaneseName": "エース／ヒット",
   "rarity": 3,
+  "category": "Hit",
+  "effect": "ACC+6",
+  "effectValue": 6,
   "psoWorldId": 332
 }

@@ -1,6 +1,7 @@
 {
   "name": "Scale Armor",
   "japaneseName": "スケイルアーマー",
+  "type": "Armor",
   "rarity": 3,
   "maxGrind": 40,
   "level": 5,
@@ -9,5 +10,8 @@
   "defenseMax": 153,
   "evasionBase": 47,
   "evasionMax": 127,
+  "maxSlots": 4,
+  "resistances": { "fire": 5, "ice": 5, "lightning": 5, "light": 0, "dark": 0 },
+  "usableBy": ["Human Hunter", "Cast Hunter", "Cast Ranger"],
   "psoWorldId": 487
 }

@@ -2,7 +2,8 @@
   "name": "Hero/Power",
   "japaneseName": "ヒーロー／パワー",
   "rarity": 5,
-  "attackBase": 15,
-  "attackMax": 15,
+  "category": "Power",
+  "effect": "ATK+15",
+  "effectValue": 15,
   "psoWorldId": 318
 }

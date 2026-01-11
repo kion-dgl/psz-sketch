@@ -1,6 +1,7 @@
 {
   "name": "Eleanor Frame",
   "japaneseName": "エルノアフレーム",
+  "type": "Frame",
   "rarity": 5,
   "maxGrind": 40,
   "level": 20,
@@ -9,5 +10,8 @@
   "defenseMax": 189,
   "evasionBase": 138,
   "evasionMax": 218,
+  "maxSlots": 3,
+  "resistances": { "fire": 0, "ice": 12, "lightning": 0, "light": 12, "dark": 0 },
+  "usableBy": ["Cast Hunter", "Cast Ranger"],
   "psoWorldId": 523
 }

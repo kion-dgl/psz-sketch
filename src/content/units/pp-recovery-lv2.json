@@ -1,7 +1,10 @@
 {
   "name": "PP Recovery Lv2",
   "japaneseName": "PPリカバリーLv2",
-  "details": "Enables Level 2 PP Regeneration.",
   "rarity": 4,
+  "category": "Special",
+  "effect": "Recover 2 PP every 5 seconds",
+  "effectValue": 2,
+  "details": "Enables Level 2 PP Regeneration.",
   "psoWorldId": 434
 }

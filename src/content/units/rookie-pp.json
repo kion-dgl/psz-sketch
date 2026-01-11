@@ -2,5 +2,8 @@
   "name": "Rookie/PP",
   "japaneseName": "ルーキー/PP",
   "rarity": 1,
+  "category": "PP",
+  "effect": "MaxPP+5",
+  "effectValue": 5,
   "psoWorldId": 346
 }

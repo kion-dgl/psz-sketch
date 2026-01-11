@@ -1,6 +1,7 @@
 {
   "name": "Ancient Robe",
   "japaneseName": "エインシェントローブ",
+  "type": "Robe",
   "rarity": 7,
   "maxGrind": 5,
   "level": 50,
@@ -9,5 +10,8 @@
   "defenseMax": 167,
   "evasionBase": 251,
   "evasionMax": 261,
+  "maxSlots": 4,
+  "resistances": { "fire": 20, "ice": 20, "lightning": 20, "light": 20, "dark": 20 },
+  "usableBy": ["Newman Hunter", "Human Ranger", "Human Force", "Newman Force"],
   "psoWorldId": 503
 }

@@ -1,0 +1,54 @@
+Level 1
+
+## Weapons
+
+N = Native
+B = Beast
+M = Machine
+D = Dark
+A = Accuracy Adj.
+E = Element
+PA = Photon Art
+
+- Sabre 350
+	N 25%
+- Sword 380 
+- Daggers 450
+	N 34% M 16% 
+- (Stun) Shield 529
+	M 39% E Stun Lv 1
+- Twin Fire 720
+- (Heat) Rod 777
+	B 17% M 43% E Heat Lv 2
+- WandStick 676
+	M 33% D 36% PA Beast Quake
+- Wand 504
+	N 43% M 44% 
+- Tact 392
+	A 40 PA Funny Dive
+- Cane 290 
+	PA Funny Dive
+
+## Armor
+
+- Common Armor 420
+	R-Fire 3%
+	R-Ice 3%
+	R-Thunder 3%
+	R-Light 0%
+	R-Dark 0%
+	Slots: 0
+- Robe 562
+	R-Fire 8%
+	R-Ice 8%
+	R-Thunder 8%
+	R-Light 8%
+	R-Dark 8%
+	Slots: 1
+
+## Units
+
+Rookie/Swift 700
+Rookie/Hit 700
+Rookie/HP 700
+All Resist Lv 1 700

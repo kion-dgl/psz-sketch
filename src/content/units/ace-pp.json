@@ -2,5 +2,8 @@
   "name": "Ace/PP",
   "japaneseName": "エース/PP",
   "rarity": 3,
+  "category": "PP",
+  "effect": "MaxPP+10",
+  "effectValue": 10,
   "psoWorldId": 347
 }

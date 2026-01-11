@@ -2,5 +2,10 @@
   "name": "Heat Resist Lv5",
   "japaneseName": "ヒートレジストLv5",
   "rarity": 7,
+  "category": "Resistance",
+  "effect": "Heat Resist +10",
+  "effectValue": 10,
+  "resistType": "Heat",
+  "resistLevel": 5,
   "psoWorldId": 442
 }

@@ -1,7 +1,10 @@
 {
   "name": "Compress PA",
   "japaneseName": "コンプレスアーツ",
-  "details": "Reduces the charge time for Photon Arts by 33%.",
   "rarity": 7,
+  "category": "Special",
+  "effect": "Reduces PA charge time by 33%",
+  "stackable": false,
+  "details": "Reduces the charge time for Photon Arts by 33%.",
   "psoWorldId": 482
 }

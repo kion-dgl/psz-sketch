@@ -1,0 +1,108 @@
+Guides - Phantasy Star Zero: Sewer Shop Guide
+
+ Printer Friendly Version
+
+Phantasy Star Zero: Sewer Shop Guide
+
+Overview
+The Sewer Shop becomes available after a character completes the third Story Mission on Normal Mode. It contains a password vending machine, enemy part exchange vendor, and Photon Drop exchange vendor. This guide will describe each of the areas and list the items that can be obtained from each one.
+
+Click on the appropriate link below to jump to the section you would like to read.
+Photon Collector
+Enemy Collector
+Password Vending Machine
+
+Photon Collector
+This vendor will trade items in exchange for Photon Drops. All of the items listed below will not appear at one time. Instead, this vendor appears to have a random assortment that rotates at certain intervals. In addition, the attributes that Weapons have will vary too. An Animal Hand may have 40% hit on one visit and 0% hit on the next.
+
+Item	Cost (Photon Drops)
+Weapons
+8-Ouncer	5
+Animal Hand	10
+Berry Ice Beam	20
+Bloom Shower	60
+Doppel Scythe	30
+Dumbbell	10
+Grow Shower	5
+Harisen	10
+Hocho	99
+Imperial Rod	45
+Missouri CX4	50
+Twinkle Star	40
+Witch's Broom	15
+Armors
+Gardening Wear	35
+Miyabi Hakama	40
+Mags
+Mag	5
+Elements
+Celeb Element	12
+Dark Element	4
+Draw Element	8
+Heat Element	4
+Heart Element	8
+Ice Element	12
+Jell Element	8
+Life Element	12
+Light Element	4
+Meseta Element	8
+Risk Element	12
+Slow Element	4
+Soul Element	8
+Stun Element	4
+X-Element	8
+Zalure Element	8
+Weapon Modifiers
+Digrinder	3
+Monogrinder	1
+Trigrinder	5
+Consumables
+Guard Material	5
+Hit Material	5
+HP Material	5
+Mind Material	5
+Power Material	5
+PP Material	5
+Reset Material	5
+Scape Doll	5
+Swift Material	5
+
+
+Enemy Collector
+For a certain cost, the vendor at this counter will convert an enemy part into a weapon. The attributes the weapon receives will be random. So if you are trading in a rare enemy part, save your game and reset the system if the attributes are not to your liking.
+
+Weapon	Trade-In Item	Cost (Meseta)
+Black Phobos	Black Shard	50,000
+Blaze Roar	Burning Mane	25,000
+Chaos Cannon	Black Barrel	5,000
+Crysta Hulse	Rohcrysta Scales	50000
+Devil Bazooka	Squirmy Tentacle	50,000
+Dragon Horn	Dragon's Horn	50000
+Hadan Bite	Garahadan Fang	100,000
+Hemara Drill	White Drill	50,000
+Helion Roar	Helion's Mane	500
+Jade Hulse	Rohjade Scales	2,500
+Mobius Drill	Black Drill	5,000
+Octo Bazooka	Slimy Tentacle	5,000
+Phobos Shoot	Phobos Shard	25,000
+Python Bite	Garapython Fang	25,000
+Scarred Horn	Broken Horn	5,000
+Tartaros Cannon	White Barrel	100,000
+
+
+Password Vending Machine
+If you enter a specific code, the vending machine will give you the item associated with that code. Each code may only be used once per account. Please note that the codes below only work for the North American and European versions of Phantasy Star Zero. The Japanese version of the vending machine contains different items, such as the Hylian Shield and other Nintendo items, and uses different codes.
+
+Item	Code
+Blade Cannon	7839-3594
+Caduceus	5139-6877
+CONSOLES+	9185-6189
+Game Master	7162-5792
+InGame:Greg&Kiri	5531-0215
+Lassi Soul x 5	4775-7197
+Nintendo Power	3171-0109
+Puyo Soul x 5	3470-1424
+Selvaria's Spear	5703-8252
+Selvaria's Shield	4294-2273
+Toppi Soul x 5	9475-6843
+

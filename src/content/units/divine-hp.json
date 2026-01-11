@@ -2,5 +2,8 @@
   "name": "Divine/HP",
   "japaneseName": "ゴッド/HP",
   "rarity": 7,
+  "category": "HP",
+  "effect": "MaxHP+25",
+  "effectValue": 25,
   "psoWorldId": 345
 }

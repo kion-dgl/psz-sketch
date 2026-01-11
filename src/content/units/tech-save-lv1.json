@@ -1,7 +1,10 @@
 {
   "name": "Tech Save Lv1",
   "japaneseName": "テクニセイブLv1",
-  "details": "Reduces PP consumption for Techniques by 10%.",
   "rarity": 5,
+  "category": "Special",
+  "effect": "Reduce Technique PP cost by 10%",
+  "effectValue": 10,
+  "details": "Reduces PP consumption for Techniques by 10%.",
   "psoWorldId": 474
 }

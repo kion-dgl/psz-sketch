@@ -1,7 +1,10 @@
 {
   "name": "PA save Lv2",
   "japaneseName": "アーツセイブLv2",
-  "details": "Reduces PP consumption for Photon Arts by 15%.",
   "rarity": 6,
+  "category": "Special",
+  "effect": "Reduce PA PP cost by 15%",
+  "effectValue": 15,
+  "details": "Reduces PP consumption for Photon Arts by 15%.",
   "psoWorldId": 478
 }

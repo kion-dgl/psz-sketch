@@ -1,7 +1,7 @@
 {
   "name": "Rika's Suit",
   "japaneseName": "ファルスーツ",
-  "details": "Can only be used by female characters.",
+  "type": "Rare",
   "rarity": 7,
   "maxGrind": 40,
   "level": 76,
@@ -10,5 +10,8 @@
   "defenseMax": 289,
   "evasionBase": 240,
   "evasionMax": 320,
+  "maxSlots": 4,
+  "resistances": { "fire": 0, "ice": 0, "lightning": 0, "light": 24, "dark": 0 },
+  "details": "Can only be used by female characters.",
   "psoWorldId": 514
 }

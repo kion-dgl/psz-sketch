@@ -1,6 +1,7 @@
 {
   "name": "Milias Frame",
   "japaneseName": "ミリアスフレーム",
+  "type": "Frame",
   "rarity": 6,
   "maxGrind": 35,
   "level": 48,
@@ -9,5 +10,8 @@
   "defenseMax": 256,
   "evasionBase": 116,
   "evasionMax": 186,
+  "maxSlots": 3,
+  "resistances": { "fire": 0, "ice": 0, "lightning": 12, "light": 12, "dark": 0 },
+  "usableBy": ["Cast Hunter", "Cast Ranger"],
   "psoWorldId": 516
 }

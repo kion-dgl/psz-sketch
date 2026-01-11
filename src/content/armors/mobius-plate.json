@@ -1,6 +1,7 @@
 {
   "name": "Mobius Plate",
   "japaneseName": "メビウスプレート",
+  "type": "Rare",
   "rarity": 7,
   "maxGrind": 30,
   "level": 64,
@@ -9,5 +10,8 @@
   "defenseMax": 311,
   "evasionBase": 157,
   "evasionMax": 217,
+  "maxSlots": 4,
+  "resistances": { "fire": 18, "ice": 18, "lightning": 0, "light": 0, "dark": 18 },
+  "usableBy": ["Cast Hunter", "Cast Ranger"],
   "psoWorldId": 513
 }

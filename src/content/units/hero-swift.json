@@ -2,7 +2,8 @@
   "name": "Hero/Swift",
   "japaneseName": "ヒーロー／スイフト",
   "rarity": 5,
-  "evasionBase": 15,
-  "evasionMax": 15,
+  "category": "Swift",
+  "effect": "EVA+15",
+  "effectValue": 15,
   "psoWorldId": 328
 }

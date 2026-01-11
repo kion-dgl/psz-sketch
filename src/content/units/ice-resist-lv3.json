@@ -2,5 +2,10 @@
   "name": "Ice Resist Lv3",
   "japaneseName": "アイスレジストLv3",
   "rarity": 5,
+  "category": "Resistance",
+  "effect": "Ice Resist +7",
+  "effectValue": 7,
+  "resistType": "Ice",
+  "resistLevel": 3,
   "psoWorldId": 445
 }

@@ -1,6 +1,7 @@
 {
   "name": "Spirit Garb",
   "japaneseName": "スピリットガーブ",
+  "type": "Rare",
   "rarity": 6,
   "maxGrind": 0,
   "level": 52,
@@ -9,5 +10,7 @@
   "defenseMax": 132,
   "evasionBase": 147,
   "evasionMax": 147,
+  "maxSlots": 4,
+  "resistances": { "fire": 0, "ice": 0, "lightning": 0, "light": 0, "dark": 24 },
   "psoWorldId": 518
 }

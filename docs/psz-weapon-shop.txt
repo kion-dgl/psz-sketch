@@ -1,0 +1,89 @@
+Level 100 Test 1
+
+Weapons:
+
+Clear Saber 5600
+Kurtana 6904
+Arturi 4984
+Cyal 11,235
+Kutune Sirka 6990
+Clear Sabre 2235
+Alias 8838
+(Dark) Deo Calibur 9240
+Ray Claymore 2550
+(Heat) Askalon 15720
+(Draw) Ka Vorg 18211
+Clear Knife 4970
+Lapis Fangs 4640
+Feather Hand 8450
+Iron Lance 2220
+(Heart) Chrome Lance 13510
+Deo Glaive 5750
+(Stun) Chrome Spear 4040 
+Alucart 15,120
+Iron Claws 1960
+Deo Arm 2,030
+Filamare 15,102
+Wrath Fangs 4,900
+Chrome Shield 5,212
+Clear Bangle 2,500
+(Stun) Double Edge 3,405
+Double Calibur 5,480
+Edu Limit 13,514
+Deo Pistol 1,650
+Rexus 3,980
+(Dark) Emerald Sin 12,180
+Radiant 7,920
+Clear Shot 2,040
+Ryjarg 12,096
+Gerhilde 12,252
+Clear Duplex 5,530
+Bergmann 7,660
+Twin Carbines 3,366
+Chrome Twins 6,855
+Ein Rocket 2,784
+(Heart) Carl Gustav 14,505
+Deo Bazooka 5,890
+Ein Cannon 2,250
+Ray Beam 2,330
+Deo Cannon 9,722
+Clear Beam 5,810
+(Heart) Vthraghna 15,948
+Ray Maser 2,330
+Holy Sort 9,880
+(Stun) Ray Staff 4,855
+Clear Staff 7,849
+Sasarai 10,154
+Salvador 13,250
+(Draw) Chrome Wand 3,400
+(Stun) Rose Quartz 7,886
+(Heart) Magi Processor 9,944
+Magi Circuit 7,470
+Ein Cutter 2,745
+Deo Cutter 7,085
+Giacobini 10,543
+
+Armor:
+
+Scale Armor 3,287
+Brigandine Armor 8,200
+Cuirass Armor 11,160
+General Frame 6,800
+Valiant Frame 17,325
+Mist Robe 8,787
+Reflect Robe 17,925
+
+Units:
+
+Ace/Power 4,500
+Rookie/Guard 700
+Ace/Guard 4,500
+Rookie/Hit 700
+Hero/Hit 19,130
+Rookie/Mind 700
+Ace/PP 4,500
+Heat Resist Lv 3 19,130
+Ice Resist Lv 1 700
+Ice Resist Lv 2 4,500
+Dark Resist Lv 3 19,130
+All Resist Lv 2 11,250

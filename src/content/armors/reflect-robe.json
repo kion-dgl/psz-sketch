@@ -1,6 +1,7 @@
 {
   "name": "Reflect Robe",
   "japaneseName": "リフレクトローブ",
+  "type": "Robe",
   "rarity": 5,
   "maxGrind": 15,
   "level": 20,
@@ -9,5 +10,8 @@
   "defenseMax": 116,
   "evasionBase": 138,
   "evasionMax": 168,
+  "maxSlots": 4,
+  "resistances": { "fire": 16, "ice": 16, "lightning": 16, "light": 16, "dark": 16 },
+  "usableBy": ["Newman Hunter", "Human Ranger", "Human Force", "Newman Force"],
   "psoWorldId": 501
 }

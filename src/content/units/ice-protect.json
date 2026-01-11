@@ -1,7 +1,9 @@
 {
   "name": "Ice Protect",
   "japaneseName": "アイスプロテクト",
-  "details": "Grants immunity to Freeze status effect.",
   "rarity": 6,
+  "category": "Special",
+  "effect": "Immunity to Freeze",
+  "details": "Grants immunity to Freeze status effect.",
   "psoWorldId": 469
 }

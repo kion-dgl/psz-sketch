@@ -1,7 +1,12 @@
 {
   "name": "Ice Resist Lv1",
   "japaneseName": "アイスレジストLv1",
-  "description": "Slot into armor to use. Boosts resistance to ice-based techniques.",
   "rarity": 1,
+  "category": "Resistance",
+  "effect": "Ice Resist +4",
+  "effectValue": 4,
+  "resistType": "Ice",
+  "resistLevel": 1,
+  "description": "Slot into armor to use. Boosts resistance to ice-based techniques.",
   "psoWorldId": 443
 }

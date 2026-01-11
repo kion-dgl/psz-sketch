@@ -2,7 +2,8 @@
   "name": "Ace/Guard",
   "japaneseName": "エース／ガード",
   "rarity": 3,
-  "defenseBase": 10,
-  "defenseMax": 10,
+  "category": "Guard",
+  "effect": "DEF+10",
+  "effectValue": 10,
   "psoWorldId": 322
 }

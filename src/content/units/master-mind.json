@@ -2,5 +2,8 @@
   "name": "Master/Mind",
   "japaneseName": "マスター／マインド",
   "rarity": 6,
+  "category": "Mind",
+  "effect": "TEC+20",
+  "effectValue": 20,
   "psoWorldId": 339
 }

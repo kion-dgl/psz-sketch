@@ -1,6 +1,7 @@
 {
   "name": "White Robe",
   "japaneseName": "ホワイトローブ",
+  "type": "Robe",
   "rarity": 2,
   "maxGrind": 30,
   "level": 2,
@@ -9,5 +10,8 @@
   "defenseMax": 89,
   "evasionBase": 47,
   "evasionMax": 107,
+  "maxSlots": 4,
+  "resistances": { "fire": 10, "ice": 10, "lightning": 10, "light": 10, "dark": 10 },
+  "usableBy": ["Newman Hunter", "Human Ranger", "Human Force", "Newman Force"],
   "psoWorldId": 498
 }

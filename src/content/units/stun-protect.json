@@ -1,7 +1,9 @@
 {
   "name": "Stun Protect",
   "japaneseName": "スタンプロテクト",
-  "details": "Grants immunity to Stun status effect.",
   "rarity": 6,
+  "category": "Special",
+  "effect": "Immunity to Paralysis",
+  "details": "Grants immunity to Stun status effect.",
   "psoWorldId": 470
 }
