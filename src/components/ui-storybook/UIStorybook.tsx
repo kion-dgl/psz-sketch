@@ -11,10 +11,11 @@ import ItemShopStorybook from '../shops/ItemShopStorybook';
 import WeaponShopStorybook from '../shops/WeaponShopStorybook';
 import Shop3DStorybook from '../shops/Shop3DStorybook';
 import WeaponShop3DStorybook from '../shops/WeaponShop3DStorybook';
-import MagSimulatorStorybook from '../mag/MagSimulatorStorybook';
+import MagEvolutionsStorybook from '../mag/MagEvolutionsStorybook';
+import MagFeederStorybook from '../mag/MagFeederStorybook';
 import ScreenPreview from './ScreenPreview';
 
-type UIComponent = 'screen' | 'hud' | 'action-palette' | 'minimap' | 'tooltip' | 'stats' | 'main-menu' | 'items' | 'equip' | 'item-shop' | 'weapon-shop' | 'shop-3d' | 'weapon-shop-3d' | 'mag-simulator';
+type UIComponent = 'screen' | 'hud' | 'action-palette' | 'minimap' | 'tooltip' | 'stats' | 'main-menu' | 'items' | 'equip' | 'item-shop' | 'weapon-shop' | 'shop-3d' | 'weapon-shop-3d' | 'mag-evolutions' | 'mag-feeder';
 
 const UI_COMPONENTS: { id: UIComponent; label: string; available: boolean }[] = [
   { id: 'screen', label: 'Screen Preview', available: true },
@@ -30,7 +31,8 @@ const UI_COMPONENTS: { id: UIComponent; label: string; available: boolean }[] = 
   { id: 'weapon-shop', label: 'Weapon Shop', available: true },
   { id: 'shop-3d', label: 'Item Shop 3D', available: true },
   { id: 'weapon-shop-3d', label: 'Weapon Shop 3D', available: true },
-  { id: 'mag-simulator', label: 'Mag Simulator', available: true },
+  { id: 'mag-evolutions', label: 'Mag Evolutions', available: true },
+  { id: 'mag-feeder', label: 'Mag Feeder', available: true },
 ];
 
 export default function UIStorybook() {
@@ -75,7 +77,8 @@ export default function UIStorybook() {
         {selected === 'weapon-shop' && <WeaponShopStorybook />}
         {selected === 'shop-3d' && <Shop3DStorybook />}
         {selected === 'weapon-shop-3d' && <WeaponShop3DStorybook />}
-        {selected === 'mag-simulator' && <MagSimulatorStorybook />}
+        {selected === 'mag-evolutions' && <MagEvolutionsStorybook />}
+        {selected === 'mag-feeder' && <MagFeederStorybook />}
       </div>
     </div>
   );
