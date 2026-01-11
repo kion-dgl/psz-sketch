@@ -11,5 +11,7 @@
   "evasionBase": 70,
   "evasionMax": 120,
   "maxSlots": 4,
+  "resistances": { "fire": 12, "ice": 12, "lightning": 12, "light": 12, "dark": 12 },
+  "usableBy": ["Newman Hunter", "Human Ranger", "Human Force", "Newman Force"],
   "psoWorldId": 499
 }

@@ -11,5 +11,7 @@
   "evasionBase": 92,
   "evasionMax": 152,
   "maxSlots": 4,
+  "resistances": { "fire": 7, "ice": 7, "lightning": 7, "light": 0, "dark": 0 },
+  "usableBy": ["Human Hunter", "Cast Hunter", "Cast Ranger"],
   "psoWorldId": 489
 }

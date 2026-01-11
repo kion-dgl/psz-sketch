@@ -11,6 +11,6 @@
   "evasionBase": 26,
   "evasionMax": 106,
   "maxSlots": 3,
-  "details": "Can have a maximum of 3 slots.",
+  "resistances": { "fire": 0, "ice": 0, "lightning": 0, "light": 4, "dark": 4 },
   "psoWorldId": 485
 }

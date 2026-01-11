@@ -11,5 +11,6 @@
   "evasionBase": 82,
   "evasionMax": 280,
   "maxSlots": 4,
+  "resistances": { "fire": 0, "ice": 5, "lightning": 0, "light": 0, "dark": 0 },
   "psoWorldId": 506
 }
