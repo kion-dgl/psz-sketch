@@ -2,123 +2,82 @@
   "itemShop": {
     "baseItems": [
       { "id": "monomate", "name": "Monomate", "price": 50, "description": "Restores a small amount of HP.", "rarity": 1 },
-      { "id": "dimate", "name": "Dimate", "price": 300, "description": "Restores a moderate amount of HP.", "rarity": 2 },
+      { "id": "dimate", "name": "Dimate", "price": 500, "description": "Restores a moderate amount of HP.", "rarity": 2 },
+      { "id": "trimate", "name": "Trimate", "price": 2400, "description": "Restores a large amount of HP.", "rarity": 3 },
       { "id": "monofluid", "name": "Monofluid", "price": 100, "description": "Restores a small amount of PP.", "rarity": 1 },
       { "id": "difluid", "name": "Difluid", "price": 500, "description": "Restores a moderate amount of PP.", "rarity": 2 },
       { "id": "antidote", "name": "Antidote", "price": 60, "description": "Cures poison status.", "rarity": 1 },
       { "id": "antiparalysis", "name": "Antiparalysis", "price": 60, "description": "Cures paralysis status.", "rarity": 1 },
       { "id": "telepipe", "name": "Telepipe", "price": 350, "description": "Creates a warp back to the city.", "rarity": 2 },
-      { "id": "moon_atomizer", "name": "Moon Atomizer", "price": 500, "description": "Revives a fallen ally.", "rarity": 3 }
-    ],
-    "presets": [
-      {
-        "name": "Standard Stock",
-        "premiumItems": []
-      },
-      {
-        "name": "Healer's Special",
-        "premiumItems": [
-          { "id": "trimate", "name": "Trimate", "price": 2400, "description": "Restores a large amount of HP.", "rarity": 3 },
-          { "id": "trifluid", "name": "Trifluid", "price": 3200, "description": "Restores a large amount of PP.", "rarity": 3 },
-          { "id": "sol_atomizer", "name": "Sol Atomizer", "price": 1200, "description": "Restores HP to all nearby allies.", "rarity": 3 }
-        ]
-      },
-      {
-        "name": "Rare Finds",
-        "premiumItems": [
-          { "id": "trimate", "name": "Trimate", "price": 2400, "description": "Restores a large amount of HP.", "rarity": 3 },
-          { "id": "scape_doll", "name": "Scape Doll", "price": 10000, "description": "Automatically revives you when HP reaches 0.", "rarity": 5 },
-          { "id": "star_atomizer", "name": "Star Atomizer", "price": 5000, "description": "Fully restores HP and PP to all nearby allies.", "rarity": 4 }
-        ]
-      },
-      {
-        "name": "Technique Disks",
-        "premiumItems": [
-          { "id": "disk_foie", "name": "Disk: Foie Lv.1", "price": 100, "description": "Fire technique. Single target.", "rarity": 1, "techLevel": 1 },
-          { "id": "disk_barta", "name": "Disk: Barta Lv.1", "price": 100, "description": "Ice technique. Single target.", "rarity": 1, "techLevel": 1 },
-          { "id": "disk_zonde", "name": "Disk: Zonde Lv.1", "price": 100, "description": "Lightning technique. Single target.", "rarity": 1, "techLevel": 1 },
-          { "id": "disk_resta", "name": "Disk: Resta Lv.1", "price": 200, "description": "Healing technique. Restores HP.", "rarity": 2, "techLevel": 1 },
-          { "id": "disk_anti", "name": "Disk: Anti Lv.1", "price": 150, "description": "Cures status ailments.", "rarity": 2, "techLevel": 1 }
-        ]
-      },
-      {
-        "name": "Advanced Techniques",
-        "premiumItems": [
-          { "id": "disk_gifoie", "name": "Disk: Gifoie Lv.1", "price": 800, "description": "Fire technique. Area of effect.", "rarity": 3, "techLevel": 1 },
-          { "id": "disk_gibarta", "name": "Disk: Gibarta Lv.1", "price": 800, "description": "Ice technique. Area of effect.", "rarity": 3, "techLevel": 1 },
-          { "id": "disk_gizonde", "name": "Disk: Gizonde Lv.1", "price": 800, "description": "Lightning technique. Chain attack.", "rarity": 3, "techLevel": 1 },
-          { "id": "disk_shifta", "name": "Disk: Shifta Lv.1", "price": 600, "description": "Buff technique. Increases attack.", "rarity": 2, "techLevel": 1 },
-          { "id": "disk_deband", "name": "Disk: Deband Lv.1", "price": 600, "description": "Buff technique. Increases defense.", "rarity": 2, "techLevel": 1 }
-        ]
-      }
+      { "id": "moon_atomizer", "name": "Moon Atomizer", "price": 500, "description": "Revives a fallen ally.", "rarity": 3 },
+      { "id": "star_atomizer", "name": "Star Atomizer", "price": 5000, "description": "Fully restores HP and PP to all nearby allies.", "rarity": 4 }
     ]
   },
   "weaponShop": {
     "presets": [
       {
-        "name": "Basic Arms",
+        "name": "Level 1 Stock",
         "weapons": [
-          { "id": "saber", "name": "Saber", "type": "Saber", "atp": 45, "ata": 30, "rarity": 1, "price": 150, "grind": 0, "element": null, "elementPercent": 0 },
-          { "id": "brand", "name": "Brand", "type": "Saber", "atp": 75, "ata": 35, "rarity": 2, "price": 800, "grind": 0, "element": null, "elementPercent": 0 },
-          { "id": "handgun", "name": "Handgun", "type": "Handgun", "atp": 25, "ata": 45, "rarity": 1, "price": 100, "grind": 0, "element": null, "elementPercent": 0 },
-          { "id": "autogun", "name": "Autogun", "type": "Handgun", "atp": 50, "ata": 50, "rarity": 2, "price": 650, "grind": 0, "element": null, "elementPercent": 0 },
-          { "id": "cane", "name": "Cane", "type": "Cane", "atp": 15, "ata": 25, "rarity": 1, "price": 80, "grind": 0, "element": null, "elementPercent": 0, "mst": 5 },
-          { "id": "dagger", "name": "Dagger", "type": "Dagger", "atp": 35, "ata": 40, "rarity": 1, "price": 120, "grind": 0, "element": null, "elementPercent": 0 }
+          { "id": "sabre_1", "name": "Sabre", "type": "Saber", "atp": 35, "ata": 25, "rarity": 1, "price": 350, "grind": 0, "native": 25 },
+          { "id": "sword_1", "name": "Sword", "type": "Sword", "atp": 55, "ata": 20, "rarity": 1, "price": 380, "grind": 0 },
+          { "id": "daggers_1", "name": "Daggers", "type": "Dagger", "atp": 28, "ata": 35, "rarity": 1, "price": 450, "grind": 0, "native": 34, "machine": 16 },
+          { "id": "shield_1", "name": "Shield", "type": "Shield", "atp": 40, "ata": 30, "rarity": 1, "price": 529, "grind": 0, "machine": 39, "element": "Stun", "elementLevel": 1 },
+          { "id": "twin_fire_1", "name": "Twin Fire", "type": "Mech Gun", "atp": 8, "ata": 40, "rarity": 2, "price": 720, "grind": 0 },
+          { "id": "rod_1", "name": "Rod", "type": "Rod", "atp": 20, "ata": 28, "rarity": 1, "price": 777, "grind": 0, "beast": 17, "machine": 43, "element": "Heat", "elementLevel": 2, "mst": 8 },
+          { "id": "wandstick_1", "name": "WandStick", "type": "Wand", "atp": 25, "ata": 30, "rarity": 2, "price": 676, "grind": 0, "machine": 33, "dark": 36, "mst": 10, "photonArt": "Beast Quake" },
+          { "id": "wand_1", "name": "Wand", "type": "Wand", "atp": 22, "ata": 28, "rarity": 1, "price": 504, "grind": 0, "native": 43, "machine": 44, "mst": 6 },
+          { "id": "tact_1", "name": "Tact", "type": "Rod", "atp": 18, "ata": 65, "rarity": 1, "price": 392, "grind": 0, "accuracyAdj": 40, "mst": 5, "photonArt": "Funny Dive" },
+          { "id": "cane_1", "name": "Cane", "type": "Wand", "atp": 15, "ata": 25, "rarity": 1, "price": 290, "grind": 0, "mst": 4, "photonArt": "Funny Dive" }
+        ],
+        "armor": [
+          { "id": "common_armor_1", "name": "Common Armor", "type": "Armor", "dfp": 33, "evp": 21, "rarity": 1, "price": 420, "slots": 0, "resistances": { "fire": 3, "ice": 3, "thunder": 3, "light": 0, "dark": 0 } },
+          { "id": "robe_1", "name": "Robe", "type": "Robe", "dfp": 20, "evp": 31, "rarity": 1, "price": 562, "slots": 1, "resistances": { "fire": 8, "ice": 8, "thunder": 8, "light": 8, "dark": 8 } }
+        ],
+        "units": [
+          { "id": "rookie_swift_1", "name": "Rookie/Swift", "effect": "EVA+5", "rarity": 1, "price": 700 },
+          { "id": "rookie_hit_1", "name": "Rookie/Hit", "effect": "ACC+3", "rarity": 1, "price": 700 },
+          { "id": "rookie_hp_1", "name": "Rookie/HP", "effect": "MaxHP+5", "rarity": 1, "price": 700 },
+          { "id": "all_resist_lv1_1", "name": "All Resist Lv 1", "effect": "All Resist +2", "rarity": 1, "price": 700 }
         ]
       },
       {
-        "name": "Elemental Stock",
+        "name": "Level 100 Stock",
         "weapons": [
-          { "id": "saber_native", "name": "Saber", "type": "Saber", "atp": 45, "ata": 30, "rarity": 1, "price": 450, "grind": 0, "element": "Native", "elementPercent": 10 },
-          { "id": "brand_abeast", "name": "Brand", "type": "Saber", "atp": 75, "ata": 35, "rarity": 2, "price": 1800, "grind": 0, "element": "A.Beast", "elementPercent": 8 },
-          { "id": "handgun_machine", "name": "Handgun", "type": "Handgun", "atp": 25, "ata": 45, "rarity": 1, "price": 320, "grind": 0, "element": "Machine", "elementPercent": 12 },
-          { "id": "rifle_dark", "name": "Rifle", "type": "Rifle", "atp": 80, "ata": 55, "rarity": 2, "price": 2200, "grind": 0, "element": "Dark", "elementPercent": 5 },
-          { "id": "staff_native", "name": "Staff", "type": "Staff", "atp": 30, "ata": 30, "rarity": 2, "price": 1100, "grind": 0, "element": "Native", "elementPercent": 15, "mst": 10 },
-          { "id": "partisan_abeast", "name": "Partisan", "type": "Partisan", "atp": 100, "ata": 25, "rarity": 2, "price": 1500, "grind": 0, "element": "A.Beast", "elementPercent": 7 }
-        ]
-      },
-      {
-        "name": "Grinder Special",
-        "weapons": [
-          { "id": "buster_g1", "name": "Buster +1", "type": "Saber", "atp": 122, "ata": 40, "rarity": 3, "price": 4500, "grind": 1, "element": null, "elementPercent": 0 },
-          { "id": "pallasch_g2", "name": "Pallasch +2", "type": "Saber", "atp": 160, "ata": 45, "rarity": 3, "price": 8200, "grind": 2, "element": null, "elementPercent": 0 },
-          { "id": "lockgun_g1", "name": "Lockgun +1", "type": "Handgun", "atp": 95, "ata": 60, "rarity": 3, "price": 5100, "grind": 1, "element": null, "elementPercent": 0 },
-          { "id": "rod_g2", "name": "Rod +2", "type": "Rod", "atp": 48, "ata": 35, "rarity": 3, "price": 3800, "grind": 2, "element": null, "elementPercent": 0, "mst": 20 },
-          { "id": "sword_g1", "name": "Sword +1", "type": "Sword", "atp": 180, "ata": 30, "rarity": 2, "price": 3200, "grind": 1, "element": null, "elementPercent": 0 },
-          { "id": "sniper_g1", "name": "Sniper +1", "type": "Rifle", "atp": 135, "ata": 65, "rarity": 3, "price": 6000, "grind": 1, "element": null, "elementPercent": 0 }
-        ]
-      },
-      {
-        "name": "Hunter's Choice",
-        "weapons": [
-          { "id": "gladius", "name": "Gladius", "type": "Saber", "atp": 90, "ata": 38, "rarity": 2, "price": 1400, "grind": 0, "element": "Native", "elementPercent": 8 },
-          { "id": "buster", "name": "Buster", "type": "Saber", "atp": 120, "ata": 40, "rarity": 3, "price": 3200, "grind": 0, "element": null, "elementPercent": 0 },
-          { "id": "gigush", "name": "Gigush", "type": "Sword", "atp": 220, "ata": 32, "rarity": 3, "price": 4800, "grind": 0, "element": "Machine", "elementPercent": 10 },
-          { "id": "partisan", "name": "Partisan", "type": "Partisan", "atp": 100, "ata": 25, "rarity": 2, "price": 1200, "grind": 0, "element": null, "elementPercent": 0 },
-          { "id": "halbert", "name": "Halbert", "type": "Partisan", "atp": 145, "ata": 28, "rarity": 3, "price": 3600, "grind": 0, "element": "A.Beast", "elementPercent": 12 },
-          { "id": "twin_brand", "name": "Twin Brand", "type": "Twin Saber", "atp": 85, "ata": 42, "rarity": 3, "price": 2800, "grind": 0, "element": null, "elementPercent": 0 }
-        ]
-      },
-      {
-        "name": "Ranger's Arsenal",
-        "weapons": [
-          { "id": "railgun", "name": "Railgun", "type": "Handgun", "atp": 70, "ata": 55, "rarity": 2, "price": 1100, "grind": 0, "element": null, "elementPercent": 0 },
-          { "id": "rifle", "name": "Rifle", "type": "Rifle", "atp": 80, "ata": 55, "rarity": 2, "price": 1400, "grind": 0, "element": null, "elementPercent": 0 },
-          { "id": "sniper", "name": "Sniper", "type": "Rifle", "atp": 130, "ata": 65, "rarity": 3, "price": 4200, "grind": 0, "element": "Dark", "elementPercent": 8 },
-          { "id": "shot", "name": "Shot", "type": "Shot", "atp": 55, "ata": 38, "rarity": 1, "price": 600, "grind": 0, "element": null, "elementPercent": 0 },
-          { "id": "spread", "name": "Spread", "type": "Shot", "atp": 90, "ata": 42, "rarity": 2, "price": 1800, "grind": 0, "element": "Machine", "elementPercent": 6 },
-          { "id": "mechgun", "name": "Mechgun", "type": "Mechgun", "atp": 15, "ata": 35, "rarity": 2, "price": 950, "grind": 0, "element": null, "elementPercent": 0 }
-        ]
-      },
-      {
-        "name": "Force Equipment",
-        "weapons": [
-          { "id": "cane", "name": "Cane", "type": "Cane", "atp": 15, "ata": 25, "rarity": 1, "price": 80, "grind": 0, "element": null, "elementPercent": 0, "mst": 5 },
-          { "id": "stick", "name": "Stick", "type": "Cane", "atp": 25, "ata": 28, "rarity": 2, "price": 450, "grind": 0, "element": null, "elementPercent": 0, "mst": 8 },
-          { "id": "staff", "name": "Staff", "type": "Staff", "atp": 30, "ata": 30, "rarity": 2, "price": 900, "grind": 0, "element": null, "elementPercent": 0, "mst": 10 },
-          { "id": "rod", "name": "Rod", "type": "Rod", "atp": 40, "ata": 32, "rarity": 2, "price": 1200, "grind": 0, "element": null, "elementPercent": 0, "mst": 15 },
-          { "id": "rod_fire", "name": "Rod", "type": "Rod", "atp": 40, "ata": 32, "rarity": 3, "price": 2400, "grind": 0, "element": "Native", "elementPercent": 10, "mst": 15 },
-          { "id": "pole", "name": "Pole", "type": "Rod", "atp": 55, "ata": 35, "rarity": 3, "price": 2800, "grind": 1, "element": null, "elementPercent": 0, "mst": 18 }
+          { "id": "clear_saber_100", "name": "Clear Saber", "type": "Saber", "atp": 180, "ata": 45, "rarity": 4, "price": 5600, "grind": 0 },
+          { "id": "kurtana_100", "name": "Kurtana", "type": "Saber", "atp": 195, "ata": 48, "rarity": 4, "price": 6904, "grind": 0 },
+          { "id": "cyal_100", "name": "Cyal", "type": "Dagger", "atp": 145, "ata": 55, "rarity": 5, "price": 11235, "grind": 0 },
+          { "id": "deo_calibur_100", "name": "Deo Calibur", "type": "Sword", "atp": 280, "ata": 38, "rarity": 4, "price": 9240, "grind": 0, "element": "Dark" },
+          { "id": "askalon_100", "name": "Askalon", "type": "Sword", "atp": 310, "ata": 42, "rarity": 5, "price": 15720, "grind": 0, "element": "Heat" },
+          { "id": "ka_vorg_100", "name": "Ka Vorg", "type": "Claw", "atp": 165, "ata": 52, "rarity": 5, "price": 18211, "grind": 0, "element": "Draw" },
+          { "id": "alucart_100", "name": "Alucart", "type": "Claw", "atp": 175, "ata": 55, "rarity": 5, "price": 15120, "grind": 0 },
+          { "id": "filamare_100", "name": "Filamare", "type": "Claw", "atp": 178, "ata": 58, "rarity": 5, "price": 15102, "grind": 0 },
+          { "id": "emerald_sin_100", "name": "Emerald Sin", "type": "Handgun", "atp": 95, "ata": 72, "rarity": 5, "price": 12180, "grind": 0, "element": "Dark" },
+          { "id": "gerhilde_100", "name": "Gerhilde", "type": "Rifle", "atp": 145, "ata": 78, "rarity": 5, "price": 12252, "grind": 0 },
+          { "id": "vthraghna_100", "name": "Vthraghna", "type": "Laser Cannon", "atp": 220, "ata": 65, "rarity": 5, "price": 15948, "grind": 0, "element": "Heart" },
+          { "id": "salvador_100", "name": "Salvador", "type": "Wand", "atp": 85, "ata": 48, "rarity": 5, "price": 13250, "grind": 0, "mst": 35 }
+        ],
+        "armor": [
+          { "id": "scale_armor_100", "name": "Scale Armor", "type": "Armor", "dfp": 73, "evp": 47, "rarity": 3, "price": 3287, "slots": 2 },
+          { "id": "brigandine_armor_100", "name": "Brigandine Armor", "type": "Armor", "dfp": 102, "evp": 66, "rarity": 4, "price": 8200, "slots": 2 },
+          { "id": "cuirass_armor_100", "name": "Cuirass Armor", "type": "Armor", "dfp": 143, "evp": 92, "rarity": 5, "price": 11160, "slots": 3 },
+          { "id": "general_frame_100", "name": "General Frame", "type": "Frame", "dfp": 86, "evp": 82, "rarity": 4, "price": 6800, "slots": 2 },
+          { "id": "valiant_frame_100", "name": "Valiant Frame", "type": "Frame", "dfp": 120, "evp": 115, "rarity": 5, "price": 17325, "slots": 3 },
+          { "id": "mist_robe_100", "name": "Mist Robe", "type": "Robe", "dfp": 61, "evp": 98, "rarity": 4, "price": 8787, "slots": 2 },
+          { "id": "reflect_robe_100", "name": "Reflect Robe", "type": "Robe", "dfp": 86, "evp": 138, "rarity": 5, "price": 17925, "slots": 3 }
+        ],
+        "units": [
+          { "id": "ace_power_100", "name": "Ace/Power", "effect": "ATK+10", "rarity": 3, "price": 4500 },
+          { "id": "rookie_guard_100", "name": "Rookie/Guard", "effect": "DEF+5", "rarity": 1, "price": 700 },
+          { "id": "ace_guard_100", "name": "Ace/Guard", "effect": "DEF+10", "rarity": 3, "price": 4500 },
+          { "id": "rookie_hit_100", "name": "Rookie/Hit", "effect": "ACC+3", "rarity": 1, "price": 700 },
+          { "id": "hero_hit_100", "name": "Hero/Hit", "effect": "ACC+9", "rarity": 5, "price": 19130 },
+          { "id": "rookie_mind_100", "name": "Rookie/Mind", "effect": "TEC+5", "rarity": 1, "price": 700 },
+          { "id": "ace_pp_100", "name": "Ace/PP", "effect": "MaxPP+10", "rarity": 3, "price": 4500 },
+          { "id": "heat_resist_lv3_100", "name": "Heat Resist Lv 3", "effect": "Heat Resist +7", "rarity": 5, "price": 19130 },
+          { "id": "ice_resist_lv1_100", "name": "Ice Resist Lv 1", "effect": "Ice Resist +4", "rarity": 1, "price": 700 },
+          { "id": "ice_resist_lv2_100", "name": "Ice Resist Lv 2", "effect": "Ice Resist +6", "rarity": 3, "price": 4500 },
+          { "id": "dark_resist_lv3_100", "name": "Dark Resist Lv 3", "effect": "Dark Resist +7", "rarity": 5, "price": 19130 },
+          { "id": "all_resist_lv2_100", "name": "All Resist Lv 2", "effect": "All Resist +3", "rarity": 3, "price": 11250 }
         ]
       }
     ]

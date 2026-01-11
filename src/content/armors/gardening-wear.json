@@ -1,6 +1,7 @@
 {
   "name": "Gardening Wear",
   "japaneseName": "ガーデニングウェア",
+  "type": "Rare",
   "rarity": 4,
   "maxGrind": 50,
   "level": 10,
@@ -9,5 +10,6 @@
   "defenseMax": 168,
   "evasionBase": 80,
   "evasionMax": 180,
+  "maxSlots": 4,
   "psoWorldId": 504
 }

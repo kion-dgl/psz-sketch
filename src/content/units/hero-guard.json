@@ -2,7 +2,8 @@
   "name": "Hero/Guard",
   "japaneseName": "ヒーロー／ガード",
   "rarity": 5,
-  "defenseBase": 15,
-  "defenseMax": 15,
+  "category": "Guard",
+  "effect": "DEF+15",
+  "effectValue": 15,
   "psoWorldId": 323
 }

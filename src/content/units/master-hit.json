@@ -2,5 +2,8 @@
   "name": "Master/Hit",
   "japaneseName": "マスター／ヒット",
   "rarity": 6,
+  "category": "Hit",
+  "effect": "ACC+12",
+  "effectValue": 12,
   "psoWorldId": 334
 }

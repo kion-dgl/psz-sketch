@@ -1,7 +1,11 @@
 {
   "name": "Tech Level Boost",
   "japaneseName": "テクレベルブース",
-  "details": "It increases a character's techniques by +1. This is capped at the character's natural technique limits.",
   "rarity": 5,
+  "category": "Special",
+  "effect": "Technique Level +1",
+  "effectValue": 1,
+  "stackable": false,
+  "details": "It increases a character's techniques by +1. This is capped at the character's natural technique limits.",
   "psoWorldId": 480
 }

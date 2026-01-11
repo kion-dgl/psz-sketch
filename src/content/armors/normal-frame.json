@@ -1,7 +1,7 @@
 {
   "name": "Normal Frame",
   "japaneseName": "ノーマルフレーム",
-  "details": "Can have a maximum of 3 slots.",
+  "type": "Frame",
   "rarity": 1,
   "maxGrind": 40,
   "level": 1,
@@ -10,5 +10,7 @@
   "defenseMax": 107,
   "evasionBase": 26,
   "evasionMax": 106,
+  "maxSlots": 3,
+  "details": "Can have a maximum of 3 slots.",
   "psoWorldId": 485
 }

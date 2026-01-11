@@ -1,7 +1,7 @@
 {
   "name": "Shock Frame",
   "japaneseName": "ショックフレーム",
-  "details": "Can have a maximum of 3 slots.",
+  "type": "Frame",
   "rarity": 3,
   "maxGrind": 30,
   "level": 5,
@@ -10,5 +10,7 @@
   "defenseMax": 121,
   "evasionBase": 59,
   "evasionMax": 119,
+  "maxSlots": 3,
+  "details": "Can have a maximum of 3 slots.",
   "psoWorldId": 493
 }

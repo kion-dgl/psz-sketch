@@ -2,5 +2,8 @@
   "name": "Hero/Hit",
   "japaneseName": "ヒーロー／ヒット",
   "rarity": 5,
+  "category": "Hit",
+  "effect": "ACC+9",
+  "effectValue": 9,
   "psoWorldId": 333
 }

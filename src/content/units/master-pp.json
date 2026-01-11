@@ -2,5 +2,8 @@
   "name": "Master/PP",
   "japaneseName": "マスター/PP",
   "rarity": 6,
+  "category": "PP",
+  "effect": "MaxPP+20",
+  "effectValue": 20,
   "psoWorldId": 349
 }

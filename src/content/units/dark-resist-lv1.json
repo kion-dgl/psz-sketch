@@ -2,5 +2,10 @@
   "name": "Dark Resist Lv1",
   "japaneseName": "ダークレジストLv1",
   "rarity": 1,
+  "category": "Resistance",
+  "effect": "Dark Resist +4",
+  "effectValue": 4,
+  "resistType": "Dark",
+  "resistLevel": 1,
   "psoWorldId": 458
 }

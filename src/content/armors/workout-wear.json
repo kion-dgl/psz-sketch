@@ -1,6 +1,7 @@
 {
   "name": "Workout Wear",
   "japaneseName": "エクササイズウェア",
+  "type": "Rare",
   "rarity": 6,
   "maxGrind": 40,
   "level": 56,
@@ -9,5 +10,6 @@
   "defenseMax": 204,
   "evasionBase": 155,
   "evasionMax": 235,
+  "maxSlots": 4,
   "psoWorldId": 519
 }

@@ -1,6 +1,7 @@
 {
   "name": "Miyabi Hakama",
   "japaneseName": "ミヤビハカマ",
+  "type": "Rare",
   "rarity": 4,
   "maxGrind": 35,
   "level": 18,
@@ -9,5 +10,6 @@
   "defenseMax": 155,
   "evasionBase": 90,
   "evasionMax": 160,
+  "maxSlots": 4,
   "psoWorldId": 511
 }

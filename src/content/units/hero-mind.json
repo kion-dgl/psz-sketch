@@ -2,5 +2,8 @@
   "name": "Hero/Mind",
   "japaneseName": "ヒーロー／マインド",
   "rarity": 5,
+  "category": "Mind",
+  "effect": "TEC+15",
+  "effectValue": 15,
   "psoWorldId": 338
 }

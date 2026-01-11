@@ -2,5 +2,10 @@
   "name": "All Resist Lv3",
   "japaneseName": "オールレジストLv3",
   "rarity": 5,
+  "category": "Resistance",
+  "effect": "All Resist +4",
+  "effectValue": 4,
+  "resistType": "All",
+  "resistLevel": 3,
   "psoWorldId": 465
 }

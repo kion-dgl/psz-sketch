@@ -2,5 +2,8 @@
   "name": "Divine/Hit",
   "japaneseName": "ゴッド／ヒット",
   "rarity": 7,
+  "category": "Hit",
+  "effect": "ACC+15",
+  "effectValue": 15,
   "psoWorldId": 335
 }

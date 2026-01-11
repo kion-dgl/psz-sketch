@@ -1,6 +1,7 @@
 {
   "name": "Hunter Shell",
   "japaneseName": "ハンターズシェル",
+  "type": "Rare",
   "rarity": 5,
   "maxGrind": 35,
   "level": 20,
@@ -9,5 +10,6 @@
   "defenseMax": 196,
   "evasionBase": 97,
   "evasionMax": 167,
+  "maxSlots": 4,
   "psoWorldId": 521
 }

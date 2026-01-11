@@ -1,6 +1,7 @@
 {
   "name": "Reflect Robe",
   "japaneseName": "リフレクトローブ",
+  "type": "Robe",
   "rarity": 5,
   "maxGrind": 15,
   "level": 20,
@@ -9,5 +10,6 @@
   "defenseMax": 116,
   "evasionBase": 138,
   "evasionMax": 168,
+  "maxSlots": 4,
   "psoWorldId": 501
 }

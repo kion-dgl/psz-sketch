@@ -1,7 +1,9 @@
 {
   "name": "Slow Protect",
   "japaneseName": "スロープロテクト",
-  "details": "Grants immunity to Slow status effect.",
   "rarity": 6,
+  "category": "Special",
+  "effect": "Immunity to Slow",
+  "details": "Grants immunity to Slow status effect.",
   "psoWorldId": 473
 }

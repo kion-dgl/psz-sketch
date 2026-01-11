@@ -1,6 +1,7 @@
 {
   "name": "Chef Apron",
   "japaneseName": "パティシエプロン",
+  "type": "Rare",
   "rarity": 4,
   "maxGrind": 40,
   "level": 16,
@@ -9,5 +10,6 @@
   "defenseMax": 146,
   "evasionBase": 82,
   "evasionMax": 162,
+  "maxSlots": 4,
   "psoWorldId": 507
 }

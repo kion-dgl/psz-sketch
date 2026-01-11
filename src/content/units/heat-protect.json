@@ -1,7 +1,9 @@
 {
   "name": "Heat Protect",
   "japaneseName": "ヒートプロテクト",
-  "details": "Grants immunity to Burn status effect.",
   "rarity": 6,
+  "category": "Special",
+  "effect": "Immunity to Burn",
+  "details": "Grants immunity to Burn status effect.",
   "psoWorldId": 468
 }

@@ -1,6 +1,7 @@
 {
   "name": "Scale Armor",
   "japaneseName": "スケイルアーマー",
+  "type": "Armor",
   "rarity": 3,
   "maxGrind": 40,
   "level": 5,
@@ -9,5 +10,6 @@
   "defenseMax": 153,
   "evasionBase": 47,
   "evasionMax": 127,
+  "maxSlots": 4,
   "psoWorldId": 487
 }

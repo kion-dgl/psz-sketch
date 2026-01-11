@@ -1,6 +1,7 @@
 {
   "name": "Dymos Armor",
   "japaneseName": "ダイモスアーマー",
+  "type": "Armor",
   "rarity": 5,
   "maxGrind": 40,
   "level": 28,
@@ -9,5 +10,6 @@
   "defenseMax": 218,
   "evasionBase": 86,
   "evasionMax": 166,
+  "maxSlots": 4,
   "psoWorldId": 520
 }

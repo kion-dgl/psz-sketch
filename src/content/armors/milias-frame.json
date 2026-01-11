@@ -1,6 +1,7 @@
 {
   "name": "Milias Frame",
   "japaneseName": "ミリアスフレーム",
+  "type": "Frame",
   "rarity": 6,
   "maxGrind": 35,
   "level": 48,
@@ -9,5 +10,6 @@
   "defenseMax": 256,
   "evasionBase": 116,
   "evasionMax": 186,
+  "maxSlots": 3,
   "psoWorldId": 516
 }

@@ -1,6 +1,7 @@
 {
   "name": "Noble Cloak",
   "japaneseName": "ジンバオリ",
+  "type": "Rare",
   "rarity": 7,
   "maxGrind": 40,
   "level": 66,
@@ -9,5 +10,6 @@
   "defenseMax": 258,
   "evasionBase": 239,
   "evasionMax": 319,
+  "maxSlots": 4,
   "psoWorldId": 515
 }

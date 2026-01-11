@@ -1,6 +1,7 @@
 {
   "name": "Battle Armor",
   "japaneseName": "バトルアーマー",
+  "type": "Armor",
   "rarity": 2,
   "maxGrind": 45,
   "level": 2,
@@ -9,5 +10,6 @@
   "defenseMax": 139,
   "evasionBase": 31,
   "evasionMax": 121,
+  "maxSlots": 4,
   "psoWorldId": 486
 }

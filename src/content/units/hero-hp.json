@@ -2,5 +2,8 @@
   "name": "Hero/HP",
   "japaneseName": "ヒーロー/HP",
   "rarity": 5,
+  "category": "HP",
+  "effect": "MaxHP+15",
+  "effectValue": 15,
   "psoWorldId": 343
 }

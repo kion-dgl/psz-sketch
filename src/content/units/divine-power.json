@@ -2,7 +2,8 @@
   "name": "Divine/Power",
   "japaneseName": "ゴッド／パワー",
   "rarity": 7,
-  "attackBase": 25,
-  "attackMax": 25,
+  "category": "Power",
+  "effect": "ATK+25",
+  "effectValue": 25,
   "psoWorldId": 320
 }

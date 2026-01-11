@@ -1,6 +1,7 @@
 {
   "name": "Ancient Robe",
   "japaneseName": "エインシェントローブ",
+  "type": "Robe",
   "rarity": 7,
   "maxGrind": 5,
   "level": 50,
@@ -9,5 +10,6 @@
   "defenseMax": 167,
   "evasionBase": 251,
   "evasionMax": 261,
+  "maxSlots": 4,
   "psoWorldId": 503
 }

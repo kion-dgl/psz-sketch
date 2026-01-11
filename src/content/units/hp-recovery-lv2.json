@@ -1,7 +1,10 @@
 {
   "name": "HP Recovery Lv2",
   "japaneseName": "HPリカバリーLv2",
-  "details": "Enables Level 2 HP Regeneration.",
   "rarity": 4,
+  "category": "Special",
+  "effect": "Recover 2 HP every 5 seconds",
+  "effectValue": 2,
+  "details": "Enables Level 2 HP Regeneration.",
   "psoWorldId": 429
 }

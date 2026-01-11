@@ -1,6 +1,7 @@
 {
   "name": "White Robe",
   "japaneseName": "ホワイトローブ",
+  "type": "Robe",
   "rarity": 2,
   "maxGrind": 30,
   "level": 2,
@@ -9,5 +10,6 @@
   "defenseMax": 89,
   "evasionBase": 47,
   "evasionMax": 107,
+  "maxSlots": 4,
   "psoWorldId": 498
 }

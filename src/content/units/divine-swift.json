@@ -2,7 +2,8 @@
   "name": "Divine/Swift",
   "japaneseName": "ゴッド／スイフト",
   "rarity": 7,
-  "evasionBase": 25,
-  "evasionMax": 25,
+  "category": "Swift",
+  "effect": "EVA+25",
+  "effectValue": 25,
   "psoWorldId": 330
 }

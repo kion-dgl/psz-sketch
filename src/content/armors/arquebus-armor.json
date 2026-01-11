@@ -1,6 +1,7 @@
 {
   "name": "Arquebus Armor",
   "japaneseName": "アークイバスアーマー",
+  "type": "Armor",
   "rarity": 6,
   "maxGrind": 25,
   "level": 35,
@@ -9,5 +10,6 @@
   "defenseMax": 243,
   "evasionBase": 124,
   "evasionMax": 174,
+  "maxSlots": 4,
   "psoWorldId": 490
 }

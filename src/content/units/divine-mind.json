@@ -2,5 +2,8 @@
   "name": "Divine/Mind",
   "japaneseName": "ゴッド／マインド",
   "rarity": 7,
+  "category": "Mind",
+  "effect": "TEC+25",
+  "effectValue": 25,
   "psoWorldId": 340
 }

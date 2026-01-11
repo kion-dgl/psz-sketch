@@ -1,6 +1,7 @@
 {
   "name": "Aegir Robe",
   "japaneseName": "エーギルローブ",
+  "type": "Robe",
   "rarity": 6,
   "maxGrind": 10,
   "level": 35,
@@ -9,5 +10,6 @@
   "defenseMax": 136,
   "evasionBase": 186,
   "evasionMax": 206,
+  "maxSlots": 4,
   "psoWorldId": 502
 }

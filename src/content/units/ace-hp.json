@@ -2,5 +2,8 @@
   "name": "Ace/HP",
   "japaneseName": "エース/HP",
   "rarity": 3,
+  "category": "HP",
+  "effect": "MaxHP+10",
+  "effectValue": 10,
   "psoWorldId": 342
 }
