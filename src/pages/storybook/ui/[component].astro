@@ -1,140 +1,24 @@
 ---
 import ScrollableLayout from '../../../layouts/ScrollableLayout.astro';
-import HUDStorybook from '../../../components/hud/HUDStorybook';
-import ActionPaletteStorybook from '../../../components/palette/ActionPaletteStorybook';
-import MinimapStorybook from '../../../components/minimap/MinimapStorybook';
-import TooltipStorybook from '../../../components/tooltip/TooltipStorybook';
-import StatsStorybook from '../../../components/stats/StatsStorybook';
-import MainMenuStorybook from '../../../components/main-menu/MainMenuStorybook';
-import ItemsStorybook from '../../../components/main-menu/ItemsStorybook';
-import EquipStorybook from '../../../components/main-menu/EquipStorybook';
-import ItemShopStorybook from '../../../components/shops/ItemShopStorybook';
-import WeaponShopStorybook from '../../../components/shops/WeaponShopStorybook';
-import Shop3DStorybook from '../../../components/shops/Shop3DStorybook';
-import WeaponShop3DStorybook from '../../../components/shops/WeaponShop3DStorybook';
-import MagEvolutionsStorybook from '../../../components/mag/MagEvolutionsStorybook';
-import MagFeederStorybook from '../../../components/mag/MagFeederStorybook';
-import ScreenPreview from '../../../components/ui-storybook/ScreenPreview';
+import UIStorybook from '../../../components/ui-storybook/UIStorybook';
 
 export const prerender = false;
 
 const { component } = Astro.params;
 
-const UI_COMPONENTS = [
-  { id: 'screen', label: 'Screen Preview' },
-  { id: 'hud', label: 'HUD' },
-  { id: 'action-palette', label: 'Action Palette' },
-  { id: 'minimap', label: 'Minimap' },
-  { id: 'tooltip', label: 'Tooltip' },
-  { id: 'stats', label: 'Stats' },
-  { id: 'main-menu', label: 'Main Menu' },
-  { id: 'items', label: 'Items' },
-  { id: 'equip', label: 'Equip' },
-  { id: 'item-shop', label: 'Item Shop' },
-  { id: 'weapon-shop', label: 'Weapon Shop' },
-  { id: 'shop-3d', label: 'Item Shop 3D' },
-  { id: 'weapon-shop-3d', label: 'Weapon Shop 3D' },
-  { id: 'mag-evolutions', label: 'Mag Evolutions' },
-  { id: 'mag-feeder', label: 'Mag Feeder' },
+const validComponents = [
+  'screen', 'hud', 'action-palette', 'minimap', 'tooltip', 'stats',
+  'main-menu', 'items', 'equip', 'item-shop', 'weapon-shop',
+  'shop-3d', 'weapon-shop-3d', 'mag-evolutions', 'mag-feeder'
 ];
 
-const validComponents = UI_COMPONENTS.map(c => c.id);
 const isValidComponent = validComponents.includes(component || '');
 
 if (!isValidComponent) {
   return Astro.redirect('/storybook/ui/screen');
 }
-
-const currentComponent = UI_COMPONENTS.find(c => c.id === component);
 ---
 
-<ScrollableLayout title={`${currentComponent?.label || 'UI'} - PSZ Sketch`}>
-  <div class="container">
-    <aside class="sidebar">
-      <h2 class="sidebar-title">UI Components</h2>
-      <nav class="nav">
-        {UI_COMPONENTS.map((comp) => (
-          <a
-            href={`/storybook/ui/${comp.id}`}
-            class:list={['nav-link', { active: comp.id === component }]}
-          >
-            {comp.label}
-          </a>
-        ))}
-      </nav>
-    </aside>
-    <main class="content">
-      {component === 'screen' && <ScreenPreview client:load />}
-      {component === 'hud' && <HUDStorybook client:load />}
-      {component === 'action-palette' && <ActionPaletteStorybook client:load />}
-      {component === 'minimap' && <MinimapStorybook client:load />}
-      {component === 'tooltip' && <TooltipStorybook client:load />}
-      {component === 'stats' && <StatsStorybook client:load />}
-      {component === 'main-menu' && <MainMenuStorybook client:load />}
-      {component === 'items' && <ItemsStorybook client:load />}
-      {component === 'equip' && <EquipStorybook client:load />}
-      {component === 'item-shop' && <ItemShopStorybook client:load />}
-      {component === 'weapon-shop' && <WeaponShopStorybook client:load />}
-      {component === 'shop-3d' && <Shop3DStorybook client:load />}
-      {component === 'weapon-shop-3d' && <WeaponShop3DStorybook client:load />}
-      {component === 'mag-evolutions' && <MagEvolutionsStorybook client:load />}
-      {component === 'mag-feeder' && <MagFeederStorybook client:load />}
-    </main>
-  </div>
+<ScrollableLayout title="UI Storybook - PSZ Sketch">
+  <UIStorybook client:load initialComponent={component} />
 </ScrollableLayout>
-
-<style>
-  .container {
-    display: flex;
-    min-height: 100vh;
-    background: #1a1a2e;
-    color: #fff;
-  }
-
-  .sidebar {
-    width: 200px;
-    background: #16213e;
-    padding: 20px;
-    border-right: 1px solid #2d3a5a;
-    flex-shrink: 0;
-  }
-
-  .sidebar-title {
-    font-size: 16px;
-    margin: 0 0 20px 0;
-    color: #6b8afd;
-  }
-
-  .nav {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .nav-link {
-    display: block;
-    padding: 10px 12px;
-    background: transparent;
-    border: none;
-    border-radius: 6px;
-    color: #aaa;
-    font-size: 14px;
-    text-decoration: none;
-    transition: all 0.2s;
-  }
-
-  .nav-link:hover {
-    background: #2d3a5a;
-    color: #fff;
-  }
-
-  .nav-link.active {
-    background: #2d3a5a;
-    color: #fff;
-  }
-
-  .content {
-    flex: 1;
-    overflow: auto;
-  }
-</style>

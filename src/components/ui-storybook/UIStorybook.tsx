@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import HUDStorybook from '../hud/HUDStorybook';
 import ActionPaletteStorybook from '../palette/ActionPaletteStorybook';
 import MinimapStorybook from '../minimap/MinimapStorybook';
@@ -35,8 +35,45 @@ const UI_COMPONENTS: { id: UIComponent; label: string; available: boolean }[] = 
   { id: 'mag-feeder', label: 'Mag Feeder', available: true },
 ];
 
-export default function UIStorybook() {
-  const [selected, setSelected] = useState<UIComponent>('screen');
+const validComponents = UI_COMPONENTS.map(c => c.id);
+
+function getComponentFromUrl(): UIComponent {
+  if (typeof window === 'undefined') return 'screen';
+  const path = window.location.pathname;
+  const match = path.match(/\/storybook\/ui\/([^/]+)/);
+  if (match && validComponents.includes(match[1] as UIComponent)) {
+    return match[1] as UIComponent;
+  }
+  return 'screen';
+}
+
+interface UIStorybookProps {
+  initialComponent?: string;
+}
+
+export default function UIStorybook({ initialComponent }: UIStorybookProps) {
+  const [selected, setSelected] = useState<UIComponent>(() => {
+    if (initialComponent && validComponents.includes(initialComponent as UIComponent)) {
+      return initialComponent as UIComponent;
+    }
+    return getComponentFromUrl();
+  });
+
+  // Update URL when selection changes
+  const handleSelect = (comp: UIComponent) => {
+    setSelected(comp);
+    const newUrl = `/storybook/ui/${comp}`;
+    window.history.pushState({}, '', newUrl);
+  };
+
+  // Listen for browser back/forward
+  useEffect(() => {
+    const handlePopState = () => {
+      setSelected(getComponentFromUrl());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   return (
     <div style={styles.container}>
@@ -47,7 +84,7 @@ export default function UIStorybook() {
           {UI_COMPONENTS.map((comp) => (
             <button
               key={comp.id}
-              onClick={() => comp.available && setSelected(comp.id)}
+              onClick={() => comp.available && handleSelect(comp.id)}
               style={{
                 ...styles.navButton,
                 ...(selected === comp.id ? styles.navButtonActive : {}),
