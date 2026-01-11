@@ -1,10 +1,4 @@
 ---
-import ScrollableLayout from '../../layouts/ScrollableLayout.astro';
-import UIStorybook from '../../components/ui-storybook/UIStorybook';
-
-export const prerender = false;
+// Redirect to the default component
+return Astro.redirect('/storybook/ui/screen');
 ---
-
-<ScrollableLayout title="UI Components - PSZ Sketch">
-  <UIStorybook client:load />
-</ScrollableLayout>
