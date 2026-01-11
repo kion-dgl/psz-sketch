@@ -140,29 +140,30 @@ describe('Mag Evolution - Tier 3 Pure (Level 30)', () => {
    * - Niid: All stats but Mind must be 0 → Flozir
    */
 
-  it('evolves to Thohn when only Power has levels', () => {
+  // Pure stats still evolve to primary forms (pure forms require special items)
+  it('evolves to Othel when only Power has levels', () => {
     const result = determineForm(makeStats(30, 0, 0, 0)); // Level 30, pure Power
-    expect(result.mag.name).toBe('Thohn');
+    expect(result.mag.name).toBe('Othel');
     expect(result.mag.stage).toBe(3);
-    expect(result.mag.photonBlast).toBe('Granir');
-  });
-
-  it('evolves to Maray when only Guard has levels', () => {
-    const result = determineForm(makeStats(0, 30, 0, 0)); // Level 30, pure Guard
-    expect(result.mag.name).toBe('Maray');
-    expect(result.mag.photonBlast).toBe('Midgul');
-  });
-
-  it('evolves to Teroo when only Hit has levels', () => {
-    const result = determineForm(makeStats(0, 0, 30, 0)); // Level 30, pure Hit
-    expect(result.mag.name).toBe('Teroo');
     expect(result.mag.photonBlast).toBe('Pacifal');
   });
 
-  it('evolves to Niid when only Mind has levels', () => {
-    const result = determineForm(makeStats(0, 0, 0, 30)); // Level 30, pure Mind
-    expect(result.mag.name).toBe('Niid');
+  it('evolves to Aiolo when only Guard has levels', () => {
+    const result = determineForm(makeStats(0, 30, 0, 0)); // Level 30, pure Guard
+    expect(result.mag.name).toBe('Aiolo');
     expect(result.mag.photonBlast).toBe('Flozir');
+  });
+
+  it('evolves to Peoth when only Hit has levels', () => {
+    const result = determineForm(makeStats(0, 0, 30, 0)); // Level 30, pure Hit
+    expect(result.mag.name).toBe('Peoth');
+    expect(result.mag.photonBlast).toBe('Granir');
+  });
+
+  it('evolves to Deegh when only Mind has levels', () => {
+    const result = determineForm(makeStats(0, 0, 0, 30)); // Level 30, pure Mind
+    expect(result.mag.name).toBe('Deegh');
+    expect(result.mag.photonBlast).toBe('Midgul');
   });
 });
 
@@ -264,30 +265,30 @@ describe('Mag Evolution - Tier 4 (Level 60)', () => {
 describe('Mag Evolution - Pure Stats at Level 60', () => {
   /**
    * From PSO-World: "Tier 4 - Evolves at Level 60 (Will Fail if Pure)"
-   * Pure mags at level 60 should stay as their Tier 3 pure form
+   * Pure mags at level 60 stay at Tier 3 primary form (can't evolve to Tier 4)
    */
 
-  it('stays as Thohn (pure Power) at level 60', () => {
+  it('stays as Othel (primary Power) at level 60 when pure', () => {
     const result = determineForm(makeStats(60, 0, 0, 0)); // Level 60, pure Power
-    expect(result.mag.name).toBe('Thohn');
+    expect(result.mag.name).toBe('Othel');
     expect(result.mag.stage).toBe(3);
   });
 
-  it('stays as Maray (pure Guard) at level 60', () => {
+  it('stays as Aiolo (primary Guard) at level 60 when pure', () => {
     const result = determineForm(makeStats(0, 60, 0, 0)); // Level 60, pure Guard
-    expect(result.mag.name).toBe('Maray');
+    expect(result.mag.name).toBe('Aiolo');
     expect(result.mag.stage).toBe(3);
   });
 
-  it('stays as Teroo (pure Hit) at level 60', () => {
+  it('stays as Peoth (primary Hit) at level 60 when pure', () => {
     const result = determineForm(makeStats(0, 0, 60, 0)); // Level 60, pure Hit
-    expect(result.mag.name).toBe('Teroo');
+    expect(result.mag.name).toBe('Peoth');
     expect(result.mag.stage).toBe(3);
   });
 
-  it('stays as Niid (pure Mind) at level 60', () => {
+  it('stays as Deegh (primary Mind) at level 60 when pure', () => {
     const result = determineForm(makeStats(0, 0, 0, 60)); // Level 60, pure Mind
-    expect(result.mag.name).toBe('Niid');
+    expect(result.mag.name).toBe('Deegh');
     expect(result.mag.stage).toBe(3);
   });
 });

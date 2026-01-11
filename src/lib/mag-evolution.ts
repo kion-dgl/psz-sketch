@@ -109,6 +109,11 @@ export function getSecondHighestStat(stats: MagStats, exclude: keyof MagStats): 
 /**
  * Determine which mag form the given stats would result in.
  * Returns the mag ID and definition.
+ *
+ * Evolution priority at each tier:
+ * - Tier 2 (Lv10+): Primary stat > Other Stats
+ * - Tier 3 (Lv30+): Primary stat > Other Stats (pure forms require special items)
+ * - Tier 4 (Lv60+): Primary > Secondary > Other Stats (fails if pure)
  */
 export function determineForm(stats: MagStats): { id: string; mag: MagDefinition } {
   const level = getLevel(stats);
@@ -118,36 +123,28 @@ export function determineForm(stats: MagStats): { id: string; mag: MagDefinition
     return { id: 'mag', mag: MAGS.mag };
   }
 
-  // Check for pure stats first (for Tier 3 pure forms at level 30+)
-  if (level >= 30) {
-    for (const [id, mag] of Object.entries(MAGS)) {
-      if (mag.stage === 3 && mag.requirement?.type === 'pure') {
-        const statKey = STAT_KEY_MAP[mag.requirement.stat];
-        if (isPure(stats, statKey)) {
-          return { id, mag };
-        }
-      }
-    }
-  }
-
   // Get primary and secondary stats
   const primaryKey = getHighestStat(stats);
   const secondaryKey = getSecondHighestStat(stats, primaryKey);
   const primaryName = (primaryKey.charAt(0).toUpperCase() + primaryKey.slice(1)) as StatName;
   const secondaryName = (secondaryKey.charAt(0).toUpperCase() + secondaryKey.slice(1)) as StatName;
 
-  // Tier 4: Level 60+ with dual stat requirements
+  // Tier 4: Level 60+ with dual stat requirements (fails if pure - needs secondary > 0)
   if (level >= 60) {
-    for (const [id, mag] of Object.entries(MAGS)) {
-      if (mag.stage === 4 && mag.requirement?.type === 'dual') {
-        if (mag.requirement.primary === primaryName && mag.requirement.secondary === secondaryName) {
-          return { id, mag };
+    const secondaryValue = stats[secondaryKey];
+    // Only evolve to tier 4 if secondary stat has actual points (not pure)
+    if (secondaryValue > 0) {
+      for (const [id, mag] of Object.entries(MAGS)) {
+        if (mag.stage === 4 && mag.requirement?.type === 'dual') {
+          if (mag.requirement.primary === primaryName && mag.requirement.secondary === secondaryName) {
+            return { id, mag };
+          }
         }
       }
     }
   }
 
-  // Tier 3: Level 30-59 with primary stat requirement (non-pure)
+  // Tier 3: Level 30+ with primary stat requirement
   if (level >= 30) {
     for (const [id, mag] of Object.entries(MAGS)) {
       if (mag.stage === 3 && mag.requirement?.type === 'primary') {

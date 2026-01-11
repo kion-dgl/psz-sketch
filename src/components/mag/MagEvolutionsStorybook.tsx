@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { determineForm, getLevel, MagStats } from '../../lib/mag-evolution';
+import { determineForm, getLevel, type MagStats } from '../../lib/mag-evolution';
 
 type EvolutionRecord = {
   level: number;
@@ -15,13 +15,23 @@ export default function MagEvolutionsStorybook() {
   const level = useMemo(() => getLevel(stats), [stats]);
   const currentForm = useMemo(() => determineForm(stats), [stats]);
 
+  const MAX_TOTAL_POINTS = 500; // Level 100 = 500 total stat points
+
   const addLevels = (stat: keyof MagStats, levels: number) => {
     const oldForm = determineForm(stats);
 
     setStats(prev => {
+      const currentTotal = prev.power + prev.guard + prev.hit + prev.mind;
+      const pointsToAdd = levels * 5;
+      const newStatValue = Math.max(0, prev[stat] + pointsToAdd);
+      const otherStats = currentTotal - prev[stat];
+
+      // Cap so total doesn't exceed MAX_TOTAL_POINTS
+      const cappedValue = Math.min(newStatValue, MAX_TOTAL_POINTS - otherStats);
+
       const newStats = {
         ...prev,
-        [stat]: Math.max(0, prev[stat] + (levels * 5)), // 5 points per level
+        [stat]: Math.max(0, cappedValue),
       };
 
       const newForm = determineForm(newStats);
@@ -43,9 +53,16 @@ export default function MagEvolutionsStorybook() {
     const oldForm = determineForm(stats);
 
     setStats(prev => {
+      const currentTotal = prev.power + prev.guard + prev.hit + prev.mind;
+      const otherStats = currentTotal - prev[stat];
+      const targetPoints = Math.max(0, targetLevel * 5);
+
+      // Cap so total doesn't exceed MAX_TOTAL_POINTS
+      const cappedValue = Math.min(targetPoints, MAX_TOTAL_POINTS - otherStats);
+
       const newStats = {
         ...prev,
-        [stat]: Math.max(0, targetLevel * 5),
+        [stat]: cappedValue,
       };
 
       const newForm = determineForm(newStats);
@@ -74,7 +91,7 @@ export default function MagEvolutionsStorybook() {
     { label: 'Aio Path (Guard)', stats: { power: 0, guard: 50, hit: 0, mind: 0 } },
     { label: 'Yth Path (Hit)', stats: { power: 0, guard: 0, hit: 50, mind: 0 } },
     { label: 'Ingh Path (Mind)', stats: { power: 0, guard: 0, hit: 0, mind: 50 } },
-    { label: 'Thohn (Pure Power Lv30)', stats: { power: 150, guard: 0, hit: 0, mind: 0 } },
+    { label: 'Othel (Power Lv30)', stats: { power: 150, guard: 0, hit: 0, mind: 0 } },
     { label: 'Urado (P>G Lv60)', stats: { power: 200, guard: 80, hit: 20, mind: 0 } },
     { label: 'Tyrna (G>P Lv60)', stats: { power: 80, guard: 200, hit: 20, mind: 0 } },
     { label: 'Sig (M>H Lv60)', stats: { power: 0, guard: 20, hit: 80, mind: 200 } },
