@@ -1,6 +1,9 @@
 {
   "name": "Thohn",
   "japaneseName": "ソーン",
-  "details": "Evolution conditions:\n-Lv30\n-All stats 0 except Power\n\nAcquired Photon Blast:\nGranir",
+  "stage": 3,
+  "evolutionLevel": 30,
+  "evolutionRequirement": { "type": "pure", "stat": "Power" },
+  "photonBlast": "Granir",
   "psoWorldId": 360
 }

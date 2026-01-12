@@ -1,0 +1,24 @@
+---
+import ScrollableLayout from '../../../layouts/ScrollableLayout.astro';
+import UIStorybook from '../../../components/ui-storybook/UIStorybook';
+
+export const prerender = false;
+
+const { component } = Astro.params;
+
+const validComponents = [
+  'screen', 'hud', 'action-palette', 'minimap', 'tooltip', 'stats',
+  'main-menu', 'items', 'equip', 'item-shop', 'weapon-shop',
+  'shop-3d', 'weapon-shop-3d', 'mag-evolutions', 'mag-feeder'
+];
+
+const isValidComponent = validComponents.includes(component || '');
+
+if (!isValidComponent) {
+  return Astro.redirect('/storybook/ui/screen');
+}
+---
+
+<ScrollableLayout title="UI Storybook - PSZ Sketch">
+  <UIStorybook client:load initialComponent={component} />
+</ScrollableLayout>

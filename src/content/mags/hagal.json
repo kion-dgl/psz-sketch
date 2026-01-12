@@ -1,6 +1,9 @@
 {
   "name": "Hagal",
   "japaneseName": "ハガル",
-  "details": "Evolution conditions:\n-Lv60, 70, 80, 90, 100\n-Hit > Guard > Other stats\n\nAcquired Photon Blast:\nMidgar",
+  "stage": 4,
+  "evolutionLevel": 60,
+  "evolutionRequirement": { "type": "stat", "primary": "Hit", "secondary": "Guard" },
+  "photonBlast": "Midgul",
   "psoWorldId": 371
 }

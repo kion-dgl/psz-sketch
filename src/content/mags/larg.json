@@ -1,6 +1,9 @@
 {
   "name": "Larg",
   "japaneseName": "ラーグ",
-  "details": "Evolution conditions:\n-Lv60, 70, 80, 90, 100\n-Guard > Mind > Other stats\n\nAcquired Photon Blast:\nFlozir",
+  "stage": 4,
+  "evolutionLevel": 60,
+  "evolutionRequirement": { "type": "stat", "primary": "Guard", "secondary": "Mind" },
+  "photonBlast": "Flozir",
   "psoWorldId": 369
 }

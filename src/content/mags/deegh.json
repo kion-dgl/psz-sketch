@@ -1,6 +1,9 @@
 {
   "name": "Deegh",
   "japaneseName": "ディーグ",
-  "details": "Evolution conditions:\n-Lv30\n-Mind > Other stats\n\nAcquired Photon Blast:\nMidgul",
+  "stage": 3,
+  "evolutionLevel": 30,
+  "evolutionRequirement": { "type": "stat", "primary": "Mind" },
+  "photonBlast": "Midgul",
   "psoWorldId": 359
 }

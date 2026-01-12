@@ -1,6 +1,9 @@
 {
   "name": "Beork",
   "japaneseName": "ベオーク",
-  "details": "Evolution conditions:\n-Lv60, 70, 80, 90, 100\n-Guard > Hit > Other stats\n\nAcquired Photon Blast:\nPacifal",
+  "stage": 4,
+  "evolutionLevel": 60,
+  "evolutionRequirement": { "type": "stat", "primary": "Guard", "secondary": "Hit" },
+  "photonBlast": "Pacifal",
   "psoWorldId": 368
 }

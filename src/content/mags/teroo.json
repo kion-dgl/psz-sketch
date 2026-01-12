@@ -1,6 +1,9 @@
 {
   "name": "Teroo",
   "japaneseName": "テルー",
-  "details": "Evolution conditions:\n-Lv30\n-All stats 0 except Hit\n\nAcquired Photon Blast:\nPacifal",
+  "stage": 3,
+  "evolutionLevel": 30,
+  "evolutionRequirement": { "type": "pure", "stat": "Hit" },
+  "photonBlast": "Pacifal",
   "psoWorldId": 362
 }

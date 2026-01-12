@@ -1,0 +1,41 @@
+{
+  "name": "Fickle",
+  "japaneseName": "きまぐれ",
+  "category": "special",
+  "tier": "advanced",
+  "unlockLevel": 60,
+  "favoriteFood": "Anything",
+  "switchFrom": "Feed 5 consecutive Hunter or Ranger Weapons",
+  "triggers": {
+    "walking": {
+      "effect": "Offensive Boost",
+      "strength": "Large",
+      "chance": 5,
+      "duration": 60
+    },
+    "lowHealth": {
+      "effect": "Resta",
+      "strength": "Strong",
+      "chance": 10
+    },
+    "statusCondition": {
+      "effect": "Anti",
+      "chance": 10
+    },
+    "bossEncounter": {
+      "effect": "Defensive Boost",
+      "strength": "Large",
+      "chance": 10,
+      "duration": 60
+    },
+    "playerDeath": {
+      "effect": "Revival",
+      "chance": 5
+    },
+    "photonBlastFull": {
+      "effect": "Invincibility",
+      "chance": 100,
+      "duration": 15
+    }
+  }
+}

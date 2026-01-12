@@ -1,6 +1,9 @@
 {
   "name": "Othel",
   "japaneseName": "オセル",
-  "details": "Evolution conditions:\n-Lv30\n-Power > Other stats\n\nAcquired Photon Blast:\nPacifal",
+  "stage": 3,
+  "evolutionLevel": 30,
+  "evolutionRequirement": { "type": "stat", "primary": "Power" },
+  "photonBlast": "Pacifal",
   "psoWorldId": 355
 }

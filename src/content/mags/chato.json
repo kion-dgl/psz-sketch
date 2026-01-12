@@ -1,6 +1,20 @@
 {
   "name": "Chato",
   "japaneseName": "シャト",
-  "details": "Evolution conditions:\nRed-Eared Shato\n-Lv60, 70, 80, 90, 100\n-Power > Mind > Other stats\n\nAcquired Photon Blast:\nFlozir\n\nOr:\nBlack Body Shato\n-Lv60, 70, 80, 90, 100\n-Mind > Power > Other stats\n\nAcquired Photon Blast:\nGranir",
+  "stage": 4,
+  "evolutionLevel": 60,
+  "variants": [
+    {
+      "name": "Red Ears",
+      "evolutionRequirement": { "type": "stat", "primary": "Power", "secondary": "Mind" },
+      "photonBlast": "Flozir"
+    },
+    {
+      "name": "Black Body",
+      "evolutionRequirement": { "type": "stat", "primary": "Mind", "secondary": "Power" },
+      "photonBlast": "Granir"
+    }
+  ],
+  "photonBlast": null,
   "psoWorldId": 366
 }

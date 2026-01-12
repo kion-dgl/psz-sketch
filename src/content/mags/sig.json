@@ -1,6 +1,20 @@
 {
   "name": "Sig",
   "japaneseName": "シグ",
-  "details": "Evolution conditions:\nWhite Body Shigu\n-Lv60, 70, 80, 90, 100\n-Hit > Mind > Other stats\n\nAcquired Photon Blast:\nFlozir\n\nOr:\nRegular Shigu\n-Lv60, 70, 80, 90, 100\n-Mind > Hit > Other stats\n\nAcquired Photon Blast:\nPacifal",
+  "stage": 4,
+  "evolutionLevel": 60,
+  "variants": [
+    {
+      "name": "Regular",
+      "evolutionRequirement": { "type": "stat", "primary": "Mind", "secondary": "Hit" },
+      "photonBlast": "Pacifal"
+    },
+    {
+      "name": "White Body",
+      "evolutionRequirement": { "type": "stat", "primary": "Hit", "secondary": "Mind" },
+      "photonBlast": "Flozir"
+    }
+  ],
+  "photonBlast": null,
   "psoWorldId": 372
 }

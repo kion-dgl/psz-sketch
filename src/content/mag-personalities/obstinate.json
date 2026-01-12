@@ -1,0 +1,38 @@
+{
+  "name": "Obstinate",
+  "japaneseName": "いじっぱり",
+  "category": "defensive",
+  "tier": "advanced",
+  "unlockLevel": 60,
+  "favoriteFood": "Armors and Atomizers",
+  "switchFrom": "Feed 5 consecutive Hunter Weapons or Armors",
+  "triggers": {
+    "walking": {
+      "effect": "Defensive Boost",
+      "strength": "Small",
+      "chance": "Low",
+      "duration": "Medium"
+    },
+    "lowHealth": {
+      "effect": "Defensive Boost",
+      "strength": "Large",
+      "chance": "Low",
+      "duration": "Medium"
+    },
+    "statusCondition": null,
+    "bossEncounter": {
+      "effect": "Defensive Boost",
+      "strength": "Large",
+      "chance": "Medium",
+      "duration": "Medium"
+    },
+    "playerDeath": {
+      "effect": "Revival",
+      "chance": 10
+    },
+    "photonBlastFull": {
+      "effect": "Invincibility",
+      "duration": "Short"
+    }
+  }
+}

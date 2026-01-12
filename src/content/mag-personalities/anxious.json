@@ -1,0 +1,39 @@
+{
+  "name": "Anxious",
+  "japaneseName": "しんぱいしょう",
+  "category": "defensive",
+  "tier": "advanced",
+  "unlockLevel": 60,
+  "favoriteFood": "Armors and Atomizers",
+  "switchFrom": "Feed 5 consecutive Ranger or Force Weapons",
+  "triggers": {
+    "walking": {
+      "effect": "Defensive Boost",
+      "strength": "Small",
+      "chance": "Low",
+      "duration": "Long"
+    },
+    "lowHealth": {
+      "effect": "Resta",
+      "strength": "Weak",
+      "chance": "Low"
+    },
+    "statusCondition": null,
+    "bossEncounter": {
+      "effect": "Defensive Boost",
+      "strength": "Small",
+      "chance": "Medium",
+      "duration": "Long"
+    },
+    "playerDeath": {
+      "effect": "Revival",
+      "chance": 5
+    },
+    "photonBlastFull": {
+      "effect": "Defensive Boost",
+      "strength": "Large",
+      "chance": "Large",
+      "duration": "Medium"
+    }
+  }
+}

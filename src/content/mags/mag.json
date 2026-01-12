@@ -1,6 +1,8 @@
 {
   "name": "Mag",
   "japaneseName": "マグ",
-  "details": "The base form (level 0) for a Mag.",
+  "stage": 1,
+  "evolutionLevel": 0,
+  "photonBlast": null,
   "psoWorldId": 315
 }

@@ -1,0 +1,24 @@
+{
+  "name": "Hungry",
+  "japaneseName": "くいしんぼ",
+  "category": "special",
+  "tier": "basic",
+  "unlockLevel": 10,
+  "favoriteFood": "Anything",
+  "triggers": {
+    "walking": {
+      "effect": "PP Recovery",
+      "strength": "Small",
+      "chance": 8
+    },
+    "lowHealth": null,
+    "statusCondition": null,
+    "bossEncounter": null,
+    "playerDeath": null,
+    "photonBlastFull": {
+      "effect": "PP Recovery",
+      "strength": "Small",
+      "chance": 100
+    }
+  }
+}

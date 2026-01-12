@@ -1,6 +1,9 @@
 {
   "name": "Lassi",
   "japaneseName": "ラッシィ",
-  "details": "Evolution conditions:\n-At least Lv60\n-Use the \"Lassi Soul\" item on your mag",
+  "stage": "rare",
+  "evolutionLevel": 60,
+  "evolutionRequirement": { "type": "soul", "item": "Lassi Soul" },
+  "photonBlast": "inherited",
   "psoWorldId": 376
 }

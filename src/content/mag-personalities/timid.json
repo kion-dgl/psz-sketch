@@ -1,0 +1,29 @@
+{
+  "name": "Timid",
+  "japaneseName": "ひっこみ",
+  "category": "defensive",
+  "tier": "basic",
+  "unlockLevel": 10,
+  "favoriteFood": "Armors and Atomizers",
+  "triggers": {
+    "walking": {
+      "effect": "Defensive Boost",
+      "strength": "Small",
+      "chance": "Low",
+      "duration": "Medium"
+    },
+    "lowHealth": null,
+    "statusCondition": null,
+    "bossEncounter": {
+      "effect": "Defensive Boost",
+      "strength": "Small",
+      "chance": "Medium",
+      "duration": "Medium"
+    },
+    "playerDeath": null,
+    "photonBlastFull": {
+      "effect": "Invincibility",
+      "duration": "Short"
+    }
+  }
+}

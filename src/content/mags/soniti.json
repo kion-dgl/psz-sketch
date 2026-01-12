@@ -1,6 +1,9 @@
 {
   "name": "Soniti",
   "japaneseName": "ソニチ",
-  "details": "Evolution conditions:\n-At least Lv70\n-Use the \"Sonichi Soul\" item on your mag",
+  "stage": "rare",
+  "evolutionLevel": 70,
+  "evolutionRequirement": { "type": "soul", "item": "Sonichi Soul" },
+  "photonBlast": "inherited",
   "psoWorldId": 378
 }

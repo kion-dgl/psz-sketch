@@ -1,6 +1,9 @@
 {
   "name": "Femini",
   "japaneseName": "フェミニ",
-  "details": "Evolution conditions:\n-At least Lv75\n-Use the \"Femini Soul\" item on your mag",
+  "stage": "rare",
+  "evolutionLevel": 75,
+  "evolutionRequirement": { "type": "soul", "item": "Femini Soul" },
+  "photonBlast": "inherited",
   "psoWorldId": 380
 }

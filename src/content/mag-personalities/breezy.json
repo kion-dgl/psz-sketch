@@ -1,0 +1,35 @@
+{
+  "name": "Breezy",
+  "japaneseName": "のんびり",
+  "category": "recovery",
+  "tier": "advanced",
+  "unlockLevel": 60,
+  "favoriteFood": "Force Weapons and Enemy Parts",
+  "switchFrom": "Feed 5 consecutive Hunter or Force Weapons",
+  "triggers": {
+    "walking": {
+      "effect": "Resta",
+      "strength": "Weak",
+      "chance": "Low"
+    },
+    "lowHealth": {
+      "effect": "Resta",
+      "strength": "Strong",
+      "chance": "Low"
+    },
+    "statusCondition": {
+      "effect": "Anti",
+      "chance": 15
+    },
+    "bossEncounter": null,
+    "playerDeath": {
+      "effect": "Revival",
+      "chance": 5
+    },
+    "photonBlastFull": {
+      "effect": "Resta",
+      "strength": "Strong",
+      "chance": "Large"
+    }
+  }
+}

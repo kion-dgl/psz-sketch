@@ -1,5 +1,9 @@
 {
   "name": "Ingh",
   "japaneseName": "イング",
+  "stage": 2,
+  "evolutionLevel": 10,
+  "evolutionRequirement": { "type": "stat", "primary": "Mind" },
+  "photonBlast": "Flozir",
   "psoWorldId": 354
 }
