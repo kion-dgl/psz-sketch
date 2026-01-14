@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Weapon Debug - Pure Three.js</title>
+  <style>
+    body { margin: 0; background: #1a1a2e; }
+    canvas { display: block; }
+    #info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-family: monospace;
+      font-size: 12px;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      border-radius: 8px;
+    }
+    #info h3 { margin: 0 0 10px 0; color: #6b8afd; }
+    #info p { margin: 4px 0; }
+  </style>
+</head>
+<body>
+  <div id="info">
+    <h3>Weapon Debug - Pure Three.js</h3>
+    <p>Model: HUmar</p>
+    <p>Animation: Saber Attack 1</p>
+    <p>Weapon: Saber</p>
+    <p id="status">Loading...</p>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    const MODEL_PATH = '/player/pc_000/pc_000/pc_000_000.glb';
+    const TEXTURE_PATH = '/player/pc_000/textures/pc_000_000.png';
+    const ANIMATION_PATH = '/player/animations/saver/m/01_saver_m/pc_000_000.glb';
+    const WEAPON_PATH = '/weapons/wsac01/wsac01/wsac01_1_o.glb';
+
+    const statusEl = document.getElementById('status');
+
+    // Setup scene
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 1.5, 3);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x1a1a2e);
+    document.body.appendChild(renderer.domElement);
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(5, 5, 5);
+    scene.add(dirLight);
+
+    // Grid
+    const grid = new THREE.GridHelper(10, 10, 0x333333, 0x222222);
+    scene.add(grid);
+
+    // Controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+
+    // Loader
+    const loader = new GLTFLoader();
+    const textureLoader = new THREE.TextureLoader();
+
+    let mixer = null;
+    let handBone = null;
+
+    // Load model
+    statusEl.textContent = 'Loading model...';
+    loader.load(MODEL_PATH, (gltf) => {
+      const model = gltf.scene;
+      scene.add(model);
+
+      // Find hand bone
+      model.traverse((child) => {
+        if (child.name === '070_RArm02') {
+          handBone = child;
+          console.log('Found hand bone:', child);
+          console.log('Bone type:', child.type);
+          console.log('Is Bone:', child.isBone);
+        }
+      });
+
+      // Log all bones
+      console.log('All bones:');
+      model.traverse((child) => {
+        if (child.isBone) {
+          console.log(' -', child.name);
+        }
+      });
+
+      // Apply texture
+      textureLoader.load(TEXTURE_PATH, (texture) => {
+        texture.magFilter = THREE.NearestFilter;
+        texture.minFilter = THREE.NearestFilter;
+        texture.flipY = false;
+        texture.colorSpace = THREE.SRGBColorSpace;
+
+        model.traverse((child) => {
+          if (child.isMesh && child.material) {
+            child.material.map = texture;
+            child.material.needsUpdate = true;
+          }
+        });
+      });
+
+      // Load animations
+      statusEl.textContent = 'Loading animations...';
+      loader.load(ANIMATION_PATH, (animGltf) => {
+        mixer = new THREE.AnimationMixer(model);
+
+        console.log('Animations:', animGltf.animations.map(a => a.name));
+
+        // Debug: Check animation tracks
+        if (animGltf.animations.length > 0) {
+          const firstAnim = animGltf.animations[0];
+          console.log('First animation tracks:');
+          firstAnim.tracks.forEach(track => {
+            console.log(' - Track:', track.name);
+          });
+        }
+
+        // Find attack animation
+        const attackAnim = animGltf.animations.find(a => a.name === 'pmsa_atk1');
+        if (attackAnim) {
+          const action = mixer.clipAction(attackAnim);
+          action.setLoop(THREE.LoopRepeat, Infinity);
+          action.timeScale = 0.5;
+          action.play();
+          console.log('Playing animation:', attackAnim.name);
+          console.log('Animation duration:', attackAnim.duration);
+        } else {
+          console.error('Attack animation pmsa_atk1 not found!');
+        }
+
+        // Load weapon
+        statusEl.textContent = 'Loading weapon...';
+        loader.load(WEAPON_PATH, (weaponGltf) => {
+          const weapon = weaponGltf.scene;
+
+          // Apply normal material
+          weapon.traverse((child) => {
+            if (child.isMesh) {
+              child.geometry.computeVertexNormals();
+              child.material = new THREE.MeshNormalMaterial({ flatShading: true });
+            }
+          });
+
+          if (handBone) {
+            // This is the key - just add as child of bone
+            handBone.add(weapon);
+            console.log('Weapon added to bone!');
+            console.log('Weapon parent:', weapon.parent?.name);
+            statusEl.textContent = 'Weapon attached to ' + handBone.name;
+          } else {
+            console.error('Hand bone not found!');
+            statusEl.textContent = 'ERROR: Hand bone not found';
+          }
+        });
+      });
+    });
+
+    // Animation loop
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const delta = clock.getDelta();
+      if (mixer) {
+        mixer.update(delta);
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Handle resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

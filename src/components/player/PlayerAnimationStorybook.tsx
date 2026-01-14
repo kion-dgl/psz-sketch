@@ -1,29 +1,46 @@
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, useGLTF } from '@react-three/drei';
-import { Suspense, useState, useEffect, useMemo, useRef } from 'react';
+import { Canvas, useGraph, useFrame } from '@react-three/fiber';
+import { OrbitControls, useGLTF, useAnimations } from '@react-three/drei';
+import { Suspense, useState, useEffect, useRef, useMemo } from 'react';
+import type { Group } from 'three';
 import * as THREE from 'three';
-import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
+import { SkeletonUtils } from 'three-stdlib';
 
-// Body type mapping - which classes use which animation body type
-const BODY_TYPE_MAP: Record<string, string> = {
-  // Male Human/Cast = m
+// Gender mapping - determines base animation type (m for male, w for female)
+const GENDER_MAP: Record<string, 'm' | 'w'> = {
+  // Male classes
   humar: 'm',
   hucast: 'm',
   ramar: 'm',
   racast: 'm',
   fomar: 'm',
-  // Female Human/Cast = w
+  hunewm: 'm',
+  fonewm: 'm',
+  // Female classes
   humarl: 'w',
   hucaseal: 'w',
   ramarl: 'w',
   racaseal: 'w',
   fomarl: 'w',
-  // Male Newman = sm
-  hunewm: 'sm',
-  fonewm: 'sm',
-  // Female Newman = sw
-  hunewearl: 'sw',
-  fonewearl: 'sw',
+  hunewearl: 'w',
+  fonewearl: 'w',
+};
+
+// Map class IDs to their PC prefix for textures
+const CLASS_TO_PC_PREFIX: Record<string, string> = {
+  humar: 'pc_00',
+  humarl: 'pc_01',
+  ramar: 'pc_02',
+  ramarl: 'pc_03',
+  fomar: 'pc_04',
+  fomarl: 'pc_05',
+  hunewm: 'pc_06',
+  hunewearl: 'pc_07',
+  fonewm: 'pc_08',
+  fonewearl: 'pc_09',
+  hucast: 'pc_10',
+  hucaseal: 'pc_11',
+  racast: 'pc_12',
+  racaseal: 'pc_13',
 };
 
 // Class display names
@@ -44,23 +61,70 @@ const CLASS_NAMES: Record<string, string> = {
   fonewearl: 'FOnewearl',
 };
 
+// Weapons each class CANNOT equip (based on weapon usableBy data)
+// Hunter Human = humar, humarl | Hunter Newman = hunewm, hunewearl | Hunter Cast = hucast, hucaseal
+// Ranger Human = ramar, ramarl | Ranger Cast = racast, racaseal
+// Force Human = fomar, fomarl | Force Newman = fonewm, fonewearl
+const CLASS_WEAPON_RESTRICTIONS: Record<string, string[]> = {
+  // Hunter Human
+  humar: ['rod', 'shotgun'],
+  humarl: ['rod', 'shotgun'],
+  // Hunter Newman
+  hunewm: ['rod', 'shotgun', 'machinegun'],
+  hunewearl: ['rod', 'shotgun', 'machinegun'],
+  // Hunter Cast
+  hucast: ['rod', 'shotgun', 'machinegun'],
+  hucaseal: ['rod', 'shotgun', 'machinegun'],
+  // Ranger Human
+  ramar: ['rod', 'claw', 'dagger', 'shield', 'slicer', 'sword'],
+  ramarl: ['rod', 'claw', 'dagger', 'shield', 'slicer', 'sword'],
+  // Ranger Cast
+  racast: ['rod', 'claw', 'dagger', 'shield', 'sword'],
+  racaseal: ['rod', 'claw', 'dagger', 'shield', 'sword'],
+  // Force Human
+  fomar: ['shotgun', 'claw', 'spear', 'sword'],
+  fomarl: ['shotgun', 'claw', 'spear', 'sword'],
+  // Force Newman
+  fonewm: ['shotgun', 'claw', 'dagger', 'machinegun', 'shield', 'spear', 'sword'],
+  fonewearl: ['shotgun', 'claw', 'dagger', 'machinegun', 'shield', 'spear', 'sword'],
+};
+
 // Animation categories with their folder names and display labels
 const ANIMATION_CATEGORIES = [
   { id: 'common', label: 'Common', prefix: '00' },
+  { id: 'saver', label: 'Saber', prefix: '01' },
   { id: 'sword', label: 'Sword', prefix: '02' },
   { id: 'dagger', label: 'Dagger', prefix: '03' },
+  { id: 'spear', label: 'Spear', prefix: '04' },
   { id: 'claw', label: 'Claw', prefix: '05' },
-  { id: 'spear', label: 'Spear', prefix: '06' },
-  { id: 'saber', label: 'Saber', prefix: '07' },
-  { id: 'slicer', label: 'Slicer', prefix: '08' },
-  { id: 'handgun', label: 'Handgun', prefix: '09' },
-  { id: 'machinegun', label: 'Machinegun', prefix: '10' },
-  { id: 'shotgun', label: 'Shotgun', prefix: '11' },
+  { id: 'shield', label: 'Shield', prefix: '06' },
+  { id: 'handgun', label: 'Handgun', prefix: '08' },
+  { id: 'shotgun', label: 'Rifle', prefix: '10' },
+  { id: 'machinegun', label: 'Machinegun', prefix: '11' },
   { id: 'grenade', label: 'Grenade', prefix: '12' },
-  { id: 'rod', label: 'Rod', prefix: '13' },
-  { id: 'wand', label: 'Wand', prefix: '14' },
-  { id: 'shield', label: 'Shield', prefix: '15' },
+  { id: 'rod', label: 'Rod', prefix: '14' },
+  { id: 'wand', label: 'Wand', prefix: '15' },
+  { id: 'slicer', label: 'Slicer', prefix: '16' },
 ];
+
+// Weapon model mapping for each animation category
+// Maps category ID to weapon GLB path (most basic/lowest rarity weapon for each type)
+const CATEGORY_WEAPON_MAP: Record<string, string | null> = {
+  common: null, // No weapon for common animations
+  saver: '/weapons/wsac01/wsac01/wsac01_1_o.glb', // Saber (rarity 1)
+  sword: '/weapons/wswr01/wswr01/wswr01_1_b.glb', // Sword (rarity 4 - lowest available)
+  dagger: '/weapons/wdah01/wdah01/wdah01_1_l.glb', // Daggers (rarity 1)
+  spear: '/weapons/wsph01/wsph01/wsph01_1_b.glb', // Spear (rarity 2 - lowest available)
+  claw: '/weapons/wclh02/wclh02/wclh02_1_o.glb', // Claw (rarity 2 - lowest available)
+  shield: '/weapons/wshh01/wshh01/wshh01_1_o.glb', // Shield (rarity 1)
+  handgun: '/weapons/whgc01/whgc01/whgc01_1_o.glb', // Handgun (rarity 1)
+  shotgun: '/weapons/wrfh01/wrfh01/wrfh01_1_b.glb', // Rifle (rarity 1)
+  machinegun: '/weapons/wmgh01/wmgh01/wmgh01_1_l.glb', // Machinegun (rarity 1)
+  grenade: '/weapons/wbac02/wbac02/wbac02_1_b.glb', // Bazooka (rarity 1)
+  rod: '/weapons/wroh01/wroh01/wroh01_1_b.glb', // Rod (rarity 1)
+  wand: '/weapons/wwan01/wwan01/wwan01_1_o.glb', // Wand (rarity 1)
+  slicer: '/weapons/wslc02/wslc02/wslc02_1_o.glb', // Slicer (rarity 3 - lowest available)
+};
 
 // Standard animation names in each 22-animation set
 const ANIMATION_LABELS: Record<string, string> = {
@@ -92,119 +156,210 @@ const ANIMATION_LABELS: Record<string, string> = {
 
 // Player model component with animation support
 function PlayerModel({
+  modelGlbPath,
   animationGlbPath,
+  textureUrl,
+  weaponGlbPath,
   selectedAnimation,
   isPlaying,
   playbackSpeed,
+  showSkeleton,
   onAnimationsLoaded,
+  onBonesFound,
 }: {
+  modelGlbPath: string;
   animationGlbPath: string;
+  textureUrl: string;
+  weaponGlbPath: string | null;
   selectedAnimation: string | null;
   isPlaying: boolean;
   playbackSpeed: number;
+  showSkeleton: boolean;
   onAnimationsLoaded?: (animations: string[]) => void;
+  onBonesFound?: (bones: string[]) => void;
 }) {
-  const { scene, animations } = useGLTF(animationGlbPath);
+  const group = useRef<Group>(null);
+  const weaponRef = useRef<THREE.Object3D | null>(null);
+  const skeletonHelperRef = useRef<THREE.SkeletonHelper | null>(null);
 
-  const mixerRef = useRef<THREE.AnimationMixer | null>(null);
-  const actionRef = useRef<THREE.AnimationAction | null>(null);
+  // Load character model and clone it for proper skeleton handling
+  const { scene } = useGLTF(modelGlbPath);
+  const clone = useMemo(() => SkeletonUtils.clone(scene), [scene]);
+  const { nodes } = useGraph(clone);
 
-  const clonedScene = useMemo(() => {
-    const clone = SkeletonUtils.clone(scene);
+  // Load animations from animation GLB
+  const animGltf = useGLTF(animationGlbPath);
 
-    clone.traverse((obj) => {
-      if (obj instanceof THREE.Mesh && obj.geometry) {
-        obj.geometry.computeVertexNormals();
-      }
-    });
+  // Load weapon if specified
+  const weaponGltf = weaponGlbPath ? useGLTF(weaponGlbPath) : null;
 
-    // Get bounding box and center/scale
-    const box = new THREE.Box3().setFromObject(clone);
-    const center = box.getCenter(new THREE.Vector3());
-    const size = box.getSize(new THREE.Vector3());
+  // Use animations from the animation GLB, bound to the model's group
+  const { actions } = useAnimations(animGltf.animations, group);
 
-    clone.position.x = -center.x;
-    clone.position.z = -center.z;
+  // Find the hand bone from the nodes
+  const handBone = nodes['070_RArm02'] as THREE.Bone | undefined;
 
-    const maxDim = Math.max(size.x, size.y, size.z);
-    if (maxDim > 2) {
-      const scale = 2 / maxDim;
-      clone.scale.setScalar(scale);
-    }
-
-    const scaledBox = new THREE.Box3().setFromObject(clone);
-    clone.position.y = -scaledBox.min.y;
-
-    clone.traverse((obj) => {
-      if (obj instanceof THREE.Mesh && obj.material instanceof THREE.Material) {
-        obj.material = obj.material.clone();
-        obj.material.side = THREE.FrontSide;
-      }
-    });
-
-    return clone;
-  }, [scene]);
-
-  // Create mixer
+  // Report available bones
   useEffect(() => {
-    mixerRef.current = new THREE.AnimationMixer(clonedScene);
-    return () => {
-      mixerRef.current?.stopAllAction();
-      mixerRef.current = null;
-    };
-  }, [clonedScene]);
+    if (onBonesFound) {
+      const boneNames = Object.keys(nodes).filter(
+        (name) => (nodes[name] as any)?.isBone
+      );
+      if (boneNames.length > 0) {
+        onBonesFound(boneNames);
+      }
+    }
+  }, [nodes, onBonesFound]);
 
   // Report available animations
   useEffect(() => {
-    if (animations.length > 0 && onAnimationsLoaded) {
-      onAnimationsLoaded(animations.map((a) => a.name));
+    if (animGltf.animations.length > 0 && onAnimationsLoaded) {
+      onAnimationsLoaded(animGltf.animations.map((a) => a.name));
     }
-  }, [animations, onAnimationsLoaded]);
+  }, [animGltf.animations, onAnimationsLoaded]);
 
   // Handle animation selection and playback
   useEffect(() => {
-    if (!mixerRef.current || !selectedAnimation) return;
+    if (!selectedAnimation || !actions[selectedAnimation]) return;
 
-    const clip = animations.find((a) => a.name === selectedAnimation);
-    if (!clip) return;
+    // Stop all animations
+    Object.values(actions).forEach((action) => action?.stop());
 
-    // Stop previous animation
-    if (actionRef.current) {
-      actionRef.current.stop();
+    // Play selected animation
+    const action = actions[selectedAnimation];
+    if (action) {
+      action.reset().fadeIn(0.2).play();
+      action.setLoop(THREE.LoopRepeat, Infinity);
     }
 
-    const action = mixerRef.current.clipAction(clip);
-    action.reset();
-    action.setLoop(THREE.LoopRepeat, Infinity);
-    action.clampWhenFinished = true;
-
-    if (isPlaying) {
-      action.play();
-    }
-
-    actionRef.current = action;
-  }, [selectedAnimation, animations, isPlaying]);
+    return () => {
+      if (actions[selectedAnimation]) {
+        actions[selectedAnimation]?.fadeOut(0.2);
+      }
+    };
+  }, [selectedAnimation, actions]);
 
   // Update playback speed
   useEffect(() => {
-    if (actionRef.current) {
-      actionRef.current.timeScale = playbackSpeed;
+    if (selectedAnimation && actions[selectedAnimation]) {
+      actions[selectedAnimation]!.timeScale = playbackSpeed;
     }
-  }, [playbackSpeed]);
+  }, [playbackSpeed, selectedAnimation, actions]);
 
   // Play/pause control
   useEffect(() => {
-    if (actionRef.current) {
-      actionRef.current.paused = !isPlaying;
+    if (selectedAnimation && actions[selectedAnimation]) {
+      actions[selectedAnimation]!.paused = !isPlaying;
     }
-  }, [isPlaying]);
+  }, [isPlaying, selectedAnimation, actions]);
 
-  // Animation update loop
-  useFrame((_, delta) => {
-    mixerRef.current?.update(delta);
+  // Load and apply texture
+  useEffect(() => {
+    if (!textureUrl || !clone) return;
+
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load(
+      textureUrl,
+      (texture) => {
+        texture.magFilter = THREE.NearestFilter;
+        texture.minFilter = THREE.NearestFilter;
+        texture.flipY = false;
+        texture.colorSpace = THREE.SRGBColorSpace;
+
+        clone.traverse((child: any) => {
+          if (child.isMesh && child.material) {
+            if (Array.isArray(child.material)) {
+              child.material.forEach((mat: any) => {
+                mat.map = texture;
+                mat.needsUpdate = true;
+              });
+            } else {
+              child.material.map = texture;
+              child.material.needsUpdate = true;
+            }
+          }
+        });
+      },
+      undefined,
+      (error) => console.error('Error loading texture:', error)
+    );
+  }, [textureUrl, clone]);
+
+  // Create weapon mesh (added to group, not bone, for proper rendering)
+  useEffect(() => {
+    if (!weaponGltf || !group.current) return;
+
+    // Remove previous weapon
+    if (weaponRef.current) {
+      weaponRef.current.removeFromParent();
+      weaponRef.current = null;
+    }
+
+    // Clone and prepare weapon
+    const weaponClone = weaponGltf.scene.clone(true);
+    weaponClone.traverse((child: any) => {
+      if (child.isMesh) {
+        if (child.geometry) {
+          child.geometry.computeVertexNormals();
+        }
+        child.material = new THREE.MeshNormalMaterial({
+          flatShading: true,
+        });
+      }
+    });
+
+    // Add weapon to the main group (not the bone)
+    // We'll sync its transform to the bone in useFrame
+    group.current.add(weaponClone);
+    weaponRef.current = weaponClone;
+
+    console.log('Weapon created, will sync to bone:', handBone?.name);
+
+    return () => {
+      if (weaponRef.current) {
+        weaponRef.current.removeFromParent();
+        weaponRef.current = null;
+      }
+    };
+  }, [weaponGltf, weaponGlbPath]);
+
+  // Sync weapon transform to hand bone every frame
+  useFrame(() => {
+    if (!weaponRef.current || !handBone) return;
+
+    // Update the bone's world matrix
+    handBone.updateWorldMatrix(true, false);
+
+    // Copy the bone's world position and rotation to the weapon
+    weaponRef.current.position.setFromMatrixPosition(handBone.matrixWorld);
+    weaponRef.current.quaternion.setFromRotationMatrix(handBone.matrixWorld);
   });
 
-  return <primitive object={clonedScene} />;
+  // Skeleton helper for debugging bone positions
+  useEffect(() => {
+    if (!clone || !group.current) return;
+
+    // Create or remove skeleton helper based on showSkeleton prop
+    if (showSkeleton) {
+      const helper = new THREE.SkeletonHelper(clone);
+      (helper.material as THREE.LineBasicMaterial).linewidth = 2;
+      group.current.add(helper);
+      skeletonHelperRef.current = helper;
+    }
+
+    return () => {
+      if (skeletonHelperRef.current && group.current) {
+        group.current.remove(skeletonHelperRef.current);
+        skeletonHelperRef.current = null;
+      }
+    };
+  }, [clone, showSkeleton]);
+
+  return (
+    <group ref={group}>
+      <primitive object={clone} />
+    </group>
+  );
 }
 
 // Loading fallback
@@ -225,9 +380,17 @@ export default function PlayerAnimationStorybook() {
   const [isPlaying, setIsPlaying] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [useSpecialAnimation, setUseSpecialAnimation] = useState(false);
+  const [showSkeleton, setShowSkeleton] = useState(false);
+  const [boneList, setBoneList] = useState<string[]>([]);
 
-  // Get body type for selected class
-  const bodyType = BODY_TYPE_MAP[selectedClass] || 'm';
+  // Get gender for selected class (m or w)
+  const gender = GENDER_MAP[selectedClass] || 'm';
+  // Apply special animation toggle: m -> sm, w -> sw
+  const bodyType = useSpecialAnimation ? (gender === 'm' ? 'sm' : 'sw') : gender;
+
+  // Get weapon restrictions for the selected class
+  const restrictions = CLASS_WEAPON_RESTRICTIONS[selectedClass] || [];
 
   // Build animation GLB path
   const category = ANIMATION_CATEGORIES.find((c) => c.id === selectedCategory);
@@ -236,12 +399,26 @@ export default function PlayerAnimationStorybook() {
     ? `/player/animations/${selectedCategory}/${bodyType}/${animationSetId}/pc_000_000.glb`
     : null;
 
-  // Reset animation when category or class changes
+  // Build character model path and texture URL
+  const pcPrefix = CLASS_TO_PC_PREFIX[selectedClass] || 'pc_00';
+  const variation = `${pcPrefix}0`; // e.g., pc_000, pc_010, etc.
+  const modelGlbPath = `/player/${variation}/${variation}/${variation}_000.glb`;
+  const textureUrl = `/player/${variation}/textures/${variation}_000.png`;
+
+  // Get weapon model path for current category
+  const weaponGlbPath = CATEGORY_WEAPON_MAP[selectedCategory] || null;
+
+  // Reset animation when category, class, or special toggle changes
   useEffect(() => {
     setSelectedAnimation(null);
     setAvailableAnimations([]);
     setLoadError(null);
-  }, [selectedClass, selectedCategory]);
+    // Reset to common if current category is restricted for this class
+    const classRestrictions = CLASS_WEAPON_RESTRICTIONS[selectedClass] || [];
+    if (classRestrictions.includes(selectedCategory)) {
+      setSelectedCategory('common');
+    }
+  }, [selectedClass, selectedCategory, useSpecialAnimation]);
 
   const handleAnimationsLoaded = (animations: string[]) => {
     setAvailableAnimations(animations);
@@ -267,7 +444,7 @@ export default function PlayerAnimationStorybook() {
                 onClick={() => setSelectedClass(id)}
               >
                 <span style={styles.className}>{name}</span>
-                <span style={styles.bodyType}>{BODY_TYPE_MAP[id]}</span>
+                <span style={styles.bodyType}>{GENDER_MAP[id] === 'm' ? 'M' : 'F'}</span>
               </button>
             ))}
           </div>
@@ -289,12 +466,17 @@ export default function PlayerAnimationStorybook() {
               <Suspense fallback={<LoadingFallback />}>
                 {animationGlbPath && (
                   <PlayerModel
-                    key={animationGlbPath}
+                    key={`${modelGlbPath}-${animationGlbPath}-${weaponGlbPath}`}
+                    modelGlbPath={modelGlbPath}
                     animationGlbPath={animationGlbPath}
+                    textureUrl={textureUrl}
+                    weaponGlbPath={weaponGlbPath}
                     selectedAnimation={selectedAnimation}
                     isPlaying={isPlaying}
                     playbackSpeed={playbackSpeed}
+                    showSkeleton={showSkeleton}
                     onAnimationsLoaded={handleAnimationsLoaded}
+                    onBonesFound={setBoneList}
                   />
                 )}
               </Suspense>
@@ -316,18 +498,42 @@ export default function PlayerAnimationStorybook() {
           <div style={styles.section}>
             <h3 style={styles.panelTitle}>Weapon / Category</h3>
             <div style={styles.categoryList}>
-              {ANIMATION_CATEGORIES.map((cat) => (
-                <button
-                  key={cat.id}
-                  style={{
-                    ...styles.categoryBtn,
-                    ...(selectedCategory === cat.id ? styles.categoryBtnActive : {}),
-                  }}
-                  onClick={() => setSelectedCategory(cat.id)}
-                >
-                  {cat.label}
-                </button>
-              ))}
+              {ANIMATION_CATEGORIES.map((cat) => {
+                const isRestricted = restrictions.includes(cat.id);
+                return (
+                  <button
+                    key={cat.id}
+                    style={{
+                      ...styles.categoryBtn,
+                      ...(selectedCategory === cat.id ? styles.categoryBtnActive : {}),
+                      ...(isRestricted ? styles.categoryBtnDisabled : {}),
+                    }}
+                    onClick={() => !isRestricted && setSelectedCategory(cat.id)}
+                    disabled={isRestricted}
+                  >
+                    {cat.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Special Animation Toggle */}
+          <div style={styles.section}>
+            <h3 style={styles.panelTitle}>Animation Type</h3>
+            <label style={styles.toggleContainer}>
+              <input
+                type="checkbox"
+                checked={useSpecialAnimation}
+                onChange={(e) => setUseSpecialAnimation(e.target.checked)}
+                style={styles.toggleCheckbox}
+              />
+              <span style={styles.toggleLabel}>
+                Special ({gender === 'm' ? 'sm' : 'sw'})
+              </span>
+            </label>
+            <div style={styles.toggleInfo}>
+              Current: <strong>{bodyType}</strong>
             </div>
           </div>
 
@@ -385,6 +591,31 @@ export default function PlayerAnimationStorybook() {
                 />
               </div>
             </div>
+          </div>
+
+          {/* Skeleton Debug */}
+          <div style={styles.section}>
+            <h3 style={styles.panelTitle}>Skeleton Debug</h3>
+            <label style={styles.toggleContainer}>
+              <input
+                type="checkbox"
+                checked={showSkeleton}
+                onChange={(e) => setShowSkeleton(e.target.checked)}
+                style={styles.toggleCheckbox}
+              />
+              <span style={styles.toggleLabel}>Show Skeleton</span>
+            </label>
+            {showSkeleton && boneList.length > 0 && (
+              <div style={styles.boneList}>
+                <div style={styles.boneListHeader}>Bones ({boneList.length}):</div>
+                {boneList.map((bone, i) => (
+                  <div key={bone} style={styles.boneItem}>
+                    <span style={styles.boneIndex}>{i}</span>
+                    <span style={styles.boneName}>{bone}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Current Animation Info */}
@@ -477,7 +708,7 @@ const styles: Record<string, React.CSSProperties> = {
   classBtnActive: {
     background: '#4a4a6a',
     color: '#fff',
-    borderColor: '#6b8afd',
+    border: '1px solid #6b8afd',
   },
   className: {
     fontWeight: 'bold',
@@ -539,7 +770,13 @@ const styles: Record<string, React.CSSProperties> = {
   categoryBtnActive: {
     background: '#4a4a6a',
     color: '#fff',
-    borderColor: '#6b8afd',
+    border: '1px solid #6b8afd',
+  },
+  categoryBtnDisabled: {
+    background: '#151520',
+    color: '#555',
+    cursor: 'not-allowed',
+    opacity: 0.5,
   },
   animationList: {
     display: 'flex',
@@ -571,7 +808,7 @@ const styles: Record<string, React.CSSProperties> = {
   animationBtnActive: {
     background: '#4a4a6a',
     color: '#fff',
-    borderColor: '#6b8afd',
+    border: '1px solid #6b8afd',
   },
   animIndex: {
     fontSize: '10px',
@@ -603,7 +840,7 @@ const styles: Record<string, React.CSSProperties> = {
   playBtnActive: {
     background: '#2d5a2d',
     color: '#6f6',
-    borderColor: '#4a4',
+    border: '1px solid #4a4',
   },
   speedControl: {
     display: 'flex',
@@ -643,5 +880,64 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '9px',
     color: '#666',
     wordBreak: 'break-all',
+  },
+  toggleContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    cursor: 'pointer',
+    padding: '8px 10px',
+    background: '#1a1a2e',
+    borderRadius: '4px',
+    border: '1px solid #444',
+  },
+  toggleCheckbox: {
+    width: '16px',
+    height: '16px',
+    cursor: 'pointer',
+  },
+  toggleLabel: {
+    fontSize: '12px',
+    color: '#aaa',
+  },
+  toggleInfo: {
+    fontSize: '11px',
+    color: '#888',
+    marginTop: '6px',
+    padding: '4px 8px',
+  },
+  boneList: {
+    marginTop: '8px',
+    background: '#1a1a2e',
+    borderRadius: '4px',
+    padding: '8px',
+    maxHeight: '150px',
+    overflowY: 'auto',
+  },
+  boneListHeader: {
+    fontSize: '11px',
+    color: '#6b8afd',
+    marginBottom: '6px',
+  },
+  boneItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '3px 0',
+    borderBottom: '1px solid #2a2a3a',
+  },
+  boneIndex: {
+    fontSize: '10px',
+    color: '#666',
+    background: '#333',
+    padding: '1px 4px',
+    borderRadius: '3px',
+    minWidth: '18px',
+    textAlign: 'center',
+  },
+  boneName: {
+    fontSize: '11px',
+    color: '#ccc',
+    fontFamily: 'monospace',
   },
 };
