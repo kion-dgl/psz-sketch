@@ -1,95 +1,45 @@
-import { Canvas, useGraph, useFrame } from '@react-three/fiber';
-import { OrbitControls, useGLTF, useAnimations } from '@react-three/drei';
-import { Suspense, useState, useEffect, useRef, useMemo } from 'react';
-import type { Group } from 'three';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import * as THREE from 'three';
-import { SkeletonUtils } from 'three-stdlib';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 // Gender mapping - determines base animation type (m for male, w for female)
 const GENDER_MAP: Record<string, 'm' | 'w'> = {
-  // Male classes
-  humar: 'm',
-  hucast: 'm',
-  ramar: 'm',
-  racast: 'm',
-  fomar: 'm',
-  hunewm: 'm',
-  fonewm: 'm',
-  // Female classes
-  humarl: 'w',
-  hucaseal: 'w',
-  ramarl: 'w',
-  racaseal: 'w',
-  fomarl: 'w',
-  hunewearl: 'w',
-  fonewearl: 'w',
+  humar: 'm', hucast: 'm', ramar: 'm', racast: 'm', fomar: 'm', hunewm: 'm', fonewm: 'm',
+  humarl: 'w', hucaseal: 'w', ramarl: 'w', racaseal: 'w', fomarl: 'w', hunewearl: 'w', fonewearl: 'w',
 };
 
 // Map class IDs to their PC prefix for textures
 const CLASS_TO_PC_PREFIX: Record<string, string> = {
-  humar: 'pc_00',
-  humarl: 'pc_01',
-  ramar: 'pc_02',
-  ramarl: 'pc_03',
-  fomar: 'pc_04',
-  fomarl: 'pc_05',
-  hunewm: 'pc_06',
-  hunewearl: 'pc_07',
-  fonewm: 'pc_08',
-  fonewearl: 'pc_09',
-  hucast: 'pc_10',
-  hucaseal: 'pc_11',
-  racast: 'pc_12',
-  racaseal: 'pc_13',
+  humar: 'pc_00', humarl: 'pc_01', ramar: 'pc_02', ramarl: 'pc_03',
+  fomar: 'pc_04', fomarl: 'pc_05', hunewm: 'pc_06', hunewearl: 'pc_07',
+  fonewm: 'pc_08', fonewearl: 'pc_09', hucast: 'pc_10', hucaseal: 'pc_11',
+  racast: 'pc_12', racaseal: 'pc_13',
 };
 
 // Class display names
 const CLASS_NAMES: Record<string, string> = {
-  humar: 'HUmar',
-  humarl: 'HUmarl',
-  hucast: 'HUcast',
-  hucaseal: 'HUcaseal',
-  hunewm: 'HUnewm',
-  hunewearl: 'HUnewearl',
-  ramar: 'RAmar',
-  ramarl: 'RAmarl',
-  racast: 'RAcast',
-  racaseal: 'RAcaseal',
-  fomar: 'FOmar',
-  fomarl: 'FOmarl',
-  fonewm: 'FOnewm',
-  fonewearl: 'FOnewearl',
+  humar: 'HUmar', humarl: 'HUmarl', hucast: 'HUcast', hucaseal: 'HUcaseal',
+  hunewm: 'HUnewm', hunewearl: 'HUnewearl', ramar: 'RAmar', ramarl: 'RAmarl',
+  racast: 'RAcast', racaseal: 'RAcaseal', fomar: 'FOmar', fomarl: 'FOmarl',
+  fonewm: 'FOnewm', fonewearl: 'FOnewearl',
 };
 
-// Weapons each class CANNOT equip (based on weapon usableBy data)
-// Hunter Human = humar, humarl | Hunter Newman = hunewm, hunewearl | Hunter Cast = hucast, hucaseal
-// Ranger Human = ramar, ramarl | Ranger Cast = racast, racaseal
-// Force Human = fomar, fomarl | Force Newman = fonewm, fonewearl
+// Weapon restrictions per class
 const CLASS_WEAPON_RESTRICTIONS: Record<string, string[]> = {
-  // Hunter Human
-  humar: ['rod', 'shotgun'],
-  humarl: ['rod', 'shotgun'],
-  // Hunter Newman
-  hunewm: ['rod', 'shotgun', 'machinegun'],
-  hunewearl: ['rod', 'shotgun', 'machinegun'],
-  // Hunter Cast
-  hucast: ['rod', 'shotgun', 'machinegun'],
-  hucaseal: ['rod', 'shotgun', 'machinegun'],
-  // Ranger Human
+  humar: ['rod', 'shotgun'], humarl: ['rod', 'shotgun'],
+  hunewm: ['rod', 'shotgun', 'machinegun'], hunewearl: ['rod', 'shotgun', 'machinegun'],
+  hucast: ['rod', 'shotgun', 'machinegun'], hucaseal: ['rod', 'shotgun', 'machinegun'],
   ramar: ['rod', 'claw', 'dagger', 'shield', 'slicer', 'sword'],
   ramarl: ['rod', 'claw', 'dagger', 'shield', 'slicer', 'sword'],
-  // Ranger Cast
   racast: ['rod', 'claw', 'dagger', 'shield', 'sword'],
   racaseal: ['rod', 'claw', 'dagger', 'shield', 'sword'],
-  // Force Human
-  fomar: ['shotgun', 'claw', 'spear', 'sword'],
-  fomarl: ['shotgun', 'claw', 'spear', 'sword'],
-  // Force Newman
+  fomar: ['shotgun', 'claw', 'spear', 'sword'], fomarl: ['shotgun', 'claw', 'spear', 'sword'],
   fonewm: ['shotgun', 'claw', 'dagger', 'machinegun', 'shield', 'spear', 'sword'],
   fonewearl: ['shotgun', 'claw', 'dagger', 'machinegun', 'shield', 'spear', 'sword'],
 };
 
-// Animation categories with their folder names and display labels
+// Animation categories
 const ANIMATION_CATEGORIES = [
   { id: 'common', label: 'Common', prefix: '00' },
   { id: 'saver', label: 'Saber', prefix: '01' },
@@ -107,325 +57,308 @@ const ANIMATION_CATEGORIES = [
   { id: 'slicer', label: 'Slicer', prefix: '16' },
 ];
 
-// Weapon model mapping for each animation category
-// Maps category ID to weapon GLB path (most basic/lowest rarity weapon for each type)
+// Weapon model paths
 const CATEGORY_WEAPON_MAP: Record<string, string | null> = {
-  common: null, // No weapon for common animations
-  saver: '/weapons/wsac01/wsac01/wsac01_1_o.glb', // Saber (rarity 1)
-  sword: '/weapons/wswr01/wswr01/wswr01_1_b.glb', // Sword (rarity 4 - lowest available)
-  dagger: '/weapons/wdah01/wdah01/wdah01_1_l.glb', // Daggers (rarity 1)
-  spear: '/weapons/wsph01/wsph01/wsph01_1_b.glb', // Spear (rarity 2 - lowest available)
-  claw: '/weapons/wclh02/wclh02/wclh02_1_o.glb', // Claw (rarity 2 - lowest available)
-  shield: '/weapons/wshh01/wshh01/wshh01_1_o.glb', // Shield (rarity 1)
-  handgun: '/weapons/whgc01/whgc01/whgc01_1_o.glb', // Handgun (rarity 1)
-  shotgun: '/weapons/wrfh01/wrfh01/wrfh01_1_b.glb', // Rifle (rarity 1)
-  machinegun: '/weapons/wmgh01/wmgh01/wmgh01_1_l.glb', // Machinegun (rarity 1)
-  grenade: '/weapons/wbac02/wbac02/wbac02_1_b.glb', // Bazooka (rarity 1)
-  rod: '/weapons/wroh01/wroh01/wroh01_1_b.glb', // Rod (rarity 1)
-  wand: '/weapons/wwan01/wwan01/wwan01_1_o.glb', // Wand (rarity 1)
-  slicer: '/weapons/wslc02/wslc02/wslc02_1_o.glb', // Slicer (rarity 3 - lowest available)
+  common: null,
+  saver: '/weapons/wsac01/wsac01/wsac01_1_o.glb',
+  sword: '/weapons/wswr01/wswr01/wswr01_1_b.glb',
+  dagger: '/weapons/wdah01/wdah01/wdah01_1_l.glb',
+  spear: '/weapons/wsph01/wsph01/wsph01_1_b.glb',
+  claw: '/weapons/wclh02/wclh02/wclh02_1_o.glb',
+  shield: '/weapons/wshh01/wshh01/wshh01_1_o.glb',
+  handgun: '/weapons/whgc01/whgc01/whgc01_1_o.glb',
+  shotgun: '/weapons/wrfh01/wrfh01/wrfh01_1_b.glb',
+  machinegun: '/weapons/wmgh01/wmgh01/wmgh01_1_l.glb',
+  grenade: '/weapons/wbac02/wbac02/wbac02_1_b.glb',
+  rod: '/weapons/wroh01/wroh01/wroh01_1_b.glb',
+  wand: '/weapons/wwan01/wwan01/wwan01_1_o.glb',
+  slicer: '/weapons/wslc02/wslc02/wslc02_1_o.glb',
 };
 
-// Standard animation names in each 22-animation set
+// Animation labels
 const ANIMATION_LABELS: Record<string, string> = {
-  'binpmbn_wait': 'Idle',
-  'bindummy1': 'Dummy 1',
-  'binpmsa_run': 'Run',
-  'binpmsa_esc_f': 'Escape Forward',
-  'binpmsa_chg': 'Charge',
-  'binpmsa_stp_fb': 'Step F/B',
-  'binpmsa_stp_lr': 'Step L/R',
-  'binpmbn_dam_n': 'Damage Normal',
-  'binpmbn_dam_h': 'Damage Heavy',
-  'binpmbn_dam_d': 'Damage Down',
-  'binpmbn_dam_d_lp': 'Damage Down Loop',
-  'binpmbn_dam_d_wa': 'Damage Down Wake',
-  'bindummy2': 'Dummy 2',
-  'binpmsa_slp': 'Sleep',
-  'binpmbn_atk1': 'Attack 1',
-  'binpmbn_atk2': 'Attack 2',
-  'binpmbn_atk3': 'Attack 3',
-  'binpmbn_pa1': 'Photon Art 1',
-  'binpmbn_pa2': 'Photon Art 2',
-  'binpmbn_pa3': 'Photon Art 3',
-  'binpmbn_tec': 'Technique',
-  'binpmbn_pb': 'Photon Blast',
-  'binpmbn_pb_lp': 'Photon Blast Loop',
-  'bindummy4': 'Dummy 4',
+  'pmsa_wait': 'Idle', 'pmsa_run': 'Run', 'pmsa_esc_f': 'Escape Forward',
+  'pmsa_chg': 'Charge', 'pmsa_stp_fb': 'Step F/B', 'pmsa_stp_lr': 'Step L/R',
+  'pmsa_dam_n': 'Damage Normal', 'pmsa_dam_h': 'Damage Heavy',
+  'pmsa_dam_d': 'Damage Down', 'pmsa_dam_d_lp': 'Damage Down Loop',
+  'pmsa_dam_d_wa': 'Damage Down Wake', 'pmsa_slp': 'Sleep',
+  'pmsa_atk1': 'Attack 1', 'pmsa_atk2': 'Attack 2', 'pmsa_atk3': 'Attack 3',
+  'pmsa_pa1': 'Photon Art 1', 'pmsa_pa2': 'Photon Art 2', 'pmsa_pa3': 'Photon Art 3',
+  'pmsa_tec': 'Technique', 'pmbn_pb': 'Photon Blast', 'pmbn_pb_lp': 'Photon Blast Loop',
 };
-
-// Player model component with animation support
-function PlayerModel({
-  modelGlbPath,
-  animationGlbPath,
-  textureUrl,
-  weaponGlbPath,
-  selectedAnimation,
-  isPlaying,
-  playbackSpeed,
-  showSkeleton,
-  onAnimationsLoaded,
-  onBonesFound,
-}: {
-  modelGlbPath: string;
-  animationGlbPath: string;
-  textureUrl: string;
-  weaponGlbPath: string | null;
-  selectedAnimation: string | null;
-  isPlaying: boolean;
-  playbackSpeed: number;
-  showSkeleton: boolean;
-  onAnimationsLoaded?: (animations: string[]) => void;
-  onBonesFound?: (bones: string[]) => void;
-}) {
-  const group = useRef<Group>(null);
-  const weaponRef = useRef<THREE.Object3D | null>(null);
-  const skeletonHelperRef = useRef<THREE.SkeletonHelper | null>(null);
-
-  // Load character model and clone it for proper skeleton handling
-  const { scene } = useGLTF(modelGlbPath);
-  const clone = useMemo(() => SkeletonUtils.clone(scene), [scene]);
-  const { nodes } = useGraph(clone);
-
-  // Load animations from animation GLB
-  const animGltf = useGLTF(animationGlbPath);
-
-  // Load weapon if specified
-  const weaponGltf = weaponGlbPath ? useGLTF(weaponGlbPath) : null;
-
-  // Use animations from the animation GLB, bound to the model's group
-  const { actions } = useAnimations(animGltf.animations, group);
-
-  // Find the hand bone from the nodes
-  const handBone = nodes['070_RArm02'] as THREE.Bone | undefined;
-
-  // Report available bones
-  useEffect(() => {
-    if (onBonesFound) {
-      const boneNames = Object.keys(nodes).filter(
-        (name) => (nodes[name] as any)?.isBone
-      );
-      if (boneNames.length > 0) {
-        onBonesFound(boneNames);
-      }
-    }
-  }, [nodes, onBonesFound]);
-
-  // Report available animations
-  useEffect(() => {
-    if (animGltf.animations.length > 0 && onAnimationsLoaded) {
-      onAnimationsLoaded(animGltf.animations.map((a) => a.name));
-    }
-  }, [animGltf.animations, onAnimationsLoaded]);
-
-  // Handle animation selection and playback
-  useEffect(() => {
-    if (!selectedAnimation || !actions[selectedAnimation]) return;
-
-    // Stop all animations
-    Object.values(actions).forEach((action) => action?.stop());
-
-    // Play selected animation
-    const action = actions[selectedAnimation];
-    if (action) {
-      action.reset().fadeIn(0.2).play();
-      action.setLoop(THREE.LoopRepeat, Infinity);
-    }
-
-    return () => {
-      if (actions[selectedAnimation]) {
-        actions[selectedAnimation]?.fadeOut(0.2);
-      }
-    };
-  }, [selectedAnimation, actions]);
-
-  // Update playback speed
-  useEffect(() => {
-    if (selectedAnimation && actions[selectedAnimation]) {
-      actions[selectedAnimation]!.timeScale = playbackSpeed;
-    }
-  }, [playbackSpeed, selectedAnimation, actions]);
-
-  // Play/pause control
-  useEffect(() => {
-    if (selectedAnimation && actions[selectedAnimation]) {
-      actions[selectedAnimation]!.paused = !isPlaying;
-    }
-  }, [isPlaying, selectedAnimation, actions]);
-
-  // Load and apply texture
-  useEffect(() => {
-    if (!textureUrl || !clone) return;
-
-    const textureLoader = new THREE.TextureLoader();
-    textureLoader.load(
-      textureUrl,
-      (texture) => {
-        texture.magFilter = THREE.NearestFilter;
-        texture.minFilter = THREE.NearestFilter;
-        texture.flipY = false;
-        texture.colorSpace = THREE.SRGBColorSpace;
-
-        clone.traverse((child: any) => {
-          if (child.isMesh && child.material) {
-            if (Array.isArray(child.material)) {
-              child.material.forEach((mat: any) => {
-                mat.map = texture;
-                mat.needsUpdate = true;
-              });
-            } else {
-              child.material.map = texture;
-              child.material.needsUpdate = true;
-            }
-          }
-        });
-      },
-      undefined,
-      (error) => console.error('Error loading texture:', error)
-    );
-  }, [textureUrl, clone]);
-
-  // Create weapon mesh (added to group, not bone, for proper rendering)
-  useEffect(() => {
-    if (!weaponGltf || !group.current) return;
-
-    // Remove previous weapon
-    if (weaponRef.current) {
-      weaponRef.current.removeFromParent();
-      weaponRef.current = null;
-    }
-
-    // Clone and prepare weapon
-    const weaponClone = weaponGltf.scene.clone(true);
-    weaponClone.traverse((child: any) => {
-      if (child.isMesh) {
-        if (child.geometry) {
-          child.geometry.computeVertexNormals();
-        }
-        child.material = new THREE.MeshNormalMaterial({
-          flatShading: true,
-        });
-      }
-    });
-
-    // Add weapon to the main group (not the bone)
-    // We'll sync its transform to the bone in useFrame
-    group.current.add(weaponClone);
-    weaponRef.current = weaponClone;
-
-    console.log('Weapon created, will sync to bone:', handBone?.name);
-
-    return () => {
-      if (weaponRef.current) {
-        weaponRef.current.removeFromParent();
-        weaponRef.current = null;
-      }
-    };
-  }, [weaponGltf, weaponGlbPath]);
-
-  // Sync weapon transform to hand bone every frame
-  useFrame(() => {
-    if (!weaponRef.current || !handBone) return;
-
-    // Update the bone's world matrix
-    handBone.updateWorldMatrix(true, false);
-
-    // Copy the bone's world position and rotation to the weapon
-    weaponRef.current.position.setFromMatrixPosition(handBone.matrixWorld);
-    weaponRef.current.quaternion.setFromRotationMatrix(handBone.matrixWorld);
-  });
-
-  // Skeleton helper for debugging bone positions
-  useEffect(() => {
-    if (!clone || !group.current) return;
-
-    // Create or remove skeleton helper based on showSkeleton prop
-    if (showSkeleton) {
-      const helper = new THREE.SkeletonHelper(clone);
-      (helper.material as THREE.LineBasicMaterial).linewidth = 2;
-      group.current.add(helper);
-      skeletonHelperRef.current = helper;
-    }
-
-    return () => {
-      if (skeletonHelperRef.current && group.current) {
-        group.current.remove(skeletonHelperRef.current);
-        skeletonHelperRef.current = null;
-      }
-    };
-  }, [clone, showSkeleton]);
-
-  return (
-    <group ref={group}>
-      <primitive object={clone} />
-    </group>
-  );
-}
-
-// Loading fallback
-function LoadingFallback() {
-  return (
-    <mesh>
-      <boxGeometry args={[0.5, 1, 0.5]} />
-      <meshStandardMaterial color="#444" wireframe />
-    </mesh>
-  );
-}
 
 export default function PlayerAnimationStorybook() {
-  const [selectedClass, setSelectedClass] = useState<string>('humar');
-  const [selectedCategory, setSelectedCategory] = useState<string>('common');
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<{
+    scene: THREE.Scene;
+    camera: THREE.PerspectiveCamera;
+    renderer: THREE.WebGLRenderer;
+    controls: OrbitControls;
+    mixer: THREE.AnimationMixer | null;
+    model: THREE.Object3D | null;
+    weapon: THREE.Object3D | null;
+    animations: THREE.AnimationClip[];
+    currentAction: THREE.AnimationAction | null;
+  } | null>(null);
+
+  const [selectedClass, setSelectedClass] = useState('humar');
+  const [selectedCategory, setSelectedCategory] = useState('common');
   const [selectedAnimation, setSelectedAnimation] = useState<string | null>(null);
   const [availableAnimations, setAvailableAnimations] = useState<string[]>([]);
   const [isPlaying, setIsPlaying] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const [loadError, setLoadError] = useState<string | null>(null);
   const [useSpecialAnimation, setUseSpecialAnimation] = useState(false);
-  const [showSkeleton, setShowSkeleton] = useState(false);
-  const [boneList, setBoneList] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Get gender for selected class (m or w)
   const gender = GENDER_MAP[selectedClass] || 'm';
-  // Apply special animation toggle: m -> sm, w -> sw
   const bodyType = useSpecialAnimation ? (gender === 'm' ? 'sm' : 'sw') : gender;
-
-  // Get weapon restrictions for the selected class
   const restrictions = CLASS_WEAPON_RESTRICTIONS[selectedClass] || [];
 
-  // Build animation GLB path
+  // Build paths
   const category = ANIMATION_CATEGORIES.find((c) => c.id === selectedCategory);
   const animationSetId = category ? `${category.prefix}_${selectedCategory}_${bodyType}` : null;
   const animationGlbPath = animationSetId
     ? `/player/animations/${selectedCategory}/${bodyType}/${animationSetId}/pc_000_000.glb`
     : null;
-
-  // Build character model path and texture URL
   const pcPrefix = CLASS_TO_PC_PREFIX[selectedClass] || 'pc_00';
-  const variation = `${pcPrefix}0`; // e.g., pc_000, pc_010, etc.
+  const variation = `${pcPrefix}0`;
   const modelGlbPath = `/player/${variation}/${variation}/${variation}_000.glb`;
   const textureUrl = `/player/${variation}/textures/${variation}_000.png`;
-
-  // Get weapon model path for current category
   const weaponGlbPath = CATEGORY_WEAPON_MAP[selectedCategory] || null;
 
-  // Reset animation when category, class, or special toggle changes
+  // Initialize Three.js scene
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const container = containerRef.current;
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+
+    // Scene
+    const scene = new THREE.Scene();
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
+    camera.position.set(0, 1.5, 3);
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(width, height);
+    renderer.setClearColor(0x0a0a1a);
+    container.appendChild(renderer.domElement);
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(5, 5, 5);
+    scene.add(dirLight);
+
+    // Grid
+    const grid = new THREE.GridHelper(10, 10, 0x333333, 0x222222);
+    scene.add(grid);
+
+    // Controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    sceneRef.current = {
+      scene, camera, renderer, controls,
+      mixer: null, model: null, weapon: null,
+      animations: [], currentAction: null,
+    };
+
+    // Animation loop
+    const clock = new THREE.Clock();
+    const animate = () => {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      if (sceneRef.current?.mixer) {
+        sceneRef.current.mixer.update(delta);
+      }
+      controls.update();
+      renderer.render(scene, camera);
+    };
+    animate();
+
+    // Handle resize
+    const handleResize = () => {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      renderer.dispose();
+      container.removeChild(renderer.domElement);
+    };
+  }, []);
+
+  // Load model, animations, and weapon
+  useEffect(() => {
+    if (!sceneRef.current || !animationGlbPath) return;
+
+    const { scene } = sceneRef.current;
+    const loader = new GLTFLoader();
+    const textureLoader = new THREE.TextureLoader();
+
+    setIsLoading(true);
+
+    // Clear previous model and weapon
+    if (sceneRef.current.model) {
+      scene.remove(sceneRef.current.model);
+      sceneRef.current.model = null;
+    }
+    if (sceneRef.current.weapon) {
+      sceneRef.current.weapon = null;
+    }
+    sceneRef.current.mixer = null;
+    sceneRef.current.currentAction = null;
+
+    // Load model
+    loader.load(modelGlbPath, (gltf) => {
+      const model = gltf.scene;
+      scene.add(model);
+      sceneRef.current!.model = model;
+
+      // Apply texture
+      textureLoader.load(textureUrl, (texture) => {
+        texture.magFilter = THREE.NearestFilter;
+        texture.minFilter = THREE.NearestFilter;
+        texture.flipY = false;
+        texture.colorSpace = THREE.SRGBColorSpace;
+        model.traverse((child: any) => {
+          if (child.isMesh && child.material) {
+            child.material.map = texture;
+            child.material.needsUpdate = true;
+          }
+        });
+      });
+
+      // Load animations
+      loader.load(animationGlbPath, (animGltf) => {
+        const mixer = new THREE.AnimationMixer(model);
+        sceneRef.current!.mixer = mixer;
+        sceneRef.current!.animations = animGltf.animations;
+
+        const animNames = animGltf.animations.map((a) => a.name);
+        setAvailableAnimations(animNames);
+
+        // Auto-select first animation
+        if (animNames.length > 0) {
+          setSelectedAnimation(animNames[0]);
+        }
+
+        // Load weapon if applicable
+        if (weaponGlbPath) {
+          // Capture category for closure
+          const currentCategory = selectedCategory;
+
+          // Find hand bones first
+          let rightHand: THREE.Bone | null = null;
+          let leftHand: THREE.Bone | null = null;
+          model.traverse((child) => {
+            if (child.name === '070_RArm02') {
+              rightHand = child as THREE.Bone;
+            }
+            if (child.name === '040_LArm02') {
+              leftHand = child as THREE.Bone;
+            }
+          });
+
+          const isDualWield = currentCategory === 'dagger' || currentCategory === 'machinegun';
+
+          // Helper to prepare weapon
+          const prepareWeapon = (scene: THREE.Group) => {
+            scene.traverse((child: any) => {
+              if (child.isMesh) {
+                child.geometry?.computeVertexNormals();
+                child.material = new THREE.MeshNormalMaterial({
+                  flatShading: true,
+                  side: THREE.DoubleSide,
+                });
+              }
+            });
+            return scene;
+          };
+
+          // Load weapon for right hand
+          loader.load(weaponGlbPath, (weaponGltf) => {
+            const weaponRight = prepareWeapon(weaponGltf.scene);
+            if (rightHand) {
+              rightHand.add(weaponRight);
+              sceneRef.current!.weapon = weaponRight;
+              console.log('Added weapon to right hand');
+            }
+
+            // Load again for left hand if dual wield
+            if (isDualWield && leftHand) {
+              loader.load(weaponGlbPath, (weaponGltf2) => {
+                const weaponLeft = prepareWeapon(weaponGltf2.scene);
+                leftHand.add(weaponLeft);
+                console.log('Added weapon to left hand');
+                setIsLoading(false);
+              });
+            } else {
+              setIsLoading(false);
+            }
+          });
+        } else {
+          setIsLoading(false);
+        }
+      });
+    });
+  }, [modelGlbPath, animationGlbPath, textureUrl, weaponGlbPath, selectedCategory]);
+
+  // Play selected animation
+  useEffect(() => {
+    if (!sceneRef.current?.mixer || !selectedAnimation) return;
+
+    const { mixer, animations, currentAction } = sceneRef.current;
+
+    // Stop current animation
+    if (currentAction) {
+      currentAction.fadeOut(0.2);
+    }
+
+    // Find and play new animation
+    const clip = animations.find((a) => a.name === selectedAnimation);
+    if (clip) {
+      const action = mixer.clipAction(clip);
+      action.reset().fadeIn(0.2).play();
+      action.setLoop(THREE.LoopRepeat, Infinity);
+      action.timeScale = playbackSpeed;
+      action.paused = !isPlaying;
+      sceneRef.current.currentAction = action;
+    }
+  }, [selectedAnimation]);
+
+  // Update playback speed
+  useEffect(() => {
+    if (sceneRef.current?.currentAction) {
+      sceneRef.current.currentAction.timeScale = playbackSpeed;
+    }
+  }, [playbackSpeed]);
+
+  // Play/pause
+  useEffect(() => {
+    if (sceneRef.current?.currentAction) {
+      sceneRef.current.currentAction.paused = !isPlaying;
+    }
+  }, [isPlaying]);
+
+  // Reset animation when category/class changes
   useEffect(() => {
     setSelectedAnimation(null);
     setAvailableAnimations([]);
-    setLoadError(null);
-    // Reset to common if current category is restricted for this class
-    const classRestrictions = CLASS_WEAPON_RESTRICTIONS[selectedClass] || [];
-    if (classRestrictions.includes(selectedCategory)) {
+    if (restrictions.includes(selectedCategory)) {
       setSelectedCategory('common');
     }
   }, [selectedClass, selectedCategory, useSpecialAnimation]);
-
-  const handleAnimationsLoaded = (animations: string[]) => {
-    setAvailableAnimations(animations);
-    if (animations.length > 0 && !selectedAnimation) {
-      setSelectedAnimation(animations[0]);
-    }
-  };
 
   return (
     <div style={styles.container}>
@@ -456,43 +389,14 @@ export default function PlayerAnimationStorybook() {
             <span style={styles.headerText}>
               {CLASS_NAMES[selectedClass]} - {category?.label || selectedCategory}
             </span>
-            <span style={styles.headerSubtext}>Body Type: {bodyType}</span>
+            <span style={styles.headerSubtext}>
+              Body Type: {bodyType} {isLoading && '(Loading...)'}
+            </span>
           </div>
-          <div style={styles.canvasContainer}>
-            <Canvas camera={{ position: [0, 1.5, 3], fov: 50 }}>
-              <ambientLight intensity={0.6} />
-              <directionalLight position={[5, 5, 5]} intensity={0.8} />
-              <directionalLight position={[-5, 3, -5]} intensity={0.4} />
-              <Suspense fallback={<LoadingFallback />}>
-                {animationGlbPath && (
-                  <PlayerModel
-                    key={`${modelGlbPath}-${animationGlbPath}-${weaponGlbPath}`}
-                    modelGlbPath={modelGlbPath}
-                    animationGlbPath={animationGlbPath}
-                    textureUrl={textureUrl}
-                    weaponGlbPath={weaponGlbPath}
-                    selectedAnimation={selectedAnimation}
-                    isPlaying={isPlaying}
-                    playbackSpeed={playbackSpeed}
-                    showSkeleton={showSkeleton}
-                    onAnimationsLoaded={handleAnimationsLoaded}
-                    onBonesFound={setBoneList}
-                  />
-                )}
-              </Suspense>
-              <OrbitControls
-                enablePan={true}
-                enableZoom={true}
-                minDistance={1}
-                maxDistance={10}
-              />
-              <gridHelper args={[10, 10, '#333', '#222']} />
-            </Canvas>
-          </div>
-          {loadError && <div style={styles.errorText}>{loadError}</div>}
+          <div style={styles.canvasContainer} ref={containerRef} />
         </div>
 
-        {/* Right Panel - Animation Controls */}
+        {/* Right Panel - Controls */}
         <div style={styles.rightPanel}>
           {/* Category Selection */}
           <div style={styles.section}>
@@ -532,19 +436,14 @@ export default function PlayerAnimationStorybook() {
                 Special ({gender === 'm' ? 'sm' : 'sw'})
               </span>
             </label>
-            <div style={styles.toggleInfo}>
-              Current: <strong>{bodyType}</strong>
-            </div>
           </div>
 
           {/* Animation List */}
           <div style={styles.section}>
-            <h3 style={styles.panelTitle}>
-              Animations ({availableAnimations.length})
-            </h3>
+            <h3 style={styles.panelTitle}>Animations ({availableAnimations.length})</h3>
             <div style={styles.animationList}>
               {availableAnimations.length === 0 ? (
-                <div style={styles.noAnimations}>Loading animations...</div>
+                <div style={styles.noAnimations}>Loading...</div>
               ) : (
                 availableAnimations.map((anim, index) => (
                   <button
@@ -592,54 +491,6 @@ export default function PlayerAnimationStorybook() {
               </div>
             </div>
           </div>
-
-          {/* Skeleton Debug */}
-          <div style={styles.section}>
-            <h3 style={styles.panelTitle}>Skeleton Debug</h3>
-            <label style={styles.toggleContainer}>
-              <input
-                type="checkbox"
-                checked={showSkeleton}
-                onChange={(e) => setShowSkeleton(e.target.checked)}
-                style={styles.toggleCheckbox}
-              />
-              <span style={styles.toggleLabel}>Show Skeleton</span>
-            </label>
-            {showSkeleton && boneList.length > 0 && (
-              <div style={styles.boneList}>
-                <div style={styles.boneListHeader}>Bones ({boneList.length}):</div>
-                {boneList.map((bone, i) => (
-                  <div key={bone} style={styles.boneItem}>
-                    <span style={styles.boneIndex}>{i}</span>
-                    <span style={styles.boneName}>{bone}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Current Animation Info */}
-          {selectedAnimation && (
-            <div style={styles.section}>
-              <h3 style={styles.panelTitle}>Current Animation</h3>
-              <div style={styles.animInfo}>
-                <div style={styles.infoRow}>
-                  <span style={styles.infoLabel}>Name:</span>
-                  <span style={styles.infoValue}>{selectedAnimation}</span>
-                </div>
-                <div style={styles.infoRow}>
-                  <span style={styles.infoLabel}>Label:</span>
-                  <span style={styles.infoValue}>
-                    {ANIMATION_LABELS[selectedAnimation] || 'Unknown'}
-                  </span>
-                </div>
-                <div style={styles.infoRow}>
-                  <span style={styles.infoLabel}>GLB Path:</span>
-                  <span style={styles.infoValueSmall}>{animationGlbPath}</span>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -710,9 +561,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#fff',
     border: '1px solid #6b8afd',
   },
-  className: {
-    fontWeight: 'bold',
-  },
+  className: { fontWeight: 'bold' },
   bodyType: {
     fontSize: '10px',
     color: '#888',
@@ -728,26 +577,13 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  headerText: {
-    fontSize: '14px',
-    fontWeight: 'bold',
-    color: '#6bf',
-  },
-  headerSubtext: {
-    fontSize: '12px',
-    color: '#888',
-  },
+  headerText: { fontSize: '14px', fontWeight: 'bold', color: '#6bf' },
+  headerSubtext: { fontSize: '12px', color: '#888' },
   canvasContainer: {
     flex: 1,
     background: '#0a0a1a',
     borderRadius: '8px',
     overflow: 'hidden',
-  },
-  errorText: {
-    color: '#f66',
-    fontSize: '12px',
-    textAlign: 'center',
-    padding: '8px',
   },
   section: {
     borderBottom: '1px solid #3a3a5a',
@@ -819,9 +655,7 @@ const styles: Record<string, React.CSSProperties> = {
     minWidth: '20px',
     textAlign: 'center',
   },
-  animName: {
-    flex: 1,
-  },
+  animName: { flex: 1 },
   playbackControls: {
     display: 'flex',
     flexDirection: 'column',
@@ -847,40 +681,8 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: 'column',
     gap: '4px',
   },
-  speedLabel: {
-    fontSize: '11px',
-    color: '#888',
-  },
-  speedSlider: {
-    width: '100%',
-  },
-  animInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
-    background: '#1a1a2e',
-    borderRadius: '4px',
-    padding: '10px',
-  },
-  infoRow: {
-    display: 'flex',
-    gap: '8px',
-  },
-  infoLabel: {
-    fontSize: '11px',
-    color: '#888',
-    minWidth: '50px',
-  },
-  infoValue: {
-    fontSize: '11px',
-    color: '#fff',
-    wordBreak: 'break-all',
-  },
-  infoValueSmall: {
-    fontSize: '9px',
-    color: '#666',
-    wordBreak: 'break-all',
-  },
+  speedLabel: { fontSize: '11px', color: '#888' },
+  speedSlider: { width: '100%' },
   toggleContainer: {
     display: 'flex',
     alignItems: 'center',
@@ -891,53 +693,6 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '4px',
     border: '1px solid #444',
   },
-  toggleCheckbox: {
-    width: '16px',
-    height: '16px',
-    cursor: 'pointer',
-  },
-  toggleLabel: {
-    fontSize: '12px',
-    color: '#aaa',
-  },
-  toggleInfo: {
-    fontSize: '11px',
-    color: '#888',
-    marginTop: '6px',
-    padding: '4px 8px',
-  },
-  boneList: {
-    marginTop: '8px',
-    background: '#1a1a2e',
-    borderRadius: '4px',
-    padding: '8px',
-    maxHeight: '150px',
-    overflowY: 'auto',
-  },
-  boneListHeader: {
-    fontSize: '11px',
-    color: '#6b8afd',
-    marginBottom: '6px',
-  },
-  boneItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '3px 0',
-    borderBottom: '1px solid #2a2a3a',
-  },
-  boneIndex: {
-    fontSize: '10px',
-    color: '#666',
-    background: '#333',
-    padding: '1px 4px',
-    borderRadius: '3px',
-    minWidth: '18px',
-    textAlign: 'center',
-  },
-  boneName: {
-    fontSize: '11px',
-    color: '#ccc',
-    fontFamily: 'monospace',
-  },
+  toggleCheckbox: { width: '16px', height: '16px', cursor: 'pointer' },
+  toggleLabel: { fontSize: '12px', color: '#aaa' },
 };
