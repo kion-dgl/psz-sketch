@@ -61,7 +61,7 @@ const ANIMATION_CATEGORIES = [
 const CATEGORY_WEAPON_MAP: Record<string, string | null> = {
   common: null,
   saver: '/weapons/wsac01/wsac01/wsac01_1_o.glb',
-  sword: '/weapons/wswr01/wswr01/wswr01_1_b.glb',
+  sword: '/weapons/wswr02/wswr02/wswr02_1_b.glb',
   dagger: '/weapons/wdah01/wdah01/wdah01_1_l.glb',
   spear: '/weapons/wsph01/wsph01/wsph01_1_b.glb',
   claw: '/weapons/wclh02/wclh02/wclh02_1_o.glb',
@@ -72,7 +72,24 @@ const CATEGORY_WEAPON_MAP: Record<string, string | null> = {
   grenade: '/weapons/wbac02/wbac02/wbac02_1_b.glb',
   rod: '/weapons/wroh01/wroh01/wroh01_1_b.glb',
   wand: '/weapons/wwan01/wwan01/wwan01_1_o.glb',
-  slicer: '/weapons/wslc02/wslc02/wslc02_1_o.glb',
+  slicer: '/weapons/wslr03/wslr03/wslr03_1_o.glb',
+};
+
+// Default weapon position offsets per category
+const WEAPON_OFFSETS: Record<string, { x: number; y: number; z: number }> = {
+  saver: { x: 0.310, y: 0.000, z: 0.000 },
+  spear: { x: 0.300, y: -0.030, z: 0.000 },
+  handgun: { x: 0.310, y: 0.000, z: 0.000 },
+  wand: { x: 0.320, y: 0.000, z: 0.000 },
+  grenade: { x: 0.300, y: 0.000, z: 0.000 },
+  shield: { x: 0.300, y: 0.000, z: 0.000 },
+  claw: { x: 0.300, y: 0.000, z: 0.000 },
+  shotgun: { x: 0.210, y: 0.000, z: 0.000 },
+  sword: { x: 0.330, y: -0.020, z: 0.070 },
+  slicer: { x: 0.300, y: 0.000, z: 0.000 },
+  rod: { x: 0.310, y: 0.000, z: 0.000 },
+  dagger: { x: 0.300, y: 0.000, z: 0.000 },
+  machinegun: { x: 0.300, y: -0.060, z: 0.000 },
 };
 
 // Animation labels
@@ -96,7 +113,8 @@ export default function PlayerAnimationStorybook() {
     controls: OrbitControls;
     mixer: THREE.AnimationMixer | null;
     model: THREE.Object3D | null;
-    weapon: THREE.Object3D | null;
+    weaponRight: THREE.Object3D | null;
+    weaponLeft: THREE.Object3D | null;
     animations: THREE.AnimationClip[];
     currentAction: THREE.AnimationAction | null;
   } | null>(null);
@@ -109,6 +127,9 @@ export default function PlayerAnimationStorybook() {
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [useSpecialAnimation, setUseSpecialAnimation] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Weapon position offset
+  const [weaponOffset, setWeaponOffset] = useState({ x: 0, y: 0, z: 0 });
 
   const gender = GENDER_MAP[selectedClass] || 'm';
   const bodyType = useSpecialAnimation ? (gender === 'm' ? 'sm' : 'sw') : gender;
@@ -164,7 +185,7 @@ export default function PlayerAnimationStorybook() {
 
     sceneRef.current = {
       scene, camera, renderer, controls,
-      mixer: null, model: null, weapon: null,
+      mixer: null, model: null, weaponRight: null, weaponLeft: null,
       animations: [], currentAction: null,
     };
 
@@ -286,24 +307,35 @@ export default function PlayerAnimationStorybook() {
             return scene;
           };
 
+          // Get default offset for this category
+          const defaultOffset = WEAPON_OFFSETS[currentCategory] || { x: 0, y: 0, z: 0 };
+
           // Load weapon for right hand
           loader.load(weaponGlbPath, (weaponGltf) => {
             const weaponRight = prepareWeapon(weaponGltf.scene);
             if (rightHand) {
+              weaponRight.position.set(defaultOffset.x, defaultOffset.y, defaultOffset.z);
               rightHand.add(weaponRight);
-              sceneRef.current!.weapon = weaponRight;
-              console.log('Added weapon to right hand');
+              sceneRef.current!.weaponRight = weaponRight;
+              console.log('Added weapon to right hand with offset:', defaultOffset);
             }
 
             // Load again for left hand if dual wield
             if (isDualWield && leftHand) {
               loader.load(weaponGlbPath, (weaponGltf2) => {
                 const weaponLeft = prepareWeapon(weaponGltf2.scene);
+                weaponLeft.position.set(defaultOffset.x, defaultOffset.y, defaultOffset.z);
+                // Rotate dual-wield weapons 180 degrees for left hand
+                if (currentCategory === 'machinegun' || currentCategory === 'dagger') {
+                  weaponLeft.rotation.x = Math.PI;
+                }
                 leftHand.add(weaponLeft);
-                console.log('Added weapon to left hand');
+                sceneRef.current!.weaponLeft = weaponLeft;
+                console.log('Added weapon to left hand with offset:', defaultOffset);
                 setIsLoading(false);
               });
             } else {
+              sceneRef.current!.weaponLeft = null;
               setIsLoading(false);
             }
           });
@@ -358,7 +390,27 @@ export default function PlayerAnimationStorybook() {
     if (restrictions.includes(selectedCategory)) {
       setSelectedCategory('common');
     }
+    // Apply default offset for this category
+    const defaultOffset = WEAPON_OFFSETS[selectedCategory] || { x: 0, y: 0, z: 0 };
+    setWeaponOffset(defaultOffset);
   }, [selectedClass, selectedCategory, useSpecialAnimation]);
+
+  // Apply weapon offset
+  useEffect(() => {
+    if (sceneRef.current?.weaponRight) {
+      sceneRef.current.weaponRight.position.set(weaponOffset.x, weaponOffset.y, weaponOffset.z);
+    }
+    if (sceneRef.current?.weaponLeft) {
+      sceneRef.current.weaponLeft.position.set(weaponOffset.x, weaponOffset.y, weaponOffset.z);
+    }
+  }, [weaponOffset]);
+
+  // Copy offset to clipboard
+  const copyOffset = () => {
+    const str = `{ x: ${weaponOffset.x.toFixed(3)}, y: ${weaponOffset.y.toFixed(3)}, z: ${weaponOffset.z.toFixed(3)} }`;
+    navigator.clipboard.writeText(str);
+    console.log('Copied:', str);
+  };
 
   return (
     <div style={styles.container}>
@@ -491,6 +543,54 @@ export default function PlayerAnimationStorybook() {
               </div>
             </div>
           </div>
+
+          {/* Weapon Position Offset */}
+          {weaponGlbPath && (
+            <div style={styles.section}>
+              <h3 style={styles.panelTitle}>Weapon Offset</h3>
+              <div style={styles.offsetControls}>
+                <div style={styles.offsetRow}>
+                  <label style={styles.offsetLabel}>X: {weaponOffset.x.toFixed(2)}</label>
+                  <input
+                    type="range"
+                    min="-0.5"
+                    max="0.5"
+                    step="0.01"
+                    value={weaponOffset.x}
+                    onChange={(e) => setWeaponOffset(prev => ({ ...prev, x: parseFloat(e.target.value) }))}
+                    style={styles.offsetSlider}
+                  />
+                </div>
+                <div style={styles.offsetRow}>
+                  <label style={styles.offsetLabel}>Y: {weaponOffset.y.toFixed(2)}</label>
+                  <input
+                    type="range"
+                    min="-0.5"
+                    max="0.5"
+                    step="0.01"
+                    value={weaponOffset.y}
+                    onChange={(e) => setWeaponOffset(prev => ({ ...prev, y: parseFloat(e.target.value) }))}
+                    style={styles.offsetSlider}
+                  />
+                </div>
+                <div style={styles.offsetRow}>
+                  <label style={styles.offsetLabel}>Z: {weaponOffset.z.toFixed(2)}</label>
+                  <input
+                    type="range"
+                    min="-0.5"
+                    max="0.5"
+                    step="0.01"
+                    value={weaponOffset.z}
+                    onChange={(e) => setWeaponOffset(prev => ({ ...prev, z: parseFloat(e.target.value) }))}
+                    style={styles.offsetSlider}
+                  />
+                </div>
+                <button style={styles.copyBtn} onClick={copyOffset}>
+                  Copy Offset
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -695,4 +795,31 @@ const styles: Record<string, React.CSSProperties> = {
   },
   toggleCheckbox: { width: '16px', height: '16px', cursor: 'pointer' },
   toggleLabel: { fontSize: '12px', color: '#aaa' },
+  offsetControls: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  offsetRow: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+  },
+  offsetLabel: {
+    fontSize: '11px',
+    color: '#888',
+  },
+  offsetSlider: {
+    width: '100%',
+  },
+  copyBtn: {
+    padding: '8px 12px',
+    background: '#4a4a6a',
+    border: '1px solid #6b8afd',
+    borderRadius: '4px',
+    color: '#fff',
+    cursor: 'pointer',
+    fontSize: '12px',
+    marginTop: '4px',
+  },
 };

@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import WeaponDebugR3F from '../../components/player/WeaponDebugR3F';
+
+export const prerender = false;
+---
+
+<Layout title="Weapon Debug R3F - PSZ Sketch">
+  <WeaponDebugR3F client:load />
+</Layout>
