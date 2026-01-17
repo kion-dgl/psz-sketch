@@ -351,8 +351,8 @@ export default function AnimatedPlayerCharacter({
   return (
     <group ref={groupRef} position={spawnPosition}>
       <group rotation={[0, rotation, 0]}>
-        {/* Player model */}
-        <primitive object={clonedModel} position={[0, -1, 0]} />
+        {/* Player model - rotated 180 degrees to face forward */}
+        <primitive object={clonedModel} position={[0, -1, 0]} rotation={[0, Math.PI, 0]} />
       </group>
     </group>
   );
