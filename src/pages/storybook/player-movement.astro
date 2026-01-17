@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PlayerMovementDemo from '../../components/player/PlayerMovementDemo';
+
+export const prerender = false;
+---
+
+<Layout title="Player Movement Demo - PSZ Sketch">
+  <PlayerMovementDemo client:load />
+</Layout>
