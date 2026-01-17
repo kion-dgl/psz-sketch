@@ -361,8 +361,8 @@ export default function FreePlayerCharacter({
 
   return (
     <group ref={groupRef} position={spawnPosition}>
-      {/* Player model - rotated 180 degrees to face forward */}
-      <primitive object={clonedModel} position={[0, -1, 0]} rotation={[0, Math.PI, 0]} />
+      {/* Player model */}
+      <primitive object={clonedModel} position={[0, -1, 0]} />
     </group>
   );
 }
