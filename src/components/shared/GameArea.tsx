@@ -5,7 +5,7 @@ import type { Character } from '../../stores/characterStore';
 import { useCharacterStore } from '../../stores/characterStore';
 import { useGameState } from '../../stores/gameStateStore';
 import { CollisionProvider } from '../../collision';
-import PlayerCharacter from '../city/PlayerCharacter';
+import AnimatedPlayerCharacter from '../city/AnimatedPlayerCharacter';
 import CameraController from './CameraController';
 import HUD from '../ui/HUD';
 import PauseMenu from '../ui/PauseMenu';
@@ -353,7 +353,7 @@ export default function GameArea({
           <CollisionProvider>
             {renderPhysicsContent?.(renderProps)}
 
-            <PlayerCharacter
+            <AnimatedPlayerCharacter
               key={respawnKey}
               character={selectedCharacter}
               onPositionChange={setPlayerPosition}

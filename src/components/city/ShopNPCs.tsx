@@ -15,7 +15,6 @@ interface ShopItem {
 interface ShopPresets {
   itemShop: {
     baseItems: ShopItem[];
-    presets: { name: string; premiumItems: ShopItem[] }[];
   };
   weaponShop: {
     presets: { name: string; weapons: any[] }[];
@@ -83,14 +82,11 @@ export default function ShopNPCs() {
 
   if (!shopData) return null;
 
-  // Combine base items with first premium preset for demo
-  const itemShopItems = [
-    ...shopData.itemShop.baseItems,
-    ...shopData.itemShop.presets[2].premiumItems // "Rare Finds" preset
-  ];
+  // Use base items for item shop
+  const itemShopItems = shopData.itemShop.baseItems;
 
   // Use first weapon preset for demo
-  const weaponShopItems = shopData.weaponShop.presets[1].weapons.map(w => ({
+  const weaponShopItems = shopData.weaponShop.presets[0].weapons.map(w => ({
     id: w.id,
     name: w.name,
     price: w.price,
