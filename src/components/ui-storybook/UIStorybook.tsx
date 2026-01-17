@@ -13,9 +13,10 @@ import Shop3DStorybook from '../shops/Shop3DStorybook';
 import WeaponShop3DStorybook from '../shops/WeaponShop3DStorybook';
 import MagEvolutionsStorybook from '../mag/MagEvolutionsStorybook';
 import MagFeederStorybook from '../mag/MagFeederStorybook';
+import PlayerAnimationStorybook from '../player/PlayerAnimationStorybook';
 import ScreenPreview from './ScreenPreview';
 
-type UIComponent = 'screen' | 'hud' | 'action-palette' | 'minimap' | 'tooltip' | 'stats' | 'main-menu' | 'items' | 'equip' | 'item-shop' | 'weapon-shop' | 'shop-3d' | 'weapon-shop-3d' | 'mag-evolutions' | 'mag-feeder';
+type UIComponent = 'screen' | 'hud' | 'action-palette' | 'minimap' | 'tooltip' | 'stats' | 'main-menu' | 'items' | 'equip' | 'item-shop' | 'weapon-shop' | 'shop-3d' | 'weapon-shop-3d' | 'mag-evolutions' | 'mag-feeder' | 'player-animations';
 
 const UI_COMPONENTS: { id: UIComponent; label: string; available: boolean }[] = [
   { id: 'screen', label: 'Screen Preview', available: true },
@@ -33,6 +34,7 @@ const UI_COMPONENTS: { id: UIComponent; label: string; available: boolean }[] = 
   { id: 'weapon-shop-3d', label: 'Weapon Shop 3D', available: true },
   { id: 'mag-evolutions', label: 'Mag Evolutions', available: true },
   { id: 'mag-feeder', label: 'Mag Feeder', available: true },
+  { id: 'player-animations', label: 'Player Animations', available: true },
 ];
 
 const validComponents = UI_COMPONENTS.map(c => c.id);
@@ -116,6 +118,7 @@ export default function UIStorybook({ initialComponent }: UIStorybookProps) {
         {selected === 'weapon-shop-3d' && <WeaponShop3DStorybook />}
         {selected === 'mag-evolutions' && <MagEvolutionsStorybook />}
         {selected === 'mag-feeder' && <MagFeederStorybook />}
+        {selected === 'player-animations' && <PlayerAnimationStorybook />}
       </div>
     </div>
   );

@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import LobbyMovementDemo from '../../components/player/LobbyMovementDemo';
+
+export const prerender = false;
+---
+
+<Layout title="Lobby Movement Demo - PSZ Sketch">
+  <LobbyMovementDemo client:load />
+</Layout>

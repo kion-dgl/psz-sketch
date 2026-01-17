@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PlayerAnimationStorybook from '../../components/player/PlayerAnimationStorybook';
+
+export const prerender = false;
+---
+
+<Layout title="Player Animations - PSZ Sketch">
+  <PlayerAnimationStorybook client:load />
+</Layout>
