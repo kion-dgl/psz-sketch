@@ -3,13 +3,9 @@ import { Suspense, useState, useEffect } from 'react';
 import { PerspectiveCamera } from '@react-three/drei';
 import type { Character } from '../../stores/characterStore';
 import { useCharacterStore } from '../../stores/characterStore';
-import { useGameState } from '../../stores/gameStateStore';
 import { CollisionProvider } from '../../collision';
 import FreePlayerCharacter from './FreePlayerCharacter';
 import FixedCameraController from '../shared/FixedCameraController';
-import HUD from '../ui/HUD';
-import PauseMenu from '../ui/PauseMenu';
-import ShopMenu from '../ui/ShopMenu';
 import MarketEnvironment from './MarketEnvironment';
 import ShopNPCs from './ShopNPCs';
 import InvisibleWalls from './InvisibleWalls';
@@ -26,12 +22,7 @@ export default function CityMarketFree() {
   const [loading, setLoading] = useState(true);
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0, rotation: 0 });
   const [playerInInteractiveZone, setPlayerInInteractiveZone] = useState<string | null>(null);
-  const { openShop } = useGameState();
   const { selectedCharacter, setSelectedCharacter } = useCharacterStore();
-
-  const handleNPCInteraction = (npcName: string) => {
-    openShop(npcName);
-  };
 
   // Load character
   useEffect(() => {
@@ -102,10 +93,6 @@ export default function CityMarketFree() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
-      <HUD />
-      <PauseMenu />
-      <ShopMenu />
-
       {/* Controls hint */}
       <div style={{
         position: 'absolute',
@@ -174,7 +161,6 @@ export default function CityMarketFree() {
             <FreePlayerCharacter
               character={selectedCharacter}
               onPositionChange={setPlayerPosition}
-              onInteraction={handleNPCInteraction}
               spawnPosition={DEFAULT_SPAWN}
               spawnRotation={Math.PI}
             />
