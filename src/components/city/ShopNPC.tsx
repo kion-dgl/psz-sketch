@@ -16,6 +16,12 @@ export interface ShopData {
   name: string;
   shopType: 'item' | 'weapon';
   items: ShopItem[];
+  // For weapon shops with multiple categories
+  categories?: {
+    weapons: ShopItem[];
+    armor: ShopItem[];
+    units: ShopItem[];
+  };
 }
 
 interface ShopNPCProps {
@@ -24,6 +30,11 @@ interface ShopNPCProps {
   modelPath: string;
   shopType: 'item' | 'weapon';
   items: ShopItem[];
+  categories?: {
+    weapons: ShopItem[];
+    armor: ShopItem[];
+    units: ShopItem[];
+  };
   playerMeseta: number;
   onPurchase?: (item: ShopItem, quantity: number) => void;
   onShopStateChange?: (isOpen: boolean, shopData: ShopData | null) => void;
@@ -35,6 +46,7 @@ export default function ShopNPC({
   modelPath,
   shopType,
   items,
+  categories,
   playerMeseta,
   onPurchase,
   onShopStateChange,
@@ -83,11 +95,11 @@ export default function ShopNPC({
   // Notify parent when shop state changes
   useEffect(() => {
     if (isShopOpen) {
-      onShopStateChange?.(true, { name, shopType, items });
+      onShopStateChange?.(true, { name, shopType, items, categories });
     } else {
       onShopStateChange?.(false, null);
     }
-  }, [isShopOpen, name, shopType, items, onShopStateChange]);
+  }, [isShopOpen, name, shopType, items, categories, onShopStateChange]);
 
   // Handle E key to open shop
   useEffect(() => {
@@ -132,11 +144,14 @@ export default function ShopNPC({
   );
 }
 
+type WeaponTab = 'weapons' | 'armor' | 'units';
+
 // Shop UI overlay component - exported for use outside Canvas
 export function ShopOverlay({
   shopType,
   name,
   items,
+  categories,
   playerMeseta,
   onPurchase,
   onClose,
@@ -144,13 +159,34 @@ export function ShopOverlay({
   shopType: 'item' | 'weapon';
   name: string;
   items: ShopItem[];
+  categories?: {
+    weapons: ShopItem[];
+    armor: ShopItem[];
+    units: ShopItem[];
+  };
   playerMeseta: number;
   onPurchase?: (item: ShopItem, quantity: number) => void;
   onClose: () => void;
 }) {
-  // Preselect first item (Monomate for item shop)
-  const [selectedItem, setSelectedItem] = useState<ShopItem | null>(items[0] || null);
+  const [activeTab, setActiveTab] = useState<WeaponTab>('weapons');
+
+  // Get display items based on shop type and active tab
+  const displayItems = useMemo(() => {
+    if (shopType === 'weapon' && categories) {
+      return categories[activeTab];
+    }
+    return items;
+  }, [shopType, categories, activeTab, items]);
+
+  // Preselect first item
+  const [selectedItem, setSelectedItem] = useState<ShopItem | null>(displayItems[0] || null);
   const [quantity, setQuantity] = useState(1);
+
+  // Update selection when tab changes
+  useEffect(() => {
+    setSelectedItem(displayItems[0] || null);
+    setQuantity(1);
+  }, [activeTab, displayItems]);
 
   const themeColor = shopType === 'item' ? '#4ade80' : '#f97316';
   const themeBg = shopType === 'item'
@@ -166,11 +202,38 @@ export function ShopOverlay({
 
   const canAfford = selectedItem ? playerMeseta >= selectedItem.price * quantity : false;
 
+  const tabs: { key: WeaponTab; label: string }[] = [
+    { key: 'weapons', label: 'Weapons' },
+    { key: 'armor', label: 'Armor' },
+    { key: 'units', label: 'Units' },
+  ];
+
   return (
     <div style={{ ...styles.shop, background: themeBg }}>
       {/* Header */}
       <div style={{ ...styles.header, borderBottomColor: themeColor }}>
         <span style={{ ...styles.title, color: themeColor }}>{name}</span>
+
+        {/* Tabs for weapon shop */}
+        {shopType === 'weapon' && categories && (
+          <div style={styles.tabs}>
+            {tabs.map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                style={{
+                  ...styles.tab,
+                  ...(activeTab === tab.key
+                    ? { ...styles.tabActive, borderBottomColor: themeColor, color: themeColor }
+                    : {}),
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div style={styles.mesetaDisplay}>
           <span style={styles.mesetaLabel}>Meseta:</span>
           <span style={styles.meseta}>{playerMeseta.toLocaleString()}</span>
@@ -183,7 +246,7 @@ export function ShopOverlay({
         {/* Left: Item list */}
         <div style={styles.itemListColumn}>
           <div style={styles.itemList}>
-            {items.map(item => (
+            {displayItems.map(item => (
               <div
                 key={item.id}
                 onClick={() => {
@@ -324,9 +387,28 @@ const styles: Record<string, React.CSSProperties> = {
     borderBottom: '1px solid',
   },
   title: {
-    flex: 1,
     fontSize: '18px',
     fontWeight: 600,
+  },
+  tabs: {
+    display: 'flex',
+    gap: '4px',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  tab: {
+    padding: '6px 14px',
+    background: 'transparent',
+    border: 'none',
+    borderBottom: '2px solid transparent',
+    color: '#888',
+    fontSize: '13px',
+    fontWeight: 500,
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+  },
+  tabActive: {
+    color: '#fff',
   },
   mesetaDisplay: {
     display: 'flex',

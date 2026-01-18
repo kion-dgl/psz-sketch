@@ -189,6 +189,7 @@ export default function CityMarketFree() {
             shopType={activeShop.shopData.shopType}
             name={activeShop.shopData.name}
             items={activeShop.shopData.items}
+            categories={activeShop.shopData.categories}
             playerMeseta={activeShop.playerMeseta}
             onPurchase={activeShop.onPurchase}
             onClose={activeShop.onClose}

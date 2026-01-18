@@ -163,14 +163,35 @@ export default function ShopNPCs({ onActiveShopChange }: ShopNPCsProps) {
   // Use base items for item shop
   const itemShopItems = shopData.itemShop.baseItems;
 
-  // Use first weapon preset for demo
-  const weaponShopItems = shopData.weaponShop.presets[0].weapons.map(w => ({
+  // Use first weapon preset for demo - include all categories
+  const preset = shopData.weaponShop.presets[0];
+
+  const weaponItems = preset.weapons.map(w => ({
     id: w.id,
     name: w.name,
     price: w.price,
     description: `${w.type} - ATP: ${w.atp}, ATA: ${w.ata}`,
     rarity: w.rarity,
   }));
+
+  const armorItems = preset.armor.map(a => ({
+    id: a.id,
+    name: a.name,
+    price: a.price,
+    description: `${a.type} - DFP: ${a.dfp}, EVP: ${a.evp}${a.slots ? `, Slots: ${a.slots}` : ''}`,
+    rarity: a.rarity,
+  }));
+
+  const unitItems = preset.units.map(u => ({
+    id: u.id,
+    name: u.name,
+    price: u.price,
+    description: u.effect,
+    rarity: u.rarity,
+  }));
+
+  // Combined list for backwards compatibility (weapons first)
+  const weaponShopItems = weaponItems;
 
   return (
     <>
@@ -191,6 +212,11 @@ export default function ShopNPCs({ onActiveShopChange }: ShopNPCsProps) {
         modelPath={NPC_MODELS.weaponShop}
         shopType="weapon"
         items={weaponShopItems}
+        categories={{
+          weapons: weaponItems,
+          armor: armorItems,
+          units: unitItems,
+        }}
         playerMeseta={playerMeseta}
         onPurchase={handleWeaponPurchase}
         onShopStateChange={handleWeaponShopStateChange}
