@@ -197,8 +197,11 @@ export function ShopOverlay({
                 }}
               >
                 <div style={styles.itemInfo}>
-                  <span style={styles.itemName}>{item.name}</span>
-                  <span style={styles.itemRarity}>{'★'.repeat(Math.min(item.rarity, 5))}</span>
+                  <div style={styles.itemHeader}>
+                    <span style={styles.itemName}>{item.name}</span>
+                    <span style={styles.itemRarity}>{'★'.repeat(Math.min(item.rarity, 5))}</span>
+                  </div>
+                  <span style={styles.itemDescription}>{item.description}</span>
                 </div>
                 <span style={{ ...styles.itemPrice, color: themeColor }}>
                   {item.price.toLocaleString()}
@@ -385,6 +388,13 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     gap: '2px',
+    flex: 1,
+    minWidth: 0,
+  },
+  itemHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
   },
   itemName: {
     fontSize: '13px',
@@ -393,6 +403,13 @@ const styles: Record<string, React.CSSProperties> = {
   itemRarity: {
     fontSize: '10px',
     color: '#fcd34d',
+  },
+  itemDescription: {
+    fontSize: '11px',
+    color: '#888',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   itemPrice: {
     fontSize: '13px',
