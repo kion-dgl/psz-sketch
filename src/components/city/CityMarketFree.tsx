@@ -1,13 +1,15 @@
 import { Canvas } from '@react-three/fiber';
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useState, useEffect, useCallback } from 'react';
 import { PerspectiveCamera } from '@react-three/drei';
 import type { Character } from '../../stores/characterStore';
 import { useCharacterStore } from '../../stores/characterStore';
+import { useGameState } from '../../stores/gameStateStore';
 import { CollisionProvider } from '../../collision';
 import FreePlayerCharacter from './FreePlayerCharacter';
 import FixedCameraController from '../shared/FixedCameraController';
 import MarketEnvironment from './MarketEnvironment';
-import ShopNPCs from './ShopNPCs';
+import ShopNPCs, { type ActiveShopState } from './ShopNPCs';
+import { ShopOverlay } from './ShopNPC';
 import InvisibleWalls from './InvisibleWalls';
 import AreaTriggers from './AreaTriggers';
 import InteractiveTriggers, { type InteractiveTrigger } from '../shared/InteractiveTriggers';
@@ -22,7 +24,18 @@ export default function CityMarketFree() {
   const [loading, setLoading] = useState(true);
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0, rotation: 0 });
   const [playerInInteractiveZone, setPlayerInInteractiveZone] = useState<string | null>(null);
+  const [activeShop, setActiveShop] = useState<ActiveShopState | null>(null);
   const { selectedCharacter, setSelectedCharacter } = useCharacterStore();
+  const { closeShop } = useGameState();
+
+  // Close any stale shop UI from global state on mount
+  useEffect(() => {
+    closeShop();
+  }, [closeShop]);
+
+  const handleActiveShopChange = useCallback((shop: ActiveShopState | null) => {
+    setActiveShop(shop);
+  }, []);
 
   // Load character
   useEffect(() => {
@@ -156,7 +169,7 @@ export default function CityMarketFree() {
               visible={false}
               onPlayerInZone={setPlayerInInteractiveZone}
             />
-            <ShopNPCs />
+            <ShopNPCs onActiveShopChange={handleActiveShopChange} />
 
             <FreePlayerCharacter
               character={selectedCharacter}
@@ -167,6 +180,44 @@ export default function CityMarketFree() {
           </CollisionProvider>
         </Suspense>
       </Canvas>
+
+      {/* Shop overlay - rendered outside Canvas */}
+      {activeShop && (
+        <div style={overlayStyles.overlay}>
+          <div style={overlayStyles.backdrop} onClick={activeShop.onClose} />
+          <ShopOverlay
+            shopType={activeShop.shopData.shopType}
+            name={activeShop.shopData.name}
+            items={activeShop.shopData.items}
+            playerMeseta={activeShop.playerMeseta}
+            onPurchase={activeShop.onPurchase}
+            onClose={activeShop.onClose}
+          />
+        </div>
+      )}
     </div>
   );
 }
+
+const overlayStyles: Record<string, React.CSSProperties> = {
+  overlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 2000,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(0, 0, 0, 0.5)',
+    cursor: 'pointer',
+  },
+};

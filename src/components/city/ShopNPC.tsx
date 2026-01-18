@@ -3,7 +3,6 @@ import { useGLTF, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { useCollision } from '../../collision';
-import { useFrame, useThree } from '@react-three/fiber';
 
 interface ShopItem {
   id: string;
@@ -11,6 +10,12 @@ interface ShopItem {
   price: number;
   description: string;
   rarity: number;
+}
+
+export interface ShopData {
+  name: string;
+  shopType: 'item' | 'weapon';
+  items: ShopItem[];
 }
 
 interface ShopNPCProps {
@@ -21,7 +26,7 @@ interface ShopNPCProps {
   items: ShopItem[];
   playerMeseta: number;
   onPurchase?: (item: ShopItem, quantity: number) => void;
-  onClose?: () => void;
+  onShopStateChange?: (isOpen: boolean, shopData: ShopData | null) => void;
 }
 
 export default function ShopNPC({
@@ -32,7 +37,7 @@ export default function ShopNPC({
   items,
   playerMeseta,
   onPurchase,
-  onClose,
+  onShopStateChange,
 }: ShopNPCProps) {
   const { registerNPC, registerTrigger } = useCollision();
   const { scene } = useGLTF(modelPath);
@@ -75,6 +80,15 @@ export default function ShopNPC({
     return unregister;
   }, [position, name, registerTrigger]);
 
+  // Notify parent when shop state changes
+  useEffect(() => {
+    if (isShopOpen) {
+      onShopStateChange?.(true, { name, shopType, items });
+    } else {
+      onShopStateChange?.(false, null);
+    }
+  }, [isShopOpen, name, shopType, items, onShopStateChange]);
+
   // Handle E key to open shop
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -82,17 +96,16 @@ export default function ShopNPC({
         setIsShopOpen(true);
       } else if (e.key === 'Escape' && isShopOpen) {
         setIsShopOpen(false);
-        onClose?.();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isPlayerNear, isShopOpen, onClose]);
+  }, [isPlayerNear, isShopOpen]);
 
+  // Public close handler (called from overlay)
   const handleClose = () => {
     setIsShopOpen(false);
-    onClose?.();
   };
 
   return (
@@ -115,33 +128,12 @@ export default function ShopNPC({
         </Html>
       )}
 
-      {/* Shop UI in 3D space */}
-      {isShopOpen && (
-        <Html
-          position={[2, 1.5, 0]}
-          center
-          transform
-          distanceFactor={4}
-          style={{ pointerEvents: 'auto' }}
-        >
-          <div style={styles.shopContainer}>
-            <InWorldShop
-              shopType={shopType}
-              name={name}
-              items={items}
-              playerMeseta={playerMeseta}
-              onPurchase={onPurchase}
-              onClose={handleClose}
-            />
-          </div>
-        </Html>
-      )}
     </group>
   );
 }
 
-// Compact shop UI designed for in-world display
-function InWorldShop({
+// Shop UI overlay component - exported for use outside Canvas
+export function ShopOverlay({
   shopType,
   name,
   items,
@@ -281,12 +273,10 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#fff',
     fontSize: '14px',
   },
-  shopContainer: {
-    transform: 'scale(0.6)',
-    transformOrigin: 'center center',
-  },
   shop: {
-    width: '380px',
+    position: 'relative',
+    zIndex: 10,
+    width: '450px',
     borderRadius: '12px',
     overflow: 'hidden',
     fontFamily: 'system-ui, -apple-system, sans-serif',
@@ -327,9 +317,9 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
   },
   itemList: {
-    maxHeight: '200px',
+    maxHeight: '300px',
     overflowY: 'auto',
-    padding: '8px',
+    padding: '12px',
   },
   item: {
     display: 'flex',

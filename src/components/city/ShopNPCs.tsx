@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useGLTF } from '@react-three/drei';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
-import ShopNPC from './ShopNPC';
+import ShopNPC, { type ShopData } from './ShopNPC';
 import { useCollision } from '../../collision';
 
 interface ShopItem {
@@ -10,6 +10,13 @@ interface ShopItem {
   price: number;
   description: string;
   rarity: number;
+}
+
+export interface ActiveShopState {
+  shopData: ShopData;
+  playerMeseta: number;
+  onPurchase: (item: ShopItem, quantity: number) => void;
+  onClose: () => void;
 }
 
 interface ShopPresets {
@@ -54,9 +61,14 @@ function RegularNPC({ position, name, modelPath }: { position: [number, number, 
   );
 }
 
-export default function ShopNPCs() {
+interface ShopNPCsProps {
+  onActiveShopChange?: (activeShop: ActiveShopState | null) => void;
+}
+
+export default function ShopNPCs({ onActiveShopChange }: ShopNPCsProps) {
   const [shopData, setShopData] = useState<ShopPresets | null>(null);
   const [playerMeseta, setPlayerMeseta] = useState(50000);
+  const [activeShopId, setActiveShopId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/data/shop-presets.json')
@@ -65,20 +77,86 @@ export default function ShopNPCs() {
       .catch(console.error);
   }, []);
 
-  const handleItemPurchase = (item: ShopItem, quantity: number) => {
+  const handleItemPurchase = useCallback((item: ShopItem, quantity: number) => {
     const total = item.price * quantity;
-    if (playerMeseta >= total) {
-      setPlayerMeseta(prev => prev - total);
-      console.log(`Purchased ${quantity}x ${item.name} for ${total} Meseta`);
-    }
-  };
+    setPlayerMeseta(prev => {
+      if (prev >= total) {
+        console.log(`Purchased ${quantity}x ${item.name} for ${total} Meseta`);
+        return prev - total;
+      }
+      return prev;
+    });
+  }, []);
 
-  const handleWeaponPurchase = (item: ShopItem, quantity: number) => {
-    if (playerMeseta >= item.price) {
-      setPlayerMeseta(prev => prev - item.price);
-      console.log(`Purchased ${item.name} for ${item.price} Meseta`);
+  const handleWeaponPurchase = useCallback((item: ShopItem, quantity: number) => {
+    setPlayerMeseta(prev => {
+      if (prev >= item.price) {
+        console.log(`Purchased ${item.name} for ${item.price} Meseta`);
+        return prev - item.price;
+      }
+      return prev;
+    });
+  }, []);
+
+  const handleCloseShop = useCallback(() => {
+    setActiveShopId(null);
+  }, []);
+
+  const handleItemShopStateChange = useCallback((isOpen: boolean, data: ShopData | null) => {
+    if (isOpen && data) {
+      setActiveShopId('item');
+      onActiveShopChange?.({
+        shopData: data,
+        playerMeseta,
+        onPurchase: handleItemPurchase,
+        onClose: handleCloseShop,
+      });
+    } else if (activeShopId === 'item') {
+      setActiveShopId(null);
+      onActiveShopChange?.(null);
     }
-  };
+  }, [playerMeseta, handleItemPurchase, handleCloseShop, onActiveShopChange, activeShopId]);
+
+  const handleWeaponShopStateChange = useCallback((isOpen: boolean, data: ShopData | null) => {
+    if (isOpen && data) {
+      setActiveShopId('weapon');
+      onActiveShopChange?.({
+        shopData: data,
+        playerMeseta,
+        onPurchase: handleWeaponPurchase,
+        onClose: handleCloseShop,
+      });
+    } else if (activeShopId === 'weapon') {
+      setActiveShopId(null);
+      onActiveShopChange?.(null);
+    }
+  }, [playerMeseta, handleWeaponPurchase, handleCloseShop, onActiveShopChange, activeShopId]);
+
+  // Update parent when playerMeseta changes while shop is open
+  useEffect(() => {
+    if (activeShopId && shopData) {
+      const items = activeShopId === 'item'
+        ? shopData.itemShop.baseItems
+        : shopData.weaponShop.presets[0].weapons.map(w => ({
+            id: w.id,
+            name: w.name,
+            price: w.price,
+            description: `${w.type} - ATP: ${w.atp}, ATA: ${w.ata}`,
+            rarity: w.rarity,
+          }));
+
+      onActiveShopChange?.({
+        shopData: {
+          name: activeShopId === 'item' ? 'Item Shop' : 'Weapon Shop',
+          shopType: activeShopId as 'item' | 'weapon',
+          items,
+        },
+        playerMeseta,
+        onPurchase: activeShopId === 'item' ? handleItemPurchase : handleWeaponPurchase,
+        onClose: handleCloseShop,
+      });
+    }
+  }, [playerMeseta, activeShopId, shopData, handleItemPurchase, handleWeaponPurchase, handleCloseShop, onActiveShopChange]);
 
   if (!shopData) return null;
 
@@ -104,6 +182,7 @@ export default function ShopNPCs() {
         items={itemShopItems}
         playerMeseta={playerMeseta}
         onPurchase={handleItemPurchase}
+        onShopStateChange={handleItemShopStateChange}
       />
 
       <ShopNPC
@@ -114,6 +193,7 @@ export default function ShopNPCs() {
         items={weaponShopItems}
         playerMeseta={playerMeseta}
         onPurchase={handleWeaponPurchase}
+        onShopStateChange={handleWeaponShopStateChange}
       />
 
       {/* Custom Shop - not yet interactive */}
