@@ -118,11 +118,10 @@ export default function ShopNPC({
       {/* Shop UI in 3D space */}
       {isShopOpen && (
         <Html
-          position={[0, 3, 0]}
+          position={[2, 1.5, 0]}
           center
           transform
-          sprite
-          distanceFactor={5}
+          distanceFactor={4}
           style={{ pointerEvents: 'auto' }}
         >
           <div style={styles.shopContainer}>

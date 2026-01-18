@@ -146,8 +146,8 @@ export default function CityMarketFree() {
         <PerspectiveCamera makeDefault position={[0, 4, 12]} />
         <FixedCameraController
           target={playerPosition}
-          distance={6}
-          height={4}
+          distance={4}
+          height={2}
         />
 
         <ambientLight intensity={0.6} />
