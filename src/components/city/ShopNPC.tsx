@@ -148,7 +148,8 @@ export function ShopOverlay({
   onPurchase?: (item: ShopItem, quantity: number) => void;
   onClose: () => void;
 }) {
-  const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null);
+  // Preselect first item (Monomate for item shop)
+  const [selectedItem, setSelectedItem] = useState<ShopItem | null>(items[0] || null);
   const [quantity, setQuantity] = useState(1);
 
   const themeColor = shopType === 'item' ? '#4ade80' : '#f97316';
@@ -171,73 +172,101 @@ export function ShopOverlay({
       <div style={{ ...styles.header, borderBottomColor: themeColor }}>
         <span style={{ ...styles.title, color: themeColor }}>{name}</span>
         <div style={styles.mesetaDisplay}>
-          <span>💰</span>
+          <span style={styles.mesetaLabel}>Meseta:</span>
           <span style={styles.meseta}>{playerMeseta.toLocaleString()}</span>
         </div>
         <button onClick={onClose} style={styles.closeButton}>✕</button>
       </div>
 
-      {/* Item list */}
-      <div style={styles.itemList}>
-        {items.map(item => (
-          <div
-            key={item.id}
-            onClick={() => {
-              setSelectedItem(item);
-              setQuantity(1);
-            }}
-            style={{
-              ...styles.item,
-              ...(selectedItem?.id === item.id ? { ...styles.itemSelected, borderColor: themeColor } : {}),
-              ...(playerMeseta < item.price ? styles.itemUnaffordable : {}),
-            }}
-          >
-            <div style={styles.itemInfo}>
-              <span style={styles.itemName}>{item.name}</span>
-              <span style={styles.itemRarity}>{'★'.repeat(Math.min(item.rarity, 5))}</span>
-            </div>
-            <span style={{ ...styles.itemPrice, color: themeColor }}>
-              {item.price.toLocaleString()}
-            </span>
+      {/* Main content - two column layout */}
+      <div style={styles.mainContent}>
+        {/* Left: Item list */}
+        <div style={styles.itemListColumn}>
+          <div style={styles.itemList}>
+            {items.map(item => (
+              <div
+                key={item.id}
+                onClick={() => {
+                  setSelectedItem(item);
+                  setQuantity(1);
+                }}
+                style={{
+                  ...styles.item,
+                  ...(selectedItem?.id === item.id ? { ...styles.itemSelected, borderColor: themeColor } : {}),
+                  ...(playerMeseta < item.price ? styles.itemUnaffordable : {}),
+                }}
+              >
+                <div style={styles.itemInfo}>
+                  <span style={styles.itemName}>{item.name}</span>
+                  <span style={styles.itemRarity}>{'★'.repeat(Math.min(item.rarity, 5))}</span>
+                </div>
+                <span style={{ ...styles.itemPrice, color: themeColor }}>
+                  {item.price.toLocaleString()}
+                </span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-
-      {/* Purchase section */}
-      {selectedItem && (
-        <div style={styles.purchaseSection}>
-          <div style={styles.purchaseInfo}>
-            <span style={styles.purchaseName}>{selectedItem.name}</span>
-            <div style={styles.quantityControl}>
-              <button
-                style={styles.qtyBtn}
-                onClick={() => setQuantity(q => Math.max(1, q - 1))}
-              >-</button>
-              <span style={styles.qtyValue}>{quantity}</span>
-              <button
-                style={styles.qtyBtn}
-                onClick={() => setQuantity(q => Math.min(10, q + 1))}
-              >+</button>
-            </div>
-          </div>
-          <div style={styles.purchaseTotal}>
-            <span style={{ color: canAfford ? themeColor : '#f66' }}>
-              {(selectedItem.price * quantity).toLocaleString()}
-            </span>
-          </div>
-          <button
-            onClick={handlePurchase}
-            disabled={!canAfford}
-            style={{
-              ...styles.buyButton,
-              background: canAfford ? themeColor : '#444',
-              cursor: canAfford ? 'pointer' : 'not-allowed',
-            }}
-          >
-            Buy
-          </button>
         </div>
-      )}
+
+        {/* Right: Purchase panel */}
+        <div style={{ ...styles.purchasePanel, borderLeftColor: `${themeColor}33` }}>
+          {selectedItem ? (
+            <>
+              <div style={styles.selectedItemHeader}>
+                <span style={{ ...styles.selectedItemName, color: themeColor }}>{selectedItem.name}</span>
+                <span style={styles.selectedItemRarity}>{'★'.repeat(Math.min(selectedItem.rarity, 5))}</span>
+              </div>
+
+              <div style={styles.selectedItemDescription}>
+                {selectedItem.description}
+              </div>
+
+              <div style={styles.priceRow}>
+                <span style={styles.priceLabel}>Price:</span>
+                <span style={{ ...styles.priceValue, color: themeColor }}>
+                  {selectedItem.price.toLocaleString()}
+                </span>
+              </div>
+
+              <div style={styles.quantityRow}>
+                <span style={styles.quantityLabel}>Qty:</span>
+                <div style={styles.quantityControl}>
+                  <button
+                    style={styles.qtyBtn}
+                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                  >-</button>
+                  <span style={styles.qtyValue}>{quantity}</span>
+                  <button
+                    style={styles.qtyBtn}
+                    onClick={() => setQuantity(q => Math.min(99, q + 1))}
+                  >+</button>
+                </div>
+              </div>
+
+              <div style={styles.totalRow}>
+                <span style={styles.totalLabel}>Total:</span>
+                <span style={{ ...styles.totalValue, color: canAfford ? themeColor : '#f66' }}>
+                  {(selectedItem.price * quantity).toLocaleString()}
+                </span>
+              </div>
+
+              <button
+                onClick={handlePurchase}
+                disabled={!canAfford}
+                style={{
+                  ...styles.buyButton,
+                  background: canAfford ? themeColor : '#444',
+                  cursor: canAfford ? 'pointer' : 'not-allowed',
+                }}
+              >
+                Buy
+              </button>
+            </>
+          ) : (
+            <div style={styles.noSelection}>Select an item</div>
+          )}
+        </div>
+      </div>
 
       {/* Footer hint */}
       <div style={styles.footer}>
@@ -276,7 +305,7 @@ const styles: Record<string, React.CSSProperties> = {
   shop: {
     position: 'relative',
     zIndex: 10,
-    width: '450px',
+    width: '650px',
     borderRadius: '12px',
     overflow: 'hidden',
     fontFamily: 'system-ui, -apple-system, sans-serif',
@@ -293,7 +322,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   title: {
     flex: 1,
-    fontSize: '16px',
+    fontSize: '18px',
     fontWeight: 600,
   },
   mesetaDisplay: {
@@ -301,6 +330,9 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: '6px',
     fontSize: '14px',
+  },
+  mesetaLabel: {
+    color: '#999',
   },
   meseta: {
     color: '#fcd34d',
@@ -315,6 +347,14 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#888',
     fontSize: '14px',
     cursor: 'pointer',
+  },
+  mainContent: {
+    display: 'flex',
+    minHeight: '300px',
+  },
+  itemListColumn: {
+    flex: 1,
+    borderRight: '1px solid rgba(255,255,255,0.1)',
   },
   itemList: {
     maxHeight: '300px',
@@ -358,23 +398,56 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '13px',
     fontWeight: 600,
   },
-  purchaseSection: {
+  purchasePanel: {
+    width: '220px',
+    padding: '16px',
     display: 'flex',
-    alignItems: 'center',
+    flexDirection: 'column',
     gap: '12px',
-    padding: '12px 16px',
     background: 'rgba(0,0,0,0.2)',
-    borderTop: '1px solid rgba(255,255,255,0.1)',
+    borderLeft: '1px solid',
   },
-  purchaseInfo: {
-    flex: 1,
+  selectedItemHeader: {
     display: 'flex',
     flexDirection: 'column',
     gap: '4px',
   },
-  purchaseName: {
+  selectedItemName: {
+    fontSize: '16px',
+    fontWeight: 600,
+  },
+  selectedItemRarity: {
     fontSize: '12px',
-    fontWeight: 500,
+    color: '#fcd34d',
+  },
+  selectedItemDescription: {
+    fontSize: '12px',
+    color: '#aaa',
+    lineHeight: 1.4,
+    padding: '8px 0',
+    borderBottom: '1px solid rgba(255,255,255,0.1)',
+  },
+  priceRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  priceLabel: {
+    fontSize: '13px',
+    color: '#888',
+  },
+  priceValue: {
+    fontSize: '14px',
+    fontWeight: 600,
+  },
+  quantityRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  quantityLabel: {
+    fontSize: '13px',
+    color: '#888',
   },
   quantityControl: {
     display: 'flex',
@@ -382,32 +455,52 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '8px',
   },
   qtyBtn: {
-    width: '24px',
-    height: '24px',
+    width: '28px',
+    height: '28px',
     background: 'rgba(255,255,255,0.1)',
     border: 'none',
     borderRadius: '4px',
     color: '#fff',
-    fontSize: '14px',
+    fontSize: '16px',
     cursor: 'pointer',
   },
   qtyValue: {
-    fontSize: '14px',
+    fontSize: '16px',
     fontWeight: 600,
-    width: '24px',
+    width: '32px',
     textAlign: 'center',
   },
-  purchaseTotal: {
-    fontSize: '16px',
+  totalRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: '8px',
+    borderTop: '1px solid rgba(255,255,255,0.1)',
+  },
+  totalLabel: {
+    fontSize: '14px',
+    fontWeight: 600,
+  },
+  totalValue: {
+    fontSize: '18px',
     fontWeight: 600,
   },
   buyButton: {
-    padding: '8px 20px',
+    padding: '12px 20px',
     border: 'none',
     borderRadius: '6px',
     color: '#000',
-    fontSize: '13px',
+    fontSize: '14px',
     fontWeight: 600,
+    marginTop: 'auto',
+  },
+  noSelection: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+    color: '#666',
+    fontSize: '14px',
   },
   footer: {
     padding: '8px 16px',
