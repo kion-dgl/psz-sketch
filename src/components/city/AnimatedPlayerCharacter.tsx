@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useMemo } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import type { Character } from '../../stores/characterStore';
 import * as THREE from 'three';
@@ -46,7 +46,6 @@ export default function AnimatedPlayerCharacter({
   onInteraction
 }: AnimatedPlayerCharacterProps) {
   const groupRef = useRef<THREE.Group>(null);
-  const modelRef = useRef<THREE.Object3D | null>(null);
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
   const currentActionRef = useRef<THREE.AnimationAction | null>(null);
   const animationsRef = useRef<Map<string, THREE.AnimationClip>>(new Map());
@@ -54,7 +53,6 @@ export default function AnimatedPlayerCharacter({
   const {
     resolveWallCollision,
     getFloorHeight,
-    hasFloor,
     checkNPCProximity,
     updateTriggers
   } = useCollision();
@@ -124,7 +122,6 @@ export default function AnimatedPlayerCharacter({
   useEffect(() => {
     if (!clonedModel || !lobbyAnimations) return;
 
-    modelRef.current = clonedModel;
     const mixer = new THREE.AnimationMixer(clonedModel);
     mixerRef.current = mixer;
 
