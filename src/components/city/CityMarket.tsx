@@ -1,6 +1,6 @@
 import LobbyArea, { type LobbyRenderProps } from '../shared/LobbyArea';
 import MarketEnvironment from './MarketEnvironment';
-import NPCs from './NPCs';
+import ShopNPCs from './ShopNPCs';
 import InvisibleWalls from './InvisibleWalls';
 import AreaTriggers from './AreaTriggers';
 import InteractiveTriggers, { type InteractiveTrigger } from '../shared/InteractiveTriggers';
@@ -30,7 +30,7 @@ export default function CityMarket() {
             visible={true}
             onPlayerInZone={setPlayerInInteractiveZone}
           />
-          <NPCs />
+          <ShopNPCs />
         </>
       )}
     />

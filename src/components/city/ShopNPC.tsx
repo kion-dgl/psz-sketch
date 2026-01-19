@@ -3,7 +3,6 @@ import { useGLTF, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { useCollision } from '../../collision';
-import { useFrame, useThree } from '@react-three/fiber';
 
 interface ShopItem {
   id: string;
@@ -13,15 +12,32 @@ interface ShopItem {
   rarity: number;
 }
 
+export interface ShopData {
+  name: string;
+  shopType: 'item' | 'weapon';
+  items: ShopItem[];
+  // For weapon shops with multiple categories
+  categories?: {
+    weapons: ShopItem[];
+    armor: ShopItem[];
+    units: ShopItem[];
+  };
+}
+
 interface ShopNPCProps {
   position: [number, number, number];
   name: string;
   modelPath: string;
   shopType: 'item' | 'weapon';
   items: ShopItem[];
+  categories?: {
+    weapons: ShopItem[];
+    armor: ShopItem[];
+    units: ShopItem[];
+  };
   playerMeseta: number;
   onPurchase?: (item: ShopItem, quantity: number) => void;
-  onClose?: () => void;
+  onShopStateChange?: (isOpen: boolean, shopData: ShopData | null) => void;
 }
 
 export default function ShopNPC({
@@ -30,9 +46,10 @@ export default function ShopNPC({
   modelPath,
   shopType,
   items,
+  categories,
   playerMeseta,
   onPurchase,
-  onClose,
+  onShopStateChange,
 }: ShopNPCProps) {
   const { registerNPC, registerTrigger } = useCollision();
   const { scene } = useGLTF(modelPath);
@@ -75,6 +92,15 @@ export default function ShopNPC({
     return unregister;
   }, [position, name, registerTrigger]);
 
+  // Notify parent when shop state changes
+  useEffect(() => {
+    if (isShopOpen) {
+      onShopStateChange?.(true, { name, shopType, items, categories });
+    } else {
+      onShopStateChange?.(false, null);
+    }
+  }, [isShopOpen, name, shopType, items, categories, onShopStateChange]);
+
   // Handle E key to open shop
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -82,17 +108,16 @@ export default function ShopNPC({
         setIsShopOpen(true);
       } else if (e.key === 'Escape' && isShopOpen) {
         setIsShopOpen(false);
-        onClose?.();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isPlayerNear, isShopOpen, onClose]);
+  }, [isPlayerNear, isShopOpen]);
 
+  // Public close handler (called from overlay)
   const handleClose = () => {
     setIsShopOpen(false);
-    onClose?.();
   };
 
   return (
@@ -115,37 +140,18 @@ export default function ShopNPC({
         </Html>
       )}
 
-      {/* Shop UI in 3D space */}
-      {isShopOpen && (
-        <Html
-          position={[0, 3, 0]}
-          center
-          transform
-          sprite
-          distanceFactor={5}
-          style={{ pointerEvents: 'auto' }}
-        >
-          <div style={styles.shopContainer}>
-            <InWorldShop
-              shopType={shopType}
-              name={name}
-              items={items}
-              playerMeseta={playerMeseta}
-              onPurchase={onPurchase}
-              onClose={handleClose}
-            />
-          </div>
-        </Html>
-      )}
     </group>
   );
 }
 
-// Compact shop UI designed for in-world display
-function InWorldShop({
+type WeaponTab = 'weapons' | 'armor' | 'units';
+
+// Shop UI overlay component - exported for use outside Canvas
+export function ShopOverlay({
   shopType,
   name,
   items,
+  categories,
   playerMeseta,
   onPurchase,
   onClose,
@@ -153,12 +159,34 @@ function InWorldShop({
   shopType: 'item' | 'weapon';
   name: string;
   items: ShopItem[];
+  categories?: {
+    weapons: ShopItem[];
+    armor: ShopItem[];
+    units: ShopItem[];
+  };
   playerMeseta: number;
   onPurchase?: (item: ShopItem, quantity: number) => void;
   onClose: () => void;
 }) {
-  const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null);
+  const [activeTab, setActiveTab] = useState<WeaponTab>('weapons');
+
+  // Get display items based on shop type and active tab
+  const displayItems = useMemo(() => {
+    if (shopType === 'weapon' && categories) {
+      return categories[activeTab];
+    }
+    return items;
+  }, [shopType, categories, activeTab, items]);
+
+  // Preselect first item
+  const [selectedItem, setSelectedItem] = useState<ShopItem | null>(displayItems[0] || null);
   const [quantity, setQuantity] = useState(1);
+
+  // Update selection when tab changes
+  useEffect(() => {
+    setSelectedItem(displayItems[0] || null);
+    setQuantity(1);
+  }, [activeTab, displayItems]);
 
   const themeColor = shopType === 'item' ? '#4ade80' : '#f97316';
   const themeBg = shopType === 'item'
@@ -174,79 +202,137 @@ function InWorldShop({
 
   const canAfford = selectedItem ? playerMeseta >= selectedItem.price * quantity : false;
 
+  const tabs: { key: WeaponTab; label: string }[] = [
+    { key: 'weapons', label: 'Weapons' },
+    { key: 'armor', label: 'Armor' },
+    { key: 'units', label: 'Units' },
+  ];
+
   return (
     <div style={{ ...styles.shop, background: themeBg }}>
       {/* Header */}
       <div style={{ ...styles.header, borderBottomColor: themeColor }}>
         <span style={{ ...styles.title, color: themeColor }}>{name}</span>
+
+        {/* Tabs for weapon shop */}
+        {shopType === 'weapon' && categories && (
+          <div style={styles.tabs}>
+            {tabs.map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                style={{
+                  ...styles.tab,
+                  ...(activeTab === tab.key
+                    ? { ...styles.tabActive, borderBottomColor: themeColor, color: themeColor }
+                    : {}),
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div style={styles.mesetaDisplay}>
-          <span>💰</span>
+          <span style={styles.mesetaLabel}>Meseta:</span>
           <span style={styles.meseta}>{playerMeseta.toLocaleString()}</span>
         </div>
         <button onClick={onClose} style={styles.closeButton}>✕</button>
       </div>
 
-      {/* Item list */}
-      <div style={styles.itemList}>
-        {items.map(item => (
-          <div
-            key={item.id}
-            onClick={() => {
-              setSelectedItem(item);
-              setQuantity(1);
-            }}
-            style={{
-              ...styles.item,
-              ...(selectedItem?.id === item.id ? { ...styles.itemSelected, borderColor: themeColor } : {}),
-              ...(playerMeseta < item.price ? styles.itemUnaffordable : {}),
-            }}
-          >
-            <div style={styles.itemInfo}>
-              <span style={styles.itemName}>{item.name}</span>
-              <span style={styles.itemRarity}>{'★'.repeat(Math.min(item.rarity, 5))}</span>
-            </div>
-            <span style={{ ...styles.itemPrice, color: themeColor }}>
-              {item.price.toLocaleString()}
-            </span>
+      {/* Main content - two column layout */}
+      <div style={styles.mainContent}>
+        {/* Left: Item list */}
+        <div style={styles.itemListColumn}>
+          <div style={styles.itemList}>
+            {displayItems.map(item => (
+              <div
+                key={item.id}
+                onClick={() => {
+                  setSelectedItem(item);
+                  setQuantity(1);
+                }}
+                style={{
+                  ...styles.item,
+                  ...(selectedItem?.id === item.id ? { ...styles.itemSelected, borderColor: themeColor } : {}),
+                  ...(playerMeseta < item.price ? styles.itemUnaffordable : {}),
+                }}
+              >
+                <div style={styles.itemInfo}>
+                  <div style={styles.itemHeader}>
+                    <span style={styles.itemName}>{item.name}</span>
+                    <span style={styles.itemRarity}>{'★'.repeat(Math.min(item.rarity, 5))}</span>
+                  </div>
+                  <span style={styles.itemDescription}>{item.description}</span>
+                </div>
+                <span style={{ ...styles.itemPrice, color: themeColor }}>
+                  {item.price.toLocaleString()}
+                </span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-
-      {/* Purchase section */}
-      {selectedItem && (
-        <div style={styles.purchaseSection}>
-          <div style={styles.purchaseInfo}>
-            <span style={styles.purchaseName}>{selectedItem.name}</span>
-            <div style={styles.quantityControl}>
-              <button
-                style={styles.qtyBtn}
-                onClick={() => setQuantity(q => Math.max(1, q - 1))}
-              >-</button>
-              <span style={styles.qtyValue}>{quantity}</span>
-              <button
-                style={styles.qtyBtn}
-                onClick={() => setQuantity(q => Math.min(10, q + 1))}
-              >+</button>
-            </div>
-          </div>
-          <div style={styles.purchaseTotal}>
-            <span style={{ color: canAfford ? themeColor : '#f66' }}>
-              {(selectedItem.price * quantity).toLocaleString()}
-            </span>
-          </div>
-          <button
-            onClick={handlePurchase}
-            disabled={!canAfford}
-            style={{
-              ...styles.buyButton,
-              background: canAfford ? themeColor : '#444',
-              cursor: canAfford ? 'pointer' : 'not-allowed',
-            }}
-          >
-            Buy
-          </button>
         </div>
-      )}
+
+        {/* Right: Purchase panel */}
+        <div style={{ ...styles.purchasePanel, borderLeftColor: `${themeColor}33` }}>
+          {selectedItem ? (
+            <>
+              <div style={styles.selectedItemHeader}>
+                <span style={{ ...styles.selectedItemName, color: themeColor }}>{selectedItem.name}</span>
+                <span style={styles.selectedItemRarity}>{'★'.repeat(Math.min(selectedItem.rarity, 5))}</span>
+              </div>
+
+              <div style={styles.selectedItemDescription}>
+                {selectedItem.description}
+              </div>
+
+              <div style={styles.priceRow}>
+                <span style={styles.priceLabel}>Price:</span>
+                <span style={{ ...styles.priceValue, color: themeColor }}>
+                  {selectedItem.price.toLocaleString()}
+                </span>
+              </div>
+
+              <div style={styles.quantityRow}>
+                <span style={styles.quantityLabel}>Qty:</span>
+                <div style={styles.quantityControl}>
+                  <button
+                    style={styles.qtyBtn}
+                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                  >-</button>
+                  <span style={styles.qtyValue}>{quantity}</span>
+                  <button
+                    style={styles.qtyBtn}
+                    onClick={() => setQuantity(q => Math.min(99, q + 1))}
+                  >+</button>
+                </div>
+              </div>
+
+              <div style={styles.totalRow}>
+                <span style={styles.totalLabel}>Total:</span>
+                <span style={{ ...styles.totalValue, color: canAfford ? themeColor : '#f66' }}>
+                  {(selectedItem.price * quantity).toLocaleString()}
+                </span>
+              </div>
+
+              <button
+                onClick={handlePurchase}
+                disabled={!canAfford}
+                style={{
+                  ...styles.buyButton,
+                  background: canAfford ? themeColor : '#444',
+                  cursor: canAfford ? 'pointer' : 'not-allowed',
+                }}
+              >
+                Buy
+              </button>
+            </>
+          ) : (
+            <div style={styles.noSelection}>Select an item</div>
+          )}
+        </div>
+      </div>
 
       {/* Footer hint */}
       <div style={styles.footer}>
@@ -282,12 +368,10 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#fff',
     fontSize: '14px',
   },
-  shopContainer: {
-    transform: 'scale(0.6)',
-    transformOrigin: 'center center',
-  },
   shop: {
-    width: '380px',
+    position: 'relative',
+    zIndex: 10,
+    width: '650px',
     borderRadius: '12px',
     overflow: 'hidden',
     fontFamily: 'system-ui, -apple-system, sans-serif',
@@ -303,15 +387,37 @@ const styles: Record<string, React.CSSProperties> = {
     borderBottom: '1px solid',
   },
   title: {
-    flex: 1,
-    fontSize: '16px',
+    fontSize: '18px',
     fontWeight: 600,
+  },
+  tabs: {
+    display: 'flex',
+    gap: '4px',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  tab: {
+    padding: '6px 14px',
+    background: 'transparent',
+    border: 'none',
+    borderBottom: '2px solid transparent',
+    color: '#888',
+    fontSize: '13px',
+    fontWeight: 500,
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+  },
+  tabActive: {
+    color: '#fff',
   },
   mesetaDisplay: {
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
     fontSize: '14px',
+  },
+  mesetaLabel: {
+    color: '#999',
   },
   meseta: {
     color: '#fcd34d',
@@ -327,10 +433,18 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '14px',
     cursor: 'pointer',
   },
+  mainContent: {
+    display: 'flex',
+    minHeight: '300px',
+  },
+  itemListColumn: {
+    flex: 1,
+    borderRight: '1px solid rgba(255,255,255,0.1)',
+  },
   itemList: {
-    maxHeight: '200px',
+    maxHeight: '300px',
     overflowY: 'auto',
-    padding: '8px',
+    padding: '12px',
   },
   item: {
     display: 'flex',
@@ -356,6 +470,13 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     gap: '2px',
+    flex: 1,
+    minWidth: 0,
+  },
+  itemHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
   },
   itemName: {
     fontSize: '13px',
@@ -365,27 +486,67 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '10px',
     color: '#fcd34d',
   },
+  itemDescription: {
+    fontSize: '11px',
+    color: '#888',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
   itemPrice: {
     fontSize: '13px',
     fontWeight: 600,
   },
-  purchaseSection: {
+  purchasePanel: {
+    width: '220px',
+    padding: '16px',
     display: 'flex',
-    alignItems: 'center',
+    flexDirection: 'column',
     gap: '12px',
-    padding: '12px 16px',
     background: 'rgba(0,0,0,0.2)',
-    borderTop: '1px solid rgba(255,255,255,0.1)',
+    borderLeft: '1px solid',
   },
-  purchaseInfo: {
-    flex: 1,
+  selectedItemHeader: {
     display: 'flex',
     flexDirection: 'column',
     gap: '4px',
   },
-  purchaseName: {
+  selectedItemName: {
+    fontSize: '16px',
+    fontWeight: 600,
+  },
+  selectedItemRarity: {
     fontSize: '12px',
-    fontWeight: 500,
+    color: '#fcd34d',
+  },
+  selectedItemDescription: {
+    fontSize: '12px',
+    color: '#aaa',
+    lineHeight: 1.4,
+    padding: '8px 0',
+    borderBottom: '1px solid rgba(255,255,255,0.1)',
+  },
+  priceRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  priceLabel: {
+    fontSize: '13px',
+    color: '#888',
+  },
+  priceValue: {
+    fontSize: '14px',
+    fontWeight: 600,
+  },
+  quantityRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  quantityLabel: {
+    fontSize: '13px',
+    color: '#888',
   },
   quantityControl: {
     display: 'flex',
@@ -393,32 +554,52 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '8px',
   },
   qtyBtn: {
-    width: '24px',
-    height: '24px',
+    width: '28px',
+    height: '28px',
     background: 'rgba(255,255,255,0.1)',
     border: 'none',
     borderRadius: '4px',
     color: '#fff',
-    fontSize: '14px',
+    fontSize: '16px',
     cursor: 'pointer',
   },
   qtyValue: {
-    fontSize: '14px',
+    fontSize: '16px',
     fontWeight: 600,
-    width: '24px',
+    width: '32px',
     textAlign: 'center',
   },
-  purchaseTotal: {
-    fontSize: '16px',
+  totalRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: '8px',
+    borderTop: '1px solid rgba(255,255,255,0.1)',
+  },
+  totalLabel: {
+    fontSize: '14px',
+    fontWeight: 600,
+  },
+  totalValue: {
+    fontSize: '18px',
     fontWeight: 600,
   },
   buyButton: {
-    padding: '8px 20px',
+    padding: '12px 20px',
     border: 'none',
     borderRadius: '6px',
     color: '#000',
-    fontSize: '13px',
+    fontSize: '14px',
     fontWeight: 600,
+    marginTop: 'auto',
+  },
+  noSelection: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+    color: '#666',
+    fontSize: '14px',
   },
   footer: {
     padding: '8px 16px',

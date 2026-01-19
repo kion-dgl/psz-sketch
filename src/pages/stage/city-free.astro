@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CityMarketFree from '../../components/city/CityMarketFree';
+
+export const prerender = false;
+---
+
+<Layout title="City Market (Free Movement) - PSZ Sketch">
+  <CityMarketFree client:load />
+</Layout>
