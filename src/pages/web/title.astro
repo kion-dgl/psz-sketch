@@ -1,0 +1,149 @@
+---
+/**
+ * Web Title Screen
+ * Simple HTML/CSS title page (no 3D)
+ */
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phantasy Star Zero</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Press Start 2P', system-ui, sans-serif;
+      background: linear-gradient(135deg, #0a1628 0%, #1a2a4a 50%, #0a1628 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .title-container {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .title {
+      font-size: 2rem;
+      background: linear-gradient(180deg, #6bb8ff 0%, #a6c9ff 50%, #ffffff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 4px 20px rgba(107, 184, 255, 0.5);
+      margin-bottom: 0.5rem;
+      letter-spacing: 4px;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: #6bb8ff;
+      margin-bottom: 3rem;
+      letter-spacing: 2px;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .menu-button {
+      background: linear-gradient(135deg, #2d4a6a 0%, #1a3a5a 100%);
+      border: 2px solid #6bb8ff;
+      color: white;
+      padding: 1rem 3rem;
+      font-family: inherit;
+      font-size: 0.7rem;
+      cursor: pointer;
+      letter-spacing: 2px;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: block;
+    }
+
+    .menu-button:hover {
+      background: linear-gradient(135deg, #3d5a8a 0%, #2a4a7a 100%);
+      border-color: #a6c9ff;
+      transform: scale(1.02);
+      box-shadow: 0 4px 20px rgba(107, 184, 255, 0.3);
+    }
+
+    .menu-button:active {
+      transform: scale(0.98);
+    }
+
+    .version {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      font-size: 0.6rem;
+      color: #4a6a8a;
+    }
+
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.5;
+      animation: twinkle 3s infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.8; }
+    }
+  </style>
+</head>
+<body data-testid="title-screen">
+  <div class="stars" id="stars"></div>
+
+  <div class="title-container">
+    <h1 class="title">PHANTASY STAR</h1>
+    <p class="subtitle">ZERO</p>
+
+    <nav class="menu">
+      <a href="/web/character-select" class="menu-button" data-testid="start-game">
+        START GAME
+      </a>
+    </nav>
+  </div>
+
+  <div class="version">v0.0.1</div>
+
+  <script>
+    // Generate random stars
+    const starsContainer = document.getElementById('stars');
+    for (let i = 0; i < 100; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 3 + 's';
+      starsContainer?.appendChild(star);
+    }
+  </script>
+</body>
+</html>

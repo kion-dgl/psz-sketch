@@ -1,0 +1,30 @@
+---
+/**
+ * Web Character Create Screen
+ * Character creation with class selection and customization
+ */
+import CharacterCreateWeb from '../../components/web/CharacterCreateWeb';
+
+// Get slot from URL params
+const url = new URL(Astro.request.url);
+const slotParam = url.searchParams.get('slot');
+const slot = slotParam !== null ? parseInt(slotParam, 10) : 0;
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Character - Phantasy Star Zero</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <CharacterCreateWeb client:load slot={slot} />
+</body>
+</html>
