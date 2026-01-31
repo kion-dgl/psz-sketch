@@ -36,6 +36,15 @@ import {
 } from '../systems/mission';
 import { applyExpGain, getLevelForExp } from '../systems/leveling';
 import { getStartingItems, STARTING_MESETA } from '../systems/inventory/starting-items';
+import {
+  getSharedStorage,
+  getSharedStorageMeseta,
+  depositMesetaToStorage,
+  withdrawMesetaFromStorage,
+  addToSharedStorage,
+  removeFromSharedStorage,
+  clearSharedStorage,
+} from '../systems/inventory/inventory';
 
 // Initialize systems
 initializeDefaultShops();
@@ -153,6 +162,53 @@ export function getAvailableCommands(): AvailableCommand[] {
         args: [],
       });
     }
+
+    if (currentLocation === 'storage') {
+      commands.push({
+        name: 'show-storage',
+        description: 'Show shared storage contents',
+        usage: 'show-storage',
+        args: [],
+      });
+
+      commands.push({
+        name: 'deposit-meseta',
+        description: 'Deposit meseta to shared storage',
+        usage: 'deposit-meseta <amount>',
+        args: [
+          { name: 'amount', type: 'number', required: true, description: 'Amount to deposit' },
+        ],
+      });
+
+      commands.push({
+        name: 'withdraw-meseta',
+        description: 'Withdraw meseta from shared storage',
+        usage: 'withdraw-meseta <amount>',
+        args: [
+          { name: 'amount', type: 'number', required: true, description: 'Amount to withdraw' },
+        ],
+      });
+
+      commands.push({
+        name: 'deposit-item',
+        description: 'Deposit item to shared storage',
+        usage: 'deposit-item <item-id> [quantity]',
+        args: [
+          { name: 'item-id', type: 'string', required: true, description: 'Item to deposit' },
+          { name: 'quantity', type: 'number', required: false, description: 'Quantity (default: 1)' },
+        ],
+      });
+
+      commands.push({
+        name: 'withdraw-item',
+        description: 'Withdraw item from shared storage',
+        usage: 'withdraw-item <item-id> [quantity]',
+        args: [
+          { name: 'item-id', type: 'string', required: true, description: 'Item to withdraw' },
+          { name: 'quantity', type: 'number', required: false, description: 'Quantity (default: 1)' },
+        ],
+      });
+    }
   }
 
   return commands;
@@ -188,7 +244,7 @@ export function execute(commandLine: string): CommandResult {
 
     case 'goto':
       if (!args[0]) {
-        return { success: false, message: 'Usage: goto <location> (city, shop, missions, inventory)' };
+        return { success: false, message: 'Usage: goto <location> (city, shop, missions, inventory, storage)' };
       }
       return executeGoto(args[0].toLowerCase() as Location);
 
@@ -216,6 +272,49 @@ export function execute(commandLine: string): CommandResult {
 
     case 'show-inventory':
       return executeShowInventory();
+
+    case 'show-storage':
+      return executeShowStorage();
+
+    case 'deposit-meseta':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: deposit-meseta <amount>' };
+      }
+      const depositAmt = parseInt(args[0]);
+      if (isNaN(depositAmt) || depositAmt < 1) {
+        return { success: false, message: 'Amount must be a positive number.' };
+      }
+      return executeDepositMeseta(depositAmt);
+
+    case 'withdraw-meseta':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: withdraw-meseta <amount>' };
+      }
+      const withdrawAmt = parseInt(args[0]);
+      if (isNaN(withdrawAmt) || withdrawAmt < 1) {
+        return { success: false, message: 'Amount must be a positive number.' };
+      }
+      return executeWithdrawMeseta(withdrawAmt);
+
+    case 'deposit-item':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: deposit-item <item-id> [quantity]' };
+      }
+      const depositItemQty = args[1] ? parseInt(args[1]) : 1;
+      if (isNaN(depositItemQty) || depositItemQty < 1) {
+        return { success: false, message: 'Quantity must be a positive number.' };
+      }
+      return executeDepositItem(args[0], depositItemQty);
+
+    case 'withdraw-item':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: withdraw-item <item-id> [quantity]' };
+      }
+      const withdrawItemQty = args[1] ? parseInt(args[1]) : 1;
+      if (isNaN(withdrawItemQty) || withdrawItemQty < 1) {
+        return { success: false, message: 'Quantity must be a positive number.' };
+      }
+      return executeWithdrawItem(args[0], withdrawItemQty);
 
     default:
       return {
@@ -334,7 +433,7 @@ function executeGoto(location: Location): CommandResult {
     };
   }
 
-  const validLocations: Location[] = ['city', 'shop', 'missions', 'inventory'];
+  const validLocations: Location[] = ['city', 'shop', 'missions', 'inventory', 'storage'];
   if (!validLocations.includes(location)) {
     return {
       success: false,
@@ -500,6 +599,203 @@ function executeShowInventory(): CommandResult {
   };
 }
 
+function executeShowStorage(): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (currentLocation !== 'storage') {
+    return { success: false, message: 'You must be at storage. Use: goto storage' };
+  }
+
+  const storage = getSharedStorage();
+  const lines: string[] = [];
+
+  lines.push(`Meseta: ${storage.meseta}`);
+  lines.push(`Items (${storage.items.length}/${storage.maxSlots}):`);
+
+  if (storage.items.length === 0) {
+    lines.push('  (empty)');
+  } else {
+    for (const slot of storage.items) {
+      lines.push(`  ${slot.item.name.padEnd(20)} x${slot.quantity}`);
+    }
+  }
+
+  return {
+    success: true,
+    message: `Shared Storage:\n${lines.join('\n')}`,
+    data: storage,
+  };
+}
+
+function executeDepositMeseta(amount: number): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (currentLocation !== 'storage') {
+    return { success: false, message: 'You must be at storage. Use: goto storage' };
+  }
+
+  const charMeseta = currentCharacter.meseta ?? 0;
+  if (charMeseta < amount) {
+    return { success: false, message: `Not enough meseta. You have ${charMeseta}` };
+  }
+
+  // Update shared storage meseta directly
+  const storage = getSharedStorage();
+  const newStorageBalance = (storage.meseta ?? 0) + amount;
+
+  // Save to storage (using localStorage directly since CLI doesn't use the full character system)
+  if (typeof localStorage !== 'undefined') {
+    const stored = localStorage.getItem('shared_storage');
+    const data = stored ? JSON.parse(stored) : { items: [], meseta: 0 };
+    data.meseta = newStorageBalance;
+    localStorage.setItem('shared_storage', JSON.stringify(data));
+  }
+
+  // Update in-memory character meseta
+  currentCharacter = {
+    ...currentCharacter,
+    meseta: charMeseta - amount,
+  };
+
+  return {
+    success: true,
+    message: `Deposited ${amount} meseta to storage`,
+    data: { newStorageBalance, characterMeseta: currentCharacter.meseta },
+  };
+}
+
+function executeWithdrawMeseta(amount: number): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (currentLocation !== 'storage') {
+    return { success: false, message: 'You must be at storage. Use: goto storage' };
+  }
+
+  const storage = getSharedStorage();
+  const storageMeseta = storage.meseta ?? 0;
+
+  if (storageMeseta < amount) {
+    return { success: false, message: `Not enough meseta in storage. Balance: ${storageMeseta}` };
+  }
+
+  // Update shared storage meseta directly
+  const newStorageBalance = storageMeseta - amount;
+
+  // Save to storage
+  if (typeof localStorage !== 'undefined') {
+    const stored = localStorage.getItem('shared_storage');
+    const data = stored ? JSON.parse(stored) : { items: [], meseta: 0 };
+    data.meseta = newStorageBalance;
+    localStorage.setItem('shared_storage', JSON.stringify(data));
+  }
+
+  // Update in-memory character meseta
+  currentCharacter = {
+    ...currentCharacter,
+    meseta: (currentCharacter.meseta ?? 0) + amount,
+  };
+
+  return {
+    success: true,
+    message: `Withdrew ${amount} meseta from storage`,
+    data: { newStorageBalance, characterMeseta: currentCharacter.meseta },
+  };
+}
+
+function executeDepositItem(itemId: string, quantity: number): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (currentLocation !== 'storage') {
+    return { success: false, message: 'You must be at storage. Use: goto storage' };
+  }
+
+  // Check if item is in character inventory
+  const item = inventory.get(itemId);
+  if (!item) {
+    return { success: false, message: `Item not found in inventory: ${itemId}` };
+  }
+
+  if (item.quantity < quantity) {
+    return { success: false, message: `Only ${item.quantity} in inventory` };
+  }
+
+  // Get the item definition from starting items (simplified for CLI)
+  const startingItems = getStartingItems(currentCharacter.class_id);
+  const itemDef = startingItems.consumables.find(c => c.item.id === itemId)?.item;
+
+  if (!itemDef) {
+    return { success: false, message: `Cannot deposit item: ${itemId}` };
+  }
+
+  // Add to shared storage
+  const result = addToSharedStorage(itemDef, quantity);
+  if (!result.success) {
+    return result;
+  }
+
+  // Remove from character inventory
+  item.quantity -= quantity;
+  if (item.quantity <= 0) {
+    inventory.delete(itemId);
+  }
+
+  return {
+    success: true,
+    message: `Deposited ${quantity}x ${itemDef.name} to storage`,
+    data: { itemId, quantity },
+  };
+}
+
+function executeWithdrawItem(itemId: string, quantity: number): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (currentLocation !== 'storage') {
+    return { success: false, message: 'You must be at storage. Use: goto storage' };
+  }
+
+  // Check if item is in shared storage
+  const storage = getSharedStorage();
+  const storageSlot = storage.items.find(s => s.item.id === itemId);
+
+  if (!storageSlot) {
+    return { success: false, message: `Item not found in storage: ${itemId}` };
+  }
+
+  if (storageSlot.quantity < quantity) {
+    return { success: false, message: `Only ${storageSlot.quantity} in storage` };
+  }
+
+  // Remove from shared storage
+  const result = removeFromSharedStorage(itemId, quantity);
+  if (!result.success) {
+    return result;
+  }
+
+  // Add to character inventory
+  const existing = inventory.get(itemId);
+  if (existing) {
+    existing.quantity += quantity;
+  } else {
+    inventory.set(itemId, { itemId, quantity });
+  }
+
+  return {
+    success: true,
+    message: `Withdrew ${quantity}x ${storageSlot.item.name} from storage`,
+    data: { itemId, quantity },
+  };
+}
+
 /**
  * Reset game state (for testing)
  */
@@ -507,4 +803,5 @@ export function resetState(): void {
   currentCharacter = null;
   currentLocation = 'city';
   inventory.clear();
+  clearSharedStorage();
 }

@@ -96,4 +96,12 @@ export const SHARED_STORAGE_SLOTS = 500;
 export interface SharedStorageState {
   items: InventorySlot[];
   maxSlots: number;
+  /** Shared meseta balance accessible by all characters */
+  meseta: number;
+}
+
+export interface MesetaTransferResult {
+  success: boolean;
+  message: string;
+  newBalance?: number;
 }

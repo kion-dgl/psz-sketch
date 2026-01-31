@@ -27,6 +27,9 @@ import {
   withdrawFromStorage,
   getSharedStorageCount,
   clearSharedStorage,
+  getSharedStorageMeseta,
+  depositMesetaToStorage,
+  withdrawMesetaFromStorage,
 } from './inventory';
 import type {
   GameItem,
@@ -36,6 +39,8 @@ import type {
   InventoryState,
 } from './types';
 import { DEFAULT_MAX_SLOTS, SHARED_STORAGE_SLOTS } from './types';
+import { createAndSaveCharacter } from '../character/character';
+import { getCharacterFromSlot, clearCharacterSlots } from '../character/storage';
 
 // Test items
 const testSword: WeaponItem = {
@@ -850,5 +855,248 @@ describe('Storage Transfer - Withdraw', () => {
     const result = withdrawFromStorage('char_full', 'monomate', 1);
     expect(result.success).toBe(false);
     expect(result.message).toContain('full');
+  });
+});
+
+// ============================================
+// SHARED STORAGE MESETA TESTS
+// ============================================
+
+describe('Shared Storage - Meseta', () => {
+  beforeEach(() => {
+    clearSharedStorage();
+    // Clear character storage for clean test
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('character_slots');
+    }
+  });
+
+  it('starts with zero meseta', () => {
+    const balance = getSharedStorageMeseta();
+    expect(balance).toBe(0);
+  });
+
+  it('includes meseta in shared storage state', () => {
+    const storage = getSharedStorage();
+    expect(storage.meseta).toBe(0);
+  });
+});
+
+describe('Shared Storage - Deposit Meseta', () => {
+  beforeEach(() => {
+    clearSharedStorage();
+    clearCharacterSlots();
+  });
+
+  it('deposits meseta from character to storage', () => {
+    const character = createAndSaveCharacter({
+      name: 'DepositTest',
+      classId: 'HUmar',
+      slot: 0,
+    });
+
+    // Character starts with 500 meseta
+    const result = depositMesetaToStorage(character.character_id, 200);
+    expect(result.success).toBe(true);
+    expect(result.newBalance).toBe(200);
+
+    // Check character meseta reduced
+    const updatedChar = getCharacterFromSlot(0);
+    expect(updatedChar?.meseta).toBe(300);
+
+    // Check storage meseta increased
+    expect(getSharedStorageMeseta()).toBe(200);
+  });
+
+  it('fails when character has insufficient meseta', () => {
+    const character = createAndSaveCharacter({
+      name: 'PoorTest',
+      classId: 'HUmar',
+      slot: 0,
+    });
+
+    // Try to deposit more than character has (500)
+    const result = depositMesetaToStorage(character.character_id, 1000);
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('Not enough meseta');
+  });
+
+  it('fails with zero or negative amount', () => {
+    const character = createAndSaveCharacter({
+      name: 'ZeroTest',
+      classId: 'HUmar',
+      slot: 0,
+    });
+
+    expect(depositMesetaToStorage(character.character_id, 0).success).toBe(false);
+    expect(depositMesetaToStorage(character.character_id, -100).success).toBe(false);
+  });
+
+  it('fails for non-existent character', () => {
+    const result = depositMesetaToStorage('fake_id', 100);
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('Character not found');
+  });
+});
+
+describe('Shared Storage - Withdraw Meseta', () => {
+  beforeEach(() => {
+    clearSharedStorage();
+    clearCharacterSlots();
+  });
+
+  it('withdraws meseta from storage to character', () => {
+    // First deposit some meseta
+    const character = createAndSaveCharacter({
+      name: 'WithdrawTest',
+      classId: 'HUmar',
+      slot: 0,
+    });
+
+    depositMesetaToStorage(character.character_id, 400);
+
+    // Now withdraw
+    const result = withdrawMesetaFromStorage(character.character_id, 150);
+    expect(result.success).toBe(true);
+    expect(result.newBalance).toBe(250);
+
+    // Check character meseta increased
+    const updatedChar = getCharacterFromSlot(0);
+    expect(updatedChar?.meseta).toBe(250); // 100 + 150
+
+    // Check storage meseta decreased
+    expect(getSharedStorageMeseta()).toBe(250);
+  });
+
+  it('fails when storage has insufficient meseta', () => {
+    const character = createAndSaveCharacter({
+      name: 'OverdrawTest',
+      classId: 'HUmar',
+      slot: 0,
+    });
+
+    // Storage starts with 0 meseta
+    const result = withdrawMesetaFromStorage(character.character_id, 100);
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('Not enough meseta in storage');
+  });
+
+  it('cannot withdraw below zero', () => {
+    const character = createAndSaveCharacter({
+      name: 'ZeroTest',
+      classId: 'HUmar',
+      slot: 0,
+    });
+
+    depositMesetaToStorage(character.character_id, 100);
+
+    // Try to withdraw more than stored
+    const result = withdrawMesetaFromStorage(character.character_id, 200);
+    expect(result.success).toBe(false);
+    expect(getSharedStorageMeseta()).toBe(100); // Unchanged
+  });
+
+  it('fails with zero or negative amount', () => {
+    const character = createAndSaveCharacter({
+      name: 'NegTest',
+      classId: 'HUmar',
+      slot: 0,
+    });
+
+    expect(withdrawMesetaFromStorage(character.character_id, 0).success).toBe(false);
+    expect(withdrawMesetaFromStorage(character.character_id, -50).success).toBe(false);
+  });
+});
+
+describe('Shared Storage - Cross-Character Access', () => {
+  beforeEach(() => {
+    clearSharedStorage();
+    clearCharacterSlots();
+  });
+
+  it('allows one character to deposit and another to withdraw meseta', () => {
+    // Create first character (Hunter)
+    const hunter = createAndSaveCharacter({
+      name: 'Hunter',
+      classId: 'HUmar',
+      slot: 0,
+    });
+
+    // Hunter deposits meseta
+    depositMesetaToStorage(hunter.character_id, 300);
+    expect(getSharedStorageMeseta()).toBe(300);
+
+    // Create second character (Force)
+    const force = createAndSaveCharacter({
+      name: 'Force',
+      classId: 'FOmarl',
+      slot: 1,
+    });
+
+    // Force withdraws meseta
+    const result = withdrawMesetaFromStorage(force.character_id, 200);
+    expect(result.success).toBe(true);
+
+    // Check balances
+    const updatedHunter = getCharacterFromSlot(0);
+    const updatedForce = getCharacterFromSlot(1);
+
+    expect(updatedHunter?.meseta).toBe(200); // 500 - 300
+    expect(updatedForce?.meseta).toBe(700); // 500 + 200
+    expect(getSharedStorageMeseta()).toBe(100); // 300 - 200
+  });
+
+  it('allows one character to deposit and another to withdraw items', () => {
+    // Create Hunter
+    const hunter = createAndSaveCharacter({
+      name: 'Hunter',
+      classId: 'HUmar',
+      slot: 0,
+    });
+
+    // Hunter picks up a rod (can't use it)
+    const rod: WeaponItem = {
+      id: 'found_rod',
+      name: 'Found Rod',
+      description: 'A rod found in the field',
+      type: 'weapon',
+      weaponType: 'rod',
+      attack: 50,
+      accuracy: 30,
+      grindLevel: 0,
+      maxGrind: 9,
+      requiredLevel: 1,
+      rarity: 2,
+      sellPrice: 100,
+      stackable: false,
+      maxStack: 1,
+      classRestrictions: ['FOmar', 'FOmarl', 'FOnewm', 'FOnewearl'],
+    };
+
+    // Add rod to Hunter's inventory
+    let hunterInv = getInventory(hunter.character_id);
+    addItem(hunterInv, rod);
+
+    // Hunter deposits rod to shared storage
+    depositToStorage(hunter.character_id, 'found_rod');
+
+    // Verify rod is in shared storage
+    const storage = getSharedStorage();
+    expect(storage.items.find(s => s.item.id === 'found_rod')).toBeDefined();
+
+    // Create Force
+    const force = createAndSaveCharacter({
+      name: 'Force',
+      classId: 'FOmarl',
+      slot: 1,
+    });
+
+    // Force withdraws the rod
+    const result = withdrawFromStorage(force.character_id, 'found_rod');
+    expect(result.success).toBe(true);
+
+    // Verify Force has the rod
+    const forceInv = getInventory(force.character_id);
+    expect(forceInv.items.find(s => s.item.id === 'found_rod')).toBeDefined();
   });
 });

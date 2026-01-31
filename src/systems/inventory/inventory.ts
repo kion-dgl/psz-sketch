@@ -14,8 +14,10 @@ import type {
   WeaponItem,
   ArmorItem,
   SharedStorageState,
+  MesetaTransferResult,
 } from './types';
 import { DEFAULT_MAX_SLOTS, MAX_INVENTORY_SLOTS, SHARED_STORAGE_SLOTS } from './types';
+import { getCharacterSlots, updateCharacter } from '../character/storage';
 
 const STORAGE_KEY_PREFIX = 'inventory_';
 
@@ -519,19 +521,23 @@ const SHARED_STORAGE_KEY = 'shared_storage';
  */
 export function getSharedStorage(): SharedStorageState {
   if (typeof localStorage === 'undefined') {
-    return { items: [], maxSlots: SHARED_STORAGE_SLOTS };
+    return { items: [], maxSlots: SHARED_STORAGE_SLOTS, meseta: 0 };
   }
 
   const stored = localStorage.getItem(SHARED_STORAGE_KEY);
   if (!stored) {
-    return { items: [], maxSlots: SHARED_STORAGE_SLOTS };
+    return { items: [], maxSlots: SHARED_STORAGE_SLOTS, meseta: 0 };
   }
 
   try {
     const parsed = JSON.parse(stored);
-    return { ...parsed, maxSlots: SHARED_STORAGE_SLOTS };
+    return {
+      items: parsed.items ?? [],
+      maxSlots: SHARED_STORAGE_SLOTS,
+      meseta: parsed.meseta ?? 0,
+    };
   } catch {
-    return { items: [], maxSlots: SHARED_STORAGE_SLOTS };
+    return { items: [], maxSlots: SHARED_STORAGE_SLOTS, meseta: 0 };
   }
 }
 
@@ -666,4 +672,84 @@ export function getSharedStorageCount(): number {
 export function clearSharedStorage(): void {
   if (typeof localStorage === 'undefined') return;
   localStorage.removeItem(SHARED_STORAGE_KEY);
+}
+
+/**
+ * Get shared storage meseta balance
+ */
+export function getSharedStorageMeseta(): number {
+  return getSharedStorage().meseta;
+}
+
+/**
+ * Deposit meseta from character to shared storage
+ */
+export function depositMesetaToStorage(characterId: string, amount: number): MesetaTransferResult {
+  if (amount <= 0) {
+    return { success: false, message: 'Amount must be positive' };
+  }
+
+  const slots = getCharacterSlots();
+  const character = slots.find((c: any) => c?.character_id === characterId);
+
+  if (!character) {
+    return { success: false, message: 'Character not found' };
+  }
+
+  const currentMeseta = character.meseta ?? 0;
+  if (currentMeseta < amount) {
+    return { success: false, message: `Not enough meseta. You have ${currentMeseta}` };
+  }
+
+  // Update character meseta
+  const updatedCharacter = { ...character, meseta: currentMeseta - amount };
+  updateCharacter(updatedCharacter);
+
+  // Update shared storage meseta
+  const storage = getSharedStorage();
+  storage.meseta = (storage.meseta ?? 0) + amount;
+  saveSharedStorage(storage);
+
+  return {
+    success: true,
+    message: `Deposited ${amount} meseta to storage`,
+    newBalance: storage.meseta,
+  };
+}
+
+/**
+ * Withdraw meseta from shared storage to character
+ */
+export function withdrawMesetaFromStorage(characterId: string, amount: number): MesetaTransferResult {
+  if (amount <= 0) {
+    return { success: false, message: 'Amount must be positive' };
+  }
+
+  const storage = getSharedStorage();
+  const storageMeseta = storage.meseta ?? 0;
+
+  if (storageMeseta < amount) {
+    return { success: false, message: `Not enough meseta in storage. Balance: ${storageMeseta}` };
+  }
+
+  const slots = getCharacterSlots();
+  const character = slots.find((c: any) => c?.character_id === characterId);
+
+  if (!character) {
+    return { success: false, message: 'Character not found' };
+  }
+
+  // Update shared storage meseta
+  storage.meseta = storageMeseta - amount;
+  saveSharedStorage(storage);
+
+  // Update character meseta
+  const updatedCharacter = { ...character, meseta: (character.meseta ?? 0) + amount };
+  updateCharacter(updatedCharacter);
+
+  return {
+    success: true,
+    message: `Withdrew ${amount} meseta from storage`,
+    newBalance: storage.meseta,
+  };
 }

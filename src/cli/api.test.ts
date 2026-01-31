@@ -381,6 +381,108 @@ describe('CLI API', () => {
       commands = getAvailableCommands();
       expect(commands.find(c => c.name === 'list-missions')).toBeDefined();
       expect(commands.find(c => c.name === 'start-mission')).toBeDefined();
+
+      // Go to storage
+      execute('goto storage');
+      commands = getAvailableCommands();
+      expect(commands.find(c => c.name === 'show-storage')).toBeDefined();
+      expect(commands.find(c => c.name === 'deposit-meseta')).toBeDefined();
+      expect(commands.find(c => c.name === 'withdraw-meseta')).toBeDefined();
+      expect(commands.find(c => c.name === 'deposit-item')).toBeDefined();
+      expect(commands.find(c => c.name === 'withdraw-item')).toBeDefined();
+    });
+  });
+
+  describe('Storage Commands', () => {
+    beforeEach(() => {
+      execute('create-character HUmar TestHero');
+      execute('goto storage');
+    });
+
+    it('moves to storage location', () => {
+      expect(getState().location).toBe('storage');
+    });
+
+    it('shows storage contents', () => {
+      const result = execute('show-storage');
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('Shared Storage');
+      expect(result.message).toContain('Meseta: 0');
+    });
+
+    it('deposits meseta to storage', () => {
+      const initialMeseta = getState().meseta;
+      const result = execute('deposit-meseta 100');
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('Deposited 100 meseta');
+
+      // Check character meseta decreased
+      expect(getState().meseta).toBe(initialMeseta - 100);
+
+      // Check storage meseta increased
+      const storageResult = execute('show-storage');
+      expect(storageResult.message).toContain('Meseta: 100');
+    });
+
+    it('fails to deposit more meseta than available', () => {
+      const result = execute('deposit-meseta 10000');
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Not enough meseta');
+    });
+
+    it('withdraws meseta from storage', () => {
+      // First deposit some meseta
+      execute('deposit-meseta 200');
+      const mesetaBefore = getState().meseta;
+
+      const result = execute('withdraw-meseta 50');
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('Withdrew 50 meseta');
+
+      // Check character meseta increased
+      expect(getState().meseta).toBe(mesetaBefore + 50);
+
+      // Check storage meseta decreased
+      const storageResult = execute('show-storage');
+      expect(storageResult.message).toContain('Meseta: 150');
+    });
+
+    it('fails to withdraw more meseta than in storage', () => {
+      const result = execute('withdraw-meseta 100');
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Not enough meseta in storage');
+    });
+
+    it('deposits item to storage', () => {
+      // Character starts with monomates
+      const result = execute('deposit-item monomate 2');
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('Deposited 2x');
+
+      // Check storage has the item
+      const storageResult = execute('show-storage');
+      expect(storageResult.message).toContain('Monomate');
+    });
+
+    it('withdraws item from storage', () => {
+      // First deposit an item
+      execute('deposit-item monomate 3');
+
+      const result = execute('withdraw-item monomate 2');
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('Withdrew 2x');
+    });
+
+    it('fails to deposit item not in inventory', () => {
+      const result = execute('deposit-item nonexistent 1');
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('not found');
+    });
+
+    it('fails to withdraw item not in storage', () => {
+      const result = execute('withdraw-item nonexistent 1');
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('not found');
     });
   });
 });

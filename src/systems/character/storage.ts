@@ -166,3 +166,12 @@ export function getCharacterCount(): number {
   const slots = getCharacterSlots();
   return slots.filter(s => s !== null).length;
 }
+
+/**
+ * Clear all character slots (for testing)
+ */
+export function clearCharacterSlots(): void {
+  if (typeof localStorage === 'undefined') return;
+  localStorage.removeItem(STORAGE_KEY);
+  clearSelectedCharacterId();
+}
