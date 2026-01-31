@@ -13,6 +13,16 @@ let currentCharacter: Character | null = null;
 let currentLocation: Location = 'city';
 let inventory: Map<string, { itemId: string; quantity: number }> = new Map();
 
+// Equipment state
+interface EquippedItems {
+  weapon: WeaponItem | null;
+  frame: ArmorItem | null;
+}
+let equippedItems: EquippedItems = { weapon: null, frame: null };
+
+// Import item types
+import type { WeaponItem, ArmorItem } from '../systems/inventory/types';
+
 // Combat state
 interface EnemyInstance {
   id: number;
@@ -37,6 +47,70 @@ let combatLog: string[] = [];
 let enemyIdCounter = 0;
 let playerCombatState: PlayerCombatState | null = null;
 
+// Technique definitions
+interface Technique {
+  id: string;
+  name: string;
+  tpCost: number;
+  type: 'attack' | 'heal' | 'buff';
+  element?: 'fire' | 'ice' | 'lightning';
+  power: number;  // Base power or heal amount
+  description: string;
+}
+
+const TECHNIQUES: Record<string, Technique> = {
+  foie: { id: 'foie', name: 'Foie', tpCost: 10, type: 'attack', element: 'fire', power: 50, description: 'Fire attack' },
+  barta: { id: 'barta', name: 'Barta', tpCost: 10, type: 'attack', element: 'ice', power: 50, description: 'Ice attack' },
+  zonde: { id: 'zonde', name: 'Zonde', tpCost: 10, type: 'attack', element: 'lightning', power: 50, description: 'Lightning attack' },
+  gifoie: { id: 'gifoie', name: 'Gifoie', tpCost: 20, type: 'attack', element: 'fire', power: 100, description: 'Strong fire attack' },
+  gibarta: { id: 'gibarta', name: 'Gibarta', tpCost: 20, type: 'attack', element: 'ice', power: 100, description: 'Strong ice attack' },
+  gizonde: { id: 'gizonde', name: 'Gizonde', tpCost: 20, type: 'attack', element: 'lightning', power: 100, description: 'Strong lightning attack' },
+  resta: { id: 'resta', name: 'Resta', tpCost: 15, type: 'heal', power: 100, description: 'Restore HP' },
+  shifta: { id: 'shifta', name: 'Shifta', tpCost: 10, type: 'buff', power: 20, description: 'Boost attack power' },
+  deband: { id: 'deband', name: 'Deband', tpCost: 10, type: 'buff', power: 20, description: 'Boost defense' },
+};
+
+// Active buffs
+interface ActiveBuff {
+  type: 'shifta' | 'deband';
+  turnsRemaining: number;
+  power: number;
+}
+let activeBuffs: ActiveBuff[] = [];
+
+// Status effects
+interface StatusEffect {
+  type: 'poison' | 'paralysis' | 'burn' | 'freeze';
+  turnsRemaining: number;
+  damagePerTurn?: number;
+}
+
+// Player status effects
+let playerStatusEffects: StatusEffect[] = [];
+
+// Enemy status effects (by enemy id)
+let enemyStatusEffects: Map<number, StatusEffect[]> = new Map();
+
+// MAG state
+import { getLevel as getMagLevel, determineForm, type MagStats } from '../lib/mag-evolution';
+
+interface MagState {
+  stats: MagStats;
+  sync: number;  // 0-120 sync meter
+  iq: number;    // 0-200 IQ
+}
+let currentMag: MagState | null = null;
+
+// Items that can feed MAGs and their stat effects
+const MAG_FEED_EFFECTS: Record<string, { power: number; guard: number; hit: number; mind: number; sync: number }> = {
+  monomate: { power: 1, guard: 0, hit: 0, mind: 0, sync: 5 },
+  dimate: { power: 2, guard: 0, hit: 0, mind: 0, sync: 10 },
+  trimate: { power: 3, guard: 0, hit: 0, mind: 0, sync: 15 },
+  monofluid: { power: 0, guard: 0, hit: 0, mind: 1, sync: 5 },
+  difluid: { power: 0, guard: 0, hit: 0, mind: 2, sync: 10 },
+  trifluid: { power: 0, guard: 0, hit: 0, mind: 3, sync: 15 },
+};
+
 // Import systems
 import {
   createCharacter,
@@ -59,8 +133,7 @@ import {
   meetsLevelForDifficulty,
 } from '../systems/mission';
 import { applyExpGain, getLevelForExp } from '../systems/leveling';
-import { getStartingItems, STARTING_MESETA, MONOMATE, MONOFLUID } from '../systems/inventory/starting-items';
-import type { ConsumableItem } from '../systems/inventory/types';
+import { getStartingItems, STARTING_MESETA, MONOMATE, MONOFLUID, getStarterWeaponForClass, STARTER_FRAME } from '../systems/inventory/starting-items';
 import {
   getSharedStorage,
   getSharedStorageMeseta,
@@ -192,6 +265,16 @@ export function getAvailableCommands(): AvailableCommand[] {
           { name: 'quantity', type: 'number', required: false, description: 'Quantity (default: 1)' },
         ],
       });
+
+      commands.push({
+        name: 'sell',
+        description: 'Sell an item from inventory',
+        usage: 'sell <item-id> [quantity]',
+        args: [
+          { name: 'item-id', type: 'string', required: true, description: 'Item ID to sell' },
+          { name: 'quantity', type: 'number', required: false, description: 'Quantity (default: 1)' },
+        ],
+      });
     }
 
     if (currentLocation === 'missions') {
@@ -219,6 +302,54 @@ export function getAvailableCommands(): AvailableCommand[] {
         description: 'Show inventory contents',
         usage: 'show-inventory',
         args: [],
+      });
+
+      commands.push({
+        name: 'show-equipment',
+        description: 'Show equipped items',
+        usage: 'show-equipment',
+        args: [],
+      });
+
+      commands.push({
+        name: 'equip',
+        description: 'Equip a weapon or armor',
+        usage: 'equip <item-id>',
+        args: [
+          { name: 'item-id', type: 'string', required: true, description: 'Item ID to equip' },
+        ],
+      });
+
+      commands.push({
+        name: 'unequip',
+        description: 'Unequip a slot',
+        usage: 'unequip <slot>',
+        args: [
+          { name: 'slot', type: 'string', required: true, description: 'weapon or frame' },
+        ],
+      });
+
+      commands.push({
+        name: 'create-mag',
+        description: 'Create a new MAG',
+        usage: 'create-mag',
+        args: [],
+      });
+
+      commands.push({
+        name: 'show-mag',
+        description: 'Show MAG status',
+        usage: 'show-mag',
+        args: [],
+      });
+
+      commands.push({
+        name: 'feed-mag',
+        description: 'Feed an item to your MAG',
+        usage: 'feed-mag <item-id>',
+        args: [
+          { name: 'item-id', type: 'string', required: true, description: 'Item to feed (monomate, monofluid, etc.)' },
+        ],
       });
     }
 
@@ -404,6 +535,23 @@ export function getAvailableCommands(): AvailableCommand[] {
       });
 
       commands.push({
+        name: 'cast',
+        description: 'Cast a technique (uses TP)',
+        usage: 'cast <technique> [target]',
+        args: [
+          { name: 'technique', type: 'string', required: true, description: 'foie, barta, zonde, resta, shifta, deband' },
+          { name: 'target', type: 'number', required: false, description: 'Enemy index for attack techs' },
+        ],
+      });
+
+      commands.push({
+        name: 'list-techniques',
+        description: 'List available techniques',
+        usage: 'list-techniques',
+        args: [],
+      });
+
+      commands.push({
         name: 'show-player-hp',
         description: 'Show player HP/TP status',
         usage: 'show-player-hp',
@@ -462,6 +610,16 @@ export function execute(commandLine: string): CommandResult {
       }
       return executeBuy(args[0], buyQty);
 
+    case 'sell':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: sell <item-id> [quantity]' };
+      }
+      const sellQty = args[1] ? parseInt(args[1]) : 1;
+      if (isNaN(sellQty) || sellQty < 1) {
+        return { success: false, message: 'Quantity must be a positive number.' };
+      }
+      return executeSell(args[0], sellQty);
+
     case 'list-missions':
       return executeListMissions();
 
@@ -473,6 +631,33 @@ export function execute(commandLine: string): CommandResult {
 
     case 'show-inventory':
       return executeShowInventory();
+
+    case 'show-equipment':
+      return executeShowEquipment();
+
+    case 'equip':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: equip <item-id>' };
+      }
+      return executeEquip(args[0]);
+
+    case 'unequip':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: unequip <slot> (weapon or frame)' };
+      }
+      return executeUnequip(args[0].toLowerCase());
+
+    case 'create-mag':
+      return executeCreateMag();
+
+    case 'show-mag':
+      return executeShowMag();
+
+    case 'feed-mag':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: feed-mag <item-id>' };
+      }
+      return executeFeedMag(args[0].toLowerCase());
 
     case 'show-storage':
       return executeShowStorage();
@@ -579,6 +764,16 @@ export function execute(commandLine: string): CommandResult {
     case 'show-player-hp':
       return executeShowPlayerHp();
 
+    case 'cast':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: cast <technique> [target]\nTechniques: foie, barta, zonde, resta, shifta, deband' };
+      }
+      const techTarget = args[1] ? parseInt(args[1]) : undefined;
+      return executeCastTechnique(args[0].toLowerCase(), techTarget);
+
+    case 'list-techniques':
+      return executeListTechniques();
+
     default:
       return {
         success: false,
@@ -650,8 +845,12 @@ function executeCreateCharacter(classId: string, name: string): CommandResult {
   const startingItems = getStartingItems(normalizedClassId);
   inventory.clear();
 
-  // Add weapon (equipped, not in inventory items list)
-  // Add frame (equipped, not in inventory items list)
+  // Equip starting weapon and frame
+  equippedItems = {
+    weapon: startingItems.weapon,
+    frame: startingItems.frame,
+  };
+
   // Add consumables to inventory
   for (const { item, quantity } of startingItems.consumables) {
     inventory.set(item.id, { itemId: item.id, quantity });
@@ -659,7 +858,7 @@ function executeCreateCharacter(classId: string, name: string): CommandResult {
 
   return {
     success: true,
-    message: `Created ${normalizedClassId} character "${name}" with ${STARTING_MESETA} meseta, starter weapon, frame, and consumables.`,
+    message: `Created ${normalizedClassId} character "${name}" with ${STARTING_MESETA} meseta.\nEquipped: ${startingItems.weapon.name}, ${startingItems.frame.name}`,
     data: currentCharacter,
   };
 }
@@ -771,6 +970,62 @@ function executeBuy(itemId: string, quantity: number): CommandResult {
   };
 }
 
+// Sell prices for items (50% of buy price)
+const SELL_PRICES: Record<string, number> = {
+  monomate: 25,
+  dimate: 75,
+  trimate: 300,
+  monofluid: 75,
+  difluid: 150,
+  trifluid: 400,
+};
+
+function executeSell(itemId: string, quantity: number): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (currentLocation !== 'shop') {
+    return { success: false, message: 'You must be at the shop.' };
+  }
+
+  // Check if item is in inventory
+  const item = inventory.get(itemId.toLowerCase());
+  if (!item || item.quantity <= 0) {
+    return { success: false, message: `No ${itemId} in inventory.` };
+  }
+
+  if (item.quantity < quantity) {
+    return { success: false, message: `Only have ${item.quantity} ${itemId}.` };
+  }
+
+  // Get sell price
+  const sellPrice = SELL_PRICES[itemId.toLowerCase()];
+  if (!sellPrice) {
+    return { success: false, message: `Cannot sell ${itemId}.` };
+  }
+
+  const totalPrice = sellPrice * quantity;
+
+  // Remove from inventory
+  item.quantity -= quantity;
+  if (item.quantity <= 0) {
+    inventory.delete(itemId.toLowerCase());
+  }
+
+  // Add meseta
+  currentCharacter = {
+    ...currentCharacter,
+    meseta: (currentCharacter.meseta ?? 0) + totalPrice,
+  };
+
+  return {
+    success: true,
+    message: `Sold ${quantity}x ${itemId} for ${totalPrice} meseta.\nMeseta: ${currentCharacter.meseta}`,
+    data: { itemId, quantity, totalPrice, meseta: currentCharacter.meseta },
+  };
+}
+
 function executeListMissions(): CommandResult {
   if (!currentCharacter) {
     return { success: false, message: 'No character.' };
@@ -864,6 +1119,225 @@ function executeShowInventory(): CommandResult {
     success: true,
     message: `Inventory:\n${lines.join('\n')}`,
     data: items,
+  };
+}
+
+function executeShowEquipment(): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  const lines: string[] = ['Equipment:'];
+
+  if (equippedItems.weapon) {
+    const w = equippedItems.weapon;
+    const grindStr = w.grindLevel > 0 ? ` +${w.grindLevel}` : '';
+    const elemStr = w.element ? ` [${w.element} ${w.elementPercent}%]` : '';
+    lines.push(`  Weapon: ${w.name}${grindStr}${elemStr} (ATK: ${w.attack}, ACC: ${w.accuracy})`);
+  } else {
+    lines.push('  Weapon: (none)');
+  }
+
+  if (equippedItems.frame) {
+    const f = equippedItems.frame;
+    lines.push(`  Frame:  ${f.name} (DEF: ${f.defense}, EVA: ${f.evasion})`);
+  } else {
+    lines.push('  Frame:  (none)');
+  }
+
+  return {
+    success: true,
+    message: lines.join('\n'),
+    data: equippedItems,
+  };
+}
+
+function executeEquip(itemId: string): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (currentLocation !== 'inventory') {
+    return { success: false, message: 'You must be in inventory. Use: goto inventory' };
+  }
+
+  // Check if item is in inventory (for weapons/armor that could be stored)
+  // For now, just provide feedback about what's equipped
+  // In a full implementation, this would swap items in/out of inventory
+
+  return {
+    success: false,
+    message: `Cannot equip "${itemId}" - item swapping not yet implemented. Use show-equipment to see current gear.`,
+  };
+}
+
+function executeUnequip(slot: string): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (currentLocation !== 'inventory') {
+    return { success: false, message: 'You must be in inventory. Use: goto inventory' };
+  }
+
+  if (slot !== 'weapon' && slot !== 'frame') {
+    return { success: false, message: 'Invalid slot. Choose: weapon, frame' };
+  }
+
+  if (slot === 'weapon') {
+    if (!equippedItems.weapon) {
+      return { success: false, message: 'No weapon equipped.' };
+    }
+    const weapon = equippedItems.weapon;
+    equippedItems.weapon = null;
+    return {
+      success: true,
+      message: `Unequipped ${weapon.name}. You are now unarmed!`,
+    };
+  } else {
+    if (!equippedItems.frame) {
+      return { success: false, message: 'No frame equipped.' };
+    }
+    const frame = equippedItems.frame;
+    equippedItems.frame = null;
+    return {
+      success: true,
+      message: `Unequipped ${frame.name}. You have no armor!`,
+    };
+  }
+}
+
+function executeCreateMag(): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (currentMag) {
+    return { success: false, message: 'You already have a MAG!' };
+  }
+
+  currentMag = {
+    stats: { power: 0, guard: 0, hit: 0, mind: 0 },
+    sync: 0,
+    iq: 0,
+  };
+
+  return {
+    success: true,
+    message: 'Created a new MAG! It is a baby Mag at Level 0.\nFeed it items to raise its stats and watch it evolve!',
+    data: { mag: currentMag },
+  };
+}
+
+function executeShowMag(): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (!currentMag) {
+    return { success: false, message: 'You have no MAG. Use: create-mag' };
+  }
+
+  const level = getMagLevel(currentMag.stats);
+  const { id, mag } = determineForm(currentMag.stats);
+
+  const lines: string[] = [];
+  lines.push(`=== ${mag.name} ===`);
+  lines.push(`Level: ${level} (Stage ${mag.stage})`);
+  lines.push(`Stats:`);
+  lines.push(`  Power: ${currentMag.stats.power}`);
+  lines.push(`  Guard: ${currentMag.stats.guard}`);
+  lines.push(`  Hit:   ${currentMag.stats.hit}`);
+  lines.push(`  Mind:  ${currentMag.stats.mind}`);
+  lines.push(`Sync: ${currentMag.sync}/120`);
+  lines.push(`IQ: ${currentMag.iq}/200`);
+  if (mag.photonBlast) {
+    lines.push(`Photon Blast: ${mag.photonBlast}`);
+  }
+
+  // Show evolution hints
+  if (level < 10) {
+    lines.push(`\nEvolves at Level 10. Feed items to raise stats!`);
+  } else if (level < 30) {
+    lines.push(`\nEvolves at Level 30. Keep feeding!`);
+  } else if (level < 60) {
+    lines.push(`\nFinal evolution at Level 60!`);
+  }
+
+  return {
+    success: true,
+    message: lines.join('\n'),
+    data: { mag: currentMag, form: id, level },
+  };
+}
+
+function executeFeedMag(itemId: string): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (!currentMag) {
+    return { success: false, message: 'You have no MAG. Use: create-mag' };
+  }
+
+  // Check if item can feed mags
+  const feedEffect = MAG_FEED_EFFECTS[itemId];
+  if (!feedEffect) {
+    const validItems = Object.keys(MAG_FEED_EFFECTS).join(', ');
+    return { success: false, message: `Cannot feed ${itemId} to MAG. Valid items: ${validItems}` };
+  }
+
+  // Check if player has the item
+  const invItem = inventory.get(itemId);
+  if (!invItem || invItem.quantity <= 0) {
+    return { success: false, message: `You don't have any ${itemId}.` };
+  }
+
+  // Get level before feeding
+  const levelBefore = getMagLevel(currentMag.stats);
+  const { mag: formBefore } = determineForm(currentMag.stats);
+
+  // Apply feed effects
+  currentMag.stats.power += feedEffect.power;
+  currentMag.stats.guard += feedEffect.guard;
+  currentMag.stats.hit += feedEffect.hit;
+  currentMag.stats.mind += feedEffect.mind;
+  currentMag.sync = Math.min(120, currentMag.sync + feedEffect.sync);
+  currentMag.iq = Math.min(200, currentMag.iq + 1);
+
+  // Consume the item
+  invItem.quantity -= 1;
+  if (invItem.quantity <= 0) {
+    inventory.delete(itemId);
+  }
+
+  // Get level after feeding
+  const levelAfter = getMagLevel(currentMag.stats);
+  const { mag: formAfter } = determineForm(currentMag.stats);
+
+  const lines: string[] = [];
+  lines.push(`Fed ${itemId} to MAG!`);
+  lines.push(`Stats: Power +${feedEffect.power}, Guard +${feedEffect.guard}, Hit +${feedEffect.hit}, Mind +${feedEffect.mind}`);
+  lines.push(`Sync: +${feedEffect.sync} (now ${currentMag.sync}/120)`);
+
+  // Check for level up
+  if (levelAfter > levelBefore) {
+    lines.push(`\n*** MAG leveled up! Level ${levelBefore} → ${levelAfter} ***`);
+  }
+
+  // Check for evolution
+  if (formAfter.name !== formBefore.name) {
+    lines.push(`\n*** MAG EVOLVED! ***`);
+    lines.push(`${formBefore.name} → ${formAfter.name}`);
+    if (formAfter.photonBlast) {
+      lines.push(`Learned Photon Blast: ${formAfter.photonBlast}!`);
+    }
+  }
+
+  return {
+    success: true,
+    message: lines.join('\n'),
+    data: { mag: currentMag, levelUp: levelAfter > levelBefore, evolved: formAfter.name !== formBefore.name },
   };
 }
 
@@ -1316,6 +1790,11 @@ export function resetState(): void {
   combatLog = [];
   enemyIdCounter = 0;
   playerCombatState = null;
+  equippedItems = { weapon: null, frame: null };
+  activeBuffs = [];
+  playerStatusEffects = [];
+  enemyStatusEffects.clear();
+  currentMag = null;
 }
 
 // ============================================================================
@@ -1369,29 +1848,53 @@ function getPlayerCombatStats(): CombatStats & { luck: number } {
   }
 
   const level = currentCharacter.level;
+
+  // Base stats from level
+  let defense = 8 + level * 2;
+  let evasion = 10 + level;
+
+  // Add equipment bonuses
+  if (equippedItems.frame) {
+    defense += equippedItems.frame.defense;
+    evasion += equippedItems.frame.evasion;
+  }
+
   return {
     hp: 100 + level * 20,
     maxHp: 100 + level * 20,
     attack: 15 + level * 3,
-    defense: 8 + level * 2,
+    defense,
     accuracy: 75 + level,
-    evasion: 10 + level,
+    evasion,
     luck: 10 + Math.floor(level / 2),
   };
 }
 
 /**
- * Get player weapon stats (simplified)
+ * Get player weapon stats from equipped weapon
  */
 function getPlayerWeaponStats(): WeaponStats & { critBonus: number } {
-  const level = currentCharacter?.level ?? 1;
+  const weapon = equippedItems.weapon;
+
+  if (!weapon) {
+    // Unarmed stats
+    return {
+      attack: 5,
+      accuracy: 5,
+      element: null,
+      elementPercent: 0,
+      grindBonus: 0,
+      critBonus: 3,
+    };
+  }
+
   return {
-    attack: 10 + level * 2,
-    accuracy: 10,
-    element: null,
-    elementPercent: 0,
-    grindBonus: 0,
-    critBonus: 5,
+    attack: weapon.attack + (weapon.grindLevel * 2),
+    accuracy: weapon.accuracy,
+    element: weapon.element as Element | null,
+    elementPercent: weapon.elementPercent || 0,
+    grindBonus: weapon.grindLevel * 2,
+    critBonus: 5 + Math.floor(weapon.attack / 20),
   };
 }
 
@@ -1500,6 +2003,34 @@ function executeAttack(targetIndex: number): CommandResult {
     return { success: false, message: 'You are defeated! Use telepipe to retreat or abandon-session.' };
   }
 
+  // Process status effects at start of turn
+  const statusResult = processPlayerStatusEffects();
+  const statusMessages = statusResult.messages;
+
+  // Apply status damage
+  if (statusResult.damage > 0) {
+    playerCombatState.hp = Math.max(0, playerCombatState.hp - statusResult.damage);
+    if (playerCombatState.hp <= 0) {
+      statusMessages.push(`\n*** YOU HAVE BEEN DEFEATED BY STATUS EFFECTS! ***`);
+      combatLog.push('PLAYER DEFEATED (status)');
+      return {
+        success: true,
+        message: statusMessages.join('\n'),
+        data: { playerHp: 0 },
+      };
+    }
+  }
+
+  // Check if can act (paralysis/freeze)
+  if (!statusResult.canAct) {
+    statusMessages.push(`Your HP: ${playerCombatState.hp}/${playerCombatState.maxHp}`);
+    return {
+      success: true,
+      message: statusMessages.join('\n'),
+      data: { playerHp: playerCombatState.hp, canAct: false },
+    };
+  }
+
   if (currentEnemies.length === 0) {
     return { success: false, message: 'No enemies to attack. Use spawn-enemies first.' };
   }
@@ -1519,7 +2050,7 @@ function executeAttack(targetIndex: number): CommandResult {
     defender: { ...target.stats, weakness: target.element },
   });
 
-  const lines: string[] = [];
+  const lines: string[] = [...statusMessages]; // Include status effect messages
   let droppedItem: { itemId: string; name: string } | null = null;
 
   if (!result.hit) {
@@ -1600,6 +2131,13 @@ function executeAttack(targetIndex: number): CommandResult {
       lines.push(`  Your HP: ${playerCombatState.hp}/${playerCombatState.maxHp}`);
       combatLog.push(`ENEMY HIT: ${attacker.name} deals ${enemyDamage}`);
 
+      // Maybe apply status effect from enemy element
+      const statusApplied = maybeApplyStatusEffect(attacker.element);
+      if (statusApplied) {
+        lines.push(`  ${statusApplied}`);
+        combatLog.push(`STATUS: ${statusApplied}`);
+      }
+
       if (playerCombatState.hp <= 0) {
         lines.push('\n*** YOU HAVE BEEN DEFEATED! ***');
         lines.push('Use telepipe to retreat (lose progress) or abandon-session.');
@@ -1644,6 +2182,95 @@ function rollItemDrop(): { itemId: string; name: string } | null {
   } else {
     return { itemId: 'difluid', name: 'Difluid' };
   }
+}
+
+/**
+ * Process player status effects at start of turn
+ * Returns messages about what happened and whether player can act
+ */
+function processPlayerStatusEffects(): { messages: string[]; canAct: boolean; damage: number } {
+  const messages: string[] = [];
+  let canAct = true;
+  let totalDamage = 0;
+
+  for (let i = playerStatusEffects.length - 1; i >= 0; i--) {
+    const effect = playerStatusEffects[i];
+
+    switch (effect.type) {
+      case 'poison':
+        const poisonDmg = effect.damagePerTurn || 10;
+        totalDamage += poisonDmg;
+        messages.push(`Poison deals ${poisonDmg} damage!`);
+        break;
+
+      case 'burn':
+        const burnDmg = effect.damagePerTurn || 15;
+        totalDamage += burnDmg;
+        messages.push(`Burn deals ${burnDmg} damage!`);
+        break;
+
+      case 'paralysis':
+        if (Math.random() < 0.5) {
+          canAct = false;
+          messages.push(`Paralyzed! Cannot move!`);
+        }
+        break;
+
+      case 'freeze':
+        canAct = false;
+        messages.push(`Frozen solid! Cannot move!`);
+        break;
+    }
+
+    // Decrement duration
+    effect.turnsRemaining--;
+    if (effect.turnsRemaining <= 0) {
+      const effectNames: Record<string, string> = {
+        poison: 'Poison', paralysis: 'Paralysis', burn: 'Burn', freeze: 'Freeze'
+      };
+      messages.push(`${effectNames[effect.type]} wore off.`);
+      playerStatusEffects.splice(i, 1);
+    }
+  }
+
+  return { messages, canAct, damage: totalDamage };
+}
+
+/**
+ * Maybe apply a status effect from an enemy attack
+ */
+function maybeApplyStatusEffect(enemyElement: Element | null): string | null {
+  // 15% chance to apply status based on enemy element
+  if (Math.random() > 0.15) return null;
+
+  let effect: StatusEffect | null = null;
+
+  if (enemyElement === 'fire') {
+    effect = { type: 'burn', turnsRemaining: 3, damagePerTurn: 15 };
+  } else if (enemyElement === 'ice') {
+    effect = { type: 'freeze', turnsRemaining: 2 };
+  } else if (enemyElement === 'lightning') {
+    effect = { type: 'paralysis', turnsRemaining: 3 };
+  } else {
+    // Generic enemies can poison
+    if (Math.random() < 0.5) {
+      effect = { type: 'poison', turnsRemaining: 4, damagePerTurn: 10 };
+    }
+  }
+
+  if (effect) {
+    // Check if already has this effect
+    const existing = playerStatusEffects.find(e => e.type === effect!.type);
+    if (!existing) {
+      playerStatusEffects.push(effect);
+      const effectNames: Record<string, string> = {
+        poison: 'Poisoned!', paralysis: 'Paralyzed!', burn: 'Burning!', freeze: 'Frozen!'
+      };
+      return effectNames[effect.type];
+    }
+  }
+
+  return null;
 }
 
 function executeNextStage(): CommandResult {
@@ -1805,11 +2432,228 @@ function executeShowPlayerHp(): CommandResult {
 
   const status = playerCombatState.hp <= 0 ? ' *** DEFEATED ***' : '';
 
+  // Show active buffs
+  const buffLines: string[] = [];
+  for (const buff of activeBuffs) {
+    buffLines.push(`  ${buff.type === 'shifta' ? 'Shifta' : 'Deband'}: +${buff.power}% (${buff.turnsRemaining} turns)`);
+  }
+  const buffStr = buffLines.length > 0 ? `\nBuffs:\n${buffLines.join('\n')}` : '';
+
+  // Show status effects
+  const statusLines: string[] = [];
+  for (const effect of playerStatusEffects) {
+    const effectNames: Record<string, string> = {
+      poison: '🟢 Poison',
+      paralysis: '⚡ Paralysis',
+      burn: '🔥 Burn',
+      freeze: '❄️ Freeze',
+    };
+    statusLines.push(`  ${effectNames[effect.type]} (${effect.turnsRemaining} turns)`);
+  }
+  const statusStr = statusLines.length > 0 ? `\nStatus:\n${statusLines.join('\n')}` : '';
+
   return {
     success: true,
     message: `Player Status:${status}
   HP: ${playerCombatState.hp.toString().padStart(4)}/${playerCombatState.maxHp} [${hpBar}] ${hpPercent}%
-  TP: ${playerCombatState.tp.toString().padStart(4)}/${playerCombatState.maxTp} [${tpBar}] ${tpPercent}%`,
+  TP: ${playerCombatState.tp.toString().padStart(4)}/${playerCombatState.maxTp} [${tpBar}] ${tpPercent}%${buffStr}${statusStr}`,
     data: playerCombatState,
+  };
+}
+
+/**
+ * List available techniques
+ */
+function executeListTechniques(): CommandResult {
+  const lines = ['Available Techniques:'];
+
+  for (const tech of Object.values(TECHNIQUES)) {
+    const typeStr = tech.type === 'attack' ? `[${tech.element?.toUpperCase()}]` : `[${tech.type.toUpperCase()}]`;
+    lines.push(`  ${tech.name.padEnd(10)} ${typeStr.padEnd(12)} TP: ${tech.tpCost.toString().padStart(2)}  ${tech.description}`);
+  }
+
+  return {
+    success: true,
+    message: lines.join('\n'),
+    data: TECHNIQUES,
+  };
+}
+
+/**
+ * Cast a technique
+ */
+function executeCastTechnique(techId: string, targetIndex?: number): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (currentLocation !== 'field') {
+    return { success: false, message: 'You must be in a field.' };
+  }
+
+  if (!playerCombatState) {
+    return { success: false, message: 'Combat state not initialized.' };
+  }
+
+  if (playerCombatState.hp <= 0) {
+    return { success: false, message: 'You are defeated!' };
+  }
+
+  const tech = TECHNIQUES[techId];
+  if (!tech) {
+    return { success: false, message: `Unknown technique: ${techId}. Use list-techniques to see options.` };
+  }
+
+  if (playerCombatState.tp < tech.tpCost) {
+    return { success: false, message: `Not enough TP! Need ${tech.tpCost}, have ${playerCombatState.tp}.` };
+  }
+
+  // Consume TP
+  playerCombatState.tp -= tech.tpCost;
+  const lines: string[] = [];
+
+  if (tech.type === 'attack') {
+    // Attack technique - requires target
+    if (currentEnemies.length === 0) {
+      playerCombatState.tp += tech.tpCost; // Refund
+      return { success: false, message: 'No enemies to target.' };
+    }
+
+    const actualTarget = targetIndex ?? 0;
+    if (actualTarget < 0 || actualTarget >= currentEnemies.length) {
+      playerCombatState.tp += tech.tpCost; // Refund
+      return { success: false, message: `Invalid target. Choose 0-${currentEnemies.length - 1}.` };
+    }
+
+    const target = currentEnemies[actualTarget];
+
+    // Calculate technique damage (base power + level scaling)
+    const level = currentCharacter.level;
+    let damage = tech.power + level * 5;
+
+    // Apply shifta buff
+    const shiftaBuff = activeBuffs.find(b => b.type === 'shifta');
+    if (shiftaBuff) {
+      damage = Math.floor(damage * (1 + shiftaBuff.power / 100));
+    }
+
+    // Check for elemental weakness (simplified)
+    const weaknessBonus = 1.5;
+    let isWeak = false;
+    if (tech.element === 'fire' && target.element === 'ice') isWeak = true;
+    if (tech.element === 'ice' && target.element === 'fire') isWeak = true;
+    if (tech.element === 'lightning') isWeak = true; // Lightning is broadly effective
+
+    if (isWeak) {
+      damage = Math.floor(damage * weaknessBonus);
+      lines.push(`${tech.name} hits ${target.name} for ${damage} damage! WEAKNESS!`);
+    } else {
+      lines.push(`${tech.name} hits ${target.name} for ${damage} damage!`);
+    }
+
+    target.stats = applyDamage(target.stats, damage);
+    combatLog.push(`TECH: ${tech.name} → ${target.name} for ${damage}`);
+
+    if (isDefeated(target.stats)) {
+      lines.push(`${target.name} defeated!`);
+      lines.push(`  +${target.expValue} EXP, +${target.mesetaValue} Meseta`);
+
+      // Award exp and meseta
+      const oldLevel = currentCharacter.level;
+      currentCharacter = {
+        ...currentCharacter,
+        experience: currentCharacter.experience + target.expValue,
+        level: getLevelForExp(currentCharacter.experience + target.expValue),
+        meseta: (currentCharacter.meseta ?? 0) + target.mesetaValue,
+      };
+
+      if (currentCharacter.level > oldLevel) {
+        lines.push(`  LEVEL UP! Now level ${currentCharacter.level}!`);
+        playerCombatState.maxHp = 100 + currentCharacter.level * 20;
+        playerCombatState.maxTp = 50 + currentCharacter.level * 10;
+        playerCombatState.hp = playerCombatState.maxHp;
+        playerCombatState.tp = playerCombatState.maxTp;
+      }
+
+      combatLog.push(`KILL: ${target.name}`);
+      currentEnemies.splice(actualTarget, 1);
+
+      if (currentEnemies.length === 0) {
+        lines.push('\nAll enemies defeated!');
+      }
+    } else {
+      lines.push(`  ${target.name} HP: ${target.stats.hp}/${target.stats.maxHp}`);
+    }
+
+  } else if (tech.type === 'heal') {
+    // Healing technique
+    const healAmount = tech.power + currentCharacter.level * 10;
+    const oldHp = playerCombatState.hp;
+    playerCombatState.hp = Math.min(playerCombatState.maxHp, playerCombatState.hp + healAmount);
+    const healed = playerCombatState.hp - oldHp;
+
+    lines.push(`${tech.name} restores ${healed} HP!`);
+    lines.push(`  HP: ${playerCombatState.hp}/${playerCombatState.maxHp}`);
+    combatLog.push(`HEAL: ${tech.name} +${healed} HP`);
+
+  } else if (tech.type === 'buff') {
+    // Buff technique
+    const buffType = techId === 'shifta' ? 'shifta' : 'deband';
+    const existing = activeBuffs.find(b => b.type === buffType);
+
+    if (existing) {
+      existing.turnsRemaining = 5;
+      existing.power = tech.power + Math.floor(currentCharacter.level / 2);
+      lines.push(`${tech.name} refreshed! +${existing.power}% ${buffType === 'shifta' ? 'ATK' : 'DEF'} for 5 turns.`);
+    } else {
+      const power = tech.power + Math.floor(currentCharacter.level / 2);
+      activeBuffs.push({ type: buffType, turnsRemaining: 5, power });
+      lines.push(`${tech.name} cast! +${power}% ${buffType === 'shifta' ? 'ATK' : 'DEF'} for 5 turns.`);
+    }
+    combatLog.push(`BUFF: ${tech.name}`);
+  }
+
+  lines.push(`  TP: ${playerCombatState.tp}/${playerCombatState.maxTp}`);
+
+  // Decrement buff durations
+  for (let i = activeBuffs.length - 1; i >= 0; i--) {
+    activeBuffs[i].turnsRemaining--;
+    if (activeBuffs[i].turnsRemaining <= 0) {
+      const expiredBuff = activeBuffs.splice(i, 1)[0];
+      lines.push(`  ${expiredBuff.type === 'shifta' ? 'Shifta' : 'Deband'} wore off!`);
+    }
+  }
+
+  // Enemy counter-attack
+  if (currentEnemies.length > 0 && playerCombatState.hp > 0) {
+    const attacker = currentEnemies[Math.floor(Math.random() * currentEnemies.length)];
+    const playerStats = getPlayerCombatStats();
+
+    let defense = playerStats.defense;
+    const debandBuff = activeBuffs.find(b => b.type === 'deband');
+    if (debandBuff) {
+      defense = Math.floor(defense * (1 + debandBuff.power / 100));
+    }
+
+    const enemyDamage = Math.max(1, Math.floor(attacker.stats.attack * (0.8 + Math.random() * 0.4) - defense * 0.5));
+    const hitChance = Math.random() * 100;
+
+    if (hitChance < attacker.stats.accuracy) {
+      playerCombatState.hp = Math.max(0, playerCombatState.hp - enemyDamage);
+      lines.push(`\n${attacker.name} counter-attacks for ${enemyDamage} damage!`);
+      lines.push(`  Your HP: ${playerCombatState.hp}/${playerCombatState.maxHp}`);
+
+      if (playerCombatState.hp <= 0) {
+        lines.push('\n*** YOU HAVE BEEN DEFEATED! ***');
+      }
+    } else {
+      lines.push(`\n${attacker.name} attacks but misses!`);
+    }
+  }
+
+  return {
+    success: true,
+    message: lines.join('\n'),
+    data: { techId, tp: playerCombatState.tp },
   };
 }
