@@ -246,6 +246,7 @@ function createSpawnMarker(
 }
 
 // Create trigger zone marker (box volume)
+// Uses -area suffix for Godot Area3D auto-import
 function createTriggerMarker(
   name: string,
   position: [number, number, number],
@@ -253,7 +254,7 @@ function createTriggerMarker(
   color: number = 0xff6600
 ): THREE.Group {
   const group = new THREE.Group();
-  group.name = name;
+  group.name = name + '-area';
   group.position.set(...position);
   group.rotation.y = rotation;
 
@@ -262,7 +263,7 @@ function createTriggerMarker(
   const boxMaterial = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.3 });
   const box = new THREE.Mesh(boxGeometry, boxMaterial);
   box.position.y = 1.5; // Center is 1.5 units up
-  box.name = `${name}_box`;
+  box.name = `${name}_box-colonly`;
   group.add(box);
 
   // Trigger wireframe
@@ -424,7 +425,7 @@ async function buildExportScene(
     });
 
     const collisionMesh = new THREE.Mesh(collisionGeometry, collisionMaterial);
-    collisionMesh.name = 'collision_floor';
+    collisionMesh.name = 'collision_floor-colonly';
     exportScene.add(collisionMesh);
   }
 
@@ -443,7 +444,8 @@ async function buildExportScene(
 
       const material = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3 });
       const mesh = new THREE.Mesh(geometry, material);
-      mesh.name = obs.label.replace(/\s+/g, '_').toLowerCase();
+      // Add -colonly suffix for Godot auto-collision import
+      mesh.name = obs.label.replace(/\s+/g, '_').toLowerCase() + '-colonly';
       mesh.position.set(...obs.position);
       mesh.rotation.set(...obs.rotation);
       obstaclesGroup.add(mesh);
@@ -564,7 +566,7 @@ export default function ExportTab({ config, stageScene, mapId }: ExportTabProps)
         });
 
         const collisionMesh = new THREE.Mesh(collisionGeometry, collisionMaterial);
-        collisionMesh.name = 'collision_floor';
+        collisionMesh.name = 'collision_floor-colonly';
         exportScene.add(collisionMesh);
       }
 
@@ -593,7 +595,8 @@ export default function ExportTab({ config, stageScene, mapId }: ExportTabProps)
           });
 
           const mesh = new THREE.Mesh(geometry, material);
-          mesh.name = obs.label.replace(/\s+/g, '_').toLowerCase();
+          // Add -colonly suffix for Godot auto-collision import
+          mesh.name = obs.label.replace(/\s+/g, '_').toLowerCase() + '-colonly';
           mesh.position.set(...obs.position);
           mesh.rotation.set(...obs.rotation);
 
@@ -1067,15 +1070,16 @@ export default function ExportTab({ config, stageScene, mapId }: ExportTabProps)
         </h4>
 
         <div style={{ marginBottom: '12px' }}>
-          <div style={{ color: '#888', marginBottom: '4px' }}>Components:</div>
+          <div style={{ color: '#888', marginBottom: '4px' }}>Components (Godot-compatible naming):</div>
           <pre style={{ margin: 0, fontSize: '10px', color: '#aaa', lineHeight: '1.6' }}>
-{`terrain_visual     - Stage mesh with Lambert materials
-collision_floor    - Walkable floor triangles
-collision_obstacles - Blocking volumes (boxes/cylinders)
+{`terrain_visual          - Stage mesh with Lambert materials
+collision_floor-colonly - Walkable floor (→ StaticBody3D)
+collision_obstacles/
+  *-colonly             - Blocking volumes (→ StaticBody3D)
 portals/
-  gate_*           - Gate position + dimensions
-  spawn_*          - Player spawn point + direction
-  trigger_*        - Warp trigger zone`}
+  gate_*                - Gate position + dimensions
+  spawn_*               - Player spawn point + direction
+  trigger_*-area        - Warp trigger zone (→ Area3D)`}
           </pre>
         </div>
 
@@ -1088,28 +1092,30 @@ portals/
 const terrain = scene.getObjectByName('terrain_visual');
 
 // Floor collision mesh
-const floor = scene.getObjectByName('collision_floor');
+const floor = scene.getObjectByName('collision_floor-colonly');
 
 // Obstacles group
 const obstacles = scene.getObjectByName('collision_obstacles');
 
-// Find all gates
-const gates = [];
-scene.traverse((obj) => {
-  if (obj.name.startsWith('gate_')) gates.push(obj);
-});
-
-// Find all spawns
-const spawns = [];
-scene.traverse((obj) => {
-  if (obj.name.startsWith('spawn_')) spawns.push(obj);
-});
-
-// Find all triggers
+// Find all triggers (now with -area suffix)
 const triggers = [];
 scene.traverse((obj) => {
-  if (obj.name.startsWith('trigger_')) triggers.push(obj);
+  if (obj.name.includes('trigger_') && obj.name.endsWith('-area')) {
+    triggers.push(obj);
+  }
 });`}
+          </pre>
+        </div>
+
+        <div style={{ marginBottom: '12px' }}>
+          <div style={{ color: '#888', marginBottom: '4px' }}>Loading in Godot (auto-imported):</div>
+          <pre style={{ margin: 0, fontSize: '10px', color: '#aaa', lineHeight: '1.6', overflowX: 'auto' }}>
+{`# -colonly meshes become StaticBody3D with collision
+var floor = $"collision_floor-colonly"  # StaticBody3D
+
+# -area groups become Area3D nodes
+var trigger = $"portals/trigger_north-area"  # Area3D
+trigger.body_entered.connect(_on_trigger_entered)`}
           </pre>
         </div>
 
