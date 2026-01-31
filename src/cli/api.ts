@@ -1278,12 +1278,21 @@ function executeClaimRewards(): CommandResult {
     `Meseta: +${result.mesetaGained}`,
   ];
 
+  // Add items to inventory
   if (result.itemsGained && result.itemsGained.length > 0) {
     lines.push('Items:');
     for (const item of result.itemsGained) {
       const itemId = 'itemId' in item ? item.itemId : (item as any).itemId;
       const quantity = 'quantity' in item ? item.quantity : 1;
       lines.push(`  ${itemId} x${quantity}`);
+
+      // Add to inventory
+      const existing = inventory.get(itemId);
+      if (existing) {
+        existing.quantity += quantity;
+      } else {
+        inventory.set(itemId, { itemId, quantity });
+      }
     }
   }
 
