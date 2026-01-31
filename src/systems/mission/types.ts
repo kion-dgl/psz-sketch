@@ -15,6 +15,7 @@ export interface Mission {
   objectives: MissionObjective[];
   rewards: MissionReward;
   unlockRequirements?: UnlockRequirement[];
+  stageSequence?: MissionStage[];
 }
 
 export interface MissionObjective {
@@ -38,9 +39,15 @@ export interface RewardItem {
 }
 
 export interface UnlockRequirement {
-  type: 'mission' | 'level' | 'item';
+  type: 'mission' | 'field' | 'level' | 'item';
   id?: string;
   value?: number;
+}
+
+export interface MissionStage {
+  stageId: string;
+  areaId: string;
+  objectiveIds?: string[];
 }
 
 export interface MissionProgress {

@@ -87,9 +87,9 @@ export default function CityHubWeb() {
           <span style={styles.navIcon}>🎒</span>
           <span>INVENTORY</span>
         </a>
-        <a href="/web/mission-select" style={styles.navButton} data-testid="nav-missions">
+        <a href="/web/guild-counter" style={styles.navButton} data-testid="nav-missions">
           <span style={styles.navIcon}>⚔️</span>
-          <span>MISSIONS</span>
+          <span>GUILD</span>
         </a>
         <a href="/web/storage" style={styles.navButton} data-testid="nav-storage">
           <span style={styles.navIcon}>📦</span>

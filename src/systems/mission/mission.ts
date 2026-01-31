@@ -72,6 +72,13 @@ export function isMissionUnlocked(
           return false;
         }
       }
+      if (req.type === 'field' && req.id) {
+        // Dynamically import to avoid circular dependency
+        const { hasFieldCompleted } = require('../field/field');
+        if (!hasFieldCompleted(characterId, req.id)) {
+          return false;
+        }
+      }
       if (req.type === 'level' && req.value) {
         if (characterLevel < req.value) {
           return false;

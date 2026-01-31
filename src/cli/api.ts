@@ -45,10 +45,31 @@ import {
   removeFromSharedStorage,
   clearSharedStorage,
 } from '../systems/inventory/inventory';
+import {
+  initializeDefaultFields,
+  getAllFields,
+  getField,
+  isFieldUnlocked,
+  hasFieldCompleted,
+} from '../systems/field';
+import {
+  setSessionConfig,
+  enterField as enterFieldSession,
+  enterMission as enterMissionSession,
+  getSessionState,
+  isInSession,
+  hasPendingRewards,
+  getPendingResult,
+  claimRewards as claimSessionRewards,
+  useTelepipe,
+  abandonSession,
+  resetSession,
+} from '../systems/session';
 
 // Initialize systems
 initializeDefaultShops();
 initializeDefaultMissions();
+initializeDefaultFields();
 
 /**
  * Get current game state
@@ -209,6 +230,79 @@ export function getAvailableCommands(): AvailableCommand[] {
         ],
       });
     }
+
+    if (currentLocation === 'guild') {
+      commands.push({
+        name: 'list-fields',
+        description: 'List available fields',
+        usage: 'list-fields',
+        args: [],
+      });
+
+      commands.push({
+        name: 'list-missions',
+        description: 'List available missions',
+        usage: 'list-missions',
+        args: [],
+      });
+
+      commands.push({
+        name: 'enter-field',
+        description: 'Enter a field',
+        usage: 'enter-field <field-id> <difficulty>',
+        args: [
+          { name: 'field-id', type: 'string', required: true, description: 'Field ID' },
+          { name: 'difficulty', type: 'string', required: true, description: 'normal, hard, super-hard' },
+        ],
+      });
+
+      commands.push({
+        name: 'enter-mission',
+        description: 'Start a mission',
+        usage: 'enter-mission <mission-id> <difficulty>',
+        args: [
+          { name: 'mission-id', type: 'string', required: true, description: 'Mission ID' },
+          { name: 'difficulty', type: 'string', required: true, description: 'normal, hard, super-hard' },
+        ],
+      });
+
+      commands.push({
+        name: 'show-session',
+        description: 'Show current session state',
+        usage: 'show-session',
+        args: [],
+      });
+
+      commands.push({
+        name: 'claim-rewards',
+        description: 'Claim pending rewards',
+        usage: 'claim-rewards',
+        args: [],
+      });
+    }
+
+    if (currentLocation === 'field') {
+      commands.push({
+        name: 'use-telepipe',
+        description: 'Return to city (preserves progress)',
+        usage: 'use-telepipe',
+        args: [],
+      });
+
+      commands.push({
+        name: 'abandon-session',
+        description: 'Abandon current session',
+        usage: 'abandon-session',
+        args: [],
+      });
+
+      commands.push({
+        name: 'show-session',
+        description: 'Show current session state',
+        usage: 'show-session',
+        args: [],
+      });
+    }
   }
 
   return commands;
@@ -244,7 +338,7 @@ export function execute(commandLine: string): CommandResult {
 
     case 'goto':
       if (!args[0]) {
-        return { success: false, message: 'Usage: goto <location> (city, shop, missions, inventory, storage)' };
+        return { success: false, message: 'Usage: goto <location> (city, shop, missions, inventory, storage, guild)' };
       }
       return executeGoto(args[0].toLowerCase() as Location);
 
@@ -315,6 +409,33 @@ export function execute(commandLine: string): CommandResult {
         return { success: false, message: 'Quantity must be a positive number.' };
       }
       return executeWithdrawItem(args[0], withdrawItemQty);
+
+    case 'list-fields':
+      return executeListFields();
+
+    case 'enter-field':
+      if (!args[0] || !args[1]) {
+        return { success: false, message: 'Usage: enter-field <field-id> <difficulty>' };
+      }
+      return executeEnterField(args[0], args[1].toLowerCase() as Difficulty);
+
+    case 'enter-mission':
+      if (!args[0] || !args[1]) {
+        return { success: false, message: 'Usage: enter-mission <mission-id> <difficulty>' };
+      }
+      return executeEnterMission(args[0], args[1].toLowerCase() as Difficulty);
+
+    case 'show-session':
+      return executeShowSession();
+
+    case 'use-telepipe':
+      return executeUseTelepipe();
+
+    case 'abandon-session':
+      return executeAbandonSession();
+
+    case 'claim-rewards':
+      return executeClaimRewards();
 
     default:
       return {
@@ -433,12 +554,17 @@ function executeGoto(location: Location): CommandResult {
     };
   }
 
-  const validLocations: Location[] = ['city', 'shop', 'missions', 'inventory', 'storage'];
+  const validLocations: Location[] = ['city', 'shop', 'missions', 'inventory', 'storage', 'guild'];
   if (!validLocations.includes(location)) {
     return {
       success: false,
       message: `Invalid location. Choose: ${validLocations.join(', ')}`,
     };
+  }
+
+  // Set session config when going to guild
+  if (location === 'guild') {
+    setSessionConfig(currentCharacter.character_id, currentCharacter.level);
   }
 
   currentLocation = location;
@@ -796,6 +922,218 @@ function executeWithdrawItem(itemId: string, quantity: number): CommandResult {
   };
 }
 
+function executeListFields(): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (currentLocation !== 'guild') {
+    return { success: false, message: 'You must be at the guild. Use: goto guild' };
+  }
+
+  const fields = getAllFields();
+  const lines = fields.map(f => {
+    const unlocked = isFieldUnlocked(f.id, currentCharacter!.character_id, currentCharacter!.level);
+    const completed = hasFieldCompleted(currentCharacter!.character_id, f.id);
+    const status = completed ? '✓' : (unlocked ? ' ' : '🔒');
+    return `  ${status} ${f.id.padEnd(20)} ${f.name.padEnd(20)} Lv.${f.recommendedLevel}`;
+  });
+
+  return {
+    success: true,
+    message: `Available fields:\n${lines.join('\n')}`,
+    data: fields,
+  };
+}
+
+function executeEnterField(fieldId: string, difficulty: Difficulty): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (currentLocation !== 'guild') {
+    return { success: false, message: 'You must be at the guild. Use: goto guild' };
+  }
+
+  const validDifficulties: Difficulty[] = ['normal', 'hard', 'super-hard'];
+  if (!validDifficulties.includes(difficulty)) {
+    return { success: false, message: `Invalid difficulty. Choose: ${validDifficulties.join(', ')}` };
+  }
+
+  const field = getField(fieldId);
+  if (!field) {
+    return { success: false, message: `Field not found: ${fieldId}` };
+  }
+
+  if (!meetsLevelForDifficulty(currentCharacter.level, difficulty)) {
+    return { success: false, message: `Level too low for ${difficulty} difficulty.` };
+  }
+
+  const success = enterFieldSession(fieldId, difficulty);
+  if (!success) {
+    return { success: false, message: 'Cannot enter field. Check if it is unlocked.' };
+  }
+
+  currentLocation = 'field';
+  return {
+    success: true,
+    message: `Entered ${field.name} on ${difficulty} difficulty.`,
+    data: { fieldId, difficulty },
+  };
+}
+
+function executeEnterMission(missionId: string, difficulty: Difficulty): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (currentLocation !== 'guild') {
+    return { success: false, message: 'You must be at the guild. Use: goto guild' };
+  }
+
+  const validDifficulties: Difficulty[] = ['normal', 'hard', 'super-hard'];
+  if (!validDifficulties.includes(difficulty)) {
+    return { success: false, message: `Invalid difficulty. Choose: ${validDifficulties.join(', ')}` };
+  }
+
+  const mission = getMission(missionId);
+  if (!mission) {
+    return { success: false, message: `Mission not found: ${missionId}` };
+  }
+
+  if (!meetsLevelForDifficulty(currentCharacter.level, difficulty)) {
+    return { success: false, message: `Level too low for ${difficulty} difficulty.` };
+  }
+
+  const success = enterMissionSession(missionId, difficulty);
+  if (!success) {
+    return { success: false, message: 'Cannot start mission. Check if it is unlocked.' };
+  }
+
+  currentLocation = 'field';
+  return {
+    success: true,
+    message: `Started ${mission.name} on ${difficulty} difficulty.`,
+    data: { missionId, difficulty },
+  };
+}
+
+function executeShowSession(): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  const state = getSessionState();
+
+  if (!isInSession()) {
+    return {
+      success: true,
+      message: 'No active session.',
+      data: state,
+    };
+  }
+
+  const lines = [
+    `Mode: ${state.mode}`,
+    `Type: ${state.activeType ?? 'none'}`,
+    `Location: ${state.activeId ?? 'none'}`,
+    `Difficulty: ${state.difficulty}`,
+    `Stage: ${state.currentStageIndex + 1}`,
+    `Telepipe Used: ${state.telepipeUsed}`,
+    `Pending Rewards: ${hasPendingRewards()}`,
+  ];
+
+  return {
+    success: true,
+    message: `Session State:\n  ${lines.join('\n  ')}`,
+    data: state,
+  };
+}
+
+function executeUseTelepipe(): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (currentLocation !== 'field') {
+    return { success: false, message: 'You must be in a field to use telepipe.' };
+  }
+
+  useTelepipe();
+  currentLocation = 'guild';
+
+  return {
+    success: true,
+    message: 'Used Telepipe. Returned to guild. Session paused.',
+  };
+}
+
+function executeAbandonSession(): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (!isInSession()) {
+    return { success: false, message: 'No active session to abandon.' };
+  }
+
+  abandonSession();
+  currentLocation = 'guild';
+
+  return {
+    success: true,
+    message: 'Session abandoned. No rewards earned.',
+  };
+}
+
+function executeClaimRewards(): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (currentLocation !== 'guild') {
+    return { success: false, message: 'You must be at the guild. Use: goto guild' };
+  }
+
+  if (!hasPendingRewards()) {
+    return { success: false, message: 'No pending rewards to claim.' };
+  }
+
+  const result = claimSessionRewards();
+  if (!result) {
+    return { success: false, message: 'Failed to claim rewards.' };
+  }
+
+  // Apply rewards to character
+  currentCharacter = {
+    ...currentCharacter,
+    experience: currentCharacter.experience + result.expGained,
+    level: getLevelForExp(currentCharacter.experience + result.expGained),
+    meseta: (currentCharacter.meseta ?? 0) + result.mesetaGained,
+  };
+
+  const lines = [
+    `Grade: ${result.grade}`,
+    `EXP: +${result.expGained}`,
+    `Meseta: +${result.mesetaGained}`,
+  ];
+
+  if (result.itemsGained && result.itemsGained.length > 0) {
+    lines.push('Items:');
+    for (const item of result.itemsGained) {
+      const itemId = 'itemId' in item ? item.itemId : (item as any).itemId;
+      const quantity = 'quantity' in item ? item.quantity : 1;
+      lines.push(`  ${itemId} x${quantity}`);
+    }
+  }
+
+  return {
+    success: true,
+    message: `Rewards claimed!\n${lines.join('\n')}`,
+    data: result,
+  };
+}
+
 /**
  * Reset game state (for testing)
  */
@@ -804,4 +1142,5 @@ export function resetState(): void {
   currentLocation = 'city';
   inventory.clear();
   clearSharedStorage();
+  resetSession();
 }

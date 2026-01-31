@@ -8,7 +8,7 @@ import type { ShopItem } from '../systems/shop/types';
 import type { Mission, Difficulty } from '../systems/mission/types';
 import type { InventoryItem } from '../systems/inventory/types';
 
-export type Location = 'city' | 'shop' | 'missions' | 'inventory' | 'storage';
+export type Location = 'city' | 'shop' | 'missions' | 'inventory' | 'storage' | 'guild' | 'field';
 
 export interface GameState {
   character: Character | null;
