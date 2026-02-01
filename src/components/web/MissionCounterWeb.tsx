@@ -1,7 +1,13 @@
+/**
+ * MissionCounterWeb - Guild Counter interface with session state tracking
+ * Shows fields, missions, active sessions, and rewards with full state visibility
+ */
+
 import { useState, useEffect } from 'react';
 import type { Character } from '../../systems/character/types';
 import type { Field, FieldResult } from '../../systems/field/types';
 import type { Mission, MissionResult, Difficulty } from '../../systems/mission/types';
+import type { InventorySlot } from '../../systems/inventory/types';
 import {
   getAllFields,
   isFieldUnlocked,
@@ -29,8 +35,16 @@ import {
   canResume,
   resumeSession,
 } from '../../systems/session';
+import { getInventory } from '../../systems/inventory/inventory';
 
 type Tab = 'fields' | 'missions' | 'active' | 'report';
+
+interface SessionLogEntry {
+  id: number;
+  action: 'enter' | 'telepipe' | 'abandon' | 'complete' | 'claim';
+  details: string;
+  timestamp: Date;
+}
 
 export default function MissionCounterWeb() {
   const [character, setCharacter] = useState<Character | null>(null);
@@ -42,6 +56,32 @@ export default function MissionCounterWeb() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('normal');
   const [message, setMessage] = useState('');
   const [pendingResult, setPendingResult] = useState<FieldResult | MissionResult | null>(null);
+  const [sessionLog, setSessionLog] = useState<SessionLogEntry[]>([]);
+  const [logCounter, setLogCounter] = useState(0);
+  const [inventory, setInventory] = useState<InventorySlot[]>([]);
+
+  // Session statistics
+  const [sessionStats, setSessionStats] = useState({
+    fieldsEntered: 0,
+    missionsStarted: 0,
+    telepipesUsed: 0,
+    sessionsCompleted: 0,
+    totalExpGained: 0,
+    totalMesetaGained: 0,
+  });
+
+  const addLogEntry = (action: SessionLogEntry['action'], details: string) => {
+    setLogCounter(prev => {
+      const newId = prev + 1;
+      setSessionLog(log => [...log.slice(-50), {
+        id: newId,
+        action,
+        details,
+        timestamp: new Date(),
+      }]);
+      return newId;
+    });
+  };
 
   useEffect(() => {
     initializeDefaultFields();
@@ -52,8 +92,14 @@ export default function MissionCounterWeb() {
   useEffect(() => {
     if (character) {
       refreshData();
+      loadInventory(character.character_id);
     }
   }, [character]);
+
+  const loadInventory = (characterId: string) => {
+    const inv = getInventory(characterId);
+    setInventory(inv.items);
+  };
 
   const loadSelectedCharacter = () => {
     const selectedId = localStorage.getItem('selectedCharacterId');
@@ -124,6 +170,8 @@ export default function MissionCounterWeb() {
     const success = enterField(selectedField.id, selectedDifficulty);
     if (success) {
       setMessage(`Entering ${selectedField.name}...`);
+      addLogEntry('enter', `Entered ${selectedField.name} (${selectedDifficulty})`);
+      setSessionStats(prev => ({ ...prev, fieldsEntered: prev.fieldsEntered + 1 }));
       // In a real game, this would transition to the field scene
       // For now, we'll simulate completion after showing the message
       setActiveTab('active');
@@ -139,6 +187,8 @@ export default function MissionCounterWeb() {
     const success = enterMission(selectedMission.id, selectedDifficulty);
     if (success) {
       setMessage(`Starting ${selectedMission.name}...`);
+      addLogEntry('enter', `Started ${selectedMission.name} (${selectedDifficulty})`);
+      setSessionStats(prev => ({ ...prev, missionsStarted: prev.missionsStarted + 1 }));
       setActiveTab('active');
     } else {
       setMessage('Cannot start mission');
@@ -147,15 +197,20 @@ export default function MissionCounterWeb() {
   };
 
   const handleTelepipe = () => {
+    const state = getSessionState();
     useTelepipe();
     setMessage('Used Telepipe - returned to city');
+    addLogEntry('telepipe', `Telepipe from ${state.activeId}`);
+    setSessionStats(prev => ({ ...prev, telepipesUsed: prev.telepipesUsed + 1 }));
     refreshData();
     setTimeout(() => setMessage(''), 3000);
   };
 
   const handleAbandon = () => {
+    const state = getSessionState();
     abandonSession();
     setMessage('Session abandoned');
+    addLogEntry('abandon', `Abandoned ${state.activeId}`);
     setActiveTab('fields');
     setSelectedField(null);
     setSelectedMission(null);
@@ -164,7 +219,9 @@ export default function MissionCounterWeb() {
 
   const handleResume = () => {
     if (resumeSession()) {
+      const state = getSessionState();
       setMessage('Resuming session...');
+      addLogEntry('enter', `Resumed ${state.activeId}`);
       setActiveTab('active');
     }
     setTimeout(() => setMessage(''), 3000);
@@ -200,6 +257,14 @@ export default function MissionCounterWeb() {
 
       setCharacter(updatedCharacter);
       setMessage('Rewards claimed!');
+      const locationId = 'fieldId' in result ? result.fieldId : (result as MissionResult).missionId;
+      addLogEntry('claim', `Claimed: +${expGained} EXP, +${mesetaGained} Meseta from ${locationId}`);
+      setSessionStats(prev => ({
+        ...prev,
+        sessionsCompleted: prev.sessionsCompleted + 1,
+        totalExpGained: prev.totalExpGained + expGained,
+        totalMesetaGained: prev.totalMesetaGained + mesetaGained,
+      }));
       setPendingResult(null);
       setActiveTab('fields');
     }
@@ -215,6 +280,8 @@ export default function MissionCounterWeb() {
   }
 
   const sessionState = getSessionState();
+  const fieldsCompleted = fields.filter(f => hasFieldCompleted(character.character_id, f.id)).length;
+  const missionsCompleted = missions.filter(m => hasMissionCompleted(character.character_id, m.id)).length;
 
   return (
     <div style={styles.container} data-testid="mission-counter">
@@ -232,27 +299,93 @@ export default function MissionCounterWeb() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={styles.tabs}>
-        {(['fields', 'missions', 'active', 'report'] as Tab[]).map(tab => (
-          <button
-            key={tab}
-            style={{
-              ...styles.tab,
-              ...(activeTab === tab ? styles.tabActive : {}),
-              ...(tab === 'report' && hasPendingRewards() ? styles.tabHighlight : {}),
-            }}
-            onClick={() => setActiveTab(tab)}
-            data-testid={`tab-${tab}`}
-          >
-            {tab.toUpperCase()}
-            {tab === 'report' && hasPendingRewards() && ' !'}
-          </button>
-        ))}
-      </div>
+      {/* Three-panel layout */}
+      <div style={styles.mainLayout}>
+        {/* Left Panel - Character Stats */}
+        <div style={styles.leftPanel} data-testid="character-panel">
+          <div style={styles.panelSection}>
+            <h3 style={styles.panelTitle}>CHARACTER</h3>
+            <div style={styles.statRow}>
+              <span style={styles.statLabel}>Name</span>
+              <span style={styles.statValue} data-testid="char-name">{character.character_name}</span>
+            </div>
+            <div style={styles.statRow}>
+              <span style={styles.statLabel}>Class</span>
+              <span style={styles.statValue} data-testid="char-class">{character.class_id}</span>
+            </div>
+            <div style={styles.statRow}>
+              <span style={styles.statLabel}>Level</span>
+              <span style={styles.statValue} data-testid="char-level">{character.level}</span>
+            </div>
+            <div style={styles.statRow}>
+              <span style={styles.statLabel}>EXP</span>
+              <span style={styles.statValue}>{character.experience.toLocaleString()}</span>
+            </div>
+            <div style={styles.statRow}>
+              <span style={styles.statLabel}>Meseta</span>
+              <span style={styles.statValue} data-testid="char-meseta">
+                {(character.meseta ?? 0).toLocaleString()}
+              </span>
+            </div>
+          </div>
 
-      {/* Content */}
-      <div style={styles.content}>
+          <div style={styles.panelSection}>
+            <h3 style={styles.panelTitle}>PROGRESS</h3>
+            <div style={styles.statRow}>
+              <span style={styles.statLabel}>Fields</span>
+              <span style={styles.statValue} data-testid="fields-progress">
+                {fieldsCompleted}/{fields.length}
+              </span>
+            </div>
+            <div style={styles.statRow}>
+              <span style={styles.statLabel}>Missions</span>
+              <span style={styles.statValue} data-testid="missions-progress">
+                {missionsCompleted}/{missions.length}
+              </span>
+            </div>
+          </div>
+
+          <div style={styles.panelSection}>
+            <h3 style={styles.panelTitle}>INVENTORY ({inventory.length})</h3>
+            <div style={styles.inventoryPreview} data-testid="inventory-preview">
+              {inventory.slice(0, 5).map((slot, idx) => (
+                <div key={idx} style={styles.inventoryItem}>
+                  {slot.itemId} x{slot.quantity}
+                </div>
+              ))}
+              {inventory.length === 0 && (
+                <div style={styles.emptyText}>No items</div>
+              )}
+              {inventory.length > 5 && (
+                <div style={styles.moreItems}>+{inventory.length - 5} more</div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Center Panel - Main Content */}
+        <div style={styles.centerPanel}>
+          {/* Tabs */}
+          <div style={styles.tabs}>
+            {(['fields', 'missions', 'active', 'report'] as Tab[]).map(tab => (
+              <button
+                key={tab}
+                style={{
+                  ...styles.tab,
+                  ...(activeTab === tab ? styles.tabActive : {}),
+                  ...(tab === 'report' && hasPendingRewards() ? styles.tabHighlight : {}),
+                }}
+                onClick={() => setActiveTab(tab)}
+                data-testid={`tab-${tab}`}
+              >
+                {tab.toUpperCase()}
+                {tab === 'report' && hasPendingRewards() && ' !'}
+              </button>
+            ))}
+          </div>
+
+          {/* Content */}
+          <div style={styles.content}>
         {/* Fields Tab */}
         {activeTab === 'fields' && (
           <div style={styles.splitView}>
@@ -554,6 +687,81 @@ export default function MissionCounterWeb() {
             )}
           </div>
         )}
+          </div>
+        </div>
+
+        {/* Right Panel - Session Stats & Log */}
+        <div style={styles.rightPanel} data-testid="session-panel">
+          <div style={styles.panelSection}>
+            <h3 style={styles.panelTitle}>SESSION STATS</h3>
+            <div style={styles.statRow}>
+              <span style={styles.statLabel}>Fields</span>
+              <span style={styles.statValue} data-testid="stat-fields-entered">
+                {sessionStats.fieldsEntered}
+              </span>
+            </div>
+            <div style={styles.statRow}>
+              <span style={styles.statLabel}>Missions</span>
+              <span style={styles.statValue} data-testid="stat-missions-started">
+                {sessionStats.missionsStarted}
+              </span>
+            </div>
+            <div style={styles.statRow}>
+              <span style={styles.statLabel}>Completed</span>
+              <span style={styles.statValue} data-testid="stat-completed">
+                {sessionStats.sessionsCompleted}
+              </span>
+            </div>
+            <div style={styles.statRow}>
+              <span style={styles.statLabel}>Telepipes</span>
+              <span style={styles.statValue} data-testid="stat-telepipes">
+                {sessionStats.telepipesUsed}
+              </span>
+            </div>
+          </div>
+
+          <div style={styles.panelSection}>
+            <h3 style={styles.panelTitle}>TOTAL EARNED</h3>
+            <div style={styles.statRow}>
+              <span style={styles.statLabel}>EXP</span>
+              <span style={styles.earnedValue} data-testid="stat-total-exp">
+                +{sessionStats.totalExpGained.toLocaleString()}
+              </span>
+            </div>
+            <div style={styles.statRow}>
+              <span style={styles.statLabel}>Meseta</span>
+              <span style={styles.earnedValue} data-testid="stat-total-meseta">
+                +{sessionStats.totalMesetaGained.toLocaleString()}
+              </span>
+            </div>
+          </div>
+
+          <div style={styles.panelSection}>
+            <h3 style={styles.panelTitle}>ACTIVITY LOG</h3>
+            <div style={styles.logContainer} data-testid="session-log">
+              {sessionLog.length === 0 ? (
+                <div style={styles.emptyText}>No activity yet</div>
+              ) : (
+                [...sessionLog].reverse().map(entry => (
+                  <div
+                    key={entry.id}
+                    style={{
+                      ...styles.logEntry,
+                      ...(entry.action === 'claim' ? styles.logEntryClaim : {}),
+                      ...(entry.action === 'abandon' ? styles.logEntryAbandon : {}),
+                    }}
+                    data-testid={`log-${entry.id}`}
+                  >
+                    <span style={styles.logTime}>
+                      {entry.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    <span style={styles.logDetails}>{entry.details}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Message */}
@@ -568,7 +776,7 @@ const styles: Record<string, React.CSSProperties> = {
   container: {
     minHeight: '100vh',
     background: 'linear-gradient(135deg, #0a1628 0%, #1a2a4a 50%, #0a1628 100%)',
-    padding: '2rem',
+    padding: '1.5rem',
     fontFamily: "'Press Start 2P', system-ui, sans-serif",
     color: 'white',
   },
@@ -582,7 +790,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '1.5rem',
+    marginBottom: '1rem',
     flexWrap: 'wrap',
     gap: '1rem',
   },
@@ -612,6 +820,108 @@ const styles: Record<string, React.CSSProperties> = {
   levelValue: {
     fontSize: '0.8rem',
     color: '#6bb8ff',
+  },
+  // Three-panel layout
+  mainLayout: {
+    display: 'grid',
+    gridTemplateColumns: '220px 1fr 220px',
+    gap: '1rem',
+    minHeight: 'calc(100vh - 120px)',
+  },
+  leftPanel: {
+    background: 'rgba(255, 255, 255, 0.03)',
+    border: '2px solid #2a4a6a',
+    borderRadius: '8px',
+    padding: '1rem',
+    overflowY: 'auto',
+    maxHeight: 'calc(100vh - 140px)',
+  },
+  centerPanel: {
+    display: 'flex',
+    flexDirection: 'column',
+    minWidth: 0,
+  },
+  rightPanel: {
+    background: 'rgba(255, 255, 255, 0.03)',
+    border: '2px solid #2a4a6a',
+    borderRadius: '8px',
+    padding: '1rem',
+    overflowY: 'auto',
+    maxHeight: 'calc(100vh - 140px)',
+  },
+  panelSection: {
+    marginBottom: '1.5rem',
+  },
+  panelTitle: {
+    fontSize: '0.55rem',
+    color: '#a78bfa',
+    marginBottom: '0.75rem',
+    marginTop: 0,
+    letterSpacing: '1px',
+  },
+  statRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    marginBottom: '0.4rem',
+    fontSize: '0.5rem',
+  },
+  statLabel: {
+    color: '#6a8aaa',
+  },
+  statValue: {
+    color: '#6bb8ff',
+  },
+  earnedValue: {
+    color: '#4ade80',
+  },
+  inventoryPreview: {
+    maxHeight: '100px',
+    overflowY: 'auto',
+  },
+  inventoryItem: {
+    fontSize: '0.45rem',
+    color: '#a6c9ff',
+    padding: '0.2rem 0',
+    borderBottom: '1px solid #2a4a6a',
+  },
+  emptyText: {
+    fontSize: '0.45rem',
+    color: '#4a6a8a',
+    fontStyle: 'italic',
+  },
+  moreItems: {
+    fontSize: '0.45rem',
+    color: '#6bb8ff',
+    marginTop: '0.25rem',
+  },
+  logContainer: {
+    maxHeight: '200px',
+    overflowY: 'auto',
+  },
+  logEntry: {
+    fontSize: '0.45rem',
+    padding: '0.3rem',
+    marginBottom: '0.25rem',
+    background: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: '2px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.15rem',
+  },
+  logEntryClaim: {
+    background: 'rgba(74, 222, 128, 0.1)',
+    borderLeft: '2px solid #4ade80',
+  },
+  logEntryAbandon: {
+    background: 'rgba(248, 113, 113, 0.1)',
+    borderLeft: '2px solid #f87171',
+  },
+  logTime: {
+    color: '#4a6a8a',
+    fontSize: '0.4rem',
+  },
+  logDetails: {
+    color: '#a6c9ff',
   },
   tabs: {
     display: 'flex',
