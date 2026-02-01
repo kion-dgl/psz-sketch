@@ -2068,9 +2068,21 @@ export function resetState(): void {
 // ============================================================================
 
 /**
- * Handle player defeat - return to city, abandon session
+ * Handle player defeat - return to city, abandon session, pay rescue fee
  */
 function handlePlayerDefeat(): string {
+  // Calculate rescue fee (half of meseta)
+  const currentMeseta = currentCharacter?.meseta ?? 0;
+  const rescueFee = Math.floor(currentMeseta / 2);
+
+  // Deduct rescue fee
+  if (currentCharacter && rescueFee > 0) {
+    currentCharacter = {
+      ...currentCharacter,
+      meseta: currentMeseta - rescueFee,
+    };
+  }
+
   // Abandon the session
   abandonSession();
 
@@ -2087,10 +2099,15 @@ function handlePlayerDefeat(): string {
 
   // Don't clear playerCombatState - let them see their HP was 0
 
+  const feeMessage = rescueFee > 0
+    ? `The rescue team charged ${rescueFee.toLocaleString()} Meseta for their services.`
+    : `The rescue team waived their fee since you had no Meseta.`;
+
   return `
 *** YOU HAVE BEEN DEFEATED! ***
 
 A rescue team found you unconscious and brought you back to Dairon City.
+${feeMessage}
 Your wounds have been treated, but you lost all progress in the field.
 
 You wake up in the city, ready to try again.`;
