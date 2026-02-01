@@ -393,9 +393,9 @@ test.describe('Navigation', () => {
     await shopPage.clickBack();
     await expect(page).toHaveURL(/\/web\/city-hub/);
 
-    // Navigate to missions
+    // Navigate to missions (guild counter)
     await cityHubPage.clickMissions();
-    await expect(page).toHaveURL(/\/web\/mission-select/);
+    await expect(page).toHaveURL(/\/web\/guild-counter/);
   });
 
   test('logout returns to character select', async ({ page }) => {
