@@ -1,0 +1,110 @@
+{
+  "description": "Maps weapon types to the classes that can equip them, derived from weapon usableBy data",
+  "classMapping": {
+    "Hunter Human": ["humar", "humarl"],
+    "Hunter Newman": ["hunewm", "hunewearl"],
+    "Hunter Cast": ["hucast", "hucaseal"],
+    "Ranger Human": ["ramar", "ramarl"],
+    "Ranger Cast": ["racast", "racaseal"],
+    "Force Human": ["fomar", "fomarl"],
+    "Force Newman": ["fonewm", "fonewearl"]
+  },
+  "weaponTypes": {
+    "saber": {
+      "label": "Saber",
+      "animationFolder": "saver",
+      "animationPrefix": "01",
+      "usableBy": ["Hunter Human", "Hunter Newman", "Hunter Cast", "Ranger Human", "Ranger Cast", "Force Human", "Force Newman"]
+    },
+    "sword": {
+      "label": "Sword",
+      "animationFolder": "sword",
+      "animationPrefix": "02",
+      "usableBy": ["Hunter Human", "Hunter Newman", "Hunter Cast"]
+    },
+    "dagger": {
+      "label": "Dagger",
+      "animationFolder": "dagger",
+      "animationPrefix": "03",
+      "usableBy": ["Hunter Human", "Hunter Newman", "Hunter Cast", "Force Human"]
+    },
+    "spear": {
+      "label": "Spear",
+      "animationFolder": "spear",
+      "animationPrefix": "04",
+      "usableBy": ["Hunter Human", "Hunter Newman", "Hunter Cast", "Ranger Human", "Ranger Cast"]
+    },
+    "claw": {
+      "label": "Claw",
+      "animationFolder": "claw",
+      "animationPrefix": "05",
+      "usableBy": ["Hunter Human", "Hunter Newman", "Hunter Cast"]
+    },
+    "shield": {
+      "label": "Shield",
+      "animationFolder": "shield",
+      "animationPrefix": "06",
+      "usableBy": ["Hunter Human", "Hunter Newman", "Hunter Cast", "Force Human"]
+    },
+    "handgun": {
+      "label": "Handgun",
+      "animationFolder": "handgun",
+      "animationPrefix": "08",
+      "usableBy": ["Hunter Human", "Hunter Newman", "Hunter Cast", "Ranger Human", "Ranger Cast", "Force Human", "Force Newman"]
+    },
+    "rifle": {
+      "label": "Rifle",
+      "animationFolder": "shotgun",
+      "animationPrefix": "10",
+      "usableBy": ["Ranger Human", "Ranger Cast"]
+    },
+    "machinegun": {
+      "label": "Machinegun",
+      "animationFolder": "machinegun",
+      "animationPrefix": "11",
+      "usableBy": ["Hunter Human", "Ranger Human", "Ranger Cast", "Force Human"]
+    },
+    "grenade": {
+      "label": "Grenade",
+      "animationFolder": "grenade",
+      "animationPrefix": "12",
+      "usableBy": ["Hunter Human", "Hunter Newman", "Hunter Cast", "Ranger Human", "Ranger Cast", "Force Human", "Force Newman"]
+    },
+    "rod": {
+      "label": "Rod",
+      "animationFolder": "rod",
+      "animationPrefix": "14",
+      "usableBy": ["Force Human", "Force Newman"]
+    },
+    "wand": {
+      "label": "Wand",
+      "animationFolder": "wand",
+      "animationPrefix": "15",
+      "usableBy": ["Hunter Human", "Hunter Newman", "Hunter Cast", "Ranger Human", "Ranger Cast", "Force Human", "Force Newman"]
+    },
+    "slicer": {
+      "label": "Slicer",
+      "animationFolder": "slicer",
+      "animationPrefix": "16",
+      "usableBy": ["Hunter Human", "Hunter Newman", "Hunter Cast", "Ranger Cast", "Force Human", "Force Newman"]
+    }
+  },
+  "bodyTypes": {
+    "m": {
+      "label": "Male Human/Cast",
+      "classes": ["humar", "hucast", "ramar", "racast", "fomar"]
+    },
+    "w": {
+      "label": "Female Human/Cast",
+      "classes": ["humarl", "hucaseal", "ramarl", "racaseal", "fomarl"]
+    },
+    "sm": {
+      "label": "Male Newman",
+      "classes": ["hunewm", "fonewm"]
+    },
+    "sw": {
+      "label": "Female Newman",
+      "classes": ["hunewearl", "fonewearl"]
+    }
+  }
+}

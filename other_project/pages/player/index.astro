@@ -1,0 +1,273 @@
+---
+import { getCollection } from 'astro:content';
+import { existsSync, readFileSync } from 'fs';
+import { join } from 'path';
+
+const base = import.meta.env.BASE_URL;
+
+// Get all players from the collection
+const allPlayers = await getCollection('players');
+
+// Transform to match the expected structure
+const players = allPlayers.map(entry => {
+  // Strip /index from the ID
+  const cleanId = entry.id.replace('/index', '');
+  return {
+    name: cleanId,
+    displayName: cleanId.toUpperCase(),
+    textureCount: entry.data.textureCount
+  };
+});
+
+// Sort players by name
+players.sort((a, b) => a.name.localeCompare(b.name));
+
+// Group players by race/class
+function getCharacterClass(name: string): string {
+  const prefix = name.replace('pc_', '').substring(0, 2);
+
+  const classMap: { [key: string]: string } = {
+    '00': 'Humar',
+    '01': 'HUmarl',
+    '02': 'RAmar',
+    '03': 'RAmarl',
+    '04': 'FOmar',
+    '05': 'FOmarl',
+    '06': 'HUnewm',
+    '07': 'HUnewearl',
+    '08': 'FOnewm',
+    '09': 'FOnewearl',
+    '10': 'HUcast',
+    '11': 'HUcaseal',
+    '12': 'RAcast',
+    '13': 'RAcaseal',
+    'a0': 'NPCs',
+    'a1': 'NPCs',
+    'a2': 'NPCs',
+    'a3': 'NPCs',
+    'a4': 'NPCs',
+  };
+
+  return classMap[prefix] || 'Unknown';
+}
+
+// Get NPC character names
+function getNPCName(name: string): string | null {
+  const npcNames: { [key: string]: string } = {
+    'pc_a00': 'Sarisa',
+    'pc_a01': 'Kai',
+    'pc_a02': 'Ogi',
+    'pc_a03': 'Reve',
+    'pc_a04': 'Ogi (Alt)',
+  };
+  return npcNames[name] || null;
+}
+
+const groupedPlayers: { [key: string]: typeof players } = {};
+for (const player of players) {
+  const className = getCharacterClass(player.name);
+  if (!groupedPlayers[className]) {
+    groupedPlayers[className] = [];
+  }
+  // Add NPC name to player object if applicable
+  const npcName = getNPCName(player.name);
+  if (npcName) {
+    player.npcName = npcName;
+  }
+  groupedPlayers[className].push(player);
+}
+
+// Load shared animations
+const animationsPath = './public/player/animations/animations.json';
+let sharedAnimations = [];
+if (existsSync(animationsPath)) {
+  try {
+    sharedAnimations = JSON.parse(readFileSync(animationsPath, 'utf-8'));
+  } catch (e) {
+    // Ignore
+  }
+}
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Player Characters - PSZ Asset Viewer</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: #0a0a0a;
+        color: #ffffff;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header {
+        margin-bottom: 2rem;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .header p {
+        color: #aaa;
+        font-size: 1.1rem;
+      }
+
+      .back-link {
+        display: inline-block;
+        margin-bottom: 1.5rem;
+        padding: 0.5rem 1rem;
+        background: #2a2a2a;
+        border: 1px solid #333;
+        border-radius: 4px;
+        color: #fff;
+        text-decoration: none;
+        transition: background 0.2s;
+      }
+
+      .back-link:hover {
+        background: #3a3a3a;
+      }
+
+      .info-box {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        color: #aaa;
+      }
+
+      .info-box strong {
+        color: #667eea;
+      }
+
+      .class-section {
+        margin-bottom: 3rem;
+      }
+
+      .class-heading {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #667eea33;
+      }
+
+      .player-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+
+      .player-card {
+        background: linear-gradient(135deg, #667eea22 0%, #764ba222 100%);
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 1.25rem;
+        text-decoration: none;
+        color: #fff;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .player-card:hover {
+        transform: translateY(-4px);
+        border-color: #667eea;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+      }
+
+      .player-name {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        font-family: 'Courier New', monospace;
+      }
+
+      .player-stats {
+        font-size: 0.85rem;
+        color: #aaa;
+        margin-top: auto;
+      }
+
+      .no-players {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #aaa;
+      }
+
+      .no-players h2 {
+        margin-bottom: 1rem;
+      }
+
+      .no-players code {
+        background: #1a1a1a;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <a href={`${base}/`} class="back-link">← Back to Home</a>
+
+      <div class="header">
+        <h1>Player Characters</h1>
+        <p>{players.length} character models available</p>
+      </div>
+
+      {sharedAnimations.length > 0 && (
+        <div class="info-box">
+          <strong>{sharedAnimations.length} shared animations</strong> available for all characters (wait, run, attack, damage, etc.)
+        </div>
+      )}
+
+      {players.length === 0 ? (
+        <div class="no-players">
+          <h2>No player models found</h2>
+          <p>Run <code>npm run processPlayer</code> to convert player character models.</p>
+        </div>
+      ) : (
+        <div>
+          {Object.entries(groupedPlayers).map(([className, classPlayers]) => (
+            <div class="class-section">
+              <h2 class="class-heading">{className}</h2>
+              <div class="player-grid">
+                {classPlayers.map(player => (
+                  <a href={`${base}player/${player.name}`} class="player-card">
+                    <div class="player-name">{player.displayName}</div>
+                    <div class="player-stats">
+                      {player.npcName ? player.npcName : (player.textureCount > 0 && `${player.textureCount} textures`)}
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  </body>
+</html>

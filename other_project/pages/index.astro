@@ -1,0 +1,975 @@
+---
+import { existsSync, readdirSync, statSync } from 'fs';
+import { join } from 'path';
+
+const base = import.meta.env.BASE_URL;
+
+// Count assets in each area
+function countAssets(cityDir: string): number {
+  if (!existsSync(cityDir)) return 0;
+
+  return readdirSync(cityDir).filter(name => {
+    const fullPath = join(cityDir, name);
+    return statSync(fullPath).isDirectory();
+  }).length;
+}
+
+const cityACount = countAssets('./public/city_a');
+const cityECount = countAssets('./public/city_e');
+const valleyACount = countAssets('./public/valley_a');
+const valleyBCount = countAssets('./public/valley_b');
+const valleyECount = countAssets('./public/valley_e');
+const valleyZCount = countAssets('./public/valley_z');
+const wetlandsACount = countAssets('./public/wetlands_a');
+const wetlandsBCount = countAssets('./public/wetlands_b');
+const wetlandsECount = countAssets('./public/wetlands_e');
+const wetlandsZCount = countAssets('./public/wetlands_z');
+const snowfieldACount = countAssets('./public/snowfield_a');
+const snowfieldBCount = countAssets('./public/snowfield_b');
+const snowfieldECount = countAssets('./public/snowfield_e');
+const snowfieldZCount = countAssets('./public/snowfield_z');
+const makaraACount = countAssets('./public/makara_a');
+const makaraBCount = countAssets('./public/makara_b');
+const makaraECount = countAssets('./public/makara_e');
+const makaraZCount = countAssets('./public/makara_z');
+const paruACount = countAssets('./public/paru_a');
+const paruBCount = countAssets('./public/paru_b');
+const paruECount = countAssets('./public/paru_e');
+const paruZCount = countAssets('./public/paru_z');
+const arcaACount = countAssets('./public/arca_a');
+const arcaBCount = countAssets('./public/arca_b');
+const arcaECount = countAssets('./public/arca_e');
+const arcaZCount = countAssets('./public/arca_z');
+const shrineACount = countAssets('./public/shrine_a');
+const shrineBCount = countAssets('./public/shrine_b');
+const shrineECount = countAssets('./public/shrine_e');
+const shrineZCount = countAssets('./public/shrine_z');
+const tower0Count = countAssets('./public/tower_0');
+const tower1Count = countAssets('./public/tower_1');
+const tower2Count = countAssets('./public/tower_2');
+const tower3Count = countAssets('./public/tower_3');
+const tower4Count = countAssets('./public/tower_4');
+const tower5Count = countAssets('./public/tower_5');
+const tower6Count = countAssets('./public/tower_6');
+const tower7Count = countAssets('./public/tower_7');
+const towerECount = countAssets('./public/tower_e');
+
+// Count player characters
+function countPlayers(): number {
+  const playerDir = './public/player';
+  if (!existsSync(playerDir)) return 0;
+
+  return readdirSync(playerDir).filter(name => {
+    const fullPath = join(playerDir, name);
+    return statSync(fullPath).isDirectory() && name.startsWith('pc_');
+  }).length;
+}
+
+// Count enemies
+function countEnemies(): number {
+  const enemiesDir = './public/enemies';
+  if (!existsSync(enemiesDir)) return 0;
+
+  return readdirSync(enemiesDir).filter(name => {
+    const fullPath = join(enemiesDir, name);
+    return statSync(fullPath).isDirectory();
+  }).length;
+}
+
+// Count weapons
+function countWeapons(): number {
+  const weaponsDir = './public/weapons';
+  if (!existsSync(weaponsDir)) return 0;
+
+  return readdirSync(weaponsDir).filter(name => {
+    const fullPath = join(weaponsDir, name);
+    return statSync(fullPath).isDirectory();
+  }).length;
+}
+
+// Count objects
+function countObjects(): number {
+  const objectsDir = './public/objects';
+  if (!existsSync(objectsDir)) return 0;
+
+  return readdirSync(objectsDir).filter(name => {
+    const fullPath = join(objectsDir, name);
+    return statSync(fullPath).isDirectory();
+  }).length;
+}
+
+const playerCount = countPlayers();
+const enemyCount = countEnemies();
+const weaponCount = countWeapons();
+const objectCount = countObjects();
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PSZ Asset Viewer</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: #0a0a0a;
+        color: #ffffff;
+        font-family: system-ui, -apple-system, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
+
+      .container {
+        max-width: 800px;
+        width: 100%;
+      }
+
+      h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .subtitle {
+        font-size: 1.2rem;
+        color: #888;
+        margin-bottom: 3rem;
+      }
+
+      .cities {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+      }
+
+      .city-card {
+        background: linear-gradient(135deg, #667eea22 0%, #764ba222 100%);
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 2rem;
+        text-decoration: none;
+        color: white;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .city-card:hover {
+        transform: translateY(-4px);
+        border-color: #667eea;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+      }
+
+      .city-card h2 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .city-card .count {
+        font-size: 1rem;
+        color: #888;
+        margin-bottom: 1rem;
+      }
+
+      .city-card .description {
+        font-size: 0.9rem;
+        color: #aaa;
+        line-height: 1.5;
+      }
+
+      .status {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 1.5rem;
+      }
+
+      .status h3 {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        color: #667eea;
+      }
+
+      .status code {
+        background: #0a0a0a;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.9rem;
+      }
+
+      .status p {
+        margin-bottom: 0.5rem;
+        color: #aaa;
+      }
+
+      .status a {
+        color: #667eea;
+        text-decoration: none;
+      }
+
+      .status a:hover {
+        text-decoration: underline;
+      }
+
+      .no-assets {
+        color: #ff6b6b;
+      }
+
+      .has-assets {
+        color: #51cf66;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Phantasy Star Zero</h1>
+      <p class="subtitle">Scene Asset Viewer</p>
+
+      <h2 style="margin-bottom: 1rem; font-size: 1.5rem;">Game Experience</h2>
+      <div class="cities">
+        <a href={`${base}title`} class="city-card" style="background: linear-gradient(135deg, #667eea44 0%, #764ba244 100%); grid-column: 1 / -1; border: 2px solid #667eea;">
+          <h2>🌍 Title Screen</h2>
+          <div class="count">Start Your Adventure</div>
+          <p class="description">
+            Experience the space-themed title screen with Earth and Moon in 3D. Navigate the main menu and access all game features. Features orbital mechanics, star fields, and nebula particle effects.
+          </p>
+        </a>
+      </div>
+
+      <h2 style="margin: 2rem 0 1rem 0; font-size: 1.5rem;">Gameplay Demos</h2>
+      <div class="cities">
+        <a href={`${base}walkable`} class="city-card" style="background: linear-gradient(135deg, #667eea22 0%, #764ba222 100%); grid-column: 1 / -1;">
+          <h2>Walkable Scene Demo</h2>
+          <div class="count">Interactive 3D Environment</div>
+          <p class="description">
+            Explore the Wetlands B environment with a playable character. Use WASD to move, click and drag to rotate the camera. Features third-person controls and running animations.
+          </p>
+        </a>
+
+        <a href={`${base}attackable`} class="city-card" style="background: linear-gradient(135deg, #ff6b6b22 0%, #ee5a6f22 100%); grid-column: 1 / -1;">
+          <h2>Attack System Demo</h2>
+          <div class="count">PSO-Style Combat Demo</div>
+          <p class="description">
+            Test the attack combo system in Rioh Snowfield with a HUmarl character. Features over-the-shoulder camera controls, 3-hit combo chains with timing windows, and snow particle effects. Click to attack, time your clicks to continue the combo!
+          </p>
+        </a>
+
+        <a href={`${base}character-create`} class="city-card" style="background: linear-gradient(135deg, #10b98122 0%, #059669222 100%); grid-column: 1 / -1;">
+          <h2>Character Creation</h2>
+          <div class="count">Customize Your Character</div>
+          <p class="description">
+            Create and customize your character with 14 different classes across 3 races (Human, Newman, Cast). Choose from 4 variations per class, 5 color schemes, and 9 skin tones. Features real-time 3D preview with asset caching for fast loading.
+          </p>
+        </a>
+      </div>
+
+      <h2 style="margin: 2rem 0 1rem 0; font-size: 1.5rem;">Shop Interfaces</h2>
+      <div class="cities">
+        <a href={`${base}item-shop`} class="city-card" style="background: linear-gradient(135deg, #f59e0b22 0%, #d9770622 100%); grid-column: 1 / -1;">
+          <h2>Item Shop Interface</h2>
+          <div class="count">2D Shop System</div>
+          <p class="description">
+            Buy and sell items with an NPC shopkeeper. Features buy/sell modes, inventory management, and Meseta currency tracking. Click items to select, then confirm your purchase or sale.
+          </p>
+        </a>
+
+        <a href={`${base}weapon-shop`} class="city-card" style="background: linear-gradient(135deg, #8b5cf622 0%, #667eea22 100%); grid-column: 1 / -1;">
+          <h2>Weapon Shop Interface</h2>
+          <div class="count">2D Weapon Shop System</div>
+          <p class="description">
+            Browse and purchase weapons from a specialized weapon shop. Features weapon selection interface with detailed stats and pricing.
+          </p>
+        </a>
+      </div>
+
+      <h2 style="margin: 2rem 0 1rem 0; font-size: 1.5rem;">Characters & Enemies</h2>
+      <div class="cities">
+        <a href={`${base}player`} class="city-card" style="background: linear-gradient(135deg, #667eea22 0%, #764ba222 100%);">
+          <h2>Player Characters</h2>
+          <div class="count">
+            {playerCount > 0
+              ? `${playerCount} characters available`
+              : 'No characters processed yet'
+            }
+          </div>
+          <p class="description">
+            View all player character models with 45 texture variants and 22 shared animations. Interactive 3D viewer.
+          </p>
+        </a>
+
+        <a href={`${base}enemies`} class="city-card" style="background: linear-gradient(135deg, #ff6b6b22 0%, #ee5a6f22 100%);">
+          <h2>Enemy Models</h2>
+          <div class="count">
+            {enemyCount > 0
+              ? `${enemyCount} enemies available`
+              : 'No enemies processed yet'
+            }
+          </div>
+          <p class="description">
+            View all enemy models with animations and effects. Interactive 3D viewer with animation playback.
+          </p>
+        </a>
+
+        <a href={`${base}weapons`} class="city-card" style="background: linear-gradient(135deg, #f59e0b22 0%, #d9770622 100%);">
+          <h2>Weapons</h2>
+          <div class="count">
+            {weaponCount > 0
+              ? `${weaponCount} weapons available`
+              : 'No weapons processed yet'
+            }
+          </div>
+          <p class="description">
+            View all weapon models with textures and optional animations. Interactive 3D viewer.
+          </p>
+        </a>
+
+        <a href={`${base}objects`} class="city-card" style="background: linear-gradient(135deg, #10b98122 0%, #059669222 100%);">
+          <h2>Objects</h2>
+          <div class="count">
+            {objectCount > 0
+              ? `${objectCount} object sets available`
+              : 'No objects processed yet'
+            }
+          </div>
+          <p class="description">
+            View environmental objects and props from all stages. Interactive 3D viewer with textures.
+          </p>
+        </a>
+      </div>
+
+      <h2 style="margin: 2rem 0 1rem 0; font-size: 1.5rem;">City (Scene 00)</h2>
+      <div class="cities">
+        <a href={`${base}city-walkable`} class="city-card" style="background: linear-gradient(135deg, #667eea22 0%, #764ba222 100%); grid-column: 1 / -1; border: 2px solid #667eea;">
+          <h2>🏙️ City Walkable Scene</h2>
+          <div class="count">Interactive City Environment</div>
+          <p class="description">
+            Walk around City E with third-person controls. Broken materials hidden, floor made usable. Features character movement, running animations, and cleaned geometry for gameplay prototyping.
+          </p>
+        </a>
+
+        <a href={`${base}city-editor`} class="city-card" style="background: linear-gradient(135deg, #10b98122 0%, #0ea5e922 100%); grid-column: 1 / -1; border: 2px solid #10b981;">
+          <h2>🏗️ City Editor</h2>
+          <div class="count">Asset Placement Tool</div>
+          <p class="description">
+            Place and transform NPC assets in the city scene. Features: free camera movement, position/rotation/scale controls, asset management, and JSON export. Assets saved to localStorage.
+          </p>
+        </a>
+
+        <a href={`${base}city_a`} class="city-card">
+          <h2>City - Area A</h2>
+          <div class="count">
+            {cityACount > 0
+              ? `${cityACount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            City 'a' area assets. Buildings and environment pieces.
+          </p>
+        </a>
+
+        <a href={`${base}city_e`} class="city-card">
+          <h2>City - Area E</h2>
+          <div class="count">
+            {cityECount > 0
+              ? `${cityECount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            City 'e' area assets. Environmental structures and objects.
+          </p>
+        </a>
+      </div>
+
+      <h2 style="margin: 2rem 0 1rem 0; font-size: 1.5rem;">City Debug Tools</h2>
+      <div class="cities">
+        <a href={`${base}dairon-walkable`} class="city-card" style="background: linear-gradient(135deg, #8b5cf622 0%, #667eea22 100%); grid-column: 1 / -1; border: 2px solid #8b5cf6;">
+          <h2>🏜️ Dairon Walkable Scene</h2>
+          <div class="count">Custom Map Environment</div>
+          <p class="description">
+            Walk around the custom Dairon map with third-person controls. Clean custom-made geometry for testing gameplay mechanics and asset placement.
+          </p>
+        </a>
+
+        <a href={`${base}city-uv-investigation`} class="city-card" style="background: linear-gradient(135deg, #f59e0b22 0%, #d9770622 100%);">
+          <h2>UV Investigation (Mesh)</h2>
+          <div class="count">Debug Tool</div>
+          <p class="description">
+            Analyze texture UV mapping at the mesh level. Toggle meshes on/off, view UV bounds, and identify out-of-range coordinates. Shows vertex/UV/index counts for debugging.
+          </p>
+        </a>
+
+        <a href={`${base}city-face-investigation`} class="city-card" style="background: linear-gradient(135deg, #f59e0b22 0%, #d9770622 100%);">
+          <h2>Face Investigation</h2>
+          <div class="count">Debug Tool</div>
+          <p class="description">
+            Analyze UVs organized by face. Toggle individual faces, copy UV data to clipboard, filter by material. Shows all 3 UV coordinates per face with vertex positions.
+          </p>
+        </a>
+
+        <a href={`${base}city-uv-corrected`} class="city-card" style="background: linear-gradient(135deg, #f59e0b22 0%, #d9770622 100%);">
+          <h2>UV Corrected Viewer</h2>
+          <div class="count">Experimental</div>
+          <p class="description">
+            Attempted UV correction for Material__794. Applies scale+offset transformations based on face orientation. Result: Did not solve texture atlas issue.
+          </p>
+        </a>
+      </div>
+
+      <h2 style="margin: 2rem 0 1rem 0; font-size: 1.5rem;">Gurhacia Valley (Scene 01)</h2>
+      <div class="cities">
+        <a href={`${base}valley_a`} class="city-card">
+          <h2>Valley - Area A</h2>
+          <div class="count">
+            {valleyACount > 0
+              ? `${valleyACount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Gurhacia Valley 'a' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}valley_b`} class="city-card">
+          <h2>Valley - Area B</h2>
+          <div class="count">
+            {valleyBCount > 0
+              ? `${valleyBCount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Gurhacia Valley 'b' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}valley_e`} class="city-card">
+          <h2>Valley - Area E</h2>
+          <div class="count">
+            {valleyECount > 0
+              ? `${valleyECount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Gurhacia Valley 'e' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}valley_z`} class="city-card">
+          <h2>Valley - Area Z</h2>
+          <div class="count">
+            {valleyZCount > 0
+              ? `${valleyZCount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Gurhacia Valley 'z' area assets.
+          </p>
+        </a>
+      </div>
+
+      <h2 style="margin: 2rem 0 1rem 0; font-size: 1.5rem;">Ozette Wetlands (Scene 02)</h2>
+      <div class="cities">
+        <a href={`${base}wetlands_a`} class="city-card">
+          <h2>Wetlands - Area A</h2>
+          <div class="count">
+            {wetlandsACount > 0
+              ? `${wetlandsACount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Ozette Wetlands 'a' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}wetlands_b`} class="city-card">
+          <h2>Wetlands - Area B</h2>
+          <div class="count">
+            {wetlandsBCount > 0
+              ? `${wetlandsBCount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Ozette Wetlands 'b' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}wetlands_e`} class="city-card">
+          <h2>Wetlands - Area E</h2>
+          <div class="count">
+            {wetlandsECount > 0
+              ? `${wetlandsECount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Ozette Wetlands 'e' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}wetlands_z`} class="city-card">
+          <h2>Wetlands - Area Z</h2>
+          <div class="count">
+            {wetlandsZCount > 0
+              ? `${wetlandsZCount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Ozette Wetlands 'z' area assets.
+          </p>
+        </a>
+      </div>
+
+      <h2 style="margin: 2rem 0 1rem 0; font-size: 1.5rem;">Rioh Snowfield (Scene 03)</h2>
+      <div class="cities">
+        <a href={`${base}snowfield_a`} class="city-card">
+          <h2>Snowfield - Area A</h2>
+          <div class="count">
+            {snowfieldACount > 0
+              ? `${snowfieldACount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Rioh Snowfield 'a' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}snowfield_b`} class="city-card">
+          <h2>Snowfield - Area B</h2>
+          <div class="count">
+            {snowfieldBCount > 0
+              ? `${snowfieldBCount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Rioh Snowfield 'b' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}snowfield_e`} class="city-card">
+          <h2>Snowfield - Area E</h2>
+          <div class="count">
+            {snowfieldECount > 0
+              ? `${snowfieldECount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Rioh Snowfield 'e' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}snowfield_z`} class="city-card">
+          <h2>Snowfield - Area Z</h2>
+          <div class="count">
+            {snowfieldZCount > 0
+              ? `${snowfieldZCount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Rioh Snowfield 'z' area assets.
+          </p>
+        </a>
+      </div>
+
+      <h2 style="margin: 2rem 0 1rem 0; font-size: 1.5rem;">Makara Ruins (Scene 04)</h2>
+      <div class="cities">
+        <a href={`${base}makara_a`} class="city-card">
+          <h2>Makara - Area A</h2>
+          <div class="count">
+            {makaraACount > 0
+              ? `${makaraACount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Makara Ruins 'a' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}makara_b`} class="city-card">
+          <h2>Makara - Area B</h2>
+          <div class="count">
+            {makaraBCount > 0
+              ? `${makaraBCount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Makara Ruins 'b' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}makara_e`} class="city-card">
+          <h2>Makara - Area E</h2>
+          <div class="count">
+            {makaraECount > 0
+              ? `${makaraECount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Makara Ruins 'e' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}makara_z`} class="city-card">
+          <h2>Makara - Area Z</h2>
+          <div class="count">
+            {makaraZCount > 0
+              ? `${makaraZCount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Makara Ruins 'z' area assets.
+          </p>
+        </a>
+      </div>
+
+      <h2 style="margin: 2rem 0 1rem 0; font-size: 1.5rem;">Oblivion City Paru (Scene 05)</h2>
+      <div class="cities">
+        <a href={`${base}paru_a`} class="city-card">
+          <h2>Paru - Area A</h2>
+          <div class="count">
+            {paruACount > 0
+              ? `${paruACount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Oblivion City Paru 'a' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}paru_b`} class="city-card">
+          <h2>Paru - Area B</h2>
+          <div class="count">
+            {paruBCount > 0
+              ? `${paruBCount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Oblivion City Paru 'b' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}paru_e`} class="city-card">
+          <h2>Paru - Area E</h2>
+          <div class="count">
+            {paruECount > 0
+              ? `${paruECount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Oblivion City Paru 'e' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}paru_z`} class="city-card">
+          <h2>Paru - Area Z</h2>
+          <div class="count">
+            {paruZCount > 0
+              ? `${paruZCount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Oblivion City Paru 'z' area assets.
+          </p>
+        </a>
+      </div>
+
+      <h2 style="margin: 2rem 0 1rem 0; font-size: 1.5rem;">Arca Plant (Scene 06)</h2>
+      <div class="cities">
+        <a href={`${base}arca_a`} class="city-card">
+          <h2>Arca - Area A</h2>
+          <div class="count">
+            {arcaACount > 0
+              ? `${arcaACount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Arca Plant 'a' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}arca_b`} class="city-card">
+          <h2>Arca - Area B</h2>
+          <div class="count">
+            {arcaBCount > 0
+              ? `${arcaBCount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Arca Plant 'b' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}arca_e`} class="city-card">
+          <h2>Arca - Area E</h2>
+          <div class="count">
+            {arcaECount > 0
+              ? `${arcaECount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Arca Plant 'e' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}arca_z`} class="city-card">
+          <h2>Arca - Area Z</h2>
+          <div class="count">
+            {arcaZCount > 0
+              ? `${arcaZCount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Arca Plant 'z' area assets.
+          </p>
+        </a>
+      </div>
+
+      <h2 style="margin: 2rem 0 1rem 0; font-size: 1.5rem;">Dark Shrine (Scene 07)</h2>
+      <div class="cities">
+        <a href={`${base}shrine_a`} class="city-card">
+          <h2>Shrine - Area A</h2>
+          <div class="count">
+            {shrineACount > 0
+              ? `${shrineACount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Dark Shrine 'a' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}shrine_b`} class="city-card">
+          <h2>Shrine - Area B</h2>
+          <div class="count">
+            {shrineBCount > 0
+              ? `${shrineBCount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Dark Shrine 'b' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}shrine_e`} class="city-card">
+          <h2>Shrine - Area E</h2>
+          <div class="count">
+            {shrineECount > 0
+              ? `${shrineECount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Dark Shrine 'e' area assets.
+          </p>
+        </a>
+
+        <a href={`${base}shrine_z`} class="city-card">
+          <h2>Shrine - Area Z</h2>
+          <div class="count">
+            {shrineZCount > 0
+              ? `${shrineZCount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Dark Shrine 'z' area assets.
+          </p>
+        </a>
+      </div>
+
+      <h2 style="margin: 2rem 0 1rem 0; font-size: 1.5rem;">Eternal Tower (Scene 08)</h2>
+      <div class="cities">
+        <a href={`${base}tower_0`} class="city-card">
+          <h2>Tower - Floor 0</h2>
+          <div class="count">
+            {tower0Count > 0
+              ? `${tower0Count} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Eternal Tower floor 0 assets.
+          </p>
+        </a>
+
+        <a href={`${base}tower_1`} class="city-card">
+          <h2>Tower - Floor 1</h2>
+          <div class="count">
+            {tower1Count > 0
+              ? `${tower1Count} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Eternal Tower floor 1 assets.
+          </p>
+        </a>
+
+        <a href={`${base}tower_2`} class="city-card">
+          <h2>Tower - Floor 2</h2>
+          <div class="count">
+            {tower2Count > 0
+              ? `${tower2Count} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Eternal Tower floor 2 assets.
+          </p>
+        </a>
+
+        <a href={`${base}tower_3`} class="city-card">
+          <h2>Tower - Floor 3</h2>
+          <div class="count">
+            {tower3Count > 0
+              ? `${tower3Count} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Eternal Tower floor 3 assets.
+          </p>
+        </a>
+
+        <a href={`${base}tower_4`} class="city-card">
+          <h2>Tower - Floor 4</h2>
+          <div class="count">
+            {tower4Count > 0
+              ? `${tower4Count} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Eternal Tower floor 4 assets.
+          </p>
+        </a>
+
+        <a href={`${base}tower_5`} class="city-card">
+          <h2>Tower - Floor 5</h2>
+          <div class="count">
+            {tower5Count > 0
+              ? `${tower5Count} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Eternal Tower floor 5 assets.
+          </p>
+        </a>
+
+        <a href={`${base}tower_6`} class="city-card">
+          <h2>Tower - Floor 6</h2>
+          <div class="count">
+            {tower6Count > 0
+              ? `${tower6Count} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Eternal Tower floor 6 assets.
+          </p>
+        </a>
+
+        <a href={`${base}tower_7`} class="city-card">
+          <h2>Tower - Floor 7</h2>
+          <div class="count">
+            {tower7Count > 0
+              ? `${tower7Count} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Eternal Tower floor 7 assets.
+          </p>
+        </a>
+
+        <a href={`${base}tower_e`} class="city-card">
+          <h2>Tower - Area E</h2>
+          <div class="count">
+            {towerECount > 0
+              ? `${towerECount} assets available`
+              : 'No assets processed yet'
+            }
+          </div>
+          <p class="description">
+            Eternal Tower 'e' area assets.
+          </p>
+        </a>
+      </div>
+
+      {(cityACount === 0 && cityECount === 0 && valleyACount === 0 && wetlandsACount === 0 && snowfieldACount === 0 && makaraACount === 0 && paruACount === 0 && arcaACount === 0 && shrineACount === 0 && tower0Count === 0) && (
+        <div class="status">
+          <h3>Getting Started</h3>
+          <p>No processed assets found. To get started:</p>
+          <ol style="margin-left: 1.5rem; margin-top: 1rem; line-height: 1.8;">
+            <li>Make sure your NARC/NSBTX files are in <code>raw/scene/</code></li>
+            <li>Install apicula: <a href="https://github.com/scurest/apicula" target="_blank">scurest/apicula</a></li>
+            <li>Run a processing script:
+              <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                <li><code>npm run processCity</code> - Process City (Scene 00)</li>
+                <li><code>npm run processValley</code> - Process Gurhacia Valley (Scene 01)</li>
+                <li><code>npm run processWetlands</code> - Process Ozette Wetlands (Scene 02)</li>
+                <li><code>npm run processSnowfield</code> - Process Rioh Snowfield (Scene 03)</li>
+                <li><code>npm run processMakara</code> - Process Makara Ruins (Scene 04)</li>
+                <li><code>npm run processParu</code> - Process Oblivion City Paru (Scene 05)</li>
+                <li><code>npm run processArca</code> - Process Arca Plant (Scene 06)</li>
+                <li><code>npm run processShrine</code> - Process Dark Shrine (Scene 07)</li>
+                <li><code>npm run processTower</code> - Process Eternal Tower (Scene 08)</li>
+              </ul>
+            </li>
+            <li>Refresh this page to see the processed assets</li>
+          </ol>
+        </div>
+      )}
+
+      {(cityACount > 0 || cityECount > 0) && (
+        <div class="status">
+          <h3>Controls</h3>
+          <ul style="margin-left: 1.5rem; line-height: 1.8; color: #aaa;">
+            <li><strong>Rotate:</strong> Left-click and drag</li>
+            <li><strong>Zoom:</strong> Mouse wheel or pinch</li>
+            <li><strong>Pan:</strong> Right-click and drag</li>
+          </ul>
+        </div>
+      )}
+    </div>
+  </body>
+</html>
