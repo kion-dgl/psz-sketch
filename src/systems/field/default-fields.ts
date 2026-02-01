@@ -46,15 +46,15 @@ export const GURHACIA_VALLEY: Field = {
   id: 'gurhacia-valley',
   name: 'Gurhacia Valley',
   description: 'A lush valley home to many creatures. Perfect for new adventurers.',
-  areaId: 'gurhacia-valley',
+  areaId: 'valley',
   requiredLevel: 1,
   recommendedLevel: 5,
   parTime: 300, // 5 minutes
   stageSequence: [
-    { stageId: 's01a', variant: 'a', areaId: 'gurhacia-valley' },
-    { stageId: 's01e', variant: 'e', areaId: 'gurhacia-valley' },
-    { stageId: 's01b', variant: 'b', areaId: 'gurhacia-valley' },
-    { stageId: 's01z', variant: 'z', areaId: 'gurhacia-valley' },
+    { stageId: 'valley_a', variant: 'a', areaId: 'valley' },
+    { stageId: 'valley_e', variant: 'e', areaId: 'valley' },
+    { stageId: 'valley_b', variant: 'b', areaId: 'valley' },
+    { stageId: 'valley_z', variant: 'z', areaId: 'valley' },
   ],
   bossId: 'de-rol-le',
 };
@@ -66,15 +66,15 @@ export const RIOH_SNOWFIELD: Field = {
   id: 'rioh-snowfield',
   name: 'Rioh Snowfield',
   description: 'A frozen tundra filled with dangerous ice creatures.',
-  areaId: 'rioh-snowfield',
+  areaId: 'snowfield',
   requiredLevel: 15,
   recommendedLevel: 20,
   parTime: 420, // 7 minutes
   stageSequence: [
-    { stageId: 's02a', variant: 'a', areaId: 'rioh-snowfield' },
-    { stageId: 's02e', variant: 'e', areaId: 'rioh-snowfield' },
-    { stageId: 's02b', variant: 'b', areaId: 'rioh-snowfield' },
-    { stageId: 's02z', variant: 'z', areaId: 'rioh-snowfield' },
+    { stageId: 'snowfield_a', variant: 'a', areaId: 'snowfield' },
+    { stageId: 'snowfield_e', variant: 'e', areaId: 'snowfield' },
+    { stageId: 'snowfield_b', variant: 'b', areaId: 'snowfield' },
+    { stageId: 'snowfield_z', variant: 'z', areaId: 'snowfield' },
   ],
   unlockRequirements: [
     { type: 'field', id: 'gurhacia-valley' },
@@ -89,15 +89,15 @@ export const OZETTE_WETLANDS: Field = {
   id: 'ozette-wetlands',
   name: 'Ozette Wetlands',
   description: 'Murky swamplands where poisonous creatures lurk.',
-  areaId: 'ozette-wetlands',
+  areaId: 'wetlands',
   requiredLevel: 30,
   recommendedLevel: 35,
   parTime: 540, // 9 minutes
   stageSequence: [
-    { stageId: 's03a', variant: 'a', areaId: 'ozette-wetlands' },
-    { stageId: 's03e', variant: 'e', areaId: 'ozette-wetlands' },
-    { stageId: 's03b', variant: 'b', areaId: 'ozette-wetlands' },
-    { stageId: 's03z', variant: 'z', areaId: 'ozette-wetlands' },
+    { stageId: 'wetlands_a', variant: 'a', areaId: 'wetlands' },
+    { stageId: 'wetlands_e', variant: 'e', areaId: 'wetlands' },
+    { stageId: 'wetlands_b', variant: 'b', areaId: 'wetlands' },
+    { stageId: 'wetlands_z', variant: 'z', areaId: 'wetlands' },
   ],
   unlockRequirements: [
     { type: 'field', id: 'rioh-snowfield' },

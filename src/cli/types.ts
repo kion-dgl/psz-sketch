@@ -67,6 +67,14 @@ export interface DroppedItemInfo {
   meseta?: number;
 }
 
+export interface CurrentStageInfo {
+  stageId: string;      // e.g., 'valley_a'
+  variant: 'a' | 'e' | 'b' | 'z';
+  areaId: string;       // e.g., 'valley'
+  areaName: string;     // e.g., 'Valley'
+  variantName: string;  // e.g., 'A' or 'Boss'
+}
+
 export interface GameState {
   character: Character | null;
   location: Location;
@@ -79,6 +87,7 @@ export interface GameState {
   stageIndex?: number;
   isAtFinalStage?: boolean;
   droppedItems?: DroppedItemInfo[];
+  currentStage?: CurrentStageInfo;
 }
 
 export interface CommandResult {

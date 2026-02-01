@@ -171,6 +171,7 @@ import {
   enterField as enterFieldSession,
   enterMission as enterMissionSession,
   getSessionState,
+  getCurrentStage,
   isInSession,
   isAtFinalStage,
   hasPendingRewards,
@@ -257,6 +258,16 @@ export function getState(): GameState {
 
   // Get session state for stage info
   const session = getSessionState();
+  const stage = getCurrentStage();
+
+  // Build current stage info
+  const currentStageInfo = stage && 'variant' in stage ? {
+    stageId: stage.stageId,
+    variant: stage.variant,
+    areaId: stage.areaId,
+    areaName: formatAreaName(stage.areaId),
+    variantName: formatVariantName(stage.variant),
+  } : undefined;
 
   return {
     character: currentCharacter,
@@ -286,7 +297,39 @@ export function getState(): GameState {
       name: d.type === 'item' ? d.item?.name : `${d.meseta} Meseta`,
       meseta: d.type === 'meseta' ? d.meseta : undefined,
     })),
+    currentStage: currentStageInfo,
   };
+}
+
+/**
+ * Format area ID into display name
+ */
+function formatAreaName(areaId: string): string {
+  const names: Record<string, string> = {
+    'valley': 'Valley',
+    'snowfield': 'Snowfield',
+    'wetlands': 'Wetlands',
+    'makara': 'Makara',
+    'paru': 'Paru',
+    'shrine': 'Shrine',
+    'arca': 'Arca',
+    'tower': 'Tower',
+    'city': 'City',
+  };
+  return names[areaId] || areaId.charAt(0).toUpperCase() + areaId.slice(1);
+}
+
+/**
+ * Format stage variant into display name
+ */
+function formatVariantName(variant: 'a' | 'e' | 'b' | 'z'): string {
+  const names: Record<string, string> = {
+    'a': 'A',
+    'e': 'E',
+    'b': 'B',
+    'z': 'Boss',
+  };
+  return names[variant] || variant.toUpperCase();
 }
 
 /**

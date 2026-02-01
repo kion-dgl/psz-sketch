@@ -359,10 +359,15 @@ export default function GamePlayWeb() {
     const hasDrops = drops.length > 0;
     const consumables = gameState?.inventory?.filter(i => i.type === 'consumable') || [];
 
+    const currentStage = gameState?.currentStage;
+    const stageTitle = currentStage
+      ? `${currentStage.areaName} ${currentStage.variantName}`
+      : `Stage ${(gameState?.stageIndex ?? 0) + 1}`;
+
     return (
       <div style={styles.locationContent}>
         <div style={styles.locationHeader}>
-          <h2 style={styles.locationTitle}>FIELD - Stage {(gameState?.stageIndex ?? 0) + 1}</h2>
+          <h2 style={styles.locationTitle}>FIELD - {stageTitle}</h2>
           <button
             style={styles.telepipeBtn}
             onClick={() => executeCommand('use-telepipe')}
