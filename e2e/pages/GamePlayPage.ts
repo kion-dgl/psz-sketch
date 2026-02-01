@@ -1,8 +1,7 @@
 import { Page } from '@playwright/test';
 
 /**
- * Page Object Model for the Gameplay Test Interface
- * Wraps CLI commands for Playwright testability
+ * Page Object Model for the Integrated Gameplay Interface
  */
 export class GamePlayPage {
   constructor(private page: Page) {}
@@ -12,7 +11,7 @@ export class GamePlayPage {
     await this.page.waitForLoadState('networkidle');
   }
 
-  // Game state getters
+  // Character state
   async getCharacterName() {
     const el = this.page.locator('[data-testid="char-name"]');
     if (await el.count() === 0) return null;
@@ -33,17 +32,13 @@ export class GamePlayPage {
 
   async getMeseta() {
     const text = await this.page.locator('[data-testid="char-meseta"]').textContent();
-    const match = text?.match(/\d+/);
+    if (!text) return null;
+    const match = text.replace(/,/g, '').match(/\d+/);
     return match ? parseInt(match[0], 10) : null;
   }
 
   async getCurrentLocation() {
     return this.page.locator('[data-testid="current-location"]').textContent();
-  }
-
-  async isInCombat() {
-    const text = await this.page.locator('[data-testid="combat-section"]').textContent();
-    return text?.includes('IN COMBAT') ?? false;
   }
 
   async hasCharacter() {
@@ -55,52 +50,63 @@ export class GamePlayPage {
   async executeCommand(command: string) {
     await this.page.fill('[data-testid="command-input"]', command);
     await this.page.click('[data-testid="submit-command"]');
-    // Wait for state to update
     await this.page.waitForTimeout(100);
   }
 
-  async clickQuickAction(command: string) {
-    const testId = `action-${command.replace(/\s+/g, '-')}`;
-    await this.page.click(`[data-testid="${testId}"]`);
+  // UI button clicks
+  async clickCreateClass(classId: string) {
+    await this.page.click(`[data-testid="create-${classId}"]`);
     await this.page.waitForTimeout(100);
   }
 
-  // Log analysis
-  async getLatestLog() {
-    const logs = this.page.locator('[data-testid^="log-"]');
-    const count = await logs.count();
-    if (count === 0) return null;
-    return logs.nth(count - 1).textContent();
+  async clickGotoShop() {
+    await this.page.click('[data-testid="goto-shop"]');
+    await this.page.waitForTimeout(100);
   }
 
-  async getLogsByType(type: 'info' | 'success' | 'error' | 'combat') {
-    const logs = this.page.locator(`[data-testid="log-${type}"]`);
-    const count = await logs.count();
-    const messages: string[] = [];
-    for (let i = 0; i < count; i++) {
-      const text = await logs.nth(i).textContent();
-      if (text) messages.push(text);
-    }
-    return messages;
+  async clickGotoGuild() {
+    await this.page.click('[data-testid="goto-guild"]');
+    await this.page.waitForTimeout(100);
   }
 
-  async hasErrorLog() {
-    return (await this.page.locator('[data-testid="log-error"]').count()) > 0;
+  async clickGotoInventory() {
+    await this.page.click('[data-testid="goto-inventory"]');
+    await this.page.waitForTimeout(100);
   }
 
-  async hasSuccessLog() {
-    return (await this.page.locator('[data-testid="log-success"]').count()) > 0;
+  async clickBuyItem(itemId: string) {
+    await this.page.click(`[data-testid="buy-${itemId}"]`);
+    await this.page.waitForTimeout(100);
   }
 
-  // Game actions via quick buttons
+  async clickEnterField(fieldId: string) {
+    await this.page.click(`[data-testid="enter-field-${fieldId}"]`);
+    await this.page.waitForTimeout(100);
+  }
+
+  async clickTelepipe() {
+    await this.page.click('[data-testid="use-telepipe"]');
+    await this.page.waitForTimeout(100);
+  }
+
   async resetGame() {
     await this.page.click('[data-testid="reset-game"]');
     await this.page.waitForTimeout(100);
   }
 
-  // Inventory inspection
+  // Log inspection
+  async getLogContent() {
+    return this.page.locator('[data-testid="game-log"]').textContent();
+  }
+
+  async hasLogContaining(text: string) {
+    const content = await this.getLogContent();
+    return content?.toLowerCase().includes(text.toLowerCase()) ?? false;
+  }
+
+  // Inventory (sidebar)
   async getInventoryItems() {
-    const items = this.page.locator('[data-testid^="inv-item-"]');
+    const items = this.page.locator('[data-testid^="sidebar-inv-"]');
     const count = await items.count();
     const result: string[] = [];
     for (let i = 0; i < count; i++) {
@@ -111,22 +117,19 @@ export class GamePlayPage {
   }
 
   async hasInventoryItem(itemId: string) {
-    return (await this.page.locator(`[data-testid="inv-item-${itemId}"]`).count()) > 0;
+    // Check sidebar inventory
+    const sidebarItem = this.page.locator(`[data-testid="sidebar-inv-${itemId}"]`);
+    if (await sidebarItem.count() > 0) return true;
+    // Also check location-based inventory view
+    const invItem = this.page.locator(`[data-testid="inv-item-${itemId}"]`);
+    return (await invItem.count()) > 0;
   }
 
-  // Available commands
-  async getAvailableCommands() {
-    const cmds = this.page.locator('[data-testid^="cmd-"]');
-    const count = await cmds.count();
-    const result: string[] = [];
-    for (let i = 0; i < count; i++) {
-      const testId = await cmds.nth(i).getAttribute('data-testid');
-      if (testId) result.push(testId.replace('cmd-', ''));
-    }
-    return result;
-  }
-
-  async clickCommand(commandName: string) {
-    await this.page.click(`[data-testid="cmd-${commandName}"]`);
+  // Wait helpers
+  async waitForLocation(location: string) {
+    await this.page.waitForFunction(
+      (loc) => document.querySelector('[data-testid="current-location"]')?.textContent?.toLowerCase().includes(loc),
+      location.toLowerCase()
+    );
   }
 }
