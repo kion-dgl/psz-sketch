@@ -271,8 +271,8 @@ export default function GamePlayWeb() {
           {!hasEnemies && (
             <button
               style={styles.actionBtn}
-              onClick={() => executeCommand('advance-stage')}
-              data-testid="advance-stage"
+              onClick={() => executeCommand('next-stage')}
+              data-testid="next-stage"
             >
               Next Stage
             </button>
