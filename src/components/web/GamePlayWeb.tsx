@@ -218,23 +218,119 @@ export default function GamePlayWeb() {
     );
   };
 
-  const renderFieldContent = () => (
-    <div style={styles.locationContent}>
-      <div style={styles.locationHeader}>
-        <h2 style={styles.locationTitle}>IN FIELD</h2>
+  const renderFieldContent = () => {
+    const combat = gameState?.playerCombat;
+    const enemies = gameState?.enemies || [];
+    const hasEnemies = enemies.length > 0;
+    const consumables = gameState?.inventory?.filter(i => i.type === 'consumable') || [];
+
+    return (
+      <div style={styles.locationContent}>
+        <div style={styles.locationHeader}>
+          <h2 style={styles.locationTitle}>FIELD - Stage {(gameState?.stageIndex ?? 0) + 1}</h2>
+          <button
+            style={styles.telepipeBtn}
+            onClick={() => executeCommand('use-telepipe')}
+            data-testid="use-telepipe"
+          >
+            Telepipe
+          </button>
+        </div>
+
+        {/* Player HP/TP */}
+        {combat && (
+          <div style={styles.playerStatus}>
+            <div style={styles.statBar}>
+              <span style={styles.statLabel}>HP</span>
+              <div style={styles.barOuter}>
+                <div style={{ ...styles.barInner, width: `${(combat.hp / combat.maxHp) * 100}%`, background: '#4ade80' }} />
+              </div>
+              <span style={styles.statNum}>{combat.hp}/{combat.maxHp}</span>
+            </div>
+            <div style={styles.statBar}>
+              <span style={styles.statLabel}>TP</span>
+              <div style={styles.barOuter}>
+                <div style={{ ...styles.barInner, width: `${(combat.tp / combat.maxTp) * 100}%`, background: '#60a5fa' }} />
+              </div>
+              <span style={styles.statNum}>{combat.tp}/{combat.maxTp}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div style={styles.fieldActions}>
+          {!hasEnemies && (
+            <button
+              style={styles.actionBtn}
+              onClick={() => executeCommand('spawn-enemies')}
+              data-testid="spawn-enemies"
+            >
+              Spawn Enemies
+            </button>
+          )}
+          {!hasEnemies && (
+            <button
+              style={styles.actionBtn}
+              onClick={() => executeCommand('advance-stage')}
+              data-testid="advance-stage"
+            >
+              Next Stage
+            </button>
+          )}
+        </div>
+
+        {/* Enemies */}
+        {hasEnemies && (
+          <div style={styles.enemySection}>
+            <h3 style={styles.sectionTitle}>ENEMIES</h3>
+            <div style={styles.enemyList}>
+              {enemies.map((enemy, idx) => (
+                <div key={enemy.id} style={styles.enemyRow}>
+                  <div style={styles.enemyInfo}>
+                    <span style={styles.enemyName}>{enemy.name}</span>
+                    <div style={styles.enemyHpBar}>
+                      <div style={{
+                        ...styles.barInner,
+                        width: `${Math.max(0, (enemy.hp / enemy.maxHp) * 100)}%`,
+                        background: '#ef4444'
+                      }} />
+                    </div>
+                    <span style={styles.enemyHp}>{enemy.hp}/{enemy.maxHp}</span>
+                  </div>
+                  <button
+                    style={styles.attackBtn}
+                    onClick={() => executeCommand(`attack ${idx}`)}
+                    data-testid={`attack-${idx}`}
+                  >
+                    Attack
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Quick Items */}
+        {consumables.length > 0 && (
+          <div style={styles.quickItems}>
+            <h3 style={styles.sectionTitle}>ITEMS</h3>
+            <div style={styles.itemBtns}>
+              {consumables.slice(0, 4).map(item => (
+                <button
+                  key={item.id}
+                  style={styles.itemBtn}
+                  onClick={() => executeCommand(`use-item ${item.id}`)}
+                  data-testid={`use-${item.id}`}
+                >
+                  {item.name} x{item.quantity}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-      <div style={styles.fieldStatus}>
-        <p>Currently exploring...</p>
-        <button
-          style={styles.telepipeBtn}
-          onClick={() => executeCommand('use-telepipe')}
-          data-testid="use-telepipe"
-        >
-          Use Telepipe (Return to City)
-        </button>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderInventoryContent = () => (
     <div style={styles.locationContent}>
@@ -704,4 +800,123 @@ const styles: Record<string, React.CSSProperties> = {
   equipLabel: { color: '#666', textTransform: 'capitalize' },
   equipItem: { color: '#4ade80' },
   equipEmpty: { color: '#444' },
+  // Field combat styles
+  playerStatus: {
+    marginBottom: '16px',
+    padding: '12px',
+    background: '#252540',
+    borderRadius: '4px',
+  },
+  statBar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    marginBottom: '8px',
+  },
+  statLabel: {
+    width: '24px',
+    fontSize: '11px',
+    color: '#888',
+  },
+  barOuter: {
+    flex: 1,
+    height: '12px',
+    background: '#1a1a2e',
+    borderRadius: '2px',
+    overflow: 'hidden',
+  },
+  barInner: {
+    height: '100%',
+    transition: 'width 0.2s',
+  },
+  statNum: {
+    width: '70px',
+    fontSize: '10px',
+    color: '#888',
+    textAlign: 'right',
+  },
+  fieldActions: {
+    display: 'flex',
+    gap: '8px',
+    marginBottom: '16px',
+  },
+  actionBtn: {
+    padding: '8px 16px',
+    background: '#2d6a4a',
+    border: '1px solid #4ade80',
+    color: '#4ade80',
+    fontFamily: 'monospace',
+    cursor: 'pointer',
+  },
+  sectionTitle: {
+    margin: '0 0 8px 0',
+    fontSize: '11px',
+    color: '#e94560',
+  },
+  enemySection: {
+    marginBottom: '16px',
+  },
+  enemyList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  enemyRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '8px',
+    background: '#252540',
+    borderRadius: '4px',
+  },
+  enemyInfo: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  enemyName: {
+    width: '100px',
+    fontSize: '11px',
+    color: '#fff',
+  },
+  enemyHpBar: {
+    flex: 1,
+    height: '8px',
+    background: '#1a1a2e',
+    borderRadius: '2px',
+    overflow: 'hidden',
+  },
+  enemyHp: {
+    width: '60px',
+    fontSize: '10px',
+    color: '#888',
+    textAlign: 'right',
+  },
+  attackBtn: {
+    padding: '6px 12px',
+    background: '#7f1d1d',
+    border: '1px solid #ef4444',
+    color: '#ef4444',
+    fontFamily: 'monospace',
+    fontSize: '11px',
+    cursor: 'pointer',
+  },
+  quickItems: {
+    marginTop: '16px',
+  },
+  itemBtns: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px',
+  },
+  itemBtn: {
+    padding: '6px 12px',
+    background: '#1a4a3a',
+    border: '1px solid #4ade80',
+    color: '#4ade80',
+    fontFamily: 'monospace',
+    fontSize: '10px',
+    cursor: 'pointer',
+  },
 };

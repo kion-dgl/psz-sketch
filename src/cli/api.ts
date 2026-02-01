@@ -244,6 +244,9 @@ export function getState(): GameState {
     toDetailedItem(entry.item, entry.quantity)
   );
 
+  // Get session state for stage info
+  const session = getSessionState();
+
   return {
     character: currentCharacter,
     location: currentLocation,
@@ -255,8 +258,15 @@ export function getState(): GameState {
       id: e.id,
       name: e.name,
       hp: e.stats.hp,
-      maxHp: e.stats.hp, // Note: would need to track initial HP separately
+      maxHp: e.stats.maxHp,
     })),
+    playerCombat: playerCombatState ? {
+      hp: playerCombatState.hp,
+      maxHp: playerCombatState.maxHp,
+      tp: playerCombatState.tp,
+      maxTp: playerCombatState.maxTp,
+    } : undefined,
+    stageIndex: session.currentStageIndex,
   };
 }
 

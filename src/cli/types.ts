@@ -45,6 +45,20 @@ export interface EquipmentSlots {
   unit4: DetailedItem | null;
 }
 
+export interface PlayerCombat {
+  hp: number;
+  maxHp: number;
+  tp: number;
+  maxTp: number;
+}
+
+export interface EnemyInfo {
+  id: number;
+  name: string;
+  hp: number;
+  maxHp: number;
+}
+
 export interface GameState {
   character: Character | null;
   location: Location;
@@ -52,7 +66,9 @@ export interface GameState {
   equipment: EquipmentSlots;
   meseta: number;
   inCombat?: boolean;
-  enemies?: { id: number; name: string; hp: number; maxHp: number }[];
+  enemies?: EnemyInfo[];
+  playerCombat?: PlayerCombat;
+  stageIndex?: number;
 }
 
 export interface CommandResult {
