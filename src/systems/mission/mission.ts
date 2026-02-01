@@ -360,6 +360,7 @@ export function clearMissions(): void {
  * Initialize default missions
  */
 export function initializeDefaultMissions(): void {
+  // First mission - standard introductory quest
   registerMission({
     id: 'mayors-mission',
     name: "Mayor's Mission",
@@ -409,6 +410,36 @@ export function initializeDefaultMissions(): void {
     ],
   });
 
+  // Third mission - the tone shift, shows the world has real stakes
+  registerMission({
+    id: 'fallen-hunter',
+    name: 'Retrieve the Fallen',
+    description: 'A hunter went missing in Gurhacia Valley three days ago. The guild has given up hope of finding them alive. Recover their belongings so we can return them to the family.',
+    areaId: 'valley',
+    requiredLevel: 10,
+    recommendedLevel: 12,
+    partySize: 1,
+    objectives: [
+      { id: 'obj1', type: 'reach', target: 'valley-camp', description: 'Find the abandoned camp' },
+      { id: 'obj2', type: 'collect', target: 'hunter-id', count: 1, description: 'Recover hunter ID card' },
+      { id: 'obj3', type: 'collect', target: 'hunter-letter', count: 1, description: 'Find the unfinished letter' },
+    ],
+    rewards: {
+      baseExp: 200,
+      baseMeseta: 300,
+      items: [
+        { itemId: 'monomate', quantity: 3, chance: 1.0 },
+      ],
+    },
+    unlockRequirements: [
+      { type: 'mission', id: 'third-daughter' },
+    ],
+    narrative: {
+      intro: "The guild clerk's voice is quiet. \"Mira was... experienced. Twenty years hunting these valleys. If she couldn't make it back...\" She slides a worn photograph across the counter. A woman with kind eyes, arm around a teenage boy. \"Her son deserves to know what happened. Bring back what you can.\"",
+      complete: "The clerk takes the ID card with trembling hands. She reads the half-finished letter silently, then folds it carefully. \"Thank you. I'll make sure Kai receives these.\" She pauses. \"The rescue team found her, you know. Too late. Cost them 2,000 Meseta to bring her home.\" Her eyes meet yours. \"Be careful out there. The valley doesn't care how experienced you are.\"",
+    },
+  });
+
   registerMission({
     id: 'valley-king',
     name: 'The Valley King',
@@ -430,7 +461,7 @@ export function initializeDefaultMissions(): void {
       ],
     },
     unlockRequirements: [
-      { type: 'mission', id: 'third-daughter' },
+      { type: 'mission', id: 'fallen-hunter' },
       { type: 'level', value: 30 },
     ],
   });

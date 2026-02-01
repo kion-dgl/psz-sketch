@@ -4,6 +4,12 @@
 
 export type Difficulty = 'normal' | 'hard' | 'super-hard';
 
+export interface MissionNarrative {
+  intro: string;      // Shown when accepting mission
+  complete: string;   // Shown when turning in mission
+  failure?: string;   // Shown if mission failed (optional)
+}
+
 export interface Mission {
   id: string;
   name: string;
@@ -16,6 +22,7 @@ export interface Mission {
   rewards: MissionReward;
   unlockRequirements?: UnlockRequirement[];
   stageSequence?: MissionStage[];
+  narrative?: MissionNarrative;  // Story dialogue for narrative missions
 }
 
 export interface MissionObjective {
