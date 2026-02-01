@@ -5,6 +5,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { execute, resetState, getState, getAvailableCommands } from '../../cli/api';
+import type { DetailedItem, EquipmentSlots } from '../../cli/types';
 
 interface GameLog {
   id: number;
@@ -12,12 +13,16 @@ interface GameLog {
   message: string;
 }
 
+type ViewTab = 'log' | 'inventory' | 'equipment';
+
 export default function GamePlayWeb() {
   const [gameState, setGameState] = useState<ReturnType<typeof getState> | null>(null);
   const [logs, setLogs] = useState<GameLog[]>([]);
   const [logCounter, setLogCounter] = useState(0);
   const [commandInput, setCommandInput] = useState('');
   const [availableCommands, setAvailableCommands] = useState<ReturnType<typeof getAvailableCommands>>([]);
+  const [activeTab, setActiveTab] = useState<ViewTab>('log');
+  const [selectedItem, setSelectedItem] = useState<DetailedItem | null>(null);
 
   // Initialize game
   useEffect(() => {
@@ -55,6 +60,21 @@ export default function GamePlayWeb() {
     }
   };
 
+  // Item actions
+  const handleUseItem = (item: DetailedItem) => {
+    executeCommand(`use-item ${item.id}`);
+    setSelectedItem(null);
+  };
+
+  const handleEquipItem = (item: DetailedItem) => {
+    executeCommand(`equip ${item.id}`);
+    setSelectedItem(null);
+  };
+
+  const handleUnequipSlot = (slot: string) => {
+    executeCommand(`unequip ${slot}`);
+  };
+
   // Quick action buttons
   const quickActions = [
     { label: 'Create HUmar', command: 'create-character humar TestHunter', show: !gameState?.character },
@@ -74,6 +94,258 @@ export default function GamePlayWeb() {
     { label: 'Abandon', command: 'abandon-session', show: gameState?.location === 'guild' },
     { label: 'Claim Rewards', command: 'claim-rewards', show: gameState?.location === 'guild' },
   ];
+
+  // Render item card
+  const renderItemCard = (item: DetailedItem, onClick?: () => void) => {
+    const isSelected = selectedItem?.id === item.id;
+    const rarityStars = '★'.repeat(item.rarity) + '☆'.repeat(Math.max(0, 5 - item.rarity));
+
+    return (
+      <div
+        key={item.id}
+        data-testid={`inv-item-${item.id}`}
+        onClick={onClick}
+        style={{
+          padding: '8px',
+          margin: '4px',
+          background: isSelected ? 'rgba(74, 222, 128, 0.2)' : 'rgba(255,255,255,0.05)',
+          border: `2px solid ${isSelected ? '#4ecca3' : '#3a5a8a'}`,
+          borderRadius: '4px',
+          cursor: onClick ? 'pointer' : 'default',
+          minWidth: '120px',
+        }}
+      >
+        <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '12px' }}>{item.name}</div>
+        <div style={{ color: '#fcd34d', fontSize: '10px' }}>{rarityStars}</div>
+        <div style={{ color: '#888', fontSize: '10px' }}>x{item.quantity}</div>
+        {item.type === 'weapon' && (
+          <div style={{ color: '#e94560', fontSize: '10px' }}>ATK: {item.attack}</div>
+        )}
+        {item.type === 'armor' && (
+          <div style={{ color: '#4a90d9', fontSize: '10px' }}>DEF: {item.defense}</div>
+        )}
+        {item.type === 'consumable' && (
+          <div style={{ color: '#4ecca3', fontSize: '10px' }}>{item.effect}</div>
+        )}
+      </div>
+    );
+  };
+
+  // Render equipment slot
+  const renderEquipSlot = (slotName: string, item: DetailedItem | null) => (
+    <div
+      data-testid={`equip-slot-${slotName}`}
+      style={{
+        padding: '10px',
+        margin: '4px',
+        background: item ? 'rgba(74, 222, 128, 0.1)' : 'rgba(255,255,255,0.03)',
+        border: `2px solid ${item ? '#4ecca3' : '#2a3a5a'}`,
+        borderRadius: '4px',
+        minWidth: '140px',
+      }}
+    >
+      <div style={{ color: '#888', fontSize: '10px', textTransform: 'uppercase' }}>{slotName}</div>
+      {item ? (
+        <>
+          <div style={{ color: '#fff', fontSize: '12px', fontWeight: 'bold' }}>{item.name}</div>
+          {item.attack && <div style={{ color: '#e94560', fontSize: '10px' }}>ATK: {item.attack}</div>}
+          {item.defense && <div style={{ color: '#4a90d9', fontSize: '10px' }}>DEF: {item.defense}</div>}
+          {gameState?.location === 'inventory' && (
+            <button
+              data-testid={`unequip-${slotName}`}
+              onClick={() => handleUnequipSlot(slotName)}
+              style={{
+                marginTop: '4px',
+                padding: '4px 8px',
+                fontSize: '10px',
+                background: '#e94560',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '2px',
+                cursor: 'pointer',
+              }}
+            >
+              Unequip
+            </button>
+          )}
+        </>
+      ) : (
+        <div style={{ color: '#555', fontSize: '11px', fontStyle: 'italic' }}>Empty</div>
+      )}
+    </div>
+  );
+
+  // Render inventory tab
+  const renderInventoryTab = () => (
+    <div style={{ display: 'flex', height: '100%' }}>
+      {/* Item Grid */}
+      <div style={{ flex: 1, padding: '8px', overflowY: 'auto' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+          {gameState?.inventory && gameState.inventory.length > 0 ? (
+            gameState.inventory.map(item => renderItemCard(item, () => setSelectedItem(item)))
+          ) : (
+            <div style={{ color: '#666', padding: '16px' }}>Inventory is empty</div>
+          )}
+        </div>
+      </div>
+
+      {/* Item Details Panel */}
+      {selectedItem && (
+        <div
+          data-testid="item-details"
+          style={{
+            width: '200px',
+            padding: '16px',
+            background: 'rgba(255,255,255,0.05)',
+            borderLeft: '2px solid #3a5a8a',
+          }}
+        >
+          <h4 style={{ margin: '0 0 8px 0', color: '#4ecca3' }}>{selectedItem.name}</h4>
+          <div style={{ color: '#fcd34d', fontSize: '12px', marginBottom: '8px' }}>
+            {'★'.repeat(selectedItem.rarity)}{'☆'.repeat(5 - selectedItem.rarity)}
+          </div>
+          <p style={{ color: '#aaa', fontSize: '11px', marginBottom: '12px' }}>{selectedItem.description}</p>
+
+          <div style={{ fontSize: '11px', color: '#888', marginBottom: '8px' }}>
+            Type: <span style={{ color: '#fff' }}>{selectedItem.type}</span>
+          </div>
+
+          {selectedItem.attack !== undefined && (
+            <div style={{ fontSize: '11px', color: '#888' }}>
+              Attack: <span style={{ color: '#e94560' }}>{selectedItem.attack}</span>
+            </div>
+          )}
+          {selectedItem.defense !== undefined && (
+            <div style={{ fontSize: '11px', color: '#888' }}>
+              Defense: <span style={{ color: '#4a90d9' }}>{selectedItem.defense}</span>
+            </div>
+          )}
+          {selectedItem.effectValue !== undefined && (
+            <div style={{ fontSize: '11px', color: '#888' }}>
+              Effect: <span style={{ color: '#4ecca3' }}>{selectedItem.effect} +{selectedItem.effectValue}</span>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {selectedItem.type === 'consumable' && (
+              <button
+                data-testid="use-item-btn"
+                onClick={() => handleUseItem(selectedItem)}
+                disabled={gameState?.location !== 'field'}
+                style={{
+                  padding: '8px',
+                  background: gameState?.location === 'field' ? '#4ecca3' : '#555',
+                  color: gameState?.location === 'field' ? '#1a1a2e' : '#888',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: gameState?.location === 'field' ? 'pointer' : 'not-allowed',
+                  fontSize: '11px',
+                  fontWeight: 'bold',
+                }}
+              >
+                Use Item
+              </button>
+            )}
+            {(selectedItem.type === 'weapon' || selectedItem.type === 'armor') && (
+              <button
+                data-testid="equip-item-btn"
+                onClick={() => handleEquipItem(selectedItem)}
+                disabled={gameState?.location !== 'inventory'}
+                style={{
+                  padding: '8px',
+                  background: gameState?.location === 'inventory' ? '#4a90d9' : '#555',
+                  color: gameState?.location === 'inventory' ? '#fff' : '#888',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: gameState?.location === 'inventory' ? 'pointer' : 'not-allowed',
+                  fontSize: '11px',
+                  fontWeight: 'bold',
+                }}
+              >
+                Equip
+              </button>
+            )}
+            <button
+              data-testid="close-details-btn"
+              onClick={() => setSelectedItem(null)}
+              style={{
+                padding: '8px',
+                background: 'transparent',
+                color: '#888',
+                border: '1px solid #555',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '11px',
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  // Render equipment tab
+  const renderEquipmentTab = () => {
+    const equipment = gameState?.equipment;
+    return (
+      <div style={{ padding: '16px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          {renderEquipSlot('weapon', equipment?.weapon ?? null)}
+          {renderEquipSlot('frame', equipment?.frame ?? null)}
+          {renderEquipSlot('barrier', equipment?.barrier ?? null)}
+        </div>
+        <div style={{ marginTop: '16px' }}>
+          <div style={{ color: '#888', fontSize: '11px', marginBottom: '8px' }}>UNIT SLOTS</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {renderEquipSlot('unit1', equipment?.unit1 ?? null)}
+            {renderEquipSlot('unit2', equipment?.unit2 ?? null)}
+            {renderEquipSlot('unit3', equipment?.unit3 ?? null)}
+            {renderEquipSlot('unit4', equipment?.unit4 ?? null)}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Render log tab
+  const renderLogTab = () => (
+    <div
+      data-testid="game-log"
+      style={{
+        flex: 1,
+        padding: '16px',
+        overflowY: 'auto',
+        background: '#0d1117'
+      }}
+    >
+      {logs.map(log => (
+        <div
+          key={log.id}
+          data-testid={`log-${log.type}`}
+          style={{
+            marginBottom: '8px',
+            padding: '8px',
+            background: log.type === 'error' ? '#2d1f1f' :
+                       log.type === 'success' ? '#1f2d1f' :
+                       log.type === 'combat' ? '#2d2d1f' : '#1f1f2d',
+            borderLeft: `3px solid ${
+              log.type === 'error' ? '#e94560' :
+              log.type === 'success' ? '#4ecca3' :
+              log.type === 'combat' ? '#f9ed69' : '#4a90d9'
+            }`,
+            whiteSpace: 'pre-wrap',
+            fontSize: '13px',
+            lineHeight: 1.4
+          }}
+        >
+          {log.message}
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div style={{
@@ -95,7 +367,7 @@ export default function GamePlayWeb() {
       }}>
         <h1 style={{ margin: 0, fontSize: '18px' }}>PSZ Game Test Interface</h1>
         <button
-          onClick={() => { resetState(); refreshState(); setLogs([]); addLog('info', 'Game reset.'); }}
+          onClick={() => { resetState(); refreshState(); setLogs([]); addLog('info', 'Game reset.'); setSelectedItem(null); }}
           data-testid="reset-game"
           style={{ padding: '8px 16px', cursor: 'pointer' }}
         >
@@ -140,12 +412,12 @@ export default function GamePlayWeb() {
           </section>
 
           <section data-testid="inventory-section" style={{ marginTop: '16px' }}>
-            <h3 style={{ margin: '0 0 8px 0', color: '#e94560' }}>Inventory</h3>
+            <h3 style={{ margin: '0 0 8px 0', color: '#e94560' }}>Inventory ({gameState?.inventory?.length ?? 0})</h3>
             <div style={{ fontSize: '13px' }}>
               {gameState?.inventory && gameState.inventory.length > 0 ? (
                 gameState.inventory.map((item, i) => (
-                  <div key={i} data-testid={`inv-item-${item.itemId}`}>
-                    {item.itemId} x{item.quantity}
+                  <div key={i} data-testid={`inv-item-${item.id}`} style={{ marginBottom: '4px' }}>
+                    {item.name} x{item.quantity}
                   </div>
                 ))
               ) : (
@@ -200,39 +472,40 @@ export default function GamePlayWeb() {
             ))}
           </div>
 
-          {/* Log Output */}
-          <div
-            data-testid="game-log"
-            style={{
-              flex: 1,
-              padding: '16px',
-              overflowY: 'auto',
-              background: '#0d1117'
-            }}
-          >
-            {logs.map(log => (
-              <div
-                key={log.id}
-                data-testid={`log-${log.type}`}
+          {/* View Tabs */}
+          <div style={{
+            display: 'flex',
+            background: '#16213e',
+            borderBottom: '1px solid #0f3460',
+          }}>
+            {(['log', 'inventory', 'equipment'] as ViewTab[]).map(tab => (
+              <button
+                key={tab}
+                data-testid={`tab-${tab}`}
+                onClick={() => setActiveTab(tab)}
                 style={{
-                  marginBottom: '8px',
-                  padding: '8px',
-                  background: log.type === 'error' ? '#2d1f1f' :
-                             log.type === 'success' ? '#1f2d1f' :
-                             log.type === 'combat' ? '#2d2d1f' : '#1f1f2d',
-                  borderLeft: `3px solid ${
-                    log.type === 'error' ? '#e94560' :
-                    log.type === 'success' ? '#4ecca3' :
-                    log.type === 'combat' ? '#f9ed69' : '#4a90d9'
-                  }`,
-                  whiteSpace: 'pre-wrap',
-                  fontSize: '13px',
-                  lineHeight: 1.4
+                  padding: '10px 20px',
+                  background: activeTab === tab ? '#1f4068' : 'transparent',
+                  color: activeTab === tab ? '#4ecca3' : '#888',
+                  border: 'none',
+                  borderBottom: activeTab === tab ? '2px solid #4ecca3' : '2px solid transparent',
+                  cursor: 'pointer',
+                  fontFamily: 'monospace',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase',
                 }}
               >
-                {log.message}
-              </div>
+                {tab}
+              </button>
             ))}
+          </div>
+
+          {/* Tab Content */}
+          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            {activeTab === 'log' && renderLogTab()}
+            {activeTab === 'inventory' && renderInventoryTab()}
+            {activeTab === 'equipment' && renderEquipmentTab()}
           </div>
 
           {/* Command Input */}

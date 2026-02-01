@@ -353,7 +353,7 @@ describe('Full Gameplay Loop Integration', () => {
       // 2. Check starting inventory
       result = execute('show-inventory');
       expect(result.success).toBe(true);
-      expect(result.message).toContain('monomate');
+      expect(result.message).toContain('Monomate');
 
       // 3. Check starting equipment
       result = execute('show-equipment');

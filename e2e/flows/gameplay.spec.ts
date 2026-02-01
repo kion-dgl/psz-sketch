@@ -143,7 +143,7 @@ test.describe('Shop Interactions', () => {
     await gamePlayPage.executeCommand('buy monomate');
 
     const items = await gamePlayPage.getInventoryItems();
-    expect(items.some(item => item.includes('monomate'))).toBe(true);
+    expect(items.some(item => item.toLowerCase().includes('monomate'))).toBe(true);
   });
 });
 

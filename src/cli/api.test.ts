@@ -62,8 +62,8 @@ describe('CLI API', () => {
       execute('create-character HUmar TestHero');
 
       const state = getState();
-      expect(state.inventory.find(i => i.itemId === 'monomate')).toBeDefined();
-      expect(state.inventory.find(i => i.itemId === 'monofluid')).toBeDefined();
+      expect(state.inventory.find(i => i.id === 'monomate')).toBeDefined();
+      expect(state.inventory.find(i => i.id === 'monofluid')).toBeDefined();
     });
 
     it('fails with invalid class', () => {
@@ -153,7 +153,7 @@ describe('CLI API', () => {
 
       const state = getState();
       expect(state.meseta).toBeLessThan(initialMeseta);
-      expect(state.inventory.find(i => i.itemId === 'monomate')).toBeDefined();
+      expect(state.inventory.find(i => i.id === 'monomate')).toBeDefined();
     });
 
     it('fails to buy non-existent item', () => {
@@ -238,8 +238,8 @@ describe('CLI API', () => {
       execute('goto inventory');
       const result = execute('show-inventory');
       expect(result.success).toBe(true);
-      expect(result.message).toContain('monomate');
-      expect(result.message).toContain('monofluid');
+      expect(result.message).toContain('Monomate');
+      expect(result.message).toContain('Monofluid');
     });
 
     it('shows updated quantity after buying more', () => {
@@ -249,7 +249,7 @@ describe('CLI API', () => {
 
       const result = execute('show-inventory');
       expect(result.success).toBe(true);
-      expect(result.message).toContain('monomate');
+      expect(result.message).toContain('Monomate');
       // Started with 5, bought 3 more = 8
       expect(result.message).toContain('x8');
     });

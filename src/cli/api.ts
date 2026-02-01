@@ -3,15 +3,24 @@
  * JSON API mode for AI testing
  */
 
-import type { GameState, CommandResult, AvailableCommand, Location } from './types';
+import type { GameState, CommandResult, AvailableCommand, Location, DetailedItem, EquipmentSlots } from './types';
 import type { Character } from '../systems/character/types';
 import type { Difficulty } from '../systems/mission/types';
 import { VALID_CLASS_IDS } from '../systems/character/types';
 
+// Import item types
+import type { WeaponItem, ArmorItem, ConsumableItem, GameItem } from '../systems/inventory/types';
+
 // Game state (in-memory for CLI)
 let currentCharacter: Character | null = null;
 let currentLocation: Location = 'city';
-let inventory: Map<string, { itemId: string; quantity: number }> = new Map();
+
+// Inventory now stores full item details
+interface InventoryEntry {
+  item: GameItem;
+  quantity: number;
+}
+let inventory: Map<string, InventoryEntry> = new Map();
 
 // Equipment state
 interface EquippedItems {
@@ -19,9 +28,6 @@ interface EquippedItems {
   frame: ArmorItem | null;
 }
 let equippedItems: EquippedItems = { weapon: null, frame: null };
-
-// Import item types
-import type { WeaponItem, ArmorItem } from '../systems/inventory/types';
 
 // Combat state
 interface EnemyInstance {
@@ -183,18 +189,74 @@ initializeDefaultMissions();
 initializeDefaultFields();
 
 /**
+ * Convert a GameItem to DetailedItem format for the UI
+ */
+function toDetailedItem(item: GameItem, quantity: number): DetailedItem {
+  const detailed: DetailedItem = {
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    type: item.type,
+    rarity: item.rarity,
+    quantity,
+  };
+
+  if (item.type === 'weapon') {
+    const w = item as WeaponItem;
+    detailed.attack = w.attack;
+    detailed.accuracy = w.accuracy;
+    detailed.weaponType = w.weaponType;
+    detailed.element = w.element;
+    detailed.requiredLevel = w.requiredLevel;
+  } else if (item.type === 'armor') {
+    const a = item as ArmorItem;
+    detailed.defense = a.defense;
+    detailed.evasion = a.evasion;
+    detailed.armorSlot = a.armorSlot;
+    detailed.unitSlots = a.unitSlots;
+    detailed.requiredLevel = a.requiredLevel;
+  } else if (item.type === 'consumable') {
+    const c = item as ConsumableItem;
+    detailed.effect = c.effect;
+    detailed.effectValue = c.effectValue;
+  }
+
+  return detailed;
+}
+
+/**
  * Get current game state
  */
 export function getState(): GameState {
+  // Build equipment slots
+  const equipment: EquipmentSlots = {
+    weapon: equippedItems.weapon ? toDetailedItem(equippedItems.weapon, 1) : null,
+    frame: equippedItems.frame ? toDetailedItem(equippedItems.frame, 1) : null,
+    barrier: null,
+    unit1: null,
+    unit2: null,
+    unit3: null,
+    unit4: null,
+  };
+
+  // Build detailed inventory
+  const detailedInventory = Array.from(inventory.values()).map(entry =>
+    toDetailedItem(entry.item, entry.quantity)
+  );
+
   return {
     character: currentCharacter,
     location: currentLocation,
-    inventory: Array.from(inventory.values()).map(item => ({
-      itemId: item.itemId,
-      quantity: item.quantity,
-      equipped: false,
-    })),
+    inventory: detailedInventory,
+    equipment,
     meseta: currentCharacter?.meseta ?? 0,
+    inCombat: currentEnemies.length > 0,
+    enemies: currentEnemies.map(e => ({
+      id: e.id,
+      name: e.name,
+      hp: e.stats.hp,
+      maxHp: e.stats.hp, // Note: would need to track initial HP separately
+    })),
   };
 }
 
@@ -853,7 +915,7 @@ function executeCreateCharacter(classId: string, name: string): CommandResult {
 
   // Add consumables to inventory
   for (const { item, quantity } of startingItems.consumables) {
-    inventory.set(item.id, { itemId: item.id, quantity });
+    inventory.set(item.id, { item, quantity });
   }
 
   return {
@@ -948,18 +1010,31 @@ function executeBuy(itemId: string, quantity: number): CommandResult {
   const meseta = currentCharacter.meseta ?? 0;
   const result = purchaseItem(SHOP_IDS.ITEM_SHOP, itemId, quantity, meseta);
 
-  if (result.success) {
+  if (result.success && result.item) {
     currentCharacter = {
       ...currentCharacter,
       meseta: result.remainingMeseta,
     };
 
-    // Add to inventory
+    // Convert ShopItem to GameItem (consumable) and add to inventory
+    const gameItem: ConsumableItem = {
+      id: result.item.id,
+      name: result.item.name,
+      description: result.item.description,
+      type: 'consumable',
+      rarity: result.item.rarity,
+      sellPrice: result.item.sellPrice,
+      stackable: true,
+      maxStack: 10,
+      effect: 'heal_hp', // Default effect for shop items
+      effectValue: 100,
+    };
+
     const existing = inventory.get(itemId);
     if (existing) {
       existing.quantity += quantity;
     } else {
-      inventory.set(itemId, { itemId, quantity });
+      inventory.set(itemId, { item: gameItem, quantity });
     }
   }
 
@@ -1111,14 +1186,14 @@ function executeShowInventory(): CommandResult {
     };
   }
 
-  const lines = items.map(item =>
-    `  ${item.itemId.padEnd(20)} x${item.quantity}`
+  const lines = items.map(entry =>
+    `  ${entry.item.name.padEnd(20)} x${entry.quantity}`
   );
 
   return {
     success: true,
     message: `Inventory:\n${lines.join('\n')}`,
-    data: items,
+    data: items.map(entry => ({ itemId: entry.item.id, quantity: entry.quantity })),
   };
 }
 
@@ -1460,38 +1535,30 @@ function executeDepositItem(itemId: string, quantity: number): CommandResult {
   }
 
   // Check if item is in character inventory
-  const item = inventory.get(itemId);
-  if (!item) {
+  const invEntry = inventory.get(itemId);
+  if (!invEntry) {
     return { success: false, message: `Item not found in inventory: ${itemId}` };
   }
 
-  if (item.quantity < quantity) {
-    return { success: false, message: `Only ${item.quantity} in inventory` };
+  if (invEntry.quantity < quantity) {
+    return { success: false, message: `Only ${invEntry.quantity} in inventory` };
   }
 
-  // Get the item definition from starting items (simplified for CLI)
-  const startingItems = getStartingItems(currentCharacter.class_id);
-  const itemDef = startingItems.consumables.find(c => c.item.id === itemId)?.item;
-
-  if (!itemDef) {
-    return { success: false, message: `Cannot deposit item: ${itemId}` };
-  }
-
-  // Add to shared storage
-  const result = addToSharedStorage(itemDef, quantity);
+  // Add to shared storage using the stored item definition
+  const result = addToSharedStorage(invEntry.item, quantity);
   if (!result.success) {
     return result;
   }
 
   // Remove from character inventory
-  item.quantity -= quantity;
-  if (item.quantity <= 0) {
+  invEntry.quantity -= quantity;
+  if (invEntry.quantity <= 0) {
     inventory.delete(itemId);
   }
 
   return {
     success: true,
-    message: `Deposited ${quantity}x ${itemDef.name} to storage`,
+    message: `Deposited ${quantity}x ${invEntry.item.name} to storage`,
     data: { itemId, quantity },
   };
 }
@@ -1528,7 +1595,7 @@ function executeWithdrawItem(itemId: string, quantity: number): CommandResult {
   if (existing) {
     existing.quantity += quantity;
   } else {
-    inventory.set(itemId, { itemId, quantity });
+    inventory.set(itemId, { item: storageSlot.item, quantity });
   }
 
   return {
@@ -1755,17 +1822,28 @@ function executeClaimRewards(): CommandResult {
   // Add items to inventory
   if (result.itemsGained && result.itemsGained.length > 0) {
     lines.push('Items:');
-    for (const item of result.itemsGained) {
-      const itemId = 'itemId' in item ? item.itemId : (item as any).itemId;
-      const quantity = 'quantity' in item ? item.quantity : 1;
+    for (const rewardItem of result.itemsGained) {
+      const itemId = 'itemId' in rewardItem ? rewardItem.itemId : (rewardItem as any).itemId;
+      const quantity = 'quantity' in rewardItem ? rewardItem.quantity : 1;
       lines.push(`  ${itemId} x${quantity}`);
 
-      // Add to inventory
+      // Add to inventory - create a consumable item for rewards
       const existing = inventory.get(itemId);
       if (existing) {
         existing.quantity += quantity;
       } else {
-        inventory.set(itemId, { itemId, quantity });
+        const gameItem: ConsumableItem = {
+          id: itemId,
+          name: itemId.charAt(0).toUpperCase() + itemId.slice(1),
+          description: `Reward item: ${itemId}`,
+          type: 'consumable',
+          rarity: 1,
+          sellPrice: 50,
+          stackable: true,
+          maxStack: 10,
+          effect: 'misc',
+        };
+        inventory.set(itemId, { item: gameItem, quantity });
       }
     }
   }
@@ -2051,7 +2129,7 @@ function executeAttack(targetIndex: number): CommandResult {
   });
 
   const lines: string[] = [...statusMessages]; // Include status effect messages
-  let droppedItem: { itemId: string; name: string } | null = null;
+  let droppedItem: ConsumableItem | null = null;
 
   if (!result.hit) {
     lines.push(`Attack missed ${target.name}!`);
@@ -2075,11 +2153,11 @@ function executeAttack(targetIndex: number): CommandResult {
         combatLog.push(`DROP: ${droppedItem.name}`);
 
         // Add to inventory
-        const existing = inventory.get(droppedItem.itemId);
+        const existing = inventory.get(droppedItem.id);
         if (existing) {
           existing.quantity += 1;
         } else {
-          inventory.set(droppedItem.itemId, { itemId: droppedItem.itemId, quantity: 1 });
+          inventory.set(droppedItem.id, { item: droppedItem, quantity: 1 });
         }
       }
 
@@ -2162,10 +2240,18 @@ function executeAttack(targetIndex: number): CommandResult {
   };
 }
 
+// Drop table items
+const DROP_TABLE: ConsumableItem[] = [
+  { id: 'monomate', name: 'Monomate', description: 'Restores a small amount of HP.', type: 'consumable', effect: 'heal_hp', effectValue: 100, rarity: 1, sellPrice: 25, stackable: true, maxStack: 10 },
+  { id: 'monofluid', name: 'Monofluid', description: 'Restores a small amount of TP.', type: 'consumable', effect: 'heal_tp', effectValue: 50, rarity: 1, sellPrice: 50, stackable: true, maxStack: 10 },
+  { id: 'dimate', name: 'Dimate', description: 'Restores a moderate amount of HP.', type: 'consumable', effect: 'heal_hp', effectValue: 200, rarity: 2, sellPrice: 75, stackable: true, maxStack: 10 },
+  { id: 'difluid', name: 'Difluid', description: 'Restores a moderate amount of TP.', type: 'consumable', effect: 'heal_tp', effectValue: 100, rarity: 2, sellPrice: 100, stackable: true, maxStack: 10 },
+];
+
 /**
  * Roll for item drop from defeated enemy
  */
-function rollItemDrop(): { itemId: string; name: string } | null {
+function rollItemDrop(): ConsumableItem | null {
   const roll = Math.random();
 
   // 20% drop chance
@@ -2174,13 +2260,13 @@ function rollItemDrop(): { itemId: string; name: string } | null {
   // Drop table
   const dropRoll = Math.random();
   if (dropRoll < 0.50) {
-    return { itemId: 'monomate', name: 'Monomate' };
+    return DROP_TABLE[0]; // monomate
   } else if (dropRoll < 0.75) {
-    return { itemId: 'monofluid', name: 'Monofluid' };
+    return DROP_TABLE[1]; // monofluid
   } else if (dropRoll < 0.90) {
-    return { itemId: 'dimate', name: 'Dimate' };
+    return DROP_TABLE[2]; // dimate
   } else {
-    return { itemId: 'difluid', name: 'Difluid' };
+    return DROP_TABLE[3]; // difluid
   }
 }
 

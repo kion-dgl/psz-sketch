@@ -6,15 +6,53 @@
 import type { Character } from '../systems/character/types';
 import type { ShopItem } from '../systems/shop/types';
 import type { Mission, Difficulty } from '../systems/mission/types';
-import type { InventoryItem } from '../systems/inventory/types';
 
 export type Location = 'city' | 'shop' | 'missions' | 'inventory' | 'storage' | 'guild' | 'field';
+
+/** Detailed item info for UI display */
+export interface DetailedItem {
+  id: string;
+  name: string;
+  description: string;
+  type: 'weapon' | 'armor' | 'consumable' | 'material';
+  rarity: number;
+  quantity: number;
+  // Weapon stats
+  attack?: number;
+  accuracy?: number;
+  weaponType?: string;
+  element?: string;
+  // Armor stats
+  defense?: number;
+  evasion?: number;
+  armorSlot?: 'frame' | 'barrier' | 'unit';
+  unitSlots?: number;
+  // Consumable
+  effect?: string;
+  effectValue?: number;
+  // Level requirement
+  requiredLevel?: number;
+}
+
+/** Equipment slot info */
+export interface EquipmentSlots {
+  weapon: DetailedItem | null;
+  frame: DetailedItem | null;
+  barrier: DetailedItem | null;
+  unit1: DetailedItem | null;
+  unit2: DetailedItem | null;
+  unit3: DetailedItem | null;
+  unit4: DetailedItem | null;
+}
 
 export interface GameState {
   character: Character | null;
   location: Location;
-  inventory: InventoryItem[];
+  inventory: DetailedItem[];
+  equipment: EquipmentSlots;
   meseta: number;
+  inCombat?: boolean;
+  enemies?: { id: number; name: string; hp: number; maxHp: number }[];
 }
 
 export interface CommandResult {
