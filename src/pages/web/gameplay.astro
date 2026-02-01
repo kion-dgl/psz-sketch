@@ -1,0 +1,30 @@
+---
+/**
+ * Gameplay Test Interface
+ * HTML-based game UI wrapping the CLI for Playwright testing
+ */
+import GamePlayWeb from '../../components/web/GamePlayWeb';
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gameplay Test - Phantasy Star Zero</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <GamePlayWeb client:only="react" />
+</body>
+</html>
