@@ -456,13 +456,12 @@ export default function GamePlayWeb() {
           gameState?.isAtFinalStage ? (
             <div style={styles.fieldComplete}>
               <p style={styles.fieldCompleteText}>Field Complete!</p>
-              <p style={styles.fieldCompleteSubtext}>Return to the Guild Counter to report.</p>
               <button
                 style={styles.returnBtn}
                 onClick={() => executeCommand('complete-field')}
                 data-testid="complete-field"
               >
-                Return to Guild
+                Return to City
               </button>
             </div>
           ) : (
