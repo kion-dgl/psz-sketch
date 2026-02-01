@@ -2068,6 +2068,35 @@ export function resetState(): void {
 // ============================================================================
 
 /**
+ * Handle player defeat - return to city, abandon session
+ */
+function handlePlayerDefeat(): string {
+  // Abandon the session
+  abandonSession();
+
+  // Return to city
+  currentLocation = 'city';
+
+  // Clear combat state
+  currentEnemies = [];
+  droppedItems = [];
+  currentWave = 0;
+  totalWaves = 1;
+  playerStatusEffects = [];
+  enemyStatusEffects.clear();
+
+  // Don't clear playerCombatState - let them see their HP was 0
+
+  return `
+*** YOU HAVE BEEN DEFEATED! ***
+
+A rescue team found you unconscious and brought you back to Dairon City.
+Your wounds have been treated, but you lost all progress in the field.
+
+You wake up in the city, ready to try again.`;
+}
+
+/**
  * Map field area to enemy area
  */
 function fieldToEnemyArea(fieldId: string): 'gurhacia' | 'rioh' | 'ozette' | 'paru' | 'makara' | 'arca' | 'dark' {
@@ -2390,7 +2419,8 @@ function executeAttack(targetIndex: number): CommandResult {
   }
 
   if (playerCombatState.hp <= 0) {
-    return { success: false, message: 'You are defeated! Use telepipe to retreat or abandon-session.' };
+    const defeatMessage = handlePlayerDefeat();
+    return { success: true, message: defeatMessage };
   }
 
   // Process status effects at start of turn
@@ -2401,12 +2431,13 @@ function executeAttack(targetIndex: number): CommandResult {
   if (statusResult.damage > 0) {
     playerCombatState.hp = Math.max(0, playerCombatState.hp - statusResult.damage);
     if (playerCombatState.hp <= 0) {
-      statusMessages.push(`\n*** YOU HAVE BEEN DEFEATED BY STATUS EFFECTS! ***`);
       combatLog.push('PLAYER DEFEATED (status)');
+      const defeatMessage = handlePlayerDefeat();
+      statusMessages.push(defeatMessage);
       return {
         success: true,
         message: statusMessages.join('\n'),
-        data: { playerHp: 0 },
+        data: { playerHp: 0, defeated: true },
       };
     }
   }
@@ -2547,9 +2578,9 @@ function executeAttack(targetIndex: number): CommandResult {
       }
 
       if (playerCombatState.hp <= 0) {
-        lines.push('\n*** YOU HAVE BEEN DEFEATED! ***');
-        lines.push('Use telepipe to retreat (lose progress) or abandon-session.');
         combatLog.push('PLAYER DEFEATED');
+        const defeatMessage = handlePlayerDefeat();
+        lines.push(defeatMessage);
       }
     } else {
       lines.push(`\n${attacker.name} attacks but misses!`);
@@ -3189,7 +3220,9 @@ function executeCastTechnique(techId: string, targetIndex?: number): CommandResu
       lines.push(`  Your HP: ${playerCombatState.hp}/${playerCombatState.maxHp}`);
 
       if (playerCombatState.hp <= 0) {
-        lines.push('\n*** YOU HAVE BEEN DEFEATED! ***');
+        combatLog.push('PLAYER DEFEATED');
+        const defeatMessage = handlePlayerDefeat();
+        lines.push(defeatMessage);
       }
     } else {
       lines.push(`\n${attacker.name} attacks but misses!`);
@@ -3199,6 +3232,6 @@ function executeCastTechnique(techId: string, targetIndex?: number): CommandResu
   return {
     success: true,
     message: lines.join('\n'),
-    data: { techId, tp: playerCombatState.tp },
+    data: { techId, tp: playerCombatState.tp, defeated: playerCombatState.hp <= 0 },
   };
 }
