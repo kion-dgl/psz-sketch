@@ -88,6 +88,8 @@ export interface GameState {
   isAtFinalStage?: boolean;
   droppedItems?: DroppedItemInfo[];
   currentStage?: CurrentStageInfo;
+  currentWave?: number;
+  totalWaves?: number;
 }
 
 export interface CommandResult {

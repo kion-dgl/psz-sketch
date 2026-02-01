@@ -363,11 +363,14 @@ export default function GamePlayWeb() {
     const stageTitle = currentStage
       ? `${currentStage.areaName} ${currentStage.variantName}`
       : `Stage ${(gameState?.stageIndex ?? 0) + 1}`;
+    const waveInfo = gameState?.totalWaves && gameState.totalWaves > 1
+      ? ` (Wave ${gameState.currentWave}/${gameState.totalWaves})`
+      : '';
 
     return (
       <div style={styles.locationContent}>
         <div style={styles.locationHeader}>
-          <h2 style={styles.locationTitle}>FIELD - {stageTitle}</h2>
+          <h2 style={styles.locationTitle}>FIELD - {stageTitle}{waveInfo}</h2>
           <button
             style={styles.telepipeBtn}
             onClick={() => executeCommand('use-telepipe')}

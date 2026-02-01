@@ -53,6 +53,10 @@ let combatLog: string[] = [];
 let enemyIdCounter = 0;
 let playerCombatState: PlayerCombatState | null = null;
 
+// Wave tracking for stage progression
+let currentWave = 0;
+let totalWaves = 1;
+
 // Technique definitions
 interface Technique {
   id: string;
@@ -299,6 +303,8 @@ export function getState(): GameState {
       meseta: d.type === 'meseta' ? d.meseta : undefined,
     })),
     currentStage: currentStageInfo,
+    currentWave,
+    totalWaves,
   };
 }
 
@@ -1832,6 +1838,10 @@ function executeEnterField(fieldId: string, difficulty: Difficulty): CommandResu
   droppedItems = [];
   currentEnemies = [];
 
+  // Reset wave tracking for new stage
+  currentWave = 0;
+  totalWaves = 1;
+
   // Auto-spawn enemies for the first stage
   const spawnResult = executeSpawnEnemies();
 
@@ -2049,6 +2059,8 @@ export function resetState(): void {
   playerStatusEffects = [];
   enemyStatusEffects.clear();
   currentMag = null;
+  currentWave = 0;
+  totalWaves = 1;
 }
 
 // ============================================================================
@@ -2177,12 +2189,15 @@ function executeSpawnEnemies(): CommandResult {
   // Get enemy area and difficulty
   const enemyArea = fieldToEnemyArea(session.activeId);
   const difficulty = session.difficulty;
-  const seed = Date.now();
+  const seed = Date.now() + currentWave; // Different seed for each wave
   const random = createSeededRandom(seed);
 
-  // Determine spawn count based on stage variant
-  // a: 5 spawns, e: 1 spawn (transition), b: 5 spawns, z: boss only
-  const spawnCount = variant === 'e' ? 1 : variant === 'z' ? 0 : 5;
+  // Set total waves based on stage variant (only on first spawn of stage)
+  // a: 5 waves, e: 1 wave (transition), b: 5 waves, z: boss only
+  if (currentWave === 0) {
+    totalWaves = variant === 'e' ? 1 : variant === 'z' ? 1 : 5;
+    currentWave = 1;
+  }
 
   if (variant === 'z') {
     // Boss stage - spawn the area boss
@@ -2209,49 +2224,104 @@ function executeSpawnEnemies(): CommandResult {
     return {
       success: true,
       message: `BOSS BATTLE!\n${enemyList.join('\n')}`,
-      data: { enemies: currentEnemies.length, area: enemyArea, difficulty, isBoss: true },
+      data: { enemies: currentEnemies.length, area: enemyArea, difficulty, isBoss: true, wave: 1, totalWaves: 1 },
     };
   }
 
-  // Regular enemy spawns
-  for (let spawn = 0; spawn < spawnCount; spawn++) {
-    // Generate enemy composition for this spawn
-    const composition = generateEnemyComposition(enemyArea, difficulty, random);
+  // Spawn one wave of enemies (3 enemies per wave)
+  const composition = generateEnemyComposition(enemyArea, difficulty, random);
 
-    // Create enemy instances (limit to reasonable count per spawn)
-    let enemiesThisSpawn = 0;
-    for (const entry of composition) {
-      if (enemiesThisSpawn >= 3) break; // Max 3 enemies per spawn point
-      for (let i = 0; i < Math.min(entry.count, 2); i++) {
-        const stats = generateEnemyStats(entry.enemyId, difficulty, currentCharacter.level);
-        const element = getEnemyElement(entry.enemyId);
+  let enemiesThisWave = 0;
+  for (const entry of composition) {
+    if (enemiesThisWave >= 3) break; // Max 3 enemies per wave
+    for (let i = 0; i < Math.min(entry.count, 2); i++) {
+      const stats = generateEnemyStats(entry.enemyId, difficulty, currentCharacter.level);
+      const element = getEnemyElement(entry.enemyId);
 
-        const diffMult = difficulty === 'normal' ? 1 : difficulty === 'hard' ? 1.5 : 2;
-        const expValue = Math.floor(50 * diffMult * (1 + currentCharacter.level * 0.1));
-        const mesetaValue = Math.floor(100 * diffMult);
+      const diffMult = difficulty === 'normal' ? 1 : difficulty === 'hard' ? 1.5 : 2;
+      const expValue = Math.floor(50 * diffMult * (1 + currentCharacter.level * 0.1));
+      const mesetaValue = Math.floor(100 * diffMult);
 
-        currentEnemies.push({
-          id: ++enemyIdCounter,
-          enemyId: entry.enemyId,
-          name: getEnemyDisplayName(entry.enemyId),
-          stats,
-          element,
-          expValue,
-          mesetaValue,
-        });
-        enemiesThisSpawn++;
-        if (enemiesThisSpawn >= 3) break;
-      }
+      currentEnemies.push({
+        id: ++enemyIdCounter,
+        enemyId: entry.enemyId,
+        name: getEnemyDisplayName(entry.enemyId),
+        stats,
+        element,
+        expValue,
+        mesetaValue,
+      });
+      enemiesThisWave++;
+      if (enemiesThisWave >= 3) break;
     }
   }
 
   const enemyList = currentEnemies.map((e, i) => `  [${i}] ${e.name} - HP: ${e.stats.hp}/${e.stats.maxHp}`);
-  combatLog.push(`Spawned ${currentEnemies.length} enemies in ${enemyArea}`);
+  combatLog.push(`Wave ${currentWave}/${totalWaves} - ${currentEnemies.length} enemies`);
 
   return {
     success: true,
-    message: `Enemies spawned (${enemyArea}, ${difficulty}):\n${enemyList.join('\n')}`,
-    data: { enemies: currentEnemies.length, area: enemyArea, difficulty },
+    message: `Wave ${currentWave}/${totalWaves} (${enemyArea}, ${difficulty}):\n${enemyList.join('\n')}`,
+    data: { enemies: currentEnemies.length, area: enemyArea, difficulty, wave: currentWave, totalWaves },
+  };
+}
+
+/**
+ * Spawn enemies for the current wave (used when auto-spawning next wave)
+ */
+function spawnWaveEnemies(): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  const session = getSessionState();
+  if (!session.activeId) {
+    return { success: false, message: 'No active session.' };
+  }
+
+  const enemyArea = fieldToEnemyArea(session.activeId);
+  const difficulty = session.difficulty;
+  const seed = Date.now() + currentWave;
+  const random = createSeededRandom(seed);
+
+  // Clear existing enemies but keep drops
+  currentEnemies = [];
+
+  // Spawn one wave of enemies (3 enemies per wave)
+  const composition = generateEnemyComposition(enemyArea, difficulty, random);
+
+  let enemiesThisWave = 0;
+  for (const entry of composition) {
+    if (enemiesThisWave >= 3) break;
+    for (let i = 0; i < Math.min(entry.count, 2); i++) {
+      const stats = generateEnemyStats(entry.enemyId, difficulty, currentCharacter.level);
+      const element = getEnemyElement(entry.enemyId);
+
+      const diffMult = difficulty === 'normal' ? 1 : difficulty === 'hard' ? 1.5 : 2;
+      const expValue = Math.floor(50 * diffMult * (1 + currentCharacter.level * 0.1));
+      const mesetaValue = Math.floor(100 * diffMult);
+
+      currentEnemies.push({
+        id: ++enemyIdCounter,
+        enemyId: entry.enemyId,
+        name: getEnemyDisplayName(entry.enemyId),
+        stats,
+        element,
+        expValue,
+        mesetaValue,
+      });
+      enemiesThisWave++;
+      if (enemiesThisWave >= 3) break;
+    }
+  }
+
+  const enemyList = currentEnemies.map((e, i) => `  [${i}] ${e.name} - HP: ${e.stats.hp}/${e.stats.maxHp}`);
+  combatLog.push(`Wave ${currentWave}/${totalWaves} spawned`);
+
+  return {
+    success: true,
+    message: `\nWave ${currentWave}/${totalWaves}:\n${enemyList.join('\n')}`,
+    data: { enemies: currentEnemies.length, area: enemyArea, difficulty, wave: currentWave, totalWaves },
   };
 }
 
@@ -2438,7 +2508,16 @@ function executeAttack(targetIndex: number): CommandResult {
       currentEnemies.splice(targetIndex, 1);
 
       if (currentEnemies.length === 0) {
-        lines.push('\nAll enemies defeated! Use next-stage or complete-field.');
+        // Check if there are more waves
+        if (currentWave < totalWaves) {
+          lines.push(`\nWave ${currentWave}/${totalWaves} cleared!`);
+          // Auto-spawn next wave
+          currentWave++;
+          const spawnResult = spawnWaveEnemies();
+          lines.push(spawnResult.message);
+        } else {
+          lines.push('\nAll waves cleared! Use next-stage or complete-field.');
+        }
       }
     } else {
       lines.push(`  ${target.name} HP: ${target.stats.hp}/${target.stats.maxHp}`);
@@ -2623,6 +2702,11 @@ function executeNextStage(): CommandResult {
     return { success: false, message: `Defeat all enemies first (${currentEnemies.length} remaining).` };
   }
 
+  // Check if there are more waves in the current stage
+  if (currentWave < totalWaves) {
+    return { success: false, message: `Clear all waves first (${currentWave}/${totalWaves}).` };
+  }
+
   const advanced = advanceToNextStage();
   if (!advanced) {
     return { success: false, message: 'Cannot advance. Already at final stage or not in session.' };
@@ -2630,6 +2714,10 @@ function executeNextStage(): CommandResult {
 
   // Clear dropped items from previous stage
   droppedItems = [];
+
+  // Reset wave tracking for new stage
+  currentWave = 0;
+  totalWaves = 1;
 
   const session = getSessionState();
   combatLog.push(`Advanced to stage ${session.currentStageIndex + 1}`);
@@ -3027,7 +3115,16 @@ function executeCastTechnique(techId: string, targetIndex?: number): CommandResu
       currentEnemies.splice(actualTarget, 1);
 
       if (currentEnemies.length === 0) {
-        lines.push('\nAll enemies defeated!');
+        // Check if there are more waves
+        if (currentWave < totalWaves) {
+          lines.push(`\nWave ${currentWave}/${totalWaves} cleared!`);
+          // Auto-spawn next wave
+          currentWave++;
+          const spawnResult = spawnWaveEnemies();
+          lines.push(spawnResult.message);
+        } else {
+          lines.push('\nAll waves cleared! Use next-stage or complete-field.');
+        }
       }
     } else {
       lines.push(`  ${target.name} HP: ${target.stats.hp}/${target.stats.maxHp}`);

@@ -403,7 +403,7 @@ describe('CLI API', () => {
     it('spawns enemies in field', () => {
       const result = execute('spawn-enemies');
       expect(result.success).toBe(true);
-      expect(result.message).toContain('Enemies spawned');
+      expect(result.message).toContain('Wave');
       expect(result.message).toContain('gurhacia');
     });
 
