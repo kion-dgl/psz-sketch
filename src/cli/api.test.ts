@@ -474,21 +474,21 @@ describe('CLI API', () => {
       const result = execute('complete-field');
       expect(result.success).toBe(true);
       expect(result.message).toContain('complete');
-      expect(getState().location).toBe('guild');
+      expect(getState().location).toBe('city');
     });
 
     it('can use telepipe to retreat', () => {
       const result = execute('use-telepipe');
       expect(result.success).toBe(true);
       expect(result.message).toContain('Telepipe');
-      expect(getState().location).toBe('guild');
+      expect(getState().location).toBe('city');
     });
 
     it('can abandon session', () => {
       const result = execute('abandon-session');
       expect(result.success).toBe(true);
       expect(result.message).toContain('abandoned');
-      expect(getState().location).toBe('guild');
+      expect(getState().location).toBe('city');
     });
 
     it('advances to next stage when enemies cleared', () => {

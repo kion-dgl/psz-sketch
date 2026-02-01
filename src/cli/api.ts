@@ -1885,7 +1885,7 @@ function executeUseTelepipe(): CommandResult {
   }
 
   useTelepipe();
-  currentLocation = 'guild';
+  currentLocation = 'city';
 
   // Clear dropped items when leaving field
   droppedItems = [];
@@ -1893,7 +1893,7 @@ function executeUseTelepipe(): CommandResult {
 
   return {
     success: true,
-    message: 'Used Telepipe. Returned to guild. Session paused.',
+    message: 'Used Telepipe. Returned to city. Session paused.',
   };
 }
 
@@ -1907,7 +1907,7 @@ function executeAbandonSession(): CommandResult {
   }
 
   abandonSession();
-  currentLocation = 'guild';
+  currentLocation = 'city';
 
   // Clear dropped items and enemies when abandoning
   droppedItems = [];
@@ -1915,7 +1915,7 @@ function executeAbandonSession(): CommandResult {
 
   return {
     success: true,
-    message: 'Session abandoned. No rewards earned.',
+    message: 'Session abandoned. Returned to city.',
   };
 }
 
@@ -2553,13 +2553,13 @@ function executeCompleteField(): CommandResult {
     return { success: false, message: 'Failed to complete session.' };
   }
 
-  currentLocation = 'guild';
+  currentLocation = 'city';
   currentEnemies = [];
   combatLog.push('Field completed!');
 
   return {
     success: true,
-    message: `Field complete! Return to guild to claim rewards.\nGrade: ${result.grade}, EXP: ${result.expGained}, Meseta: ${result.mesetaGained}`,
+    message: `Field complete! Visit the guild to claim rewards.\nGrade: ${result.grade}, EXP: ${result.expGained}, Meseta: ${result.mesetaGained}`,
     data: result,
   };
 }
