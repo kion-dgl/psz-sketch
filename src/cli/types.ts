@@ -7,7 +7,7 @@ import type { Character } from '../systems/character/types';
 import type { ShopItem } from '../systems/shop/types';
 import type { Mission, Difficulty } from '../systems/mission/types';
 
-export type Location = 'city' | 'shop' | 'missions' | 'inventory' | 'storage' | 'guild' | 'field';
+export type Location = 'city' | 'shop' | 'missions' | 'inventory' | 'storage' | 'guild' | 'teleporter' | 'field';
 
 /** Detailed item info for UI display */
 export interface DetailedItem {
@@ -59,6 +59,14 @@ export interface EnemyInfo {
   maxHp: number;
 }
 
+export interface DroppedItemInfo {
+  dropId: number;
+  type: 'item' | 'meseta';
+  itemId?: string;
+  name: string;
+  meseta?: number;
+}
+
 export interface GameState {
   character: Character | null;
   location: Location;
@@ -69,6 +77,8 @@ export interface GameState {
   enemies?: EnemyInfo[];
   playerCombat?: PlayerCombat;
   stageIndex?: number;
+  isAtFinalStage?: boolean;
+  droppedItems?: DroppedItemInfo[];
 }
 
 export interface CommandResult {

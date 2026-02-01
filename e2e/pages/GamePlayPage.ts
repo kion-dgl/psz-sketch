@@ -54,7 +54,11 @@ export class GamePlayPage {
   }
 
   // UI button clicks
-  async clickCreateClass(classId: string) {
+  async clickCreateClass(classId: string, slot: number = 0) {
+    // First click "New Game" on an empty slot to show class selection
+    await this.page.click(`[data-testid="new-game-${slot}"]`);
+    await this.page.waitForTimeout(50);
+    // Then select the class
     await this.page.click(`[data-testid="create-${classId}"]`);
     await this.page.waitForTimeout(100);
   }
@@ -66,6 +70,11 @@ export class GamePlayPage {
 
   async clickGotoGuild() {
     await this.page.click('[data-testid="goto-guild"]');
+    await this.page.waitForTimeout(100);
+  }
+
+  async clickGotoTeleporter() {
+    await this.page.click('[data-testid="goto-teleporter"]');
     await this.page.waitForTimeout(100);
   }
 
@@ -81,7 +90,8 @@ export class GamePlayPage {
 
   async clickEnterField(fieldId: string) {
     await this.page.click(`[data-testid="enter-field-${fieldId}"]`);
-    await this.page.waitForTimeout(100);
+    // Wait longer for auto-spawn to complete
+    await this.page.waitForTimeout(500);
   }
 
   async clickTelepipe() {

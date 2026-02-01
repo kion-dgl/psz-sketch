@@ -140,17 +140,17 @@ test.describe('Shop Interactions', () => {
   });
 });
 
-test.describe('Guild & Field Entry', () => {
+test.describe('Teleporter & Field Entry', () => {
   let gamePlayPage: GamePlayPage;
 
   test.beforeEach(async ({ page }) => {
     gamePlayPage = new GamePlayPage(page);
     await gamePlayPage.goto();
     await gamePlayPage.clickCreateClass('HUmar');
-    await gamePlayPage.clickGotoGuild();
+    await gamePlayPage.clickGotoTeleporter();
   });
 
-  test('guild shows fields', async ({ page }) => {
+  test('teleporter shows fields', async ({ page }) => {
     const field = page.locator('[data-testid="field-gurhacia-valley"]');
     expect(await field.count()).toBeGreaterThan(0);
   });
@@ -202,7 +202,7 @@ test.describe('Stats Display', () => {
 });
 
 test.describe('Full Game Loop', () => {
-  test('complete loop: create → shop → guild → field → return', async ({ page }) => {
+  test('complete loop: create → shop → teleporter → field → return', async ({ page }) => {
     const gamePlayPage = new GamePlayPage(page);
     await gamePlayPage.goto();
 
@@ -219,9 +219,9 @@ test.describe('Full Game Loop', () => {
     await gamePlayPage.executeCommand('goto city');
     expect((await gamePlayPage.getCurrentLocation())?.toLowerCase()).toContain('city');
 
-    // 4. Go to guild
-    await gamePlayPage.clickGotoGuild();
-    expect((await gamePlayPage.getCurrentLocation())?.toLowerCase()).toContain('guild');
+    // 4. Go to teleporter
+    await gamePlayPage.clickGotoTeleporter();
+    expect((await gamePlayPage.getCurrentLocation())?.toLowerCase()).toContain('teleporter');
 
     // 5. Enter field
     await gamePlayPage.clickEnterField('gurhacia-valley');

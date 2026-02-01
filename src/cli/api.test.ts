@@ -396,7 +396,7 @@ describe('CLI API', () => {
   describe('Combat Commands', () => {
     beforeEach(() => {
       execute('create-character HUmar TestHero');
-      execute('goto guild');
+      execute('goto teleporter');
       execute('enter-field gurhacia-valley normal');
     });
 
@@ -423,10 +423,11 @@ describe('CLI API', () => {
       expect(result.message).toMatch(/Hit|Attack missed/);
     });
 
-    it('fails to attack without enemies', () => {
-      const result = execute('attack 0');
-      expect(result.success).toBe(false);
-      expect(result.message).toContain('No enemies');
+    it('enemies auto-spawn when entering field', () => {
+      // Enemies should already be spawned after entering field
+      const state = getState();
+      expect(state.enemies).toBeDefined();
+      expect(state.enemies!.length).toBeGreaterThan(0);
     });
 
     it('fails to attack invalid index', () => {
@@ -493,6 +494,7 @@ describe('CLI API', () => {
     it('advances to next stage when enemies cleared', () => {
       // Complete the field immediately to avoid fighting
       execute('complete-field');
+      execute('goto teleporter');
       execute('enter-field gurhacia-valley normal');
 
       // Try to advance (should fail without clearing enemies first)
@@ -505,7 +507,7 @@ describe('CLI API', () => {
   describe('Item Drops', () => {
     beforeEach(() => {
       execute('create-character HUmar TestHero');
-      execute('goto guild');
+      execute('goto teleporter');
       execute('enter-field gurhacia-valley normal');
       execute('spawn-enemies');
     });
@@ -530,7 +532,7 @@ describe('CLI API', () => {
   describe('Player Death', () => {
     beforeEach(() => {
       execute('create-character HUmar TestHero');
-      execute('goto guild');
+      execute('goto teleporter');
       execute('enter-field gurhacia-valley normal');
     });
 

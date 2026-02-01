@@ -377,8 +377,8 @@ describe('Full Gameplay Loop Integration', () => {
       result = execute('buy monomate');
       // May succeed or fail based on meseta, both are valid
 
-      // 8. Go to guild
-      result = execute('goto guild');
+      // 8. Go to teleporter
+      result = execute('goto teleporter');
       expect(result.success).toBe(true);
 
       // 9. List fields
@@ -435,7 +435,7 @@ describe('Combat Gameplay Loop', () => {
   it('attack command requires enemy index', () => {
     // Create character and enter field
     execute('create-character humar Fighter');
-    execute('goto guild');
+    execute('goto teleporter');
     execute('enter-field gurhacia-valley normal');
 
     // Attack without index should prompt for index
@@ -452,7 +452,7 @@ describe('Combat Gameplay Loop', () => {
     expect(result.success).toBe(false);
 
     // Enter field
-    execute('goto guild');
+    execute('goto teleporter');
     execute('enter-field gurhacia-valley normal');
 
     // Cast requires a target

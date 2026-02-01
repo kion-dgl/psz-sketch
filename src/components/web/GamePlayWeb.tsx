@@ -23,6 +23,8 @@ import {
 import type { Field } from '../../systems/field/types';
 import type { Difficulty } from '../../systems/mission/types';
 import { meetsLevelForDifficulty } from '../../systems/mission';
+import { VALID_CLASS_IDS, MAX_SLOTS } from '../../systems/character/types';
+import type { Character, CharacterSlots } from '../../systems/character/types';
 
 export default function GamePlayWeb() {
   const [gameState, setGameState] = useState<ReturnType<typeof getState> | null>(null);
@@ -31,14 +33,88 @@ export default function GamePlayWeb() {
   const [commandInput, setCommandInput] = useState('');
   const [shopTab, setShopTab] = useState<'items' | 'weapons'>('items');
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
+  // Character slot management
+  const [characterSlots, setCharacterSlots] = useState<CharacterSlots>([null, null, null, null]);
+  const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
 
   useEffect(() => {
     initializeDefaultShops();
     initializeDefaultFields();
     resetState();
+    loadCharacterSlots();
     refreshState();
-    addLog('Welcome! Create a character to begin.');
+    addLog('Welcome! Select or create a character to begin.');
   }, []);
+
+  const loadCharacterSlots = () => {
+    const stored = localStorage.getItem('characters');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        const slots: CharacterSlots = [null, null, null, null];
+        for (let i = 0; i < Math.min(parsed.length, MAX_SLOTS); i++) {
+          slots[i] = parsed[i];
+        }
+        setCharacterSlots(slots);
+      } catch {
+        setCharacterSlots([null, null, null, null]);
+      }
+    }
+  };
+
+  const saveCharacterSlots = (slots: CharacterSlots) => {
+    localStorage.setItem('characters', JSON.stringify(slots));
+    setCharacterSlots(slots);
+  };
+
+  const handleSelectCharacter = (character: Character, slot: number) => {
+    // Load this character into the game state via CLI
+    const charJson = JSON.stringify(character);
+    const result = execute(`load-character ${charJson}`);
+    if (result.success) {
+      refreshState();
+      addLog(`Selected ${character.character_name} (${character.class_id})`);
+    } else {
+      addLog(`Failed to load character: ${result.message}`);
+    }
+    setSelectedSlot(null);
+  };
+
+  const handleCreateCharacter = (classId: string) => {
+    if (selectedSlot === null) return;
+
+    const result = executeCommand(`create-character ${classId} Hero`);
+    if (result.success) {
+      // Get the created character from game state
+      const newState = getState();
+      if (newState.character) {
+        const newSlots = [...characterSlots] as CharacterSlots;
+        newSlots[selectedSlot] = { ...newState.character, slot: selectedSlot };
+        saveCharacterSlots(newSlots);
+        addLog(`Created ${newState.character.character_name} in slot ${selectedSlot + 1}`);
+      }
+    }
+    setSelectedSlot(null);
+  };
+
+  const handleDeleteCharacter = () => {
+    if (deleteConfirm === null) return;
+
+    const charToDelete = characterSlots[deleteConfirm];
+    const newSlots = [...characterSlots] as CharacterSlots;
+    newSlots[deleteConfirm] = null;
+    saveCharacterSlots(newSlots);
+
+    // If this was the active character, reset game state
+    if (gameState?.character?.character_id === charToDelete?.character_id) {
+      resetState();
+      refreshState();
+    }
+
+    addLog(`Deleted character from slot ${deleteConfirm + 1}`);
+    setDeleteConfirm(null);
+  };
 
   const refreshState = useCallback(() => {
     setGameState(getState());
@@ -96,6 +172,13 @@ export default function GamePlayWeb() {
           data-testid="goto-shop"
         >
           Item Shop
+        </button>
+        <button
+          style={styles.cityButton}
+          onClick={() => executeCommand('goto teleporter')}
+          data-testid="goto-teleporter"
+        >
+          Teleporter
         </button>
         <button
           style={styles.cityButton}
@@ -165,7 +248,7 @@ export default function GamePlayWeb() {
     );
   };
 
-  const renderGuildContent = () => {
+  const renderTeleporterContent = () => {
     const fields = getAllFields();
     const charId = gameState?.character?.character_id ?? '';
     const level = gameState?.character?.level ?? 1;
@@ -173,9 +256,11 @@ export default function GamePlayWeb() {
     return (
       <div style={styles.locationContent}>
         <div style={styles.locationHeader}>
-          <h2 style={styles.locationTitle}>GUILD COUNTER</h2>
+          <h2 style={styles.locationTitle}>TELEPORTER</h2>
           <button style={styles.backBtn} onClick={() => executeCommand('goto city')}>← Back</button>
         </div>
+
+        <p style={styles.locationDesc}>Select a field to explore freely.</p>
 
         <div style={styles.difficultyRow}>
           <span style={styles.diffLabel}>Difficulty:</span>
@@ -218,10 +303,60 @@ export default function GamePlayWeb() {
     );
   };
 
+  const renderGuildContent = () => {
+    return (
+      <div style={styles.locationContent}>
+        <div style={styles.locationHeader}>
+          <h2 style={styles.locationTitle}>GUILD COUNTER</h2>
+          <button style={styles.backBtn} onClick={() => executeCommand('goto city')}>← Back</button>
+        </div>
+
+        <p style={styles.locationDesc}>Accept missions for rewards.</p>
+
+        <div style={styles.missionList}>
+          <div style={styles.missionItem}>
+            <div style={styles.missionInfo}>
+              <span style={styles.missionName}>Mayor's Mission</span>
+              <span style={styles.missionArea}>Gurhacia Valley</span>
+            </div>
+            <span style={styles.missionReward}>500 Meseta + Grow Shower</span>
+            <button style={styles.buyBtn} data-testid="accept-mayors-mission">
+              Accept
+            </button>
+          </div>
+          <div style={styles.missionItem}>
+            <div style={styles.missionInfo}>
+              <span style={styles.missionName}>Get Connected</span>
+              <span style={styles.missionArea}>Gurhacia Valley</span>
+            </div>
+            <span style={styles.missionReward}>1,000 Meseta + Ace/PP</span>
+            <button style={styles.buyBtn} data-testid="accept-get-connected">
+              Accept
+            </button>
+          </div>
+          <div style={styles.missionItem}>
+            <div style={styles.missionInfo}>
+              <span style={styles.missionNameLocked}>Waltz of Rage</span>
+              <span style={styles.missionArea}>Rioh Snowfield</span>
+            </div>
+            <span style={styles.missionReward}>500 Meseta + 8-Ouncer</span>
+            <button style={styles.buyBtnDisabled} disabled>
+              Locked
+            </button>
+          </div>
+        </div>
+
+        <p style={styles.comingSoon}>More missions coming soon...</p>
+      </div>
+    );
+  };
+
   const renderFieldContent = () => {
     const combat = gameState?.playerCombat;
     const enemies = gameState?.enemies || [];
+    const drops = gameState?.droppedItems || [];
     const hasEnemies = enemies.length > 0;
+    const hasDrops = drops.length > 0;
     const consumables = gameState?.inventory?.filter(i => i.type === 'consumable') || [];
 
     return (
@@ -257,28 +392,6 @@ export default function GamePlayWeb() {
           </div>
         )}
 
-        {/* Actions */}
-        <div style={styles.fieldActions}>
-          {!hasEnemies && (
-            <button
-              style={styles.actionBtn}
-              onClick={() => executeCommand('spawn-enemies')}
-              data-testid="spawn-enemies"
-            >
-              Spawn Enemies
-            </button>
-          )}
-          {!hasEnemies && (
-            <button
-              style={styles.actionBtn}
-              onClick={() => executeCommand('next-stage')}
-              data-testid="next-stage"
-            >
-              Next Stage
-            </button>
-          )}
-        </div>
-
         {/* Enemies */}
         {hasEnemies && (
           <div style={styles.enemySection}>
@@ -308,6 +421,62 @@ export default function GamePlayWeb() {
               ))}
             </div>
           </div>
+        )}
+
+        {/* Dropped Items */}
+        {hasDrops && (
+          <div style={styles.dropsSection}>
+            <h3 style={styles.sectionTitle}>DROPPED ITEMS</h3>
+            <div style={styles.dropsList}>
+              {drops.map(drop => (
+                <button
+                  key={drop.dropId}
+                  style={drop.type === 'meseta' ? styles.mesetaDropBtn : styles.dropBtn}
+                  onClick={() => executeCommand(`pickup-item ${drop.dropId}`)}
+                  data-testid={`pickup-${drop.dropId}`}
+                >
+                  {drop.name}
+                </button>
+              ))}
+              {drops.length > 1 && (
+                <button
+                  style={styles.pickupAllBtn}
+                  onClick={() => executeCommand('pickup-all')}
+                  data-testid="pickup-all"
+                >
+                  Pick Up All
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Stage Complete - different UI for final stage vs intermediate stages */}
+        {!hasEnemies && !hasDrops && combat && (
+          gameState?.isAtFinalStage ? (
+            <div style={styles.fieldComplete}>
+              <p style={styles.fieldCompleteText}>Field Complete!</p>
+              <p style={styles.fieldCompleteSubtext}>Return to the Guild Counter to report.</p>
+              <button
+                style={styles.returnBtn}
+                onClick={() => executeCommand('complete-field')}
+                data-testid="complete-field"
+              >
+                Return to Guild
+              </button>
+            </div>
+          ) : (
+            <div style={styles.stageComplete}>
+              <p style={styles.stageCompleteText}>Stage Clear!</p>
+              <button
+                style={styles.nextStageBtn}
+                onClick={() => executeCommand('next-stage')}
+                data-testid="next-stage"
+              >
+                Next Stage
+              </button>
+            </div>
+          )
         )}
 
         {/* Quick Items */}
@@ -355,23 +524,124 @@ export default function GamePlayWeb() {
     </div>
   );
 
-  const renderNoCharacter = () => (
+  // Group classes by race for display
+  const CLASS_GROUPS = {
+    Human: ['HUmar', 'HUmarl', 'RAmar', 'RAmarl', 'FOmar', 'FOmarl'],
+    Newman: ['HUnewm', 'HUnewearl', 'FOnewm', 'FOnewearl'],
+    Cast: ['HUcast', 'HUcaseal', 'RAcast', 'RAcaseal'],
+  };
+
+  const renderCharacterSlots = () => (
     <div style={styles.locationContent}>
-      <h2 style={styles.locationTitle}>CREATE CHARACTER</h2>
-      <div style={styles.createMenu}>
-        {['HUmar', 'HUnewearl', 'RAmar', 'RAmarl', 'FOmar', 'FOmarl'].map(classId => (
-          <button
-            key={classId}
-            style={styles.classBtn}
-            onClick={() => executeCommand(`create-character ${classId} Hero`)}
-            data-testid={`create-${classId}`}
-          >
-            {classId}
-          </button>
+      <h2 style={styles.locationTitle}>SELECT CHARACTER</h2>
+      <div style={styles.slotList}>
+        {characterSlots.map((char, idx) => (
+          <div key={idx} style={styles.slotRow} data-testid={`character-slot-${idx}`}>
+            {char ? (
+              <>
+                <div style={styles.slotInfo}>
+                  <span style={styles.slotName}>{char.character_name}</span>
+                  <span style={styles.slotClass}>{char.class_id}</span>
+                  <span style={styles.slotLevel}>Lv.{char.level}</span>
+                </div>
+                <div style={styles.slotActions}>
+                  <button
+                    style={styles.selectBtn}
+                    onClick={() => handleSelectCharacter(char, idx)}
+                    data-testid={`select-character-${idx}`}
+                  >
+                    Select
+                  </button>
+                  <button
+                    style={styles.deleteSmallBtn}
+                    onClick={() => setDeleteConfirm(idx)}
+                    data-testid={`delete-character-${idx}`}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div style={styles.emptySlotRow}>
+                <span style={styles.emptySlotText}>Slot {idx + 1} - Empty</span>
+                <button
+                  style={styles.newGameBtn}
+                  onClick={() => setSelectedSlot(idx)}
+                  data-testid={`new-game-${idx}`}
+                >
+                  New Game
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm !== null && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <p style={styles.modalText}>
+              Delete {characterSlots[deleteConfirm]?.character_name}?
+            </p>
+            <div style={styles.modalActions}>
+              <button
+                style={styles.confirmDeleteBtn}
+                onClick={handleDeleteCharacter}
+                data-testid="confirm-delete"
+              >
+                Yes, Delete
+              </button>
+              <button
+                style={styles.cancelBtn}
+                onClick={() => setDeleteConfirm(null)}
+                data-testid="cancel-delete"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderClassSelection = () => (
+    <div style={styles.locationContent}>
+      <div style={styles.locationHeader}>
+        <h2 style={styles.locationTitle}>SELECT CLASS - Slot {(selectedSlot ?? 0) + 1}</h2>
+        <button style={styles.backBtn} onClick={() => setSelectedSlot(null)}>← Back</button>
+      </div>
+      <div style={styles.classGroups}>
+        {Object.entries(CLASS_GROUPS).map(([race, classes]) => (
+          <div key={race} style={styles.classGroup}>
+            <h3 style={styles.raceName}>{race}</h3>
+            <div style={styles.createMenu}>
+              {classes.map(classId => (
+                <button
+                  key={classId}
+                  style={styles.classBtn}
+                  onClick={() => handleCreateCharacter(classId)}
+                  data-testid={`create-${classId}`}
+                >
+                  {classId}
+                </button>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     </div>
   );
+
+  const renderNoCharacter = () => {
+    // If a slot is selected, show class selection
+    if (selectedSlot !== null) {
+      return renderClassSelection();
+    }
+    // Otherwise show character slots
+    return renderCharacterSlots();
+  };
 
   const renderLocationContent = () => {
     if (!gameState?.character) return renderNoCharacter();
@@ -379,6 +649,7 @@ export default function GamePlayWeb() {
     switch (gameState.location) {
       case 'city': return renderCityContent();
       case 'shop': return renderShopContent();
+      case 'teleporter': return renderTeleporterContent();
       case 'guild': return renderGuildContent();
       case 'field': return renderFieldContent();
       case 'inventory': return renderInventoryContent();
@@ -748,6 +1019,141 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: 'monospace',
     cursor: 'pointer',
   },
+  // Character slot styles
+  slotList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    maxWidth: '450px',
+  },
+  slotRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '12px 16px',
+    background: '#252540',
+    border: '1px solid #333',
+    borderRadius: '4px',
+  },
+  slotInfo: {
+    display: 'flex',
+    gap: '16px',
+    alignItems: 'baseline',
+  },
+  slotName: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: '13px',
+  },
+  slotClass: {
+    color: '#6bf',
+    fontSize: '11px',
+  },
+  slotLevel: {
+    color: '#888',
+    fontSize: '11px',
+  },
+  slotActions: {
+    display: 'flex',
+    gap: '8px',
+  },
+  selectBtn: {
+    padding: '6px 12px',
+    background: '#2d6a4a',
+    border: '1px solid #4ade80',
+    color: '#4ade80',
+    fontFamily: 'monospace',
+    fontSize: '11px',
+    cursor: 'pointer',
+    borderRadius: '2px',
+  },
+  deleteSmallBtn: {
+    padding: '6px 12px',
+    background: 'transparent',
+    border: '1px solid #f87171',
+    color: '#f87171',
+    fontFamily: 'monospace',
+    fontSize: '11px',
+    cursor: 'pointer',
+    borderRadius: '2px',
+  },
+  emptySlotRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  emptySlotText: {
+    color: '#555',
+    fontSize: '12px',
+  },
+  newGameBtn: {
+    padding: '6px 16px',
+    background: '#333',
+    border: '1px solid #6bf',
+    color: '#6bf',
+    fontFamily: 'monospace',
+    fontSize: '11px',
+    cursor: 'pointer',
+    borderRadius: '2px',
+  },
+  modal: {
+    position: 'fixed' as const,
+    inset: 0,
+    background: 'rgba(0,0,0,0.7)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 100,
+  },
+  modalContent: {
+    background: '#252540',
+    padding: '24px',
+    borderRadius: '4px',
+    border: '1px solid #f87171',
+    textAlign: 'center' as const,
+  },
+  modalText: {
+    color: '#fff',
+    marginBottom: '16px',
+  },
+  modalActions: {
+    display: 'flex',
+    gap: '12px',
+    justifyContent: 'center',
+  },
+  confirmDeleteBtn: {
+    padding: '8px 16px',
+    background: '#7f1d1d',
+    border: '1px solid #f87171',
+    color: '#f87171',
+    fontFamily: 'monospace',
+    cursor: 'pointer',
+    borderRadius: '2px',
+  },
+  cancelBtn: {
+    padding: '8px 16px',
+    background: 'transparent',
+    border: '1px solid #888',
+    color: '#888',
+    fontFamily: 'monospace',
+    cursor: 'pointer',
+    borderRadius: '2px',
+  },
+  classGroups: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+  },
+  classGroup: {
+    marginBottom: '8px',
+  },
+  raceName: {
+    margin: '0 0 8px 0',
+    fontSize: '12px',
+    color: '#e94560',
+    letterSpacing: '1px',
+  },
   commandBar: {
     display: 'flex',
     gap: '8px',
@@ -918,5 +1324,160 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: 'monospace',
     fontSize: '10px',
     cursor: 'pointer',
+  },
+  // Dropped items styles
+  dropsSection: {
+    marginTop: '16px',
+    padding: '12px',
+    background: '#2d2d1a',
+    borderRadius: '4px',
+    border: '1px solid #fcd34d',
+  },
+  dropsList: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px',
+  },
+  dropBtn: {
+    padding: '8px 16px',
+    background: '#4a4a2d',
+    border: '1px solid #fcd34d',
+    color: '#fcd34d',
+    fontFamily: 'monospace',
+    fontSize: '11px',
+    cursor: 'pointer',
+    borderRadius: '2px',
+  },
+  mesetaDropBtn: {
+    padding: '8px 16px',
+    background: '#3d3d1a',
+    border: '1px solid #fbbf24',
+    color: '#fbbf24',
+    fontFamily: 'monospace',
+    fontSize: '11px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    borderRadius: '2px',
+  },
+  pickupAllBtn: {
+    padding: '8px 16px',
+    background: '#5a5a2d',
+    border: '2px solid #fcd34d',
+    color: '#fcd34d',
+    fontFamily: 'monospace',
+    fontSize: '11px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    borderRadius: '2px',
+  },
+  // Stage complete styles
+  stageComplete: {
+    marginTop: '16px',
+    padding: '16px',
+    background: '#1a2d1a',
+    borderRadius: '4px',
+    border: '1px solid #4ade80',
+    textAlign: 'center' as const,
+  },
+  stageCompleteText: {
+    margin: '0 0 12px 0',
+    color: '#4ade80',
+    fontSize: '14px',
+    fontWeight: 'bold',
+  },
+  nextStageBtn: {
+    padding: '10px 24px',
+    background: '#2d6a4a',
+    border: '2px solid #4ade80',
+    color: '#4ade80',
+    fontFamily: 'monospace',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    borderRadius: '4px',
+  },
+  // Field complete styles
+  fieldComplete: {
+    marginTop: '16px',
+    padding: '20px',
+    background: '#1a1a3d',
+    borderRadius: '4px',
+    border: '2px solid #a78bfa',
+    textAlign: 'center' as const,
+  },
+  fieldCompleteText: {
+    margin: '0 0 8px 0',
+    color: '#a78bfa',
+    fontSize: '18px',
+    fontWeight: 'bold',
+  },
+  fieldCompleteSubtext: {
+    margin: '0 0 16px 0',
+    color: '#888',
+    fontSize: '12px',
+  },
+  returnBtn: {
+    padding: '12px 32px',
+    background: '#4a2d6a',
+    border: '2px solid #a78bfa',
+    color: '#a78bfa',
+    fontFamily: 'monospace',
+    fontSize: '14px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    borderRadius: '4px',
+  },
+  // Location description
+  locationDesc: {
+    color: '#888',
+    fontSize: '12px',
+    marginBottom: '16px',
+  },
+  // Mission list styles
+  missionList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  missionItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '12px',
+    background: '#252540',
+    borderRadius: '4px',
+    border: '1px solid #333',
+  },
+  missionInfo: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+  },
+  missionName: {
+    color: '#fff',
+    fontSize: '13px',
+    fontWeight: 'bold',
+  },
+  missionNameLocked: {
+    color: '#555',
+    fontSize: '13px',
+    fontWeight: 'bold',
+  },
+  missionArea: {
+    color: '#6bf',
+    fontSize: '10px',
+  },
+  missionReward: {
+    color: '#fcd34d',
+    fontSize: '10px',
+    width: '140px',
+  },
+  comingSoon: {
+    color: '#555',
+    fontSize: '11px',
+    fontStyle: 'italic',
+    marginTop: '16px',
+    textAlign: 'center' as const,
   },
 };
