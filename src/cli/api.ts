@@ -192,6 +192,7 @@ import {
   getEnemyPool,
   generateEnemyComposition,
   getEnemyCountRange,
+  getBossForArea,
 } from '../systems/stage';
 import { getEnemyDisplayName, getEnemyElement } from '../components/enemies/enemyData';
 
@@ -2165,6 +2166,10 @@ function executeSpawnEnemies(): CommandResult {
     return { success: false, message: 'No active session.' };
   }
 
+  // Get current stage info
+  const stage = getCurrentStage();
+  const variant = stage && 'variant' in stage ? stage.variant : 'a';
+
   // Clear existing enemies
   currentEnemies = [];
   combatLog = [];
@@ -2175,41 +2180,103 @@ function executeSpawnEnemies(): CommandResult {
   const seed = Date.now();
   const random = createSeededRandom(seed);
 
-  // Generate enemy composition
-  const composition = generateEnemyComposition(enemyArea, difficulty, random);
+  // Determine spawn count based on stage variant
+  // a: 5 spawns, e: 1 spawn (transition), b: 5 spawns, z: boss only
+  const spawnCount = variant === 'e' ? 1 : variant === 'z' ? 0 : 5;
 
-  // Create enemy instances
-  for (const entry of composition) {
-    for (let i = 0; i < entry.count; i++) {
-      const stats = generateEnemyStats(entry.enemyId, difficulty, currentCharacter.level);
-      const element = getEnemyElement(entry.enemyId);
-
-      // Calculate exp/meseta values
+  if (variant === 'z') {
+    // Boss stage - spawn the area boss
+    const bossId = getBossForArea(enemyArea);
+    if (bossId) {
+      const stats = generateBossStats(bossId, difficulty, currentCharacter.level);
+      const element = getEnemyElement(bossId);
       const diffMult = difficulty === 'normal' ? 1 : difficulty === 'hard' ? 1.5 : 2;
-      const isBoss = entry.enemyId.startsWith('boss_');
-      const expValue = Math.floor((isBoss ? 500 : 50) * diffMult * (1 + currentCharacter.level * 0.1));
-      const mesetaValue = Math.floor((isBoss ? 1000 : 100) * diffMult);
 
       currentEnemies.push({
         id: ++enemyIdCounter,
-        enemyId: entry.enemyId,
-        name: getEnemyDisplayName(entry.enemyId),
+        enemyId: bossId,
+        name: getEnemyDisplayName(bossId),
         stats,
         element,
-        expValue,
-        mesetaValue,
+        expValue: Math.floor(2000 * diffMult * (1 + currentCharacter.level * 0.1)),
+        mesetaValue: Math.floor(5000 * diffMult),
       });
+    }
+
+    const enemyList = currentEnemies.map((e, i) => `  [${i}] ${e.name} - HP: ${e.stats.hp}/${e.stats.maxHp}`);
+    combatLog.push(`BOSS BATTLE! ${currentEnemies[0]?.name || 'Unknown'}`);
+
+    return {
+      success: true,
+      message: `BOSS BATTLE!\n${enemyList.join('\n')}`,
+      data: { enemies: currentEnemies.length, area: enemyArea, difficulty, isBoss: true },
+    };
+  }
+
+  // Regular enemy spawns
+  for (let spawn = 0; spawn < spawnCount; spawn++) {
+    // Generate enemy composition for this spawn
+    const composition = generateEnemyComposition(enemyArea, difficulty, random);
+
+    // Create enemy instances (limit to reasonable count per spawn)
+    let enemiesThisSpawn = 0;
+    for (const entry of composition) {
+      if (enemiesThisSpawn >= 3) break; // Max 3 enemies per spawn point
+      for (let i = 0; i < Math.min(entry.count, 2); i++) {
+        const stats = generateEnemyStats(entry.enemyId, difficulty, currentCharacter.level);
+        const element = getEnemyElement(entry.enemyId);
+
+        const diffMult = difficulty === 'normal' ? 1 : difficulty === 'hard' ? 1.5 : 2;
+        const expValue = Math.floor(50 * diffMult * (1 + currentCharacter.level * 0.1));
+        const mesetaValue = Math.floor(100 * diffMult);
+
+        currentEnemies.push({
+          id: ++enemyIdCounter,
+          enemyId: entry.enemyId,
+          name: getEnemyDisplayName(entry.enemyId),
+          stats,
+          element,
+          expValue,
+          mesetaValue,
+        });
+        enemiesThisSpawn++;
+        if (enemiesThisSpawn >= 3) break;
+      }
     }
   }
 
   const enemyList = currentEnemies.map((e, i) => `  [${i}] ${e.name} - HP: ${e.stats.hp}/${e.stats.maxHp}`);
-
   combatLog.push(`Spawned ${currentEnemies.length} enemies in ${enemyArea}`);
 
   return {
     success: true,
     message: `Enemies spawned (${enemyArea}, ${difficulty}):\n${enemyList.join('\n')}`,
     data: { enemies: currentEnemies.length, area: enemyArea, difficulty },
+  };
+}
+
+/**
+ * Generate boss stats (stronger than regular enemies)
+ */
+function generateBossStats(bossId: string, difficulty: Difficulty, playerLevel: number): CombatStats {
+  const difficultyMult = difficulty === 'normal' ? 1 : difficulty === 'hard' ? 1.5 : 2;
+  const levelMult = 1 + (playerLevel - 1) * 0.1;
+
+  // Base boss stats (much higher than regular enemies)
+  const baseHp = 500;
+  const baseAtk = 80;
+  const baseDef = 40;
+
+  return {
+    hp: Math.floor(baseHp * difficultyMult * levelMult),
+    maxHp: Math.floor(baseHp * difficultyMult * levelMult),
+    attack: Math.floor(baseAtk * difficultyMult * levelMult),
+    defense: Math.floor(baseDef * difficultyMult * levelMult),
+    accuracy: 90,
+    evasion: 15,
+    critRate: 10,
+    critDamage: 1.5,
+    attackSpeed: 1.0,
   };
 }
 
