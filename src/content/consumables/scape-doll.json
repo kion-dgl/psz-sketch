@@ -3,5 +3,6 @@
   "japaneseName": "スケープドール",
   "details": "Revives your character upon death.",
   "rarity": 5,
+  "maxStack": 1,
   "psoWorldId": 309
 }

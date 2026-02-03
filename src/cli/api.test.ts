@@ -163,8 +163,8 @@ describe('CLI API', () => {
     });
 
     it('fails to buy without enough meseta', () => {
-      // Buy something expensive
-      const result = execute('buy trimate 100');
+      // Buy something expensive (trimate costs 600, starting meseta is 500)
+      const result = execute('buy trimate 1');
       expect(result.success).toBe(false);
       expect(result.message).toContain('Not enough meseta');
     });

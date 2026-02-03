@@ -3,5 +3,6 @@
   "japaneseName": "トリメイト",
   "details": "Restores 100% of HP.",
   "rarity": 3,
+  "maxStack": 10,
   "psoWorldId": 301
 }

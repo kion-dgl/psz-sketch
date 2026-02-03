@@ -3,5 +3,6 @@
   "japaneseName": "アイストラップ",
   "details": "Inflicts Freeze Status effect on enemies.",
   "rarity": 1,
+  "maxStack": 10,
   "psoWorldId": 312
 }

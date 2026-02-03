@@ -1167,6 +1167,31 @@ function executeListItems(): CommandResult {
   };
 }
 
+// Stack limits for consumables (from content data)
+const CONSUMABLE_STACK_LIMITS: Record<string, number> = {
+  monomate: 10,
+  dimate: 10,
+  trimate: 10,
+  monofluid: 10,
+  difluid: 10,
+  trifluid: 10,
+  'sol-atomizer': 10,
+  'moon-atomizer': 10,
+  'star-atomizer': 5,
+  'scape-doll': 1,
+  telepipe: 10,
+  'photon-drop': 99,
+  'heal-trap': 10,
+  'heat-trap': 10,
+  'ice-trap': 10,
+  'light-trap': 10,
+  'trap-vision': 10,
+};
+
+function getMaxStack(itemId: string): number {
+  return CONSUMABLE_STACK_LIMITS[itemId] ?? 10;
+}
+
 function executeBuy(itemId: string, quantity: number): CommandResult {
   if (!currentCharacter) {
     return { success: false, message: 'No character.' };
@@ -1174,6 +1199,19 @@ function executeBuy(itemId: string, quantity: number): CommandResult {
 
   if (currentLocation !== 'shop') {
     return { success: false, message: 'You must be at the shop.' };
+  }
+
+  // Check stack limit before purchase
+  const maxStack = getMaxStack(itemId);
+  const existing = inventory.get(itemId);
+  const currentQty = existing?.quantity ?? 0;
+
+  if (currentQty + quantity > maxStack) {
+    const canBuy = maxStack - currentQty;
+    if (canBuy <= 0) {
+      return { success: false, message: `Cannot carry more ${itemId}. (Max: ${maxStack})` };
+    }
+    return { success: false, message: `Can only buy ${canBuy} more ${itemId}. (Max: ${maxStack}, Have: ${currentQty})` };
   }
 
   const meseta = currentCharacter.meseta ?? 0;
@@ -1194,12 +1232,11 @@ function executeBuy(itemId: string, quantity: number): CommandResult {
       rarity: result.item.rarity,
       sellPrice: result.item.sellPrice,
       stackable: true,
-      maxStack: 10,
+      maxStack: maxStack,
       effect: 'heal_hp', // Default effect for shop items
       effectValue: 100,
     };
 
-    const existing = inventory.get(itemId);
     if (existing) {
       existing.quantity += quantity;
     } else {
@@ -2967,15 +3004,15 @@ function executePickupItem(dropId: number): CommandResult {
       data: { meseta: drop.meseta },
     };
   } else if (drop.type === 'item' && drop.item) {
-    // Check stack limit for consumables (max 10)
-    const CONSUMABLE_STACK_LIMIT = 10;
+    // Check stack limit for consumables
     const existing = inventory.get(drop.item.id);
     const isConsumable = drop.item.type === 'consumable';
+    const maxStack = getMaxStack(drop.item.id);
 
-    if (isConsumable && existing && existing.quantity >= CONSUMABLE_STACK_LIMIT) {
+    if (isConsumable && existing && existing.quantity >= maxStack) {
       return {
         success: false,
-        message: `Cannot carry more ${drop.item.name}. (Max: ${CONSUMABLE_STACK_LIMIT})`,
+        message: `Cannot carry more ${drop.item.name}. (Max: ${maxStack})`,
       };
     }
 
@@ -3013,7 +3050,6 @@ function executePickupAll(): CommandResult {
     return { success: false, message: 'No items on ground.' };
   }
 
-  const CONSUMABLE_STACK_LIMIT = 10;
   const pickedUp: string[] = [];
   const leftOnGround: typeof droppedItems = [];
   let totalMeseta = 0;
@@ -3025,9 +3061,10 @@ function executePickupAll(): CommandResult {
     } else if (drop.type === 'item' && drop.item) {
       const existing = inventory.get(drop.item.id);
       const isConsumable = drop.item.type === 'consumable';
+      const maxStack = getMaxStack(drop.item.id);
 
       // Check stack limit for consumables
-      if (isConsumable && existing && existing.quantity >= CONSUMABLE_STACK_LIMIT) {
+      if (isConsumable && existing && existing.quantity >= maxStack) {
         leftOnGround.push(drop);
         continue;
       }

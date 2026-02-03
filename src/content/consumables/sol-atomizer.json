@@ -1,7 +1,8 @@
 {
   "name": "Sol Atomizer",
-  "japaneseName": "ソルアルトマイザー",
+  "japaneseName": "ソルアトマイザー",
   "details": "Removes all status effects.",
   "rarity": 2,
+  "maxStack": 10,
   "psoWorldId": 305
 }

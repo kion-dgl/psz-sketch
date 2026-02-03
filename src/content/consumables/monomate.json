@@ -3,5 +3,6 @@
   "japaneseName": "モノメイト",
   "details": "Restores 30% of HP.",
   "rarity": 1,
+  "maxStack": 10,
   "psoWorldId": 299
 }
