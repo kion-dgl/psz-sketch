@@ -1898,9 +1898,21 @@ function executeEnterMission(missionId: string, difficulty: Difficulty): Command
   };
 
   currentLocation = 'field';
+
+  // Clear any previous dropped items and enemies
+  droppedItems = [];
+  currentEnemies = [];
+
+  // Reset wave tracking for new stage
+  currentWave = 0;
+  totalWaves = 1;
+
+  // Auto-spawn enemies for the first stage
+  const spawnResult = executeSpawnEnemies();
+
   return {
     success: true,
-    message: `Started ${mission.name} on ${difficulty} difficulty.\nHP: ${playerCombatState.hp}/${playerCombatState.maxHp}  TP: ${playerCombatState.tp}/${playerCombatState.maxTp}`,
+    message: `Started ${mission.name} on ${difficulty} difficulty.\nHP: ${playerCombatState.hp}/${playerCombatState.maxHp}  TP: ${playerCombatState.tp}/${playerCombatState.maxTp}\n${spawnResult.message}`,
     data: { missionId, difficulty },
   };
 }
