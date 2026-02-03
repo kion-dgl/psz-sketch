@@ -272,12 +272,12 @@ describe('Shop System - Default Shops', () => {
     initializeDefaultShops();
 
     const itemShop = getShopInventory(SHOP_IDS.ITEM_SHOP);
-    const weaponShop = getShopInventory(SHOP_IDS.WEAPON_SHOP);
+    const armorShop = getShopInventory(SHOP_IDS.ARMOR_SHOP);
 
     expect(itemShop).not.toBeNull();
-    expect(weaponShop).not.toBeNull();
+    expect(armorShop).not.toBeNull();
     expect(itemShop!.items.length).toBeGreaterThan(0);
-    expect(weaponShop!.items.length).toBeGreaterThan(0);
+    expect(armorShop!.items.length).toBeGreaterThan(0);
   });
 
   it('item shop has consumables', () => {
@@ -287,11 +287,12 @@ describe('Shop System - Default Shops', () => {
     expect(items.find(i => i.id === 'monomate')).toBeDefined();
   });
 
-  it('weapon shop has weapons', () => {
+  it('armor shop has weapons with randomized IDs', () => {
     initializeDefaultShops();
-    const items = getShopItemsByCategory(SHOP_IDS.WEAPON_SHOP, 'weapon');
+    const items = getShopItemsByCategory(SHOP_IDS.ARMOR_SHOP, 'weapon');
     expect(items.length).toBeGreaterThan(0);
-    expect(items.find(i => i.id === 'saber')).toBeDefined();
+    // Weapons now have randomized IDs like 'saber-{seed}'
+    expect(items.find(i => i.id.startsWith('saber-'))).toBeDefined();
   });
 });
 

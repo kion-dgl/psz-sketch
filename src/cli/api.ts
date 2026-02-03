@@ -757,6 +757,12 @@ export function execute(commandLine: string): CommandResult {
       }
       return executeBuy(args[0], buyQty);
 
+    case 'buy-equipment':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: buy-equipment <item-id>' };
+      }
+      return executeBuyEquipment(args[0]);
+
     case 'sell':
       if (!args[0]) {
         return { success: false, message: 'Usage: sell <item-id> [quantity]' };
@@ -1126,7 +1132,7 @@ function executeGoto(location: Location): CommandResult {
     };
   }
 
-  const validLocations: Location[] = ['city', 'shop', 'missions', 'inventory', 'storage', 'guild', 'teleporter'];
+  const validLocations: Location[] = ['city', 'shop', 'weapon-shop', 'missions', 'inventory', 'storage', 'guild', 'teleporter'];
   if (!validLocations.includes(location)) {
     return {
       success: false,
@@ -1241,6 +1247,82 @@ function executeBuy(itemId: string, quantity: number): CommandResult {
       existing.quantity += quantity;
     } else {
       inventory.set(itemId, { item: gameItem, quantity });
+    }
+  }
+
+  return {
+    success: result.success,
+    message: result.message,
+    data: result,
+  };
+}
+
+function executeBuyEquipment(itemId: string): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (currentLocation !== 'weapon-shop') {
+    return { success: false, message: 'You must be at the weapon shop.' };
+  }
+
+  const meseta = currentCharacter.meseta ?? 0;
+  const result = purchaseItem(SHOP_IDS.ARMOR_SHOP, itemId, 1, meseta);
+
+  if (result.success && result.item) {
+    currentCharacter = {
+      ...currentCharacter,
+      meseta: result.remainingMeseta,
+    };
+
+    const shopItem = result.item as any; // EquipmentShopItem
+
+    // Convert to appropriate game item type based on category
+    if (shopItem.category === 'weapon') {
+      const weaponItem: WeaponItem = {
+        id: shopItem.id,
+        name: shopItem.name,
+        description: shopItem.description,
+        type: 'weapon',
+        rarity: shopItem.rarity,
+        sellPrice: shopItem.sellPrice,
+        attack: shopItem.attack ?? 0,
+        accuracy: 90,
+        weaponType: 'sword',
+        element: shopItem.element,
+        elementPercent: shopItem.elementPercent,
+        requiredLevel: shopItem.requiredLevel,
+      };
+      inventory.set(shopItem.id, { item: weaponItem, quantity: 1 });
+    } else if (shopItem.category === 'armor') {
+      const armorItem: ArmorItem = {
+        id: shopItem.id,
+        name: shopItem.name,
+        description: shopItem.description,
+        type: 'armor',
+        rarity: shopItem.rarity,
+        sellPrice: shopItem.sellPrice,
+        defense: shopItem.defense ?? 0,
+        evasion: shopItem.evasion ?? 0,
+        armorSlot: 'frame',
+        unitSlots: shopItem.slots ?? 0,
+        requiredLevel: shopItem.requiredLevel,
+      };
+      inventory.set(shopItem.id, { item: armorItem, quantity: 1 });
+    } else if (shopItem.category === 'unit') {
+      const unitItem: ArmorItem = {
+        id: shopItem.id,
+        name: shopItem.name,
+        description: shopItem.description,
+        type: 'armor',
+        rarity: shopItem.rarity,
+        sellPrice: shopItem.sellPrice,
+        defense: 0,
+        evasion: 0,
+        armorSlot: 'unit',
+        requiredLevel: shopItem.requiredLevel,
+      };
+      inventory.set(shopItem.id, { item: unitItem, quantity: 1 });
     }
   }
 

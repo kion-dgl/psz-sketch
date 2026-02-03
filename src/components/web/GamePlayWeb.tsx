@@ -12,9 +12,10 @@ import {
   canAfford,
   formatPrice,
   initializeDefaultShops,
+  refreshWeaponShop,
   SHOP_IDS,
 } from '../../systems/shop';
-import type { ShopItem } from '../../systems/shop/types';
+import type { ShopItem, EquipmentShopItem } from '../../systems/shop/types';
 import {
   getAllFields,
   isFieldUnlocked,
@@ -39,6 +40,7 @@ export default function GamePlayWeb() {
   const [logCounter, setLogCounter] = useState(0);
   const [commandInput, setCommandInput] = useState('');
   const [shopTab, setShopTab] = useState<'items' | 'weapons'>('items');
+  const [weaponShopTab, setWeaponShopTab] = useState<'weapons' | 'armor' | 'units'>('weapons');
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
   // Character slot management
   const [characterSlots, setCharacterSlots] = useState<CharacterSlots>([null, null, null, null]);
@@ -321,6 +323,20 @@ export default function GamePlayWeb() {
         </button>
         <button
           style={styles.cityButton}
+          onClick={() => executeCommand('goto weapon-shop')}
+          data-testid="goto-weapon-shop"
+        >
+          Weapon Shop
+        </button>
+        <button
+          style={styles.cityButtonDisabled}
+          disabled
+          data-testid="goto-custom-shop"
+        >
+          Custom Shop
+        </button>
+        <button
+          style={styles.cityButton}
           onClick={() => executeCommand('goto teleporter')}
           data-testid="goto-teleporter"
         >
@@ -339,6 +355,24 @@ export default function GamePlayWeb() {
           data-testid="goto-inventory"
         >
           Inventory
+        </button>
+      </div>
+
+      <h3 style={styles.citySectionTitle}>Man Hole</h3>
+      <div style={styles.cityMenu}>
+        <button
+          style={styles.cityButtonDisabled}
+          disabled
+          data-testid="goto-photon-collector"
+        >
+          Photon Collector
+        </button>
+        <button
+          style={styles.cityButtonDisabled}
+          disabled
+          data-testid="goto-enemy-collector"
+        >
+          Enemy Collector
         </button>
       </div>
     </div>
@@ -427,6 +461,135 @@ export default function GamePlayWeb() {
               </div>
             );
           })}
+        </div>
+      </div>
+    );
+  };
+
+  const renderWeaponShopContent = () => {
+    // Get items from the armor shop (which has weapons, armor, and units via refreshWeaponShop)
+    const allItems = getShopItems(SHOP_IDS.ARMOR_SHOP) as EquipmentShopItem[];
+    const meseta = gameState?.character?.meseta ?? 0;
+
+    // Filter items by current tab
+    const filteredItems = allItems.filter(item => {
+      if (weaponShopTab === 'weapons') return item.category === 'weapon';
+      if (weaponShopTab === 'armor') return item.category === 'armor';
+      if (weaponShopTab === 'units') return item.category === 'unit';
+      return false;
+    });
+
+    const handleBuyEquipment = (item: EquipmentShopItem) => {
+      if (!gameState?.character) return;
+      const result = purchaseItem(SHOP_IDS.ARMOR_SHOP, item.id, 1, meseta);
+      if (result.success) {
+        executeCommand(`buy-equipment ${item.id}`);
+      } else {
+        addLog(result.message);
+      }
+    };
+
+    const formatItemName = (item: EquipmentShopItem): string => {
+      return item.name;
+    };
+
+    const formatItemStats = (item: EquipmentShopItem): string => {
+      if (item.category === 'weapon') {
+        const elemStr = item.element && item.element !== 'None'
+          ? ` | ${item.element} ${item.elementPercent}%`
+          : '';
+        return `ATK: ${item.attack}${elemStr}`;
+      }
+      if (item.category === 'armor') {
+        const slotStr = item.slots && item.slots > 0 ? ` | ${item.slots} slots` : '';
+        return `DEF: ${item.defense} | EVA: ${item.evasion}${slotStr}`;
+      }
+      return item.description;
+    };
+
+    const getRarityColor = (rarity: number): string => {
+      switch (rarity) {
+        case 1: return '#ccc';
+        case 2: return '#4ade80';
+        case 3: return '#60a5fa';
+        case 4: return '#a78bfa';
+        default: return '#ccc';
+      }
+    };
+
+    return (
+      <div style={styles.locationContent}>
+        <div style={styles.locationHeader}>
+          <h2 style={styles.locationTitle}>WEAPON SHOP</h2>
+          <div style={styles.shopHeaderActions}>
+            <button
+              style={styles.refreshBtn}
+              onClick={() => { refreshWeaponShop(); refreshState(); addLog('Shop inventory refreshed!'); }}
+              data-testid="refresh-shop"
+            >
+              Refresh
+            </button>
+            <button style={styles.backBtn} onClick={() => executeCommand('goto city')}>← Back</button>
+          </div>
+        </div>
+
+        <div style={styles.tabs}>
+          <button
+            style={weaponShopTab === 'weapons' ? styles.tabActive : styles.tab}
+            onClick={() => setWeaponShopTab('weapons')}
+            data-testid="tab-weapons"
+          >
+            Weapons
+          </button>
+          <button
+            style={weaponShopTab === 'armor' ? styles.tabActive : styles.tab}
+            onClick={() => setWeaponShopTab('armor')}
+            data-testid="tab-armor"
+          >
+            Armor
+          </button>
+          <button
+            style={weaponShopTab === 'units' ? styles.tabActive : styles.tab}
+            onClick={() => setWeaponShopTab('units')}
+            data-testid="tab-units"
+          >
+            Units
+          </button>
+        </div>
+
+        <div style={styles.equipmentList}>
+          {filteredItems.map(item => {
+            const affordable = canAfford(meseta, item);
+            const rarityColor = getRarityColor(item.rarity);
+
+            return (
+              <div key={item.id} style={styles.equipmentRow} data-testid={`equip-item-${item.id}`}>
+                <div style={styles.equipmentInfo}>
+                  <span style={{ ...styles.equipmentName, color: rarityColor }}>
+                    {formatItemName(item)}
+                  </span>
+                  <span style={styles.equipmentStats}>
+                    {formatItemStats(item)}
+                  </span>
+                  {item.requiredLevel && (
+                    <span style={styles.equipmentLevel}>Lv.{item.requiredLevel}</span>
+                  )}
+                </div>
+                <span style={styles.itemPrice}>{formatPrice(item.price)}</span>
+                <button
+                  style={affordable ? styles.buyBtn : styles.buyBtnDisabled}
+                  onClick={() => handleBuyEquipment(item)}
+                  disabled={!affordable}
+                  data-testid={`buy-${item.id}`}
+                >
+                  {affordable ? 'Buy' : 'No $'}
+                </button>
+              </div>
+            );
+          })}
+          {filteredItems.length === 0 && (
+            <p style={styles.emptyMessage}>No items available in this category.</p>
+          )}
         </div>
       </div>
     );
@@ -952,6 +1115,7 @@ export default function GamePlayWeb() {
     switch (gameState.location) {
       case 'city': return renderCityContent();
       case 'shop': return renderShopContent();
+      case 'weapon-shop': return renderWeaponShopContent();
       case 'teleporter': return renderTeleporterContent();
       case 'guild': return renderGuildContent();
       case 'field': return renderFieldContent();
@@ -1222,6 +1386,22 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '12px',
     cursor: 'pointer',
     textAlign: 'left',
+  },
+  cityButtonDisabled: {
+    padding: '12px 16px',
+    background: '#1a1a2e',
+    border: '1px solid #444',
+    color: '#555',
+    fontFamily: 'monospace',
+    fontSize: '12px',
+    cursor: 'not-allowed',
+    textAlign: 'left',
+  },
+  citySectionTitle: {
+    margin: '20px 0 8px 0',
+    fontSize: '12px',
+    color: '#888',
+    letterSpacing: '1px',
   },
   tabs: {
     display: 'flex',
@@ -1870,5 +2050,56 @@ const styles: Record<string, React.CSSProperties> = {
     fontStyle: 'italic',
     marginTop: '16px',
     textAlign: 'center' as const,
+  },
+  // Weapon shop styles
+  shopHeaderActions: {
+    display: 'flex',
+    gap: '8px',
+  },
+  refreshBtn: {
+    padding: '4px 12px',
+    background: 'transparent',
+    border: '1px solid #fcd34d',
+    color: '#fcd34d',
+    fontFamily: 'monospace',
+    cursor: 'pointer',
+  },
+  equipmentList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+  },
+  equipmentRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '10px 12px',
+    background: '#252540',
+    borderRadius: '4px',
+    border: '1px solid #333',
+  },
+  equipmentInfo: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+  },
+  equipmentName: {
+    fontSize: '12px',
+    fontWeight: 'bold',
+  },
+  equipmentStats: {
+    fontSize: '10px',
+    color: '#888',
+  },
+  equipmentLevel: {
+    fontSize: '9px',
+    color: '#e94560',
+  },
+  emptyMessage: {
+    color: '#555',
+    fontSize: '12px',
+    textAlign: 'center' as const,
+    padding: '16px',
   },
 };

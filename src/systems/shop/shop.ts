@@ -10,8 +10,15 @@ import type {
   SellResult,
   ShopCategory,
   ShopId,
+  EquipmentShopItem,
 } from './types';
 import { SELL_MULTIPLIER, SHOP_IDS } from './types';
+
+// Elements available for weapons
+const WEAPON_ELEMENTS = ['Fire', 'Ice', 'Thunder', 'Light', 'Dark', 'None'];
+
+// Seed for consistent randomization per session
+let shopSeed = Date.now();
 
 // Shop inventories (would be loaded from JSON in production)
 const shopInventories = new Map<string, ShopInventory>();
@@ -232,6 +239,153 @@ export function clearShopInventories(): void {
 }
 
 /**
+ * Simple seeded random number generator
+ */
+function seededRandom(seed: number): () => number {
+  let state = seed;
+  return () => {
+    state = (state * 1103515245 + 12345) & 0x7fffffff;
+    return state / 0x7fffffff;
+  };
+}
+
+/**
+ * Roll for armor slots (0 common, 1 rare, 2 very rare, 3 extremely rare)
+ */
+function rollArmorSlots(random: () => number): number {
+  const roll = random();
+  if (roll < 0.70) return 0;      // 70% chance: 0 slots
+  if (roll < 0.90) return 1;      // 20% chance: 1 slot
+  if (roll < 0.98) return 2;      // 8% chance: 2 slots
+  return 3;                        // 2% chance: 3 slots
+}
+
+/**
+ * Roll for weapon element
+ */
+function rollWeaponElement(random: () => number): { element: string; percent: number } {
+  const roll = random();
+  if (roll < 0.40) {
+    return { element: 'None', percent: 0 };
+  }
+  const element = WEAPON_ELEMENTS[Math.floor(random() * (WEAPON_ELEMENTS.length - 1))];
+  const percent = Math.floor(random() * 15) + 5; // 5-20%
+  return { element, percent };
+}
+
+/**
+ * Generate randomized weapon shop inventory
+ */
+function generateWeaponShopInventory(): EquipmentShopItem[] {
+  const random = seededRandom(shopSeed);
+  const items: EquipmentShopItem[] = [];
+
+  // Base weapons with randomized elements
+  const baseWeapons = [
+    { id: 'saber', name: 'Saber', desc: 'Basic sword', price: 500, rarity: 1, attack: 30 },
+    { id: 'brand', name: 'Brand', desc: 'Stronger sword', price: 2000, rarity: 2, attack: 55, level: 10 },
+    { id: 'buster', name: 'Buster', desc: 'Heavy sword', price: 5000, rarity: 3, attack: 85, level: 20 },
+    { id: 'dagger', name: 'Dagger', desc: 'Quick blade', price: 400, rarity: 1, attack: 22 },
+    { id: 'handgun', name: 'Handgun', desc: 'Basic ranged', price: 600, rarity: 1, attack: 25 },
+    { id: 'autogun', name: 'Autogun', desc: 'Automatic ranged', price: 2500, rarity: 2, attack: 50, level: 10 },
+    { id: 'cane', name: 'Cane', desc: 'Basic rod', price: 400, rarity: 1, attack: 18 },
+    { id: 'rod', name: 'Rod', desc: 'Better rod', price: 1800, rarity: 2, attack: 40, level: 10 },
+  ];
+
+  for (const base of baseWeapons) {
+    const { element, percent } = rollWeaponElement(random);
+    const elementSuffix = element !== 'None' ? ` [${element} ${percent}%]` : '';
+    const priceBonus = element !== 'None' ? Math.floor(base.price * (percent / 100)) : 0;
+
+    items.push({
+      id: `${base.id}-${shopSeed}`,
+      name: `${base.name}${elementSuffix}`,
+      description: base.desc,
+      price: base.price + priceBonus,
+      sellPrice: Math.floor((base.price + priceBonus) * 0.25),
+      rarity: base.rarity,
+      category: 'weapon',
+      requiredLevel: base.level,
+      element: element,
+      elementPercent: percent,
+      attack: base.attack,
+    });
+  }
+
+  return items;
+}
+
+/**
+ * Generate randomized armor shop inventory
+ */
+function generateArmorShopInventory(): EquipmentShopItem[] {
+  const random = seededRandom(shopSeed + 1000);
+  const items: EquipmentShopItem[] = [];
+
+  const baseArmors = [
+    { id: 'frame', name: 'Frame', desc: 'Basic armor', price: 400, rarity: 1, def: 10, eva: 5 },
+    { id: 'armor', name: 'Armor', desc: 'Standard armor', price: 1200, rarity: 2, def: 25, eva: 10, level: 5 },
+    { id: 'gear', name: 'Gear', desc: 'Sturdy armor', price: 3000, rarity: 2, def: 45, eva: 15, level: 10 },
+    { id: 'barrier', name: 'Barrier', desc: 'Energy shield', price: 600, rarity: 1, def: 5, eva: 15 },
+    { id: 'shield', name: 'Shield', desc: 'Protective shield', price: 1500, rarity: 2, def: 15, eva: 20, level: 5 },
+  ];
+
+  for (const base of baseArmors) {
+    const slots = rollArmorSlots(random);
+    const slotSuffix = slots > 0 ? ` [${slots}S]` : '';
+    const priceBonus = slots * 500; // Each slot adds 500 meseta
+
+    items.push({
+      id: `${base.id}-${shopSeed}`,
+      name: `${base.name}${slotSuffix}`,
+      description: base.desc,
+      price: base.price + priceBonus,
+      sellPrice: Math.floor((base.price + priceBonus) * 0.25),
+      rarity: base.rarity,
+      category: 'armor',
+      requiredLevel: base.level,
+      slots: slots,
+      defense: base.def,
+      evasion: base.eva,
+    });
+  }
+
+  return items;
+}
+
+/**
+ * Generate unit shop inventory (weak units only)
+ */
+function generateUnitShopInventory(): EquipmentShopItem[] {
+  return [
+    { id: 'knight-power', name: 'Knight/Power', description: 'ATK +5', price: 800, sellPrice: 200, rarity: 1, category: 'unit' },
+    { id: 'knight-guard', name: 'Knight/Guard', description: 'DEF +5', price: 800, sellPrice: 200, rarity: 1, category: 'unit' },
+    { id: 'knight-hp', name: 'Knight/HP', description: 'Max HP +20', price: 600, sellPrice: 150, rarity: 1, category: 'unit' },
+    { id: 'knight-pp', name: 'Knight/PP', description: 'Max PP +5', price: 600, sellPrice: 150, rarity: 1, category: 'unit' },
+    { id: 'knight-mind', name: 'Knight/Mind', description: 'TEC +5', price: 700, sellPrice: 175, rarity: 1, category: 'unit' },
+    { id: 'resist-fire', name: 'Resist/Fire', description: 'Fire resist +5', price: 500, sellPrice: 125, rarity: 1, category: 'unit' },
+    { id: 'resist-ice', name: 'Resist/Ice', description: 'Ice resist +5', price: 500, sellPrice: 125, rarity: 1, category: 'unit' },
+    { id: 'resist-thunder', name: 'Resist/Thunder', description: 'Thunder resist +5', price: 500, sellPrice: 125, rarity: 1, category: 'unit' },
+  ];
+}
+
+/**
+ * Refresh weapon shop with new random items
+ */
+export function refreshWeaponShop(): void {
+  shopSeed = Date.now();
+
+  registerShopInventory({
+    shopId: SHOP_IDS.ARMOR_SHOP,
+    items: [
+      ...generateWeaponShopInventory(),
+      ...generateArmorShopInventory(),
+      ...generateUnitShopInventory(),
+    ],
+  });
+}
+
+/**
  * Initialize default shops
  */
 export function initializeDefaultShops(): void {
@@ -251,20 +405,8 @@ export function initializeDefaultShops(): void {
     ],
   });
 
-  // Weapon Shop
-  registerShopInventory({
-    shopId: SHOP_IDS.WEAPON_SHOP,
-    items: [
-      { id: 'saber', name: 'Saber', description: 'Basic sword', price: 500, sellPrice: 125, rarity: 1, category: 'weapon' },
-      { id: 'brand', name: 'Brand', description: 'Stronger sword', price: 2000, sellPrice: 500, rarity: 2, category: 'weapon', requiredLevel: 10 },
-      { id: 'buster', name: 'Buster', description: 'Heavy sword', price: 5000, sellPrice: 1250, rarity: 3, category: 'weapon', requiredLevel: 20 },
-      { id: 'handgun', name: 'Handgun', description: 'Basic ranged weapon', price: 600, sellPrice: 150, rarity: 1, category: 'weapon' },
-      { id: 'autogun', name: 'Autogun', description: 'Automatic ranged', price: 2500, sellPrice: 625, rarity: 2, category: 'weapon', requiredLevel: 10 },
-      { id: 'lockgun', name: 'Lockgun', description: 'Homing ranged', price: 6000, sellPrice: 1500, rarity: 3, category: 'weapon', requiredLevel: 20 },
-      { id: 'cane', name: 'Cane', description: 'Basic rod', price: 400, sellPrice: 100, rarity: 1, category: 'weapon' },
-      { id: 'rod', name: 'Rod', description: 'Better rod', price: 1800, sellPrice: 450, rarity: 2, category: 'weapon', requiredLevel: 10 },
-    ],
-  });
+  // Weapon/Armor Shop (randomized inventory)
+  refreshWeaponShop();
 }
 
 export { SHOP_IDS };
