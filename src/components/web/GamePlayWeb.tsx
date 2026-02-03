@@ -901,28 +901,58 @@ export default function GamePlayWeb() {
     );
   };
 
-  const renderInventoryContent = () => (
-    <div style={styles.locationContent}>
-      <div style={styles.locationHeader}>
-        <h2 style={styles.locationTitle}>INVENTORY</h2>
-        <button style={styles.backBtn} onClick={() => executeCommand('goto city')}>← Back</button>
+  const renderInventoryContent = () => {
+    const equippedWeaponId = gameState?.equipment?.weapon?.id;
+    const equippedArmorId = gameState?.equipment?.frame?.id;
+
+    return (
+      <div style={styles.locationContent}>
+        <div style={styles.locationHeader}>
+          <h2 style={styles.locationTitle}>INVENTORY ({gameState?.inventorySlots ?? 0}/{gameState?.maxInventorySlots ?? 40})</h2>
+          <button style={styles.backBtn} onClick={() => executeCommand('goto city')}>← Back</button>
+        </div>
+        <div style={styles.inventoryGrid}>
+          {gameState?.inventory && gameState.inventory.length > 0 ? (
+            gameState.inventory.map(item => {
+              const isWeapon = item.type === 'weapon';
+              const isArmor = item.type === 'armor';
+              const isEquipped = (isWeapon && item.id === equippedWeaponId) ||
+                                 (isArmor && item.id === equippedArmorId);
+              const canEquip = isWeapon || isArmor;
+              const armorSlots = isArmor && 'slots' in item ? (item as any).slots : null;
+
+              return (
+                <div key={item.id} style={styles.invCard} data-testid={`inv-item-${item.id}`}>
+                  <div style={styles.invItemName}>{item.name}</div>
+                  <div style={styles.invItemQty}>x{item.quantity}</div>
+                  {isWeapon && <div style={styles.invItemStat}>ATK: {(item as any).attack}</div>}
+                  {isArmor && (
+                    <div style={styles.invItemStat}>
+                      DEF: {(item as any).defense}
+                      {armorSlots !== null && armorSlots > 0 && <span style={styles.armorSlots}> [{armorSlots}]</span>}
+                    </div>
+                  )}
+                  {item.type === 'consumable' && <div style={styles.invItemEffect}>{(item as any).effect}</div>}
+                  {canEquip && (
+                    <button
+                      style={isEquipped ? styles.equippedBtn : styles.equipBtn}
+                      onClick={() => executeCommand(isWeapon ? `equip-weapon ${item.id}` : `equip-frame ${item.id}`)}
+                      disabled={isEquipped}
+                      data-testid={`equip-${item.id}`}
+                    >
+                      {isEquipped ? 'Equipped' : 'Equip'}
+                    </button>
+                  )}
+                </div>
+              );
+            })
+          ) : (
+            <div style={styles.emptyText}>No items</div>
+          )}
+        </div>
       </div>
-      <div style={styles.inventoryGrid}>
-        {gameState?.inventory && gameState.inventory.length > 0 ? (
-          gameState.inventory.map(item => (
-            <div key={item.id} style={styles.invCard} data-testid={`inv-item-${item.id}`}>
-              <div style={styles.invItemName}>{item.name}</div>
-              <div style={styles.invItemQty}>x{item.quantity}</div>
-              {item.type === 'weapon' && <div style={styles.invItemStat}>ATK: {item.attack}</div>}
-              {item.type === 'consumable' && <div style={styles.invItemEffect}>{item.effect}</div>}
-            </div>
-          ))
-        ) : (
-          <div style={styles.emptyText}>No items</div>
-        )}
-      </div>
-    </div>
-  );
+    );
+  };
 
   // Class table organized by Race (rows) and Class/Gender (columns)
   // Format: { race: { classType: { male: classId | null, female: classId | null } } }
@@ -1571,6 +1601,28 @@ const styles: Record<string, React.CSSProperties> = {
   invItemQty: { color: '#888', fontSize: '10px' },
   invItemStat: { color: '#e94560', fontSize: '10px' },
   invItemEffect: { color: '#4ade80', fontSize: '10px' },
+  equipBtn: {
+    marginTop: '6px',
+    padding: '4px 8px',
+    background: '#2d4a6a',
+    border: '1px solid #6bf',
+    color: '#6bf',
+    fontFamily: 'monospace',
+    fontSize: '10px',
+    cursor: 'pointer',
+    width: '100%',
+  },
+  equippedBtn: {
+    marginTop: '6px',
+    padding: '4px 8px',
+    background: '#1a3a2a',
+    border: '1px solid #4ade80',
+    color: '#4ade80',
+    fontFamily: 'monospace',
+    fontSize: '10px',
+    cursor: 'default',
+    width: '100%',
+  },
   createMenu: {
     display: 'flex',
     flexWrap: 'wrap',
