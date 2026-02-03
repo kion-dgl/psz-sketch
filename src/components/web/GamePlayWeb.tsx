@@ -623,13 +623,15 @@ export default function GamePlayWeb() {
         {!hasEnemies && !hasDrops && combat && (
           gameState?.isAtFinalStage ? (
             <div style={styles.fieldComplete}>
-              <p style={styles.fieldCompleteText}>Field Complete!</p>
+              <p style={styles.fieldCompleteText}>
+                {gameState?.sessionType === 'mission' ? 'Mission Complete!' : 'Field Complete!'}
+              </p>
               <button
                 style={styles.returnBtn}
                 onClick={() => executeCommand('complete-field')}
                 data-testid="complete-field"
               >
-                Return to City
+                {gameState?.sessionType === 'mission' ? 'Return to Guild' : 'Return to City'}
               </button>
             </div>
           ) : (

@@ -90,6 +90,7 @@ export interface GameState {
   currentStage?: CurrentStageInfo;
   currentWave?: number;
   totalWaves?: number;
+  sessionType?: 'field' | 'mission' | null;
 }
 
 export interface CommandResult {

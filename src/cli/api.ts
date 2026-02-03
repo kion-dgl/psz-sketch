@@ -307,6 +307,7 @@ export function getState(): GameState {
     currentStage: currentStageInfo,
     currentWave,
     totalWaves,
+    sessionType: session.activeType,
   };
 }
 
@@ -2590,7 +2591,7 @@ function executeAttack(targetIndex: number): CommandResult {
           const spawnResult = spawnWaveEnemies();
           lines.push(spawnResult.message);
         } else {
-          lines.push('\nAll waves cleared! Use next-stage or complete-field.');
+          lines.push('\nAll waves cleared! Use next-stage to continue or complete-field to finish.');
         }
       }
     } else {
@@ -2819,6 +2820,10 @@ function executeCompleteField(): CommandResult {
     return { success: false, message: 'No active session.' };
   }
 
+  // Check if this is a mission or field
+  const session = getSessionState();
+  const isMission = session.activeType === 'mission';
+
   // Complete the session
   const result = completeSession(true);
   if (!result) {
@@ -2827,13 +2832,22 @@ function executeCompleteField(): CommandResult {
 
   currentLocation = 'city';
   currentEnemies = [];
-  combatLog.push('Field completed!');
 
-  return {
-    success: true,
-    message: `Field complete! Visit the guild to claim rewards.\nGrade: ${result.grade}, EXP: ${result.expGained}, Meseta: ${result.mesetaGained}`,
-    data: result,
-  };
+  if (isMission) {
+    combatLog.push('Mission completed!');
+    return {
+      success: true,
+      message: `Mission complete! Return to the guild to claim rewards.\nGrade: ${result.grade}, EXP: ${result.expGained}, Meseta: ${result.mesetaGained}`,
+      data: result,
+    };
+  } else {
+    combatLog.push('Field completed!');
+    return {
+      success: true,
+      message: `Field complete! Rewards collected.\nGrade: ${result.grade}, EXP: ${result.expGained}, Meseta: ${result.mesetaGained}`,
+      data: result,
+    };
+  }
 }
 
 function executeCombatLog(): CommandResult {
@@ -3197,7 +3211,7 @@ function executeCastTechnique(techId: string, targetIndex?: number): CommandResu
           const spawnResult = spawnWaveEnemies();
           lines.push(spawnResult.message);
         } else {
-          lines.push('\nAll waves cleared! Use next-stage or complete-field.');
+          lines.push('\nAll waves cleared! Use next-stage to continue or complete-field to finish.');
         }
       }
     } else {
