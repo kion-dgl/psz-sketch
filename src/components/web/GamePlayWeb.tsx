@@ -3,7 +3,7 @@
  * Center content swaps based on location, stats/inventory always visible
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { execute, resetState, getState, getAvailableCommands } from '../../cli/api';
 import type { DetailedItem } from '../../cli/types';
 import {
@@ -25,6 +25,13 @@ import type { Difficulty } from '../../systems/mission/types';
 import { meetsLevelForDifficulty } from '../../systems/mission';
 import { VALID_CLASS_IDS, MAX_SLOTS } from '../../systems/character/types';
 import type { Character, CharacterSlots } from '../../systems/character/types';
+import {
+  loadGameData,
+  saveGameData,
+  resetAllGameData,
+  type PersistedCharacterData,
+  type PersistedGameData,
+} from '../../systems/persistence';
 
 export default function GamePlayWeb() {
   const [gameState, setGameState] = useState<ReturnType<typeof getState> | null>(null);
@@ -37,51 +44,146 @@ export default function GamePlayWeb() {
   const [characterSlots, setCharacterSlots] = useState<CharacterSlots>([null, null, null, null]);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [resetConfirm, setResetConfirm] = useState(false);
+  const [activeSlot, setActiveSlot] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Initialize game systems and load persisted data
   useEffect(() => {
-    initializeDefaultShops();
-    initializeDefaultFields();
-    resetState();
-    loadCharacterSlots();
-    refreshState();
-    addLog('Welcome! Select or create a character to begin.');
+    const initGame = async () => {
+      initializeDefaultShops();
+      initializeDefaultFields();
+      resetState();
+
+      // Load persisted game data from IndexedDB
+      const gameData = await loadGameData();
+
+      // Convert persisted data to character slots
+      const slots: CharacterSlots = [null, null, null, null];
+      for (let i = 0; i < 4; i++) {
+        const charData = gameData.characters[i];
+        if (charData) {
+          slots[i] = charData.character;
+        }
+      }
+      setCharacterSlots(slots);
+
+      // If there was a last active slot with a character, auto-select it
+      if (gameData.lastActiveSlot !== null && slots[gameData.lastActiveSlot]) {
+        const char = slots[gameData.lastActiveSlot]!;
+        const charData = gameData.characters[gameData.lastActiveSlot];
+        if (charData) {
+          // Load the full character state including inventory
+          loadCharacterWithData(char, gameData.lastActiveSlot, charData);
+        }
+      }
+
+      refreshState();
+      setIsLoading(false);
+      addLog('Welcome! Select or create a character to begin.');
+    };
+
+    initGame();
   }, []);
 
-  const loadCharacterSlots = () => {
-    const stored = localStorage.getItem('characters');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        const slots: CharacterSlots = [null, null, null, null];
-        for (let i = 0; i < Math.min(parsed.length, MAX_SLOTS); i++) {
-          slots[i] = parsed[i];
-        }
-        setCharacterSlots(slots);
-      } catch {
-        setCharacterSlots([null, null, null, null]);
+  // Auto-save game state when it changes (debounced)
+  useEffect(() => {
+    if (isLoading || activeSlot === null || !gameState?.character) return;
+
+    // Debounce saves to avoid too many writes
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = setTimeout(() => {
+      saveCurrentCharacter();
+    }, 1000);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [gameState, activeSlot, isLoading]);
+
+  const loadCharacterWithData = (character: Character, slot: number, data: PersistedCharacterData) => {
+    // Load character into game state
+    const charJson = JSON.stringify(character);
+    execute(`load-character ${charJson}`);
+
+    // Restore inventory
+    if (data.inventory) {
+      for (const entry of data.inventory) {
+        execute(`add-item ${JSON.stringify(entry.item)} ${entry.quantity}`);
       }
     }
-  };
 
-  const saveCharacterSlots = (slots: CharacterSlots) => {
-    localStorage.setItem('characters', JSON.stringify(slots));
-    setCharacterSlots(slots);
-  };
-
-  const handleSelectCharacter = (character: Character, slot: number) => {
-    // Load this character into the game state via CLI
-    const charJson = JSON.stringify(character);
-    const result = execute(`load-character ${charJson}`);
-    if (result.success) {
-      refreshState();
-      addLog(`Selected ${character.character_name} (${character.class_id})`);
-    } else {
-      addLog(`Failed to load character: ${result.message}`);
+    // Restore equipment
+    if (data.equipment?.weapon) {
+      execute(`equip-weapon ${data.equipment.weapon.id}`);
     }
-    setSelectedSlot(null);
+    if (data.equipment?.frame) {
+      execute(`equip-frame ${data.equipment.frame.id}`);
+    }
+
+    setActiveSlot(slot);
   };
 
-  const handleCreateCharacter = (classId: string) => {
+  const saveCurrentCharacter = async () => {
+    if (activeSlot === null || !gameState?.character) return;
+
+    const gameData = await loadGameData();
+
+    // Build persisted character data from current state
+    const charData: PersistedCharacterData = {
+      character: gameState.character,
+      inventory: gameState.inventory?.map(item => ({
+        item: item as any, // Full item data
+        quantity: item.quantity,
+      })) || [],
+      equipment: {
+        weapon: (gameState.equipment?.weapon as any) || null,
+        frame: (gameState.equipment?.frame as any) || null,
+      },
+      completedMissions: [], // TODO: track from mission system
+      completedFields: [], // TODO: track from field system
+    };
+
+    gameData.characters[activeSlot] = charData;
+    gameData.lastActiveSlot = activeSlot;
+    await saveGameData(gameData);
+  };
+
+  const handleSelectCharacter = async (character: Character, slot: number) => {
+    // Save current character before switching
+    if (activeSlot !== null) {
+      await saveCurrentCharacter();
+    }
+
+    // Load persisted data for this character
+    const gameData = await loadGameData();
+    const charData = gameData.characters[slot];
+
+    if (charData) {
+      loadCharacterWithData(character, slot, charData);
+    } else {
+      // No persisted data, just load character
+      const charJson = JSON.stringify(character);
+      execute(`load-character ${charJson}`);
+      setActiveSlot(slot);
+    }
+
+    refreshState();
+    addLog(`Selected ${character.character_name} (${character.class_id})`);
+    setSelectedSlot(null);
+
+    // Update last active slot
+    gameData.lastActiveSlot = slot;
+    await saveGameData(gameData);
+  };
+
+  const handleCreateCharacter = async (classId: string) => {
     if (selectedSlot === null) return;
 
     const result = executeCommand(`create-character ${classId} Hero`);
@@ -90,30 +192,74 @@ export default function GamePlayWeb() {
       const newState = getState();
       if (newState.character) {
         const newSlots = [...characterSlots] as CharacterSlots;
-        newSlots[selectedSlot] = { ...newState.character, slot: selectedSlot };
-        saveCharacterSlots(newSlots);
+        const newChar = { ...newState.character, slot: selectedSlot };
+        newSlots[selectedSlot] = newChar;
+        setCharacterSlots(newSlots);
+        setActiveSlot(selectedSlot);
+
+        // Save to IndexedDB
+        const gameData = await loadGameData();
+        gameData.characters[selectedSlot] = {
+          character: newChar,
+          inventory: newState.inventory?.map(item => ({
+            item: item as any,
+            quantity: item.quantity,
+          })) || [],
+          equipment: {
+            weapon: (newState.equipment?.weapon as any) || null,
+            frame: (newState.equipment?.frame as any) || null,
+          },
+          completedMissions: [],
+          completedFields: [],
+        };
+        gameData.lastActiveSlot = selectedSlot;
+        await saveGameData(gameData);
+
         addLog(`Created ${newState.character.character_name} in slot ${selectedSlot + 1}`);
       }
     }
     setSelectedSlot(null);
   };
 
-  const handleDeleteCharacter = () => {
+  const handleDeleteCharacter = async () => {
     if (deleteConfirm === null) return;
 
     const charToDelete = characterSlots[deleteConfirm];
     const newSlots = [...characterSlots] as CharacterSlots;
     newSlots[deleteConfirm] = null;
-    saveCharacterSlots(newSlots);
+    setCharacterSlots(newSlots);
+
+    // Update IndexedDB
+    const gameData = await loadGameData();
+    gameData.characters[deleteConfirm] = null;
+    if (gameData.lastActiveSlot === deleteConfirm) {
+      gameData.lastActiveSlot = null;
+    }
+    await saveGameData(gameData);
 
     // If this was the active character, reset game state
     if (gameState?.character?.character_id === charToDelete?.character_id) {
       resetState();
+      setActiveSlot(null);
       refreshState();
     }
 
     addLog(`Deleted character from slot ${deleteConfirm + 1}`);
     setDeleteConfirm(null);
+  };
+
+  const handleResetAll = async () => {
+    // Reset all persisted data
+    await resetAllGameData();
+
+    // Reset in-memory state
+    resetState();
+    setCharacterSlots([null, null, null, null]);
+    setActiveSlot(null);
+    setResetConfirm(false);
+    refreshState();
+
+    addLog('All game data has been reset.');
   };
 
   const refreshState = useCallback(() => {
@@ -598,6 +744,17 @@ export default function GamePlayWeb() {
         ))}
       </div>
 
+      {/* Reset All Button */}
+      <div style={styles.resetSection}>
+        <button
+          style={styles.resetAllBtn}
+          onClick={() => setResetConfirm(true)}
+          data-testid="reset-all-btn"
+        >
+          Reset All Data
+        </button>
+      </div>
+
       {/* Delete Confirmation Modal */}
       {deleteConfirm !== null && (
         <div style={styles.modal}>
@@ -617,6 +774,33 @@ export default function GamePlayWeb() {
                 style={styles.cancelBtn}
                 onClick={() => setDeleteConfirm(null)}
                 data-testid="cancel-delete"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset All Confirmation Modal */}
+      {resetConfirm && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <p style={styles.modalText}>
+              Reset ALL game data? This will delete all characters and cannot be undone.
+            </p>
+            <div style={styles.modalActions}>
+              <button
+                style={styles.confirmDeleteBtn}
+                onClick={handleResetAll}
+                data-testid="confirm-reset"
+              >
+                Yes, Reset Everything
+              </button>
+              <button
+                style={styles.cancelBtn}
+                onClick={() => setResetConfirm(false)}
+                data-testid="cancel-reset"
               >
                 Cancel
               </button>
@@ -1160,6 +1344,22 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: 'monospace',
     cursor: 'pointer',
     borderRadius: '2px',
+  },
+  resetSection: {
+    marginTop: '24px',
+    paddingTop: '16px',
+    borderTop: '1px solid #333',
+    textAlign: 'center' as const,
+  },
+  resetAllBtn: {
+    padding: '8px 16px',
+    background: 'transparent',
+    border: '1px solid #666',
+    color: '#666',
+    fontFamily: 'monospace',
+    cursor: 'pointer',
+    borderRadius: '2px',
+    fontSize: '11px',
   },
   classGroups: {
     display: 'flex',
