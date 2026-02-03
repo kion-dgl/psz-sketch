@@ -691,12 +691,28 @@ export default function GamePlayWeb() {
     </div>
   );
 
-  // Group classes by race for display
-  const CLASS_GROUPS = {
-    Human: ['HUmar', 'HUmarl', 'RAmar', 'RAmarl', 'FOmar', 'FOmarl'],
-    Newman: ['HUnewm', 'HUnewearl', 'FOnewm', 'FOnewearl'],
-    Cast: ['HUcast', 'HUcaseal', 'RAcast', 'RAcaseal'],
+  // Class table organized by Race (rows) and Class/Gender (columns)
+  // Format: { race: { classType: { male: classId | null, female: classId | null } } }
+  const CLASS_TABLE: Record<string, Record<string, { male: string | null; female: string | null }>> = {
+    Human: {
+      Hunter: { male: 'HUmar', female: 'HUmarl' },
+      Ranger: { male: 'RAmar', female: 'RAmarl' },
+      Force: { male: 'FOmar', female: 'FOmarl' },
+    },
+    Newman: {
+      Hunter: { male: 'HUnewm', female: 'HUnewearl' },
+      Ranger: { male: null, female: null },
+      Force: { male: 'FOnewm', female: 'FOnewearl' },
+    },
+    Cast: {
+      Hunter: { male: 'HUcast', female: 'HUcaseal' },
+      Ranger: { male: 'RAcast', female: 'RAcaseal' },
+      Force: { male: null, female: null },
+    },
   };
+
+  const CLASS_TYPES = ['Hunter', 'Ranger', 'Force'];
+  const RACES = ['Human', 'Newman', 'Cast'];
 
   const renderCharacterSlots = () => (
     <div style={styles.locationContent}>
@@ -817,25 +833,67 @@ export default function GamePlayWeb() {
         <h2 style={styles.locationTitle}>SELECT CLASS - Slot {(selectedSlot ?? 0) + 1}</h2>
         <button style={styles.backBtn} onClick={() => setSelectedSlot(null)}>← Back</button>
       </div>
-      <div style={styles.classGroups}>
-        {Object.entries(CLASS_GROUPS).map(([race, classes]) => (
-          <div key={race} style={styles.classGroup}>
-            <h3 style={styles.raceName}>{race}</h3>
-            <div style={styles.createMenu}>
-              {classes.map(classId => (
-                <button
-                  key={classId}
-                  style={styles.classBtn}
-                  onClick={() => handleCreateCharacter(classId)}
-                  data-testid={`create-${classId}`}
-                >
-                  {classId}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+      <table style={styles.classTable}>
+        <thead>
+          <tr>
+            <th style={styles.classTableHeader}></th>
+            {CLASS_TYPES.map(classType => (
+              <th key={classType} colSpan={2} style={styles.classTypeHeader}>
+                {classType}
+              </th>
+            ))}
+          </tr>
+          <tr>
+            <th style={styles.classTableHeader}></th>
+            {CLASS_TYPES.map(classType => (
+              <>
+                <th key={`${classType}-m`} style={styles.genderHeader}>M</th>
+                <th key={`${classType}-f`} style={styles.genderHeader}>F</th>
+              </>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {RACES.map(race => (
+            <tr key={race}>
+              <td style={styles.raceCell}>{race}</td>
+              {CLASS_TYPES.map(classType => {
+                const classes = CLASS_TABLE[race][classType];
+                return (
+                  <>
+                    <td key={`${race}-${classType}-m`} style={styles.classCell}>
+                      {classes.male ? (
+                        <button
+                          style={styles.classBtn}
+                          onClick={() => handleCreateCharacter(classes.male!)}
+                          data-testid={`create-${classes.male}`}
+                        >
+                          {classes.male}
+                        </button>
+                      ) : (
+                        <span style={styles.noClass}>-</span>
+                      )}
+                    </td>
+                    <td key={`${race}-${classType}-f`} style={styles.classCell}>
+                      {classes.female ? (
+                        <button
+                          style={styles.classBtn}
+                          onClick={() => handleCreateCharacter(classes.female!)}
+                          data-testid={`create-${classes.female}`}
+                        >
+                          {classes.female}
+                        </button>
+                      ) : (
+                        <span style={styles.noClass}>-</span>
+                      )}
+                    </td>
+                  </>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 
@@ -1361,19 +1419,48 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '2px',
     fontSize: '11px',
   },
-  classGroups: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
+  classTable: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    marginTop: '16px',
   },
-  classGroup: {
-    marginBottom: '8px',
+  classTableHeader: {
+    padding: '8px',
+    textAlign: 'left' as const,
+    color: '#888',
+    fontSize: '11px',
+    borderBottom: '1px solid #333',
   },
-  raceName: {
-    margin: '0 0 8px 0',
-    fontSize: '12px',
+  classTypeHeader: {
+    padding: '8px',
+    textAlign: 'center' as const,
     color: '#e94560',
+    fontSize: '12px',
     letterSpacing: '1px',
+    borderBottom: '1px solid #333',
+  },
+  genderHeader: {
+    padding: '4px 8px',
+    textAlign: 'center' as const,
+    color: '#666',
+    fontSize: '10px',
+    borderBottom: '1px solid #333',
+  },
+  raceCell: {
+    padding: '12px 8px',
+    color: '#4ade80',
+    fontSize: '12px',
+    fontWeight: 'bold' as const,
+    borderBottom: '1px solid #222',
+  },
+  classCell: {
+    padding: '8px',
+    textAlign: 'center' as const,
+    borderBottom: '1px solid #222',
+  },
+  noClass: {
+    color: '#444',
+    fontSize: '14px',
   },
   commandBar: {
     display: 'flex',
