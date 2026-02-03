@@ -930,13 +930,30 @@ export default function GamePlayWeb() {
         <span style={styles.location} data-testid="current-location">
           {gameState?.location?.toUpperCase() || 'TITLE'}
         </span>
-        <button
-          style={styles.resetBtn}
-          onClick={() => { resetState(); refreshState(); setLogs([]); addLog('Game reset.'); }}
-          data-testid="reset-game"
-        >
-          Reset
-        </button>
+        <div style={styles.headerButtons}>
+          {gameState?.character && (
+            <button
+              style={styles.switchCharBtn}
+              onClick={async () => {
+                await saveCurrentCharacter();
+                resetState();
+                setActiveSlot(null);
+                refreshState();
+                addLog('Returned to character select.');
+              }}
+              data-testid="switch-character"
+            >
+              Switch
+            </button>
+          )}
+          <button
+            style={styles.resetBtn}
+            onClick={() => { resetState(); refreshState(); setLogs([]); addLog('Game reset.'); }}
+            data-testid="reset-game"
+          >
+            Reset
+          </button>
+        </div>
       </header>
 
       <div style={styles.main}>
@@ -1056,6 +1073,19 @@ const styles: Record<string, React.CSSProperties> = {
   },
   title: { color: '#4ade80', fontWeight: 'bold', fontSize: '16px' },
   location: { color: '#a78bfa', fontSize: '12px' },
+  headerButtons: {
+    display: 'flex',
+    gap: '8px',
+  },
+  switchCharBtn: {
+    padding: '4px 12px',
+    background: 'transparent',
+    border: '1px solid #4ade80',
+    color: '#4ade80',
+    fontFamily: 'monospace',
+    cursor: 'pointer',
+    fontSize: '11px',
+  },
   resetBtn: {
     padding: '4px 12px',
     background: 'transparent',
