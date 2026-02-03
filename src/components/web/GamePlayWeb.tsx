@@ -1252,7 +1252,7 @@ export default function GamePlayWeb() {
 
         {/* Right - Inventory */}
         <aside style={styles.inventoryPanel} data-testid="inventory-panel">
-          <h3 style={styles.panelTitle}>INVENTORY</h3>
+          <h3 style={styles.panelTitle}>INVENTORY ({gameState?.inventorySlots ?? 0}/{gameState?.maxInventorySlots ?? 40})</h3>
           <div style={styles.invList}>
             {gameState?.inventory && gameState.inventory.length > 0 ? (
               gameState.inventory.map(item => (
