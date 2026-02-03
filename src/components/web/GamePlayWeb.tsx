@@ -304,6 +304,23 @@ export default function GamePlayWeb() {
   };
 
   const renderGuildContent = () => {
+    // Get missions from the list-missions command
+    const missionsResult = execute('list-missions');
+    const missions = missionsResult.data as Array<{
+      id: string;
+      name: string;
+      description: string;
+      areaId: string;
+      requiredLevel: number;
+      recommendedLevel: number;
+      rewards: { baseExp: number; baseMeseta: number };
+      unlocked: boolean;
+    }> || [];
+
+    const handleAcceptMission = (missionId: string) => {
+      executeCommand(`enter-mission ${missionId} normal`);
+    };
+
     return (
       <div style={styles.locationContent}>
         <div style={styles.locationHeader}>
@@ -314,39 +331,36 @@ export default function GamePlayWeb() {
         <p style={styles.locationDesc}>Accept missions for rewards.</p>
 
         <div style={styles.missionList}>
-          <div style={styles.missionItem}>
-            <div style={styles.missionInfo}>
-              <span style={styles.missionName}>Mayor's Mission</span>
-              <span style={styles.missionArea}>Gurhacia Valley</span>
+          {missions.map((mission) => (
+            <div key={mission.id} style={styles.missionItem}>
+              <div style={styles.missionInfo}>
+                <span style={mission.unlocked ? styles.missionName : styles.missionNameLocked}>
+                  {mission.name}
+                </span>
+                <span style={styles.missionArea}>Lv.{mission.recommendedLevel} - {mission.areaId}</span>
+              </div>
+              <span style={styles.missionReward}>
+                {mission.rewards.baseExp} EXP + {mission.rewards.baseMeseta} Meseta
+              </span>
+              {mission.unlocked ? (
+                <button
+                  style={styles.buyBtn}
+                  onClick={() => handleAcceptMission(mission.id)}
+                  data-testid={`accept-${mission.id}`}
+                >
+                  Accept
+                </button>
+              ) : (
+                <button style={styles.buyBtnDisabled} disabled>
+                  Locked
+                </button>
+              )}
             </div>
-            <span style={styles.missionReward}>500 Meseta + Grow Shower</span>
-            <button style={styles.buyBtn} data-testid="accept-mayors-mission">
-              Accept
-            </button>
-          </div>
-          <div style={styles.missionItem}>
-            <div style={styles.missionInfo}>
-              <span style={styles.missionName}>Get Connected</span>
-              <span style={styles.missionArea}>Gurhacia Valley</span>
-            </div>
-            <span style={styles.missionReward}>1,000 Meseta + Ace/PP</span>
-            <button style={styles.buyBtn} data-testid="accept-get-connected">
-              Accept
-            </button>
-          </div>
-          <div style={styles.missionItem}>
-            <div style={styles.missionInfo}>
-              <span style={styles.missionNameLocked}>Waltz of Rage</span>
-              <span style={styles.missionArea}>Rioh Snowfield</span>
-            </div>
-            <span style={styles.missionReward}>500 Meseta + 8-Ouncer</span>
-            <button style={styles.buyBtnDisabled} disabled>
-              Locked
-            </button>
-          </div>
+          ))}
+          {missions.length === 0 && (
+            <p style={styles.emptyMessage}>No missions available.</p>
+          )}
         </div>
-
-        <p style={styles.comingSoon}>More missions coming soon...</p>
       </div>
     );
   };

@@ -147,10 +147,12 @@ import {
 import {
   initializeDefaultMissions,
   getAvailableMissions,
+  getAllMissions,
   getMission,
   startMission,
   completeMission,
   meetsLevelForDifficulty,
+  isMissionUnlocked,
 } from '../systems/mission';
 import { applyExpGain, getLevelForExp } from '../systems/leveling';
 import { getStartingItems, STARTING_MESETA, MONOMATE, MONOFLUID, getStarterWeaponForClass, STARTER_FRAME } from '../systems/inventory/starting-items';
@@ -1272,19 +1274,25 @@ function executeListMissions(): CommandResult {
     return { success: false, message: 'No character.' };
   }
 
-  if (currentLocation !== 'missions') {
-    return { success: false, message: 'You must be at missions. Use: goto missions' };
+  if (currentLocation !== 'missions' && currentLocation !== 'guild') {
+    return { success: false, message: 'You must be at the guild. Use: goto guild' };
   }
 
-  const missions = getAvailableMissions(currentCharacter.character_id, currentCharacter.level);
-  const lines = missions.map(m =>
-    `  ${m.id.padEnd(20)} ${m.name.padEnd(25)} Lv.${m.recommendedLevel}`
-  );
+  const allMissions = getAllMissions();
+  const missionsWithStatus = allMissions.map(m => ({
+    ...m,
+    unlocked: isMissionUnlocked(m.id, currentCharacter!.character_id, currentCharacter!.level),
+  }));
+
+  const lines = missionsWithStatus.map(m => {
+    const status = m.unlocked ? ' ' : '🔒';
+    return `  ${status} ${m.id.padEnd(20)} ${m.name.padEnd(25)} Lv.${m.recommendedLevel}`;
+  });
 
   return {
     success: true,
     message: `Available missions:\n${lines.join('\n')}`,
-    data: missions,
+    data: missionsWithStatus,
   };
 }
 
