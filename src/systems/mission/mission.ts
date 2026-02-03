@@ -315,6 +315,28 @@ export function getCompletionCount(characterId: string): number {
 }
 
 /**
+ * Get all completed mission IDs for a character (for persistence)
+ */
+export function getCompletedMissions(characterId: string): string[] {
+  const completed = completedMissions.get(characterId);
+  return completed ? Array.from(completed) : [];
+}
+
+/**
+ * Restore completed missions for a character (from persistence)
+ */
+export function restoreCompletedMissions(characterId: string, missionIds: string[]): void {
+  if (!missionIds || missionIds.length === 0) return;
+  if (!completedMissions.has(characterId)) {
+    completedMissions.set(characterId, new Set());
+  }
+  const completed = completedMissions.get(characterId)!;
+  for (const id of missionIds) {
+    completed.add(id);
+  }
+}
+
+/**
  * Get recommended difficulty based on level
  */
 export function getRecommendedDifficulty(

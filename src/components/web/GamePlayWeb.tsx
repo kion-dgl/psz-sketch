@@ -23,7 +23,8 @@ import {
 } from '../../systems/field';
 import type { Field } from '../../systems/field/types';
 import type { Difficulty } from '../../systems/mission/types';
-import { meetsLevelForDifficulty } from '../../systems/mission';
+import { meetsLevelForDifficulty, getCompletedMissions, restoreCompletedMissions } from '../../systems/mission';
+import { getCompletedFields, restoreCompletedFields } from '../../systems/field';
 import { VALID_CLASS_IDS, MAX_SLOTS } from '../../systems/character/types';
 import type { Character, CharacterSlots } from '../../systems/character/types';
 import {
@@ -129,6 +130,14 @@ export default function GamePlayWeb() {
       execute(`equip-frame ${data.equipment.frame.id}`);
     }
 
+    // Restore completed missions and fields
+    if (data.completedMissions && data.completedMissions.length > 0) {
+      restoreCompletedMissions(character.character_id, data.completedMissions);
+    }
+    if (data.completedFields && data.completedFields.length > 0) {
+      restoreCompletedFields(character.character_id, data.completedFields);
+    }
+
     setActiveSlot(slot);
   };
 
@@ -148,8 +157,8 @@ export default function GamePlayWeb() {
         weapon: (gameState.equipment?.weapon as any) || null,
         frame: (gameState.equipment?.frame as any) || null,
       },
-      completedMissions: [], // TODO: track from mission system
-      completedFields: [], // TODO: track from field system
+      completedMissions: getCompletedMissions(gameState.character.character_id),
+      completedFields: getCompletedFields(gameState.character.character_id),
     };
 
     gameData.characters[activeSlot] = charData;
@@ -211,8 +220,8 @@ export default function GamePlayWeb() {
             weapon: (newState.equipment?.weapon as any) || null,
             frame: (newState.equipment?.frame as any) || null,
           },
-          completedMissions: [],
-          completedFields: [],
+          completedMissions: getCompletedMissions(newChar.character_id),
+          completedFields: getCompletedFields(newChar.character_id),
         };
         gameData.lastActiveSlot = selectedSlot;
         await saveGameData(gameData);

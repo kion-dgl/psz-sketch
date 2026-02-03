@@ -125,6 +125,28 @@ export function getFieldCompletionCount(characterId: string): number {
 }
 
 /**
+ * Get all completed field IDs for a character (for persistence)
+ */
+export function getCompletedFields(characterId: string): string[] {
+  const completed = completedFields.get(characterId);
+  return completed ? Array.from(completed) : [];
+}
+
+/**
+ * Restore completed fields for a character (from persistence)
+ */
+export function restoreCompletedFields(characterId: string, fieldIds: string[]): void {
+  if (!fieldIds || fieldIds.length === 0) return;
+  if (!completedFields.has(characterId)) {
+    completedFields.set(characterId, new Set());
+  }
+  const completed = completedFields.get(characterId)!;
+  for (const id of fieldIds) {
+    completed.add(id);
+  }
+}
+
+/**
  * Calculate field grade based on completion time
  */
 export function calculateFieldGrade(actualTime: number, parTime: number): FieldGrade {
