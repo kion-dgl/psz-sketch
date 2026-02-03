@@ -939,6 +939,25 @@ export function execute(commandLine: string): CommandResult {
     case 'list-techniques':
       return executeListTechniques();
 
+    case 'add-item': {
+      // Internal command for restoring inventory from persistence
+      if (!args[0]) {
+        return { success: false, message: 'Usage: add-item <item-json> [quantity]' };
+      }
+      // Parse the JSON item - args may have been split, so rejoin
+      const jsonStr = args.join(' ');
+      const qtyMatch = jsonStr.match(/\}\s+(\d+)$/);
+      const quantity = qtyMatch ? parseInt(qtyMatch[1], 10) : 1;
+      const itemJson = qtyMatch ? jsonStr.slice(0, jsonStr.lastIndexOf('}') + 1) : jsonStr;
+      try {
+        const item = JSON.parse(itemJson) as GameItem;
+        inventory.set(item.id, { item, quantity });
+        return { success: true, message: `Added ${item.name} x${quantity}` };
+      } catch {
+        return { success: false, message: 'Invalid item JSON' };
+      }
+    }
+
     default:
       return {
         success: false,
@@ -1205,7 +1224,11 @@ function getMaxStack(itemId: string): number {
 const MAX_INVENTORY_SLOTS = 40;
 
 function getInventorySlotCount(): number {
-  return inventory.size;
+  let count = inventory.size;
+  // Equipped items also take inventory slots
+  if (equippedItems.weapon) count++;
+  if (equippedItems.frame) count++;
+  return count;
 }
 
 function isInventoryFull(): boolean {
