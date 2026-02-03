@@ -2830,17 +2830,20 @@ function executeCompleteField(): CommandResult {
     return { success: false, message: 'Failed to complete session.' };
   }
 
-  currentLocation = 'city';
   currentEnemies = [];
 
   if (isMission) {
+    // Missions return to guild for reward claiming
+    currentLocation = 'guild';
     combatLog.push('Mission completed!');
     return {
       success: true,
-      message: `Mission complete! Return to the guild to claim rewards.\nGrade: ${result.grade}, EXP: ${result.expGained}, Meseta: ${result.mesetaGained}`,
+      message: `═══════════════════════════════════════\n        MISSION COMPLETE!\n═══════════════════════════════════════\n\nGrade: ${result.grade}\nEXP Earned: ${result.expGained.toLocaleString()}\nMeseta Earned: ${result.mesetaGained.toLocaleString()}\n\nRewards have been added to your inventory.`,
       data: result,
     };
   } else {
+    // Fields return to city
+    currentLocation = 'city';
     combatLog.push('Field completed!');
     return {
       success: true,
@@ -2964,8 +2967,19 @@ function executePickupItem(dropId: number): CommandResult {
       data: { meseta: drop.meseta },
     };
   } else if (drop.type === 'item' && drop.item) {
-    // Add to inventory
+    // Check stack limit for consumables (max 10)
+    const CONSUMABLE_STACK_LIMIT = 10;
     const existing = inventory.get(drop.item.id);
+    const isConsumable = drop.item.type === 'consumable';
+
+    if (isConsumable && existing && existing.quantity >= CONSUMABLE_STACK_LIMIT) {
+      return {
+        success: false,
+        message: `Cannot carry more ${drop.item.name}. (Max: ${CONSUMABLE_STACK_LIMIT})`,
+      };
+    }
+
+    // Add to inventory
     if (existing) {
       existing.quantity += 1;
     } else {
@@ -2999,7 +3013,9 @@ function executePickupAll(): CommandResult {
     return { success: false, message: 'No items on ground.' };
   }
 
+  const CONSUMABLE_STACK_LIMIT = 10;
   const pickedUp: string[] = [];
+  const leftOnGround: typeof droppedItems = [];
   let totalMeseta = 0;
 
   for (const drop of droppedItems) {
@@ -3008,6 +3024,14 @@ function executePickupAll(): CommandResult {
       combatLog.push(`PICKUP: ${drop.meseta} Meseta`);
     } else if (drop.type === 'item' && drop.item) {
       const existing = inventory.get(drop.item.id);
+      const isConsumable = drop.item.type === 'consumable';
+
+      // Check stack limit for consumables
+      if (isConsumable && existing && existing.quantity >= CONSUMABLE_STACK_LIMIT) {
+        leftOnGround.push(drop);
+        continue;
+      }
+
       if (existing) {
         existing.quantity += 1;
       } else {
@@ -3027,12 +3051,24 @@ function executePickupAll(): CommandResult {
     pickedUp.push(`${totalMeseta} Meseta`);
   }
 
-  droppedItems = [];
+  // Keep items that couldn't be picked up on ground
+  droppedItems = leftOnGround;
+
+  if (pickedUp.length === 0) {
+    return {
+      success: false,
+      message: 'Cannot pick up any more items. Inventory full.',
+    };
+  }
+
+  const leftMessage = leftOnGround.length > 0
+    ? `\n(${leftOnGround.length} item(s) left on ground - stack full)`
+    : '';
 
   return {
     success: true,
-    message: `Picked up: ${pickedUp.join(', ')}`,
-    data: { items: pickedUp, meseta: totalMeseta },
+    message: `Picked up: ${pickedUp.join(', ')}${leftMessage}`,
+    data: { items: pickedUp, meseta: totalMeseta, leftOnGround: leftOnGround.length },
   };
 }
 
