@@ -470,6 +470,9 @@ export default function GamePlayWeb() {
     // Get items from the armor shop (which has weapons, armor, and units via refreshWeaponShop)
     const allItems = getShopItems(SHOP_IDS.ARMOR_SHOP) as EquipmentShopItem[];
     const meseta = gameState?.character?.meseta ?? 0;
+    const inventorySlots = gameState?.inventorySlots ?? 0;
+    const maxSlots = gameState?.maxInventorySlots ?? 40;
+    const inventoryFull = inventorySlots >= maxSlots;
 
     // Filter items by current tab
     const filteredItems = allItems.filter(item => {
@@ -481,12 +484,11 @@ export default function GamePlayWeb() {
 
     const handleBuyEquipment = (item: EquipmentShopItem) => {
       if (!gameState?.character) return;
-      const result = purchaseItem(SHOP_IDS.ARMOR_SHOP, item.id, 1, meseta);
-      if (result.success) {
-        executeCommand(`buy-equipment ${item.id}`);
-      } else {
-        addLog(result.message);
+      if (inventoryFull) {
+        addLog(`Inventory full. (${maxSlots}/${maxSlots} slots)`);
+        return;
       }
+      executeCommand(`buy-equipment ${item.id}`);
     };
 
     const formatItemName = (item: EquipmentShopItem): string => {
@@ -557,10 +559,29 @@ export default function GamePlayWeb() {
           </button>
         </div>
 
+        <p style={styles.inventorySlotInfo}>
+          Inventory: {inventorySlots}/{maxSlots} slots
+        </p>
+
         <div style={styles.equipmentList}>
           {filteredItems.map(item => {
             const affordable = canAfford(meseta, item);
             const rarityColor = getRarityColor(item.rarity);
+
+            // Determine button state
+            let buttonStyle = styles.buyBtn;
+            let buttonText = 'Buy';
+            let isDisabled = false;
+
+            if (inventoryFull) {
+              buttonStyle = styles.buyBtnMaxStack;
+              buttonText = 'Full';
+              isDisabled = true;
+            } else if (!affordable) {
+              buttonStyle = styles.buyBtnDisabled;
+              buttonText = 'No $';
+              isDisabled = true;
+            }
 
             return (
               <div key={item.id} style={styles.equipmentRow} data-testid={`equip-item-${item.id}`}>
@@ -577,12 +598,12 @@ export default function GamePlayWeb() {
                 </div>
                 <span style={styles.itemPrice}>{formatPrice(item.price)}</span>
                 <button
-                  style={affordable ? styles.buyBtn : styles.buyBtnDisabled}
+                  style={buttonStyle}
                   onClick={() => handleBuyEquipment(item)}
-                  disabled={!affordable}
+                  disabled={isDisabled}
                   data-testid={`buy-${item.id}`}
                 >
-                  {affordable ? 'Buy' : 'No $'}
+                  {buttonText}
                 </button>
               </div>
             );
@@ -2101,5 +2122,10 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '12px',
     textAlign: 'center' as const,
     padding: '16px',
+  },
+  inventorySlotInfo: {
+    margin: '0 0 12px 0',
+    fontSize: '11px',
+    color: '#888',
   },
 };

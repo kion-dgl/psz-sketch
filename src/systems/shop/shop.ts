@@ -138,6 +138,20 @@ export function purchaseItem(
 }
 
 /**
+ * Remove an item from a shop's inventory (for one-time purchases like equipment)
+ */
+export function removeShopItem(shopId: ShopId | string, itemId: string): boolean {
+  const inventory = getShopInventory(shopId);
+  if (!inventory) return false;
+
+  const index = inventory.items.findIndex(item => item.id === itemId);
+  if (index === -1) return false;
+
+  inventory.items.splice(index, 1);
+  return true;
+}
+
+/**
  * Sell an item
  */
 export function sellItem(

@@ -81,6 +81,8 @@ export interface GameState {
   inventory: DetailedItem[];
   equipment: EquipmentSlots;
   meseta: number;
+  inventorySlots?: number;
+  maxInventorySlots?: number;
   inCombat?: boolean;
   enemies?: EnemyInfo[];
   playerCombat?: PlayerCombat;

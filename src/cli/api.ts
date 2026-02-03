@@ -142,6 +142,7 @@ import {
   initializeDefaultShops,
   getShopItems,
   purchaseItem,
+  removeShopItem,
   SHOP_IDS,
 } from '../systems/shop';
 import {
@@ -282,6 +283,8 @@ export function getState(): GameState {
     inventory: detailedInventory,
     equipment,
     meseta: currentCharacter?.meseta ?? 0,
+    inventorySlots: getInventorySlotCount(),
+    maxInventorySlots: MAX_INVENTORY_SLOTS,
     inCombat: currentEnemies.length > 0,
     enemies: currentEnemies.map(e => ({
       id: e.id,
@@ -1198,6 +1201,17 @@ function getMaxStack(itemId: string): number {
   return CONSUMABLE_STACK_LIMITS[itemId] ?? 10;
 }
 
+// Maximum inventory slots (each item stack or equipment piece takes 1 slot)
+const MAX_INVENTORY_SLOTS = 40;
+
+function getInventorySlotCount(): number {
+  return inventory.size;
+}
+
+function isInventoryFull(): boolean {
+  return getInventorySlotCount() >= MAX_INVENTORY_SLOTS;
+}
+
 function executeBuy(itemId: string, quantity: number): CommandResult {
   if (!currentCharacter) {
     return { success: false, message: 'No character.' };
@@ -1266,6 +1280,11 @@ function executeBuyEquipment(itemId: string): CommandResult {
     return { success: false, message: 'You must be at the weapon shop.' };
   }
 
+  // Check if inventory is full
+  if (isInventoryFull()) {
+    return { success: false, message: `Inventory full. (${MAX_INVENTORY_SLOTS}/${MAX_INVENTORY_SLOTS} slots)` };
+  }
+
   const meseta = currentCharacter.meseta ?? 0;
   const result = purchaseItem(SHOP_IDS.ARMOR_SHOP, itemId, 1, meseta);
 
@@ -1324,6 +1343,9 @@ function executeBuyEquipment(itemId: string): CommandResult {
       };
       inventory.set(shopItem.id, { item: unitItem, quantity: 1 });
     }
+
+    // Remove item from shop (equipment is one-time purchase like PSO)
+    removeShopItem(SHOP_IDS.ARMOR_SHOP, itemId);
   }
 
   return {
