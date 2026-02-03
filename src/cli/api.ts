@@ -2259,9 +2259,15 @@ function executeSpawnEnemies(): CommandResult {
   const random = createSeededRandom(seed);
 
   // Set total waves based on stage variant (only on first spawn of stage)
-  // a: 5 waves, e: 1 wave (transition), b: 5 waves, z: boss only
+  // Fields: a: 5 waves, e: 1 wave (transition), b: 5 waves, z: boss only
+  // Missions: 3 waves per stage (shorter, more focused experience)
   if (currentWave === 0) {
-    totalWaves = variant === 'e' ? 1 : variant === 'z' ? 1 : 5;
+    const isMission = session.activeType === 'mission';
+    if (isMission) {
+      totalWaves = 3; // Missions have 3 waves per stage
+    } else {
+      totalWaves = variant === 'e' ? 1 : variant === 'z' ? 1 : 5;
+    }
     currentWave = 1;
   }
 

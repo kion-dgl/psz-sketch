@@ -194,10 +194,17 @@ export function advanceToNextStage(): boolean {
     return true;
   }
 
-  // For missions, just increment (no fixed stage count)
+  // For missions, limit to 3 stages
+  if (sessionState.currentStageIndex >= MISSION_STAGE_COUNT - 1) {
+    return false; // Already at last stage
+  }
+
   sessionState.currentStageIndex++;
   return true;
 }
+
+// Missions have a fixed 3-stage structure
+const MISSION_STAGE_COUNT = 3;
 
 /**
  * Check if at final stage
@@ -214,8 +221,8 @@ export function isAtFinalStage(): boolean {
     return sessionState.currentStageIndex >= field.stageSequence.length - 1;
   }
 
-  // Missions don't have fixed stage count
-  return false;
+  // Missions have 3 stages (0, 1, 2) - final is index 2
+  return sessionState.currentStageIndex >= MISSION_STAGE_COUNT - 1;
 }
 
 /**
