@@ -344,6 +344,22 @@ export default function GamePlayWeb() {
     </div>
   );
 
+  // Stack limits for consumables (must match api.ts)
+  const STACK_LIMITS: Record<string, number> = {
+    monomate: 10, dimate: 10, trimate: 10,
+    monofluid: 10, difluid: 10, trifluid: 10,
+    'sol-atomizer': 10, 'moon-atomizer': 10, 'star-atomizer': 5,
+    'scape-doll': 1, telepipe: 10, 'photon-drop': 99,
+  };
+
+  const getItemStackInfo = (itemId: string) => {
+    const invItem = gameState?.inventory?.find(i => i.id === itemId);
+    const currentQty = invItem?.quantity ?? 0;
+    const maxStack = STACK_LIMITS[itemId] ?? 99; // weapons/armor have no limit
+    const atMaxStack = currentQty >= maxStack;
+    return { currentQty, maxStack, atMaxStack };
+  };
+
   const renderShopContent = () => {
     const shopId = shopTab === 'weapons' ? SHOP_IDS.WEAPON_SHOP : SHOP_IDS.ITEM_SHOP;
     const items = getShopItems(shopId);
@@ -374,17 +390,39 @@ export default function GamePlayWeb() {
         <div style={styles.itemList}>
           {items.map(item => {
             const affordable = canAfford(meseta, item);
+            const { currentQty, maxStack, atMaxStack } = getItemStackInfo(item.id);
+            const isConsumable = shopTab === 'items';
+
+            // Determine button state and style
+            let buttonStyle = styles.buyBtn;
+            let buttonText = 'Buy';
+            let isDisabled = false;
+
+            if (isConsumable && atMaxStack) {
+              buttonStyle = styles.buyBtnMaxStack;
+              buttonText = `Max (${maxStack})`;
+              isDisabled = true;
+            } else if (!affordable) {
+              buttonStyle = styles.buyBtnDisabled;
+              isDisabled = true;
+            }
+
             return (
               <div key={item.id} style={styles.itemRow} data-testid={`shop-item-${item.id}`}>
-                <span style={styles.itemName}>{item.name}</span>
+                <span style={styles.itemName}>
+                  {item.name}
+                  {isConsumable && currentQty > 0 && (
+                    <span style={styles.itemOwned}> ({currentQty}/{maxStack})</span>
+                  )}
+                </span>
                 <span style={styles.itemPrice}>{formatPrice(item.price)}</span>
                 <button
-                  style={affordable ? styles.buyBtn : styles.buyBtnDisabled}
+                  style={buttonStyle}
                   onClick={() => handleBuyItem(item)}
-                  disabled={!affordable}
+                  disabled={isDisabled}
                   data-testid={`buy-${item.id}`}
                 >
-                  Buy
+                  {buttonText}
                 </button>
               </div>
             );
@@ -1238,6 +1276,19 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#555',
     fontFamily: 'monospace',
     cursor: 'not-allowed',
+  },
+  buyBtnMaxStack: {
+    padding: '4px 12px',
+    background: '#1a1a2e',
+    border: '1px solid #a78bfa',
+    color: '#a78bfa',
+    fontFamily: 'monospace',
+    cursor: 'not-allowed',
+    fontSize: '10px',
+  },
+  itemOwned: {
+    color: '#888',
+    fontSize: '11px',
   },
   difficultyRow: {
     display: 'flex',
