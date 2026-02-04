@@ -902,9 +902,6 @@ export default function GamePlayWeb() {
   };
 
   const renderInventoryContent = () => {
-    const equippedWeaponId = gameState?.equipment?.weapon?.id;
-    const equippedArmorId = gameState?.equipment?.frame?.id;
-
     return (
       <div style={styles.locationContent}>
         <div style={styles.locationHeader}>
@@ -916,13 +913,13 @@ export default function GamePlayWeb() {
             gameState.inventory.map(item => {
               const isWeapon = item.type === 'weapon';
               const isArmor = item.type === 'armor';
-              const isEquipped = (isWeapon && item.id === equippedWeaponId) ||
-                                 (isArmor && item.id === equippedArmorId);
+              const isEquipped = (item as any).equipped === true;
               const canEquip = isWeapon || isArmor;
-              const armorSlots = isArmor && 'slots' in item ? (item as any).slots : null;
+              const armorSlots = isArmor && 'unitSlots' in item ? (item as any).unitSlots : null;
+              const itemKey = isEquipped ? `equipped-${item.id}` : item.id;
 
               return (
-                <div key={item.id} style={styles.invCard} data-testid={`inv-item-${item.id}`}>
+                <div key={itemKey} style={styles.invCard} data-testid={`inv-item-${item.id}`}>
                   <div style={styles.invItemName}>{item.name}</div>
                   <div style={styles.invItemQty}>x{item.quantity}</div>
                   {isWeapon && <div style={styles.invItemStat}>ATK: {(item as any).attack}</div>}
@@ -1288,8 +1285,9 @@ export default function GamePlayWeb() {
               gameState.inventory.map(item => {
                 const slots = item.type === 'armor' && 'unitSlots' in item ? (item as any).unitSlots : null;
                 const isEquipped = (item as any).equipped;
+                const itemKey = isEquipped ? `equipped-${item.id}` : item.id;
                 return (
-                  <div key={item.id} style={isEquipped ? styles.invRowEquipped : styles.invRow} data-testid={`sidebar-inv-${item.id}`}>
+                  <div key={itemKey} style={isEquipped ? styles.invRowEquipped : styles.invRow} data-testid={`sidebar-inv-${item.id}`}>
                     <span>
                       {isEquipped && <span style={styles.equippedMarker}>E </span>}
                       {item.name}
