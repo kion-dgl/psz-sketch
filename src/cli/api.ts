@@ -1342,12 +1342,16 @@ function executeBuyEquipment(itemId: string): CommandResult {
         type: 'weapon',
         rarity: shopItem.rarity,
         sellPrice: shopItem.sellPrice,
+        stackable: false,
+        maxStack: 1,
         attack: shopItem.attack ?? 0,
         accuracy: 90,
         weaponType: 'sword',
         element: shopItem.element,
         elementPercent: shopItem.elementPercent,
-        requiredLevel: shopItem.requiredLevel,
+        grindLevel: 0,
+        maxGrind: 10,
+        requiredLevel: shopItem.requiredLevel ?? 1,
       };
       inventory.set(shopItem.id, { item: weaponItem, quantity: 1 });
     } else if (shopItem.category === 'armor') {
@@ -1358,11 +1362,13 @@ function executeBuyEquipment(itemId: string): CommandResult {
         type: 'armor',
         rarity: shopItem.rarity,
         sellPrice: shopItem.sellPrice,
+        stackable: false,
+        maxStack: 1,
         defense: shopItem.defense ?? 0,
         evasion: shopItem.evasion ?? 0,
         armorSlot: 'frame',
         unitSlots: shopItem.slots ?? 0,
-        requiredLevel: shopItem.requiredLevel,
+        requiredLevel: shopItem.requiredLevel ?? 1,
       };
       inventory.set(shopItem.id, { item: armorItem, quantity: 1 });
     } else if (shopItem.category === 'unit') {
@@ -1373,10 +1379,12 @@ function executeBuyEquipment(itemId: string): CommandResult {
         type: 'armor',
         rarity: shopItem.rarity,
         sellPrice: shopItem.sellPrice,
+        stackable: false,
+        maxStack: 1,
         defense: 0,
         evasion: 0,
         armorSlot: 'unit',
-        requiredLevel: shopItem.requiredLevel,
+        requiredLevel: shopItem.requiredLevel ?? 1,
       };
       inventory.set(shopItem.id, { item: unitItem, quantity: 1 });
     }
