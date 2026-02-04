@@ -33,7 +33,9 @@ import {
   resetAllGameData,
   type PersistedCharacterData,
   type PersistedGameData,
+  type PersistedEquipment,
 } from '../../systems/persistence';
+import type { WeaponItem, ArmorItem, UnitItem } from '../../systems/inventory/types';
 
 export default function GamePlayWeb() {
   const [gameState, setGameState] = useState<ReturnType<typeof getState> | null>(null);
@@ -122,12 +124,24 @@ export default function GamePlayWeb() {
       }
     }
 
-    // Restore equipment (use set-weapon/set-frame to directly restore without inventory swap)
+    // Restore equipment (use set-weapon/set-frame/set-unit to directly restore without inventory swap)
     if (data.equipment?.weapon) {
       execute(`set-weapon ${JSON.stringify(data.equipment.weapon)}`);
     }
     if (data.equipment?.frame) {
       execute(`set-frame ${JSON.stringify(data.equipment.frame)}`);
+    }
+    if (data.equipment?.unit1) {
+      execute(`set-unit 1 ${JSON.stringify(data.equipment.unit1)}`);
+    }
+    if (data.equipment?.unit2) {
+      execute(`set-unit 2 ${JSON.stringify(data.equipment.unit2)}`);
+    }
+    if (data.equipment?.unit3) {
+      execute(`set-unit 3 ${JSON.stringify(data.equipment.unit3)}`);
+    }
+    if (data.equipment?.unit4) {
+      execute(`set-unit 4 ${JSON.stringify(data.equipment.unit4)}`);
     }
 
     // Restore completed missions and fields
@@ -154,8 +168,12 @@ export default function GamePlayWeb() {
         quantity: item.quantity,
       })) || [],
       equipment: {
-        weapon: (gameState.equipment?.weapon as any) || null,
-        frame: (gameState.equipment?.frame as any) || null,
+        weapon: (gameState.equipment?.weapon as WeaponItem) || null,
+        frame: (gameState.equipment?.frame as ArmorItem) || null,
+        unit1: (gameState.equipment?.unit1 as UnitItem) || null,
+        unit2: (gameState.equipment?.unit2 as UnitItem) || null,
+        unit3: (gameState.equipment?.unit3 as UnitItem) || null,
+        unit4: (gameState.equipment?.unit4 as UnitItem) || null,
       },
       completedMissions: getCompletedMissions(gameState.character.character_id),
       completedFields: getCompletedFields(gameState.character.character_id),
@@ -217,8 +235,12 @@ export default function GamePlayWeb() {
             quantity: item.quantity,
           })) || [],
           equipment: {
-            weapon: (newState.equipment?.weapon as any) || null,
-            frame: (newState.equipment?.frame as any) || null,
+            weapon: (newState.equipment?.weapon as WeaponItem) || null,
+            frame: (newState.equipment?.frame as ArmorItem) || null,
+            unit1: (newState.equipment?.unit1 as UnitItem) || null,
+            unit2: (newState.equipment?.unit2 as UnitItem) || null,
+            unit3: (newState.equipment?.unit3 as UnitItem) || null,
+            unit4: (newState.equipment?.unit4 as UnitItem) || null,
           },
           completedMissions: getCompletedMissions(newChar.character_id),
           completedFields: getCompletedFields(newChar.character_id),
@@ -913,27 +935,37 @@ export default function GamePlayWeb() {
             gameState.inventory.map(item => {
               const isWeapon = item.type === 'weapon';
               const isArmor = item.type === 'armor';
-              const isEquipped = (item as any).equipped === true;
-              const canEquip = isWeapon || isArmor;
-              const armorSlots = isArmor && 'unitSlots' in item ? (item as any).unitSlots : null;
+              const isUnit = item.type === 'unit';
+              const isFrame = isArmor; // Armor items are always frames now
+              const isEquipped = item.equipped === true;
+              const canEquip = isWeapon || isArmor || isUnit;
+              const armorSlots = isFrame ? item.unitSlots : null;
               const itemKey = isEquipped ? `equipped-${item.id}` : item.id;
+
+              // Determine the correct equip command
+              const getEquipCommand = () => {
+                if (isWeapon) return `equip-weapon ${item.id}`;
+                if (isUnit) return `equip-unit ${item.id}`;
+                return `equip-frame ${item.id}`;
+              };
 
               return (
                 <div key={itemKey} style={styles.invCard} data-testid={`inv-item-${item.id}`}>
                   <div style={styles.invItemName}>{item.name}</div>
                   <div style={styles.invItemQty}>x{item.quantity}</div>
-                  {isWeapon && <div style={styles.invItemStat}>ATK: {(item as any).attack}</div>}
-                  {isArmor && (
+                  {isWeapon && <div style={styles.invItemStat}>ATK: {item.attack}</div>}
+                  {isFrame && (
                     <div style={styles.invItemStat}>
-                      DEF: {(item as any).defense}
-                      {armorSlots !== null && armorSlots > 0 && <span style={styles.armorSlots}> [{armorSlots}]</span>}
+                      DEF: {item.defense}
+                      {armorSlots != null && armorSlots > 0 && <span style={styles.armorSlots}> [{armorSlots}S]</span>}
                     </div>
                   )}
-                  {item.type === 'consumable' && <div style={styles.invItemEffect}>{(item as any).effect}</div>}
+                  {isUnit && <div style={styles.invItemStat}>{item.description}</div>}
+                  {item.type === 'consumable' && <div style={styles.invItemEffect}>{item.effect}</div>}
                   {canEquip && (
                     <button
                       style={isEquipped ? styles.equippedBtn : styles.equipBtn}
-                      onClick={() => executeCommand(isWeapon ? `equip-weapon ${item.id}` : `equip-frame ${item.id}`)}
+                      onClick={() => executeCommand(getEquipCommand())}
                       disabled={isEquipped}
                       data-testid={`equip-${item.id}`}
                     >
@@ -1283,8 +1315,8 @@ export default function GamePlayWeb() {
           <div style={styles.invList}>
             {gameState?.inventory && gameState.inventory.length > 0 ? (
               gameState.inventory.map(item => {
-                const slots = item.type === 'armor' && 'unitSlots' in item ? (item as any).unitSlots : null;
-                const isEquipped = (item as any).equipped;
+                const slots = item.type === 'armor' ? item.unitSlots : null;
+                const isEquipped = item.equipped;
                 const itemKey = isEquipped ? `equipped-${item.id}` : item.id;
                 return (
                   <div key={itemKey} style={isEquipped ? styles.invRowEquipped : styles.invRow} data-testid={`sidebar-inv-${item.id}`}>

@@ -9,7 +9,7 @@ import type { Difficulty } from '../systems/mission/types';
 import { VALID_CLASS_IDS } from '../systems/character/types';
 
 // Import item types
-import type { WeaponItem, ArmorItem, ConsumableItem, GameItem } from '../systems/inventory/types';
+import type { WeaponItem, ArmorItem, UnitItem, ConsumableItem, GameItem } from '../systems/inventory/types';
 
 // Game state (in-memory for CLI)
 let currentCharacter: Character | null = null;
@@ -26,8 +26,19 @@ let inventory: Map<string, InventoryEntry> = new Map();
 interface EquippedItems {
   weapon: WeaponItem | null;
   frame: ArmorItem | null;
+  unit1: UnitItem | null;
+  unit2: UnitItem | null;
+  unit3: UnitItem | null;
+  unit4: UnitItem | null;
 }
-let equippedItems: EquippedItems = { weapon: null, frame: null };
+let equippedItems: EquippedItems = {
+  weapon: null,
+  frame: null,
+  unit1: null,
+  unit2: null,
+  unit3: null,
+  unit4: null,
+};
 
 // Combat state
 interface EnemyInstance {
@@ -227,14 +238,30 @@ function toDetailedItem(item: GameItem, quantity: number): DetailedItem {
     detailed.accuracy = w.accuracy;
     detailed.weaponType = w.weaponType;
     detailed.element = w.element;
+    detailed.elementPercent = w.elementPercent;
+    detailed.grindLevel = w.grindLevel;
+    detailed.maxGrind = w.maxGrind;
     detailed.requiredLevel = w.requiredLevel;
   } else if (item.type === 'armor') {
     const a = item as ArmorItem;
     detailed.defense = a.defense;
     detailed.evasion = a.evasion;
-    detailed.armorSlot = a.armorSlot;
     detailed.unitSlots = a.unitSlots;
     detailed.requiredLevel = a.requiredLevel;
+  } else if (item.type === 'unit') {
+    const u = item as UnitItem;
+    detailed.attackBonus = u.attackBonus;
+    detailed.defenseBonus = u.defenseBonus;
+    detailed.accuracyBonus = u.accuracyBonus;
+    detailed.evasionBonus = u.evasionBonus;
+    detailed.hpBonus = u.hpBonus;
+    detailed.tpBonus = u.tpBonus;
+    detailed.fireResist = u.fireResist;
+    detailed.iceResist = u.iceResist;
+    detailed.thunderResist = u.thunderResist;
+    detailed.lightResist = u.lightResist;
+    detailed.darkResist = u.darkResist;
+    detailed.requiredLevel = u.requiredLevel;
   } else if (item.type === 'consumable') {
     const c = item as ConsumableItem;
     detailed.effect = c.effect;
@@ -253,10 +280,10 @@ export function getState(): GameState {
     weapon: equippedItems.weapon ? toDetailedItem(equippedItems.weapon, 1) : null,
     frame: equippedItems.frame ? toDetailedItem(equippedItems.frame, 1) : null,
     barrier: null,
-    unit1: null,
-    unit2: null,
-    unit3: null,
-    unit4: null,
+    unit1: equippedItems.unit1 ? toDetailedItem(equippedItems.unit1, 1) : null,
+    unit2: equippedItems.unit2 ? toDetailedItem(equippedItems.unit2, 1) : null,
+    unit3: equippedItems.unit3 ? toDetailedItem(equippedItems.unit3, 1) : null,
+    unit4: equippedItems.unit4 ? toDetailedItem(equippedItems.unit4, 1) : null,
   };
 
   // Build detailed inventory (including equipped items)
@@ -265,15 +292,28 @@ export function getState(): GameState {
   );
 
   // Add equipped items to inventory list (marked as equipped)
+  let insertIndex = 0;
   if (equippedItems.weapon) {
     const weaponDetail = toDetailedItem(equippedItems.weapon, 1);
     weaponDetail.equipped = true;
     detailedInventory.unshift(weaponDetail); // Show at top
+    insertIndex++;
   }
   if (equippedItems.frame) {
     const frameDetail = toDetailedItem(equippedItems.frame, 1);
     frameDetail.equipped = true;
-    detailedInventory.splice(equippedItems.weapon ? 1 : 0, 0, frameDetail); // After weapon
+    detailedInventory.splice(insertIndex, 0, frameDetail); // After weapon
+    insertIndex++;
+  }
+  // Add equipped units
+  const units = [equippedItems.unit1, equippedItems.unit2, equippedItems.unit3, equippedItems.unit4];
+  for (const unit of units) {
+    if (unit) {
+      const unitDetail = toDetailedItem(unit, 1);
+      unitDetail.equipped = true;
+      detailedInventory.splice(insertIndex, 0, unitDetail);
+      insertIndex++;
+    }
   }
 
   // Get session state for stage info
@@ -481,10 +521,28 @@ export function getAvailableCommands(): AvailableCommand[] {
 
       commands.push({
         name: 'unequip',
-        description: 'Unequip a slot',
+        description: 'Unequip a slot (use unequip-unit for units)',
         usage: 'unequip <slot>',
         args: [
           { name: 'slot', type: 'string', required: true, description: 'weapon or frame' },
+        ],
+      });
+
+      commands.push({
+        name: 'equip-unit',
+        description: 'Equip a unit to your frame',
+        usage: 'equip-unit <item-id>',
+        args: [
+          { name: 'item-id', type: 'string', required: true, description: 'Unit ID to equip' },
+        ],
+      });
+
+      commands.push({
+        name: 'unequip-unit',
+        description: 'Unequip a unit from a slot',
+        usage: 'unequip-unit <slot>',
+        args: [
+          { name: 'slot', type: 'number', required: true, description: 'Unit slot (1-4)' },
         ],
       });
 
@@ -984,6 +1042,24 @@ export function execute(commandLine: string): CommandResult {
       return executeEquipFrame(args[0]);
     }
 
+    case 'equip-unit': {
+      if (!args[0]) {
+        return { success: false, message: 'Usage: equip-unit <item-id>' };
+      }
+      return executeEquipUnit(args[0]);
+    }
+
+    case 'unequip-unit': {
+      if (!args[0]) {
+        return { success: false, message: 'Usage: unequip-unit <slot>' };
+      }
+      const slotNum = parseInt(args[0], 10);
+      if (isNaN(slotNum)) {
+        return { success: false, message: 'Invalid slot number. Use 1-4.' };
+      }
+      return executeUnequipUnit(slotNum);
+    }
+
     case 'set-weapon': {
       // Internal command for restoring equipped weapon from persistence
       if (!args[0]) {
@@ -1009,6 +1085,30 @@ export function execute(commandLine: string): CommandResult {
         return { success: true, message: `Restored armor: ${frame.name}` };
       } catch {
         return { success: false, message: 'Invalid armor JSON' };
+      }
+    }
+
+    case 'set-unit': {
+      // Internal command for restoring equipped unit from persistence
+      // Usage: set-unit <slot> <unit-json>
+      if (!args[0] || !args[1]) {
+        return { success: false, message: 'Usage: set-unit <slot> <unit-json>' };
+      }
+      const slot = parseInt(args[0], 10);
+      if (isNaN(slot) || slot < 1 || slot > 4) {
+        return { success: false, message: 'Invalid slot. Use 1-4.' };
+      }
+      try {
+        const unit = JSON.parse(args.slice(1).join(' ')) as UnitItem;
+        switch (slot) {
+          case 1: equippedItems.unit1 = unit; break;
+          case 2: equippedItems.unit2 = unit; break;
+          case 3: equippedItems.unit3 = unit; break;
+          case 4: equippedItems.unit4 = unit; break;
+        }
+        return { success: true, message: `Restored unit ${slot}: ${unit.name}` };
+      } catch {
+        return { success: false, message: 'Invalid unit JSON' };
       }
     }
 
@@ -1405,19 +1505,26 @@ function executeBuyEquipment(itemId: string): CommandResult {
       };
       inventory.set(shopItem.id, { item: armorItem, quantity: 1 });
     } else if (shopItem.category === 'unit') {
-      const unitItem: ArmorItem = {
+      // Parse unit bonuses from description (e.g., "ATK +5", "DEF +5", "Fire resist +5")
+      const desc = shopItem.description;
+      const unitItem: UnitItem = {
         id: shopItem.id,
         name: shopItem.name,
         description: shopItem.description,
-        type: 'armor',
+        type: 'unit',
         rarity: shopItem.rarity,
         sellPrice: shopItem.sellPrice,
         stackable: false,
         maxStack: 1,
-        defense: 0,
-        evasion: 0,
-        armorSlot: 'unit',
         requiredLevel: shopItem.requiredLevel ?? 1,
+        // Parse bonuses from description
+        attackBonus: desc.includes('ATK') ? parseInt(desc.match(/\+(\d+)/)?.[1] ?? '0') : undefined,
+        defenseBonus: desc.includes('DEF') ? parseInt(desc.match(/\+(\d+)/)?.[1] ?? '0') : undefined,
+        hpBonus: desc.includes('HP') ? parseInt(desc.match(/\+(\d+)/)?.[1] ?? '0') : undefined,
+        tpBonus: desc.includes('PP') || desc.includes('TP') ? parseInt(desc.match(/\+(\d+)/)?.[1] ?? '0') : undefined,
+        fireResist: desc.toLowerCase().includes('fire') ? parseInt(desc.match(/\+(\d+)/)?.[1] ?? '0') : undefined,
+        iceResist: desc.toLowerCase().includes('ice') ? parseInt(desc.match(/\+(\d+)/)?.[1] ?? '0') : undefined,
+        thunderResist: desc.toLowerCase().includes('thunder') ? parseInt(desc.match(/\+(\d+)/)?.[1] ?? '0') : undefined,
       };
       inventory.set(shopItem.id, { item: unitItem, quantity: 1 });
     }
@@ -1621,6 +1728,30 @@ function executeShowEquipment(): CommandResult {
   };
 }
 
+// Helper functions for unit slot management
+function getEquippedUnitCount(): number {
+  let count = 0;
+  if (equippedItems.unit1) count++;
+  if (equippedItems.unit2) count++;
+  if (equippedItems.unit3) count++;
+  if (equippedItems.unit4) count++;
+  return count;
+}
+
+function getFrameUnitSlots(): number {
+  if (!equippedItems.frame) return 0;
+  return equippedItems.frame.unitSlots ?? 0;
+}
+
+function getNextEmptyUnitSlot(): 1 | 2 | 3 | 4 | null {
+  const maxSlots = getFrameUnitSlots();
+  if (maxSlots >= 1 && !equippedItems.unit1) return 1;
+  if (maxSlots >= 2 && !equippedItems.unit2) return 2;
+  if (maxSlots >= 3 && !equippedItems.unit3) return 3;
+  if (maxSlots >= 4 && !equippedItems.unit4) return 4;
+  return null;
+}
+
 function executeEquip(itemId: string): CommandResult {
   if (!currentCharacter) {
     return { success: false, message: 'No character.' };
@@ -1650,7 +1781,7 @@ function executeUnequip(slot: string): CommandResult {
   }
 
   if (slot !== 'weapon' && slot !== 'frame') {
-    return { success: false, message: 'Invalid slot. Choose: weapon, frame' };
+    return { success: false, message: 'Invalid slot. Choose: weapon, frame (use unequip-unit for units)' };
   }
 
   if (slot === 'weapon') {
@@ -1668,10 +1799,40 @@ function executeUnequip(slot: string): CommandResult {
       return { success: false, message: 'No frame equipped.' };
     }
     const frame = equippedItems.frame;
+
+    // Unequip all units when frame is removed
+    const unequippedUnits: string[] = [];
+    if (equippedItems.unit1) {
+      inventory.set(equippedItems.unit1.id, { item: equippedItems.unit1, quantity: 1 });
+      unequippedUnits.push(equippedItems.unit1.name);
+      equippedItems.unit1 = null;
+    }
+    if (equippedItems.unit2) {
+      inventory.set(equippedItems.unit2.id, { item: equippedItems.unit2, quantity: 1 });
+      unequippedUnits.push(equippedItems.unit2.name);
+      equippedItems.unit2 = null;
+    }
+    if (equippedItems.unit3) {
+      inventory.set(equippedItems.unit3.id, { item: equippedItems.unit3, quantity: 1 });
+      unequippedUnits.push(equippedItems.unit3.name);
+      equippedItems.unit3 = null;
+    }
+    if (equippedItems.unit4) {
+      inventory.set(equippedItems.unit4.id, { item: equippedItems.unit4, quantity: 1 });
+      unequippedUnits.push(equippedItems.unit4.name);
+      equippedItems.unit4 = null;
+    }
+
     equippedItems.frame = null;
+
+    let message = `Unequipped ${frame.name}. You have no armor!`;
+    if (unequippedUnits.length > 0) {
+      message += ` Also unequipped units: ${unequippedUnits.join(', ')}.`;
+    }
+
     return {
       success: true,
-      message: `Unequipped ${frame.name}. You have no armor!`,
+      message,
     };
   }
 }
@@ -1714,14 +1875,22 @@ function executeEquipFrame(itemId: string): CommandResult {
     return { success: false, message: 'No character.' };
   }
 
-  // Find the armor in inventory
+  // Find the item in inventory
   const entry = inventory.get(itemId);
   if (!entry) {
     return { success: false, message: `Item "${itemId}" not found in inventory.` };
   }
 
+  // Check if it's a unit (common mistake)
+  if (entry.item.type === 'unit') {
+    return {
+      success: false,
+      message: `${entry.item.name} is a unit, not a frame. Use equip-unit for units.`,
+    };
+  }
+
   if (entry.item.type !== 'armor') {
-    return { success: false, message: `${entry.item.name} is not armor.` };
+    return { success: false, message: `${entry.item.name} is not a frame.` };
   }
 
   const armor = entry.item as ArmorItem;
@@ -1731,14 +1900,151 @@ function executeEquipFrame(itemId: string): CommandResult {
     inventory.set(equippedItems.frame.id, { item: equippedItems.frame, quantity: 1 });
   }
 
+  // Check if new frame has fewer unit slots - unequip excess units
+  const newSlots = armor.unitSlots ?? 0;
+  const unequippedUnits: string[] = [];
+
+  if (newSlots < 4 && equippedItems.unit4) {
+    inventory.set(equippedItems.unit4.id, { item: equippedItems.unit4, quantity: 1 });
+    unequippedUnits.push(equippedItems.unit4.name);
+    equippedItems.unit4 = null;
+  }
+  if (newSlots < 3 && equippedItems.unit3) {
+    inventory.set(equippedItems.unit3.id, { item: equippedItems.unit3, quantity: 1 });
+    unequippedUnits.push(equippedItems.unit3.name);
+    equippedItems.unit3 = null;
+  }
+  if (newSlots < 2 && equippedItems.unit2) {
+    inventory.set(equippedItems.unit2.id, { item: equippedItems.unit2, quantity: 1 });
+    unequippedUnits.push(equippedItems.unit2.name);
+    equippedItems.unit2 = null;
+  }
+  if (newSlots < 1 && equippedItems.unit1) {
+    inventory.set(equippedItems.unit1.id, { item: equippedItems.unit1, quantity: 1 });
+    unequippedUnits.push(equippedItems.unit1.name);
+    equippedItems.unit1 = null;
+  }
+
   // Equip the new armor and remove from inventory
   equippedItems.frame = armor;
   inventory.delete(itemId);
 
+  let message = `Equipped ${armor.name}.`;
+  if (unequippedUnits.length > 0) {
+    message += ` Unequipped units (not enough slots): ${unequippedUnits.join(', ')}.`;
+  }
+
   return {
     success: true,
-    message: `Equipped ${armor.name}.`,
+    message,
     data: { equipped: armor },
+  };
+}
+
+function executeEquipUnit(itemId: string): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  // Find the item in inventory
+  const entry = inventory.get(itemId);
+  if (!entry) {
+    return { success: false, message: `Item "${itemId}" not found in inventory.` };
+  }
+
+  // Check if it's a frame (common mistake)
+  if (entry.item.type === 'armor') {
+    return {
+      success: false,
+      message: `${entry.item.name} is a frame, not a unit. Use equip-frame for frames.`,
+    };
+  }
+
+  if (entry.item.type !== 'unit') {
+    return { success: false, message: `${entry.item.name} is not a unit.` };
+  }
+
+  const unit = entry.item as UnitItem;
+
+  // Check that a frame is equipped
+  if (!equippedItems.frame) {
+    return {
+      success: false,
+      message: 'No frame equipped. Equip a frame first.',
+    };
+  }
+
+  // Check if there's an available slot
+  const nextSlot = getNextEmptyUnitSlot();
+  if (nextSlot === null) {
+    const maxSlots = getFrameUnitSlots();
+    return {
+      success: false,
+      message: `${equippedItems.frame.name} has no available unit slots (${maxSlots}/${maxSlots} used).`,
+    };
+  }
+
+  // Equip the unit to the next available slot
+  switch (nextSlot) {
+    case 1: equippedItems.unit1 = unit; break;
+    case 2: equippedItems.unit2 = unit; break;
+    case 3: equippedItems.unit3 = unit; break;
+    case 4: equippedItems.unit4 = unit; break;
+  }
+
+  // Remove from inventory
+  inventory.delete(itemId);
+
+  return {
+    success: true,
+    message: `Equipped ${unit.name} to unit slot ${nextSlot}.`,
+    data: { equipped: armor, slot: nextSlot },
+  };
+}
+
+function executeUnequipUnit(slotNum: number): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (currentLocation !== 'inventory') {
+    return { success: false, message: 'You must be in inventory. Use: goto inventory' };
+  }
+
+  if (slotNum < 1 || slotNum > 4) {
+    return { success: false, message: 'Invalid unit slot. Choose: 1, 2, 3, or 4' };
+  }
+
+  let unit: UnitItem | null = null;
+  switch (slotNum) {
+    case 1:
+      unit = equippedItems.unit1;
+      equippedItems.unit1 = null;
+      break;
+    case 2:
+      unit = equippedItems.unit2;
+      equippedItems.unit2 = null;
+      break;
+    case 3:
+      unit = equippedItems.unit3;
+      equippedItems.unit3 = null;
+      break;
+    case 4:
+      unit = equippedItems.unit4;
+      equippedItems.unit4 = null;
+      break;
+  }
+
+  if (!unit) {
+    return { success: false, message: `No unit in slot ${slotNum}.` };
+  }
+
+  // Return to inventory
+  inventory.set(unit.id, { item: unit, quantity: 1 });
+
+  return {
+    success: true,
+    message: `Unequipped ${unit.name} from unit slot ${slotNum}.`,
   };
 }
 
@@ -2360,7 +2666,14 @@ export function resetState(): void {
   combatLog = [];
   enemyIdCounter = 0;
   playerCombatState = null;
-  equippedItems = { weapon: null, frame: null };
+  equippedItems = {
+    weapon: null,
+    frame: null,
+    unit1: null,
+    unit2: null,
+    unit3: null,
+    unit4: null,
+  };
   activeBuffs = [];
   playerStatusEffects = [];
   enemyStatusEffects.clear();
@@ -2506,12 +2819,15 @@ function getPlayerWeaponStats(): WeaponStats & { critBonus: number } {
     };
   }
 
+  // Default grindLevel to 0 if undefined (e.g., from old persisted data)
+  const grindLevel = weapon.grindLevel ?? 0;
+
   return {
-    attack: weapon.attack + (weapon.grindLevel * 2),
+    attack: weapon.attack + (grindLevel * 2),
     accuracy: weapon.accuracy,
     element: weapon.element as Element | null,
-    elementPercent: weapon.elementPercent || 0,
-    grindBonus: weapon.grindLevel * 2,
+    elementPercent: weapon.elementPercent ?? 0,
+    grindBonus: grindLevel * 2,
     critBonus: 5 + Math.floor(weapon.attack / 20),
   };
 }

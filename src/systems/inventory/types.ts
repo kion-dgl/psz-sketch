@@ -27,13 +27,31 @@ export interface WeaponItem extends ItemBase {
 
 export interface ArmorItem extends ItemBase {
   type: 'armor';
-  armorSlot: 'frame' | 'barrier' | 'unit';
+  armorSlot: 'frame';
   defense: number;
   evasion: number;
   resistances?: Record<string, number>;
   requiredLevel: number;
-  /** Number of unit slots (0-4). Only applicable to frames. */
-  unitSlots?: number;
+  /** Number of unit slots (0-4) */
+  unitSlots: number;
+}
+
+export interface UnitItem extends ItemBase {
+  type: 'unit';
+  requiredLevel: number;
+  // Stat bonuses
+  attackBonus?: number;
+  defenseBonus?: number;
+  accuracyBonus?: number;
+  evasionBonus?: number;
+  hpBonus?: number;
+  tpBonus?: number;
+  // Resistances
+  fireResist?: number;
+  iceResist?: number;
+  thunderResist?: number;
+  lightResist?: number;
+  darkResist?: number;
 }
 
 export interface ConsumableItem extends ItemBase {
@@ -47,7 +65,7 @@ export interface MaterialItem extends ItemBase {
   materialType: string;
 }
 
-export type GameItem = WeaponItem | ArmorItem | ConsumableItem | MaterialItem;
+export type GameItem = WeaponItem | ArmorItem | UnitItem | ConsumableItem | MaterialItem;
 
 export interface InventorySlot {
   item: GameItem;

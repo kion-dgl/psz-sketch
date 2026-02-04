@@ -5,7 +5,7 @@
 
 import localforage from 'localforage';
 import type { Character } from '../character/types';
-import type { GameItem } from '../inventory/types';
+import type { GameItem, WeaponItem, ArmorItem, UnitItem } from '../inventory/types';
 
 // Configure localForage
 localforage.config({
@@ -15,13 +15,19 @@ localforage.config({
 });
 
 // Types for persisted data
+export interface PersistedEquipment {
+  weapon: WeaponItem | null;
+  frame: ArmorItem | null;
+  unit1?: UnitItem | null;
+  unit2?: UnitItem | null;
+  unit3?: UnitItem | null;
+  unit4?: UnitItem | null;
+}
+
 export interface PersistedCharacterData {
   character: Character;
   inventory: Array<{ item: GameItem; quantity: number }>;
-  equipment: {
-    weapon: GameItem | null;
-    frame: GameItem | null;
-  };
+  equipment: PersistedEquipment;
   completedMissions: string[];
   completedFields: string[];
 }

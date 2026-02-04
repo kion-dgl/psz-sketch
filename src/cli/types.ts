@@ -14,7 +14,7 @@ export interface DetailedItem {
   id: string;
   name: string;
   description: string;
-  type: 'weapon' | 'armor' | 'consumable' | 'material';
+  type: 'weapon' | 'armor' | 'unit' | 'consumable' | 'material';
   rarity: number;
   quantity: number;
   // Weapon stats
@@ -22,11 +22,25 @@ export interface DetailedItem {
   accuracy?: number;
   weaponType?: string;
   element?: string;
-  // Armor stats
+  elementPercent?: number;
+  grindLevel?: number;
+  maxGrind?: number;
+  // Armor/Frame stats
   defense?: number;
   evasion?: number;
-  armorSlot?: 'frame' | 'barrier' | 'unit';
   unitSlots?: number;
+  // Unit stats
+  attackBonus?: number;
+  defenseBonus?: number;
+  accuracyBonus?: number;
+  evasionBonus?: number;
+  hpBonus?: number;
+  tpBonus?: number;
+  fireResist?: number;
+  iceResist?: number;
+  thunderResist?: number;
+  lightResist?: number;
+  darkResist?: number;
   // Consumable
   effect?: string;
   effectValue?: number;
