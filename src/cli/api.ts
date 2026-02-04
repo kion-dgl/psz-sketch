@@ -1070,12 +1070,11 @@ function executeCreateCharacter(classId: string, name: string): CommandResult {
   // Add starting items to inventory
   const startingItems = getStartingItems(normalizedClassId);
   inventory.clear();
+  equippedItems = { weapon: null, frame: null };
 
-  // Equip starting weapon and frame
-  equippedItems = {
-    weapon: startingItems.weapon,
-    frame: startingItems.frame,
-  };
+  // Add starting weapon and frame to inventory (player equips from inventory)
+  inventory.set(startingItems.weapon.id, { item: startingItems.weapon, quantity: 1 });
+  inventory.set(startingItems.frame.id, { item: startingItems.frame, quantity: 1 });
 
   // Add consumables to inventory
   for (const { item, quantity } of startingItems.consumables) {
@@ -1084,7 +1083,7 @@ function executeCreateCharacter(classId: string, name: string): CommandResult {
 
   return {
     success: true,
-    message: `Created ${normalizedClassId} character "${name}" with ${STARTING_MESETA} meseta.\nEquipped: ${startingItems.weapon.name}, ${startingItems.frame.name}`,
+    message: `Created ${normalizedClassId} character "${name}" with ${STARTING_MESETA} meseta.\nStarting gear in inventory.`,
     data: currentCharacter,
   };
 }
