@@ -259,10 +259,22 @@ export function getState(): GameState {
     unit4: null,
   };
 
-  // Build detailed inventory
+  // Build detailed inventory (including equipped items)
   const detailedInventory = Array.from(inventory.values()).map(entry =>
     toDetailedItem(entry.item, entry.quantity)
   );
+
+  // Add equipped items to inventory list (marked as equipped)
+  if (equippedItems.weapon) {
+    const weaponDetail = toDetailedItem(equippedItems.weapon, 1);
+    weaponDetail.equipped = true;
+    detailedInventory.unshift(weaponDetail); // Show at top
+  }
+  if (equippedItems.frame) {
+    const frameDetail = toDetailedItem(equippedItems.frame, 1);
+    frameDetail.equipped = true;
+    detailedInventory.splice(equippedItems.weapon ? 1 : 0, 0, frameDetail); // After weapon
+  }
 
   // Get session state for stage info
   const session = getSessionState();

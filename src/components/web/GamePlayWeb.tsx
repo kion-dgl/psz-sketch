@@ -1286,38 +1286,22 @@ export default function GamePlayWeb() {
           <div style={styles.invList}>
             {gameState?.inventory && gameState.inventory.length > 0 ? (
               gameState.inventory.map(item => {
-                const slots = item.type === 'armor' && 'slots' in item ? (item as any).slots : null;
+                const slots = item.type === 'armor' && 'unitSlots' in item ? (item as any).unitSlots : null;
+                const isEquipped = (item as any).equipped;
                 return (
-                  <div key={item.id} style={styles.invRow} data-testid={`sidebar-inv-${item.id}`}>
+                  <div key={item.id} style={isEquipped ? styles.invRowEquipped : styles.invRow} data-testid={`sidebar-inv-${item.id}`}>
                     <span>
+                      {isEquipped && <span style={styles.equippedMarker}>E </span>}
                       {item.name}
                       {slots !== null && slots > 0 && <span style={styles.armorSlots}> [{slots}]</span>}
                     </span>
-                    <span style={styles.invQty}>x{item.quantity}</span>
+                    {!isEquipped && <span style={styles.invQty}>x{item.quantity}</span>}
                   </div>
                 );
               })
             ) : (
               <div style={styles.emptyText}>Empty</div>
             )}
-          </div>
-
-          <h3 style={{ ...styles.panelTitle, marginTop: '16px' }}>EQUIPMENT</h3>
-          <div style={styles.equipList}>
-            {['weapon', 'armor'].map(slot => {
-              const equipKey = slot === 'armor' ? 'frame' : slot;
-              const item = gameState?.equipment?.[equipKey as keyof typeof gameState.equipment];
-              const armorSlots = slot === 'armor' && item && 'slots' in item ? (item as any).slots : null;
-              return (
-                <div key={slot} style={styles.equipRow} data-testid={`equip-slot-${slot}`}>
-                  <span style={styles.equipLabel}>{slot}</span>
-                  <span style={item ? styles.equipItem : styles.equipEmpty}>
-                    {item?.name || '--'}
-                    {armorSlots !== null && armorSlots > 0 && <span style={styles.armorSlots}> [{armorSlots}]</span>}
-                  </span>
-                </div>
-              );
-            })}
           </div>
         </aside>
       </div>
@@ -1850,6 +1834,18 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '10px',
     padding: '4px',
     background: '#0d1117',
+  },
+  invRowEquipped: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    fontSize: '10px',
+    padding: '4px',
+    background: '#1a2d1a',
+    border: '1px solid #4ade80',
+  },
+  equippedMarker: {
+    color: '#4ade80',
+    fontWeight: 'bold',
   },
   invQty: { color: '#666' },
   emptyText: { color: '#555', fontSize: '10px' },

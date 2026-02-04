@@ -32,6 +32,8 @@ export interface DetailedItem {
   effectValue?: number;
   // Level requirement
   requiredLevel?: number;
+  // Equipment state
+  equipped?: boolean;
 }
 
 /** Equipment slot info */
