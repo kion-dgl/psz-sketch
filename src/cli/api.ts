@@ -243,11 +243,19 @@ function toDetailedItem(item: GameItem, quantity: number): DetailedItem {
     detailed.maxGrind = w.maxGrind;
     detailed.requiredLevel = w.requiredLevel;
   } else if (item.type === 'armor') {
-    const a = item as ArmorItem;
-    detailed.defense = a.defense;
-    detailed.evasion = a.evasion;
-    detailed.unitSlots = a.unitSlots;
-    detailed.requiredLevel = a.requiredLevel;
+    // Check for old-style unit data (type: 'armor' with armorSlot: 'unit')
+    const armorSlot = (item as any).armorSlot;
+    if (armorSlot === 'unit') {
+      // Convert to unit type for UI
+      detailed.type = 'unit';
+      detailed.requiredLevel = (item as any).requiredLevel;
+    } else {
+      const a = item as ArmorItem;
+      detailed.defense = a.defense;
+      detailed.evasion = a.evasion;
+      detailed.unitSlots = a.unitSlots;
+      detailed.requiredLevel = a.requiredLevel;
+    }
   } else if (item.type === 'unit') {
     const u = item as UnitItem;
     detailed.attackBonus = u.attackBonus;
