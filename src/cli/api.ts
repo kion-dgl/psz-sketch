@@ -972,6 +972,34 @@ export function execute(commandLine: string): CommandResult {
       return executeEquipFrame(args[0]);
     }
 
+    case 'set-weapon': {
+      // Internal command for restoring equipped weapon from persistence
+      if (!args[0]) {
+        return { success: false, message: 'Usage: set-weapon <weapon-json>' };
+      }
+      try {
+        const weapon = JSON.parse(args.join(' ')) as WeaponItem;
+        equippedItems.weapon = weapon;
+        return { success: true, message: `Restored weapon: ${weapon.name}` };
+      } catch {
+        return { success: false, message: 'Invalid weapon JSON' };
+      }
+    }
+
+    case 'set-frame': {
+      // Internal command for restoring equipped armor from persistence
+      if (!args[0]) {
+        return { success: false, message: 'Usage: set-frame <armor-json>' };
+      }
+      try {
+        const frame = JSON.parse(args.join(' ')) as ArmorItem;
+        equippedItems.frame = frame;
+        return { success: true, message: `Restored armor: ${frame.name}` };
+      } catch {
+        return { success: false, message: 'Invalid armor JSON' };
+      }
+    }
+
     default:
       return {
         success: false,
@@ -1111,17 +1139,11 @@ function executeLoadCharacter(jsonString: string): CommandResult {
     currentEnemies = [];
     playerCombatState = null;
 
-    // Set up starting equipment based on class
-    const startingItems = getStartingItems(normalizedClassId);
+    // Don't auto-equip starting items - let persistence layer restore actual equipment
     equippedItems = {
-      weapon: startingItems.weapon,
-      frame: startingItems.frame,
+      weapon: null,
+      frame: null,
     };
-
-    // Add consumables to inventory
-    for (const { item, quantity } of startingItems.consumables) {
-      inventory.set(item.id, { item, quantity });
-    }
 
     return {
       success: true,

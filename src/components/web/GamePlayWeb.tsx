@@ -122,12 +122,12 @@ export default function GamePlayWeb() {
       }
     }
 
-    // Restore equipment
+    // Restore equipment (use set-weapon/set-frame to directly restore without inventory swap)
     if (data.equipment?.weapon) {
-      execute(`equip-weapon ${data.equipment.weapon.id}`);
+      execute(`set-weapon ${JSON.stringify(data.equipment.weapon)}`);
     }
     if (data.equipment?.frame) {
-      execute(`equip-frame ${data.equipment.frame.id}`);
+      execute(`set-frame ${JSON.stringify(data.equipment.frame)}`);
     }
 
     // Restore completed missions and fields
