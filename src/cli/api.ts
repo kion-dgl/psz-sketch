@@ -958,6 +958,20 @@ export function execute(commandLine: string): CommandResult {
       }
     }
 
+    case 'equip-weapon': {
+      if (!args[0]) {
+        return { success: false, message: 'Usage: equip-weapon <item-id>' };
+      }
+      return executeEquipWeapon(args[0]);
+    }
+
+    case 'equip-frame': {
+      if (!args[0]) {
+        return { success: false, message: 'Usage: equip-frame <item-id>' };
+      }
+      return executeEquipFrame(args[0]);
+    }
+
     default:
       return {
         success: false,
@@ -1619,6 +1633,72 @@ function executeUnequip(slot: string): CommandResult {
       message: `Unequipped ${frame.name}. You have no armor!`,
     };
   }
+}
+
+function executeEquipWeapon(itemId: string): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  // Find the weapon in inventory
+  const entry = inventory.get(itemId);
+  if (!entry) {
+    return { success: false, message: `Item "${itemId}" not found in inventory.` };
+  }
+
+  if (entry.item.type !== 'weapon') {
+    return { success: false, message: `${entry.item.name} is not a weapon.` };
+  }
+
+  const weapon = entry.item as WeaponItem;
+
+  // If there's already a weapon equipped, put it back in inventory
+  if (equippedItems.weapon) {
+    inventory.set(equippedItems.weapon.id, { item: equippedItems.weapon, quantity: 1 });
+  }
+
+  // Equip the new weapon and remove from inventory
+  equippedItems.weapon = weapon;
+  inventory.delete(itemId);
+
+  return {
+    success: true,
+    message: `Equipped ${weapon.name}.`,
+    data: { equipped: weapon },
+  };
+}
+
+function executeEquipFrame(itemId: string): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  // Find the armor in inventory
+  const entry = inventory.get(itemId);
+  if (!entry) {
+    return { success: false, message: `Item "${itemId}" not found in inventory.` };
+  }
+
+  if (entry.item.type !== 'armor') {
+    return { success: false, message: `${entry.item.name} is not armor.` };
+  }
+
+  const armor = entry.item as ArmorItem;
+
+  // If there's already armor equipped, put it back in inventory
+  if (equippedItems.frame) {
+    inventory.set(equippedItems.frame.id, { item: equippedItems.frame, quantity: 1 });
+  }
+
+  // Equip the new armor and remove from inventory
+  equippedItems.frame = armor;
+  inventory.delete(itemId);
+
+  return {
+    success: true,
+    message: `Equipped ${armor.name}.`,
+    data: { equipped: armor },
+  };
 }
 
 function executeCreateMag(): CommandResult {
