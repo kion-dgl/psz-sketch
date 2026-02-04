@@ -1882,7 +1882,10 @@ function executeEquipFrame(itemId: string): CommandResult {
   }
 
   // Check if it's a unit (common mistake)
-  if (entry.item.type === 'unit') {
+  // Also check armorSlot for backwards compatibility with old persisted data
+  const isUnit = entry.item.type === 'unit' ||
+    (entry.item.type === 'armor' && (entry.item as any).armorSlot === 'unit');
+  if (isUnit) {
     return {
       success: false,
       message: `${entry.item.name} is a unit, not a frame. Use equip-unit for units.`,
@@ -1952,15 +1955,19 @@ function executeEquipUnit(itemId: string): CommandResult {
     return { success: false, message: `Item "${itemId}" not found in inventory.` };
   }
 
-  // Check if it's a frame (common mistake)
-  if (entry.item.type === 'armor') {
+  // Check for unit type (new format) or old format with armorSlot === 'unit'
+  const isUnit = entry.item.type === 'unit' ||
+    (entry.item.type === 'armor' && (entry.item as any).armorSlot === 'unit');
+
+  // Check if it's a frame (common mistake) - but not an old-style unit
+  if (entry.item.type === 'armor' && !isUnit) {
     return {
       success: false,
       message: `${entry.item.name} is a frame, not a unit. Use equip-frame for frames.`,
     };
   }
 
-  if (entry.item.type !== 'unit') {
+  if (!isUnit) {
     return { success: false, message: `${entry.item.name} is not a unit.` };
   }
 
