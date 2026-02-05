@@ -243,12 +243,16 @@ function toDetailedItem(item: GameItem, quantity: number): DetailedItem {
     detailed.maxGrind = w.maxGrind;
     detailed.requiredLevel = w.requiredLevel;
   } else if (item.type === 'armor') {
-    // Check for old-style unit data (type: 'armor' with armorSlot: 'unit')
-    const armorSlot = (item as any).armorSlot;
-    if (armorSlot === 'unit') {
+    // Check for old-style unit data - multiple detection methods:
+    // 1. Has armorSlot: 'unit'
+    // 2. Has defense === 0, evasion === 0, and no unitSlots (lost armorSlot after save cycle)
+    const i = item as any;
+    const isOldUnit = i.armorSlot === 'unit' ||
+      (i.defense === 0 && i.evasion === 0 && i.unitSlots === undefined);
+    if (isOldUnit) {
       // Convert to unit type for UI
       detailed.type = 'unit';
-      detailed.requiredLevel = (item as any).requiredLevel;
+      detailed.requiredLevel = i.requiredLevel;
     } else {
       const a = item as ArmorItem;
       detailed.defense = a.defense;
@@ -1890,9 +1894,14 @@ function executeEquipFrame(itemId: string): CommandResult {
   }
 
   // Check if it's a unit (common mistake)
-  // Also check armorSlot for backwards compatibility with old persisted data
-  const isUnit = entry.item.type === 'unit' ||
-    (entry.item.type === 'armor' && (entry.item as any).armorSlot === 'unit');
+  // Check multiple ways for backwards compatibility with old persisted data:
+  // 1. New format: type === 'unit'
+  // 2. Old format with armorSlot: type === 'armor' && armorSlot === 'unit'
+  // 3. Old format after save cycle (lost armorSlot): type === 'armor' && defense === 0 && no unitSlots
+  const item = entry.item as any;
+  const isUnit = item.type === 'unit' ||
+    (item.type === 'armor' && item.armorSlot === 'unit') ||
+    (item.type === 'armor' && item.defense === 0 && item.evasion === 0 && item.unitSlots === undefined);
   if (isUnit) {
     return {
       success: false,
@@ -1963,12 +1972,17 @@ function executeEquipUnit(itemId: string): CommandResult {
     return { success: false, message: `Item "${itemId}" not found in inventory.` };
   }
 
-  // Check for unit type (new format) or old format with armorSlot === 'unit'
-  const isUnit = entry.item.type === 'unit' ||
-    (entry.item.type === 'armor' && (entry.item as any).armorSlot === 'unit');
+  // Check for unit type - multiple ways for backwards compatibility:
+  // 1. New format: type === 'unit'
+  // 2. Old format with armorSlot: type === 'armor' && armorSlot === 'unit'
+  // 3. Old format after save cycle (lost armorSlot): type === 'armor' && defense === 0 && no unitSlots
+  const item = entry.item as any;
+  const isUnit = item.type === 'unit' ||
+    (item.type === 'armor' && item.armorSlot === 'unit') ||
+    (item.type === 'armor' && item.defense === 0 && item.evasion === 0 && item.unitSlots === undefined);
 
   // Check if it's a frame (common mistake) - but not an old-style unit
-  if (entry.item.type === 'armor' && !isUnit) {
+  if (item.type === 'armor' && !isUnit) {
     return {
       success: false,
       message: `${entry.item.name} is a frame, not a unit. Use equip-frame for frames.`,
@@ -2013,7 +2027,7 @@ function executeEquipUnit(itemId: string): CommandResult {
   return {
     success: true,
     message: `Equipped ${unit.name} to unit slot ${nextSlot}.`,
-    data: { equipped: armor, slot: nextSlot },
+    data: { equipped: unit, slot: nextSlot },
   };
 }
 
