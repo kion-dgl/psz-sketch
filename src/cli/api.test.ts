@@ -120,10 +120,10 @@ describe('CLI API', () => {
       expect(getState().location).toBe('missions');
     });
 
-    it('moves to inventory', () => {
+    it('inventory is no longer a valid location (use overlay instead)', () => {
       const result = execute('goto inventory');
-      expect(result.success).toBe(true);
-      expect(getState().location).toBe('inventory');
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Invalid location');
     });
 
     it('fails for invalid location', () => {

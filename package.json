@@ -15,7 +15,8 @@
     "test:e2e:ui": "playwright test --ui",
     "test:all": "vitest run && playwright test",
     "cli": "npx tsx src/cli/game.ts",
-    "cli:api": "npx tsx src/cli/game.ts --api"
+    "cli:api": "npx tsx src/cli/game.ts --api",
+    "ai-test": "npx tsx src/cli/ai-test.ts"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.0",

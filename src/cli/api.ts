@@ -377,6 +377,7 @@ export function getState(): GameState {
     currentWave,
     totalWaves,
     sessionType: session.activeType,
+    storage: getSharedStorage(),
   };
 }
 
@@ -1320,7 +1321,7 @@ function executeGoto(location: Location): CommandResult {
     };
   }
 
-  const validLocations: Location[] = ['city', 'shop', 'weapon-shop', 'missions', 'inventory', 'storage', 'guild', 'teleporter'];
+  const validLocations: Location[] = ['city', 'shop', 'weapon-shop', 'missions', 'storage', 'guild', 'teleporter'];
   if (!validLocations.includes(location)) {
     return {
       success: false,

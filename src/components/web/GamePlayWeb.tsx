@@ -383,10 +383,17 @@ export default function GamePlayWeb() {
         </button>
         <button
           style={styles.cityButton}
-          onClick={() => executeCommand('goto inventory')}
+          onClick={() => setShowInventoryOverlay(true)}
           data-testid="goto-inventory"
         >
           Inventory
+        </button>
+        <button
+          style={styles.cityButton}
+          onClick={() => executeCommand('goto storage')}
+          data-testid="goto-storage"
+        >
+          Storage
         </button>
       </div>
 
@@ -995,6 +1002,107 @@ export default function GamePlayWeb() {
     );
   };
 
+  const renderStorageContent = () => {
+    const storage = gameState?.storage;
+    const storageItems = storage?.items || [];
+    const storageMeseta = storage?.meseta || 0;
+    const maxSlots = storage?.maxSlots || 200;
+
+    return (
+      <div style={styles.locationContent}>
+        <div style={styles.locationHeader}>
+          <h2 style={styles.locationTitle}>SHARED STORAGE ({storageItems.length}/{maxSlots})</h2>
+          <button style={styles.backBtn} onClick={() => executeCommand('goto city')}>← Back</button>
+        </div>
+
+        {/* Meseta Section */}
+        <div style={styles.storageSection}>
+          <h3 style={styles.sectionTitle}>MESETA</h3>
+          <div style={styles.mesetaRow}>
+            <span>Storage: {storageMeseta.toLocaleString()}</span>
+            <span>Wallet: {(gameState?.meseta || 0).toLocaleString()}</span>
+          </div>
+          <div style={styles.mesetaActions}>
+            <button
+              style={styles.storageBtn}
+              onClick={() => {
+                const amount = prompt('Deposit how much meseta?');
+                if (amount && !isNaN(Number(amount))) {
+                  executeCommand(`deposit-meseta ${amount}`);
+                  refreshState();
+                }
+              }}
+              data-testid="deposit-meseta"
+            >
+              Deposit
+            </button>
+            <button
+              style={styles.storageBtn}
+              onClick={() => {
+                const amount = prompt('Withdraw how much meseta?');
+                if (amount && !isNaN(Number(amount))) {
+                  executeCommand(`withdraw-meseta ${amount}`);
+                  refreshState();
+                }
+              }}
+              data-testid="withdraw-meseta"
+            >
+              Withdraw
+            </button>
+          </div>
+        </div>
+
+        {/* Inventory Items - can deposit to storage */}
+        <div style={styles.storageSection}>
+          <h3 style={styles.sectionTitle}>YOUR INVENTORY</h3>
+          <div style={styles.storageGrid}>
+            {gameState?.inventory && gameState.inventory.length > 0 ? (
+              gameState.inventory.filter(item => !item.equipped).map(item => (
+                <div key={`inv-${item.id}`} style={styles.storageCard}>
+                  <div style={styles.invItemName}>{item.name}</div>
+                  <div style={styles.invItemQty}>x{item.quantity}</div>
+                  <button
+                    style={styles.depositBtn}
+                    onClick={() => { executeCommand(`deposit-item ${item.id}`); refreshState(); }}
+                    data-testid={`deposit-${item.id}`}
+                  >
+                    Deposit →
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div style={styles.emptyText}>No items to deposit</div>
+            )}
+          </div>
+        </div>
+
+        {/* Storage Items - can withdraw to inventory */}
+        <div style={styles.storageSection}>
+          <h3 style={styles.sectionTitle}>STORED ITEMS</h3>
+          <div style={styles.storageGrid}>
+            {storageItems.length > 0 ? (
+              storageItems.map((slot, idx) => (
+                <div key={`storage-${slot.item.id}-${idx}`} style={styles.storageCard}>
+                  <div style={styles.invItemName}>{slot.item.name}</div>
+                  <div style={styles.invItemQty}>x{slot.quantity}</div>
+                  <button
+                    style={styles.withdrawBtn}
+                    onClick={() => { executeCommand(`withdraw-item ${slot.item.id}`); refreshState(); }}
+                    data-testid={`withdraw-${slot.item.id}`}
+                  >
+                    ← Withdraw
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div style={styles.emptyText}>Storage is empty</div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Class table organized by Race (rows) and Class/Gender (columns)
   // Format: { race: { classType: { male: classId | null, female: classId | null } } }
   const CLASS_TABLE: Record<string, Record<string, { male: string | null; female: string | null }>> = {
@@ -1220,7 +1328,7 @@ export default function GamePlayWeb() {
       case 'teleporter': return renderTeleporterContent();
       case 'guild': return renderGuildContent();
       case 'field': return renderFieldContent();
-      case 'inventory': return renderInventoryContent();
+      case 'storage': return renderStorageContent();
       default: return renderCityContent();
     }
   };
@@ -1348,8 +1456,8 @@ export default function GamePlayWeb() {
         </aside>
       </div>
 
-      {/* Inventory Overlay - for field/mission access */}
-      {showInventoryOverlay && gameState?.location === 'field' && (
+      {/* Inventory Overlay - accessible from anywhere */}
+      {showInventoryOverlay && (
         <div style={styles.inventoryOverlay}>
           <div style={styles.inventoryOverlayContent}>
             <div style={styles.inventoryOverlayHeader}>
@@ -1751,6 +1859,66 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#2d4a3a',
     border: '1px solid #4ade80',
     color: '#4ade80',
+    fontFamily: 'monospace',
+    cursor: 'pointer',
+    fontSize: '11px',
+    width: '100%',
+  },
+  storageSection: {
+    marginBottom: '16px',
+  },
+  storageGrid: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px',
+  },
+  storageCard: {
+    padding: '8px',
+    background: '#252540',
+    border: '1px solid #3a5a8a',
+    borderRadius: '4px',
+    minWidth: '120px',
+  },
+  mesetaRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    padding: '8px',
+    background: '#252540',
+    borderRadius: '4px',
+    marginBottom: '8px',
+    color: '#fcd34d',
+    fontSize: '12px',
+  },
+  mesetaActions: {
+    display: 'flex',
+    gap: '8px',
+  },
+  storageBtn: {
+    padding: '6px 12px',
+    background: '#2d3a4a',
+    border: '1px solid #60a5fa',
+    color: '#60a5fa',
+    fontFamily: 'monospace',
+    cursor: 'pointer',
+    fontSize: '11px',
+  },
+  depositBtn: {
+    marginTop: '4px',
+    padding: '4px 8px',
+    background: '#3a2d4a',
+    border: '1px solid #a78bfa',
+    color: '#a78bfa',
+    fontFamily: 'monospace',
+    cursor: 'pointer',
+    fontSize: '11px',
+    width: '100%',
+  },
+  withdrawBtn: {
+    marginTop: '4px',
+    padding: '4px 8px',
+    background: '#2d4a4a',
+    border: '1px solid #22d3d1',
+    color: '#22d3d1',
     fontFamily: 'monospace',
     cursor: 'pointer',
     fontSize: '11px',
