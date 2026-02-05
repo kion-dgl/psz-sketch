@@ -873,7 +873,8 @@ export default function GamePlayWeb() {
         )}
 
         {/* Stage Complete - different UI for final stage vs intermediate stages */}
-        {!hasEnemies && !hasDrops && combat && (
+        {/* Items on ground are optional - player can pick up or ignore and proceed */}
+        {!hasEnemies && combat && (
           gameState?.isAtFinalStage ? (
             <div style={styles.fieldComplete}>
               <p style={styles.fieldCompleteText}>
