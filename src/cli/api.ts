@@ -1778,10 +1778,6 @@ function executeEquip(itemId: string): CommandResult {
     return { success: false, message: 'No character.' };
   }
 
-  if (currentLocation !== 'inventory') {
-    return { success: false, message: 'You must be in inventory. Use: goto inventory' };
-  }
-
   // Check if item is in inventory (for weapons/armor that could be stored)
   // For now, just provide feedback about what's equipped
   // In a full implementation, this would swap items in/out of inventory
@@ -1795,10 +1791,6 @@ function executeEquip(itemId: string): CommandResult {
 function executeUnequip(slot: string): CommandResult {
   if (!currentCharacter) {
     return { success: false, message: 'No character.' };
-  }
-
-  if (currentLocation !== 'inventory') {
-    return { success: false, message: 'You must be in inventory. Use: goto inventory' };
   }
 
   if (slot !== 'weapon' && slot !== 'frame') {
@@ -2043,10 +2035,6 @@ function executeEquipUnit(itemId: string): CommandResult {
 function executeUnequipUnit(slotNum: number): CommandResult {
   if (!currentCharacter) {
     return { success: false, message: 'No character.' };
-  }
-
-  if (currentLocation !== 'inventory') {
-    return { success: false, message: 'You must be in inventory. Use: goto inventory' };
   }
 
   if (slotNum < 1 || slotNum > 4) {

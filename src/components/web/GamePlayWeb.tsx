@@ -45,6 +45,7 @@ export default function GamePlayWeb() {
   const [shopTab, setShopTab] = useState<'items' | 'weapons'>('items');
   const [weaponShopTab, setWeaponShopTab] = useState<'weapons' | 'armor' | 'units'>('weapons');
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
+  const [showInventoryOverlay, setShowInventoryOverlay] = useState(false);
   // Character slot management
   const [characterSlots, setCharacterSlots] = useState<CharacterSlots>([null, null, null, null]);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
@@ -787,7 +788,7 @@ export default function GamePlayWeb() {
           <div style={styles.headerBtnGroup}>
             <button
               style={styles.fieldHeaderBtn}
-              onClick={() => executeCommand('goto inventory')}
+              onClick={() => setShowInventoryOverlay(true)}
               data-testid="field-inventory"
             >
               Inventory
@@ -1346,6 +1347,80 @@ export default function GamePlayWeb() {
           </div>
         </aside>
       </div>
+
+      {/* Inventory Overlay - for field/mission access */}
+      {showInventoryOverlay && gameState?.location === 'field' && (
+        <div style={styles.inventoryOverlay}>
+          <div style={styles.inventoryOverlayContent}>
+            <div style={styles.inventoryOverlayHeader}>
+              <h2 style={styles.locationTitle}>INVENTORY ({gameState?.inventorySlots ?? 0}/{gameState?.maxInventorySlots ?? 40})</h2>
+              <button
+                style={styles.closeOverlayBtn}
+                onClick={() => setShowInventoryOverlay(false)}
+                data-testid="close-inventory-overlay"
+              >
+                ✕ Close
+              </button>
+            </div>
+            <div style={styles.inventoryOverlayGrid}>
+              {gameState?.inventory && gameState.inventory.length > 0 ? (
+                gameState.inventory.map(item => {
+                  const isWeapon = item.type === 'weapon';
+                  const isArmor = item.type === 'armor';
+                  const isUnit = item.type === 'unit';
+                  const isFrame = isArmor;
+                  const isEquipped = item.equipped === true;
+                  const canEquip = isWeapon || isArmor || isUnit;
+                  const armorSlots = isFrame ? item.unitSlots : null;
+                  const itemKey = isEquipped ? `overlay-equipped-${item.id}` : `overlay-${item.id}`;
+
+                  const getEquipCommand = () => {
+                    if (isWeapon) return `equip-weapon ${item.id}`;
+                    if (isUnit) return `equip-unit ${item.id}`;
+                    return `equip-frame ${item.id}`;
+                  };
+
+                  return (
+                    <div key={itemKey} style={styles.invCard} data-testid={`overlay-inv-item-${item.id}`}>
+                      <div style={styles.invItemName}>{item.name}</div>
+                      <div style={styles.invItemQty}>x{item.quantity}</div>
+                      {isWeapon && <div style={styles.invItemStat}>ATK: {item.attack}</div>}
+                      {isFrame && (
+                        <div style={styles.invItemStat}>
+                          DEF: {item.defense}
+                          {armorSlots != null && armorSlots > 0 && <span style={styles.armorSlots}> [{armorSlots}S]</span>}
+                        </div>
+                      )}
+                      {isUnit && <div style={styles.invItemStat}>{item.description}</div>}
+                      {item.type === 'consumable' && (
+                        <button
+                          style={styles.useItemBtn}
+                          onClick={() => { executeCommand(`use-item ${item.id}`); refreshState(); }}
+                          data-testid={`overlay-use-${item.id}`}
+                        >
+                          Use
+                        </button>
+                      )}
+                      {canEquip && (
+                        <button
+                          style={isEquipped ? styles.equippedBtn : styles.equipBtn}
+                          onClick={() => { executeCommand(getEquipCommand()); refreshState(); }}
+                          disabled={isEquipped}
+                          data-testid={`overlay-equip-${item.id}`}
+                        >
+                          {isEquipped ? 'Equipped' : 'Equip'}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                <div style={styles.emptyText}>No items</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1626,6 +1701,60 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexWrap: 'wrap',
     gap: '8px',
+  },
+  inventoryOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(0, 0, 0, 0.85)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100,
+  },
+  inventoryOverlayContent: {
+    background: '#1a1a2e',
+    border: '2px solid #3a5a8a',
+    borderRadius: '8px',
+    padding: '16px',
+    maxWidth: '600px',
+    maxHeight: '80vh',
+    overflowY: 'auto',
+    width: '90%',
+  },
+  inventoryOverlayHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '16px',
+    paddingBottom: '8px',
+    borderBottom: '1px solid #333',
+  },
+  inventoryOverlayGrid: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px',
+  },
+  closeOverlayBtn: {
+    padding: '8px 16px',
+    background: '#4a2d2d',
+    border: '1px solid #f87171',
+    color: '#f87171',
+    fontFamily: 'monospace',
+    cursor: 'pointer',
+  },
+  useItemBtn: {
+    marginTop: '4px',
+    padding: '4px 8px',
+    background: '#2d4a3a',
+    border: '1px solid #4ade80',
+    color: '#4ade80',
+    fontFamily: 'monospace',
+    cursor: 'pointer',
+    fontSize: '11px',
+    width: '100%',
   },
   invCard: {
     padding: '8px',
