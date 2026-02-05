@@ -279,6 +279,8 @@ function toDetailedItem(item: GameItem, quantity: number): DetailedItem {
     const c = item as ConsumableItem;
     detailed.effect = c.effect;
     detailed.effectValue = c.effectValue;
+    detailed.stackable = c.stackable;
+    detailed.maxStack = c.maxStack;
   }
 
   return detailed;
