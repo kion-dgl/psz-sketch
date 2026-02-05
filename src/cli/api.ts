@@ -14,6 +14,7 @@ import type { WeaponItem, ArmorItem, UnitItem, ConsumableItem, GameItem } from '
 // Game state (in-memory for CLI)
 let currentCharacter: Character | null = null;
 let currentLocation: Location = 'city';
+let previousLocation: Location = 'city';
 
 // Inventory now stores full item details
 interface InventoryEntry {
@@ -344,6 +345,7 @@ export function getState(): GameState {
   return {
     character: currentCharacter,
     location: currentLocation,
+    previousLocation: previousLocation,
     inventory: detailedInventory,
     equipment,
     meseta: currentCharacter?.meseta ?? 0,
@@ -1331,6 +1333,8 @@ function executeGoto(location: Location): CommandResult {
     setSessionConfig(currentCharacter.character_id, currentCharacter.level);
   }
 
+  // Track previous location for back navigation
+  previousLocation = currentLocation;
   currentLocation = location;
   return {
     success: true,
@@ -2693,6 +2697,7 @@ function executeClaimRewards(): CommandResult {
 export function resetState(): void {
   currentCharacter = null;
   currentLocation = 'city';
+  previousLocation = 'city';
   inventory.clear();
   clearSharedStorage();
   resetSession();

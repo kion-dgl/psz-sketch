@@ -784,13 +784,22 @@ export default function GamePlayWeb() {
       <div style={styles.locationContent}>
         <div style={styles.locationHeader}>
           <h2 style={styles.locationTitle}>FIELD - {stageTitle}{waveInfo}</h2>
-          <button
-            style={styles.telepipeBtn}
-            onClick={() => executeCommand('use-telepipe')}
-            data-testid="use-telepipe"
-          >
-            Telepipe
-          </button>
+          <div style={styles.headerBtnGroup}>
+            <button
+              style={styles.fieldHeaderBtn}
+              onClick={() => executeCommand('goto inventory')}
+              data-testid="field-inventory"
+            >
+              Inventory
+            </button>
+            <button
+              style={styles.fieldHeaderBtn}
+              onClick={() => executeCommand('use-telepipe')}
+              data-testid="use-telepipe"
+            >
+              Telepipe
+            </button>
+          </div>
         </div>
 
         {/* Player HP/TP */}
@@ -925,11 +934,12 @@ export default function GamePlayWeb() {
   };
 
   const renderInventoryContent = () => {
+    const backLocation = gameState?.previousLocation || 'city';
     return (
       <div style={styles.locationContent}>
         <div style={styles.locationHeader}>
           <h2 style={styles.locationTitle}>INVENTORY ({gameState?.inventorySlots ?? 0}/{gameState?.maxInventorySlots ?? 40})</h2>
-          <button style={styles.backBtn} onClick={() => executeCommand('goto city')}>← Back</button>
+          <button style={styles.backBtn} onClick={() => executeCommand(`goto ${backLocation}`)}>← Back</button>
         </div>
         <div style={styles.inventoryGrid}>
           {gameState?.inventory && gameState.inventory.length > 0 ? (
@@ -1597,6 +1607,18 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#4a4a2d',
     border: '1px solid #fcd34d',
     color: '#fcd34d',
+    fontFamily: 'monospace',
+    cursor: 'pointer',
+  },
+  headerBtnGroup: {
+    display: 'flex',
+    gap: '8px',
+  },
+  fieldHeaderBtn: {
+    padding: '8px 16px',
+    background: '#2d3a4a',
+    border: '1px solid #60a5fa',
+    color: '#60a5fa',
     fontFamily: 'monospace',
     cursor: 'pointer',
   },
