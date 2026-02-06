@@ -1,6 +1,7 @@
 /**
  * Enemy Pools
  * Defines which enemies can spawn in each area
+ * Uses proper PSZ enemy names from content/enemies/*.json
  */
 
 import type { EnemyArea, EnemyPool, ContentDifficulty } from './types';
@@ -12,69 +13,71 @@ import type { EnemyArea, EnemyPool, ContentDifficulty } from './types';
  * - rare: Low spawn rate, special conditions
  * - bosses: Area boss enemies
  * - elites: Mini-bosses or powerful variants
+ *
+ * Enemy names match content/enemies/*.json and content/drops/*.json
  */
 export const ENEMY_POOLS: Record<EnemyArea, EnemyPool> = {
   gurhacia: {
     area: 'gurhacia',
-    common: ['snake', 'lizard', 'hyena'],
-    uncommon: ['vulture', 'lion'],
-    rare: ['snake_rare', 'hyena_rare', 'lion_rare', 'rappy', 'booma'],
-    bosses: ['boss_dragon'],
-    elites: ['lion'],
+    common: ['ghowl', 'vulkure', 'garapython'],
+    uncommon: ['garahadan', 'grimble', 'tormatible'],
+    rare: ['rappy', 'booma-origin', 'helion'],
+    bosses: ['blaze-helion'],
+    elites: ['helion'],
   },
 
   rioh: {
     area: 'rioh',
-    common: ['wolf', 'deer', 'rabbit'],
-    uncommon: ['gorilla', 'gorilla_female'],
-    rare: ['rabbit_rare', 'gorilla_rare', 'rappy'],
-    bosses: [], // Rioh shares boss with another area or has story boss
-    elites: ['gorilla'],
+    common: ['usanny', 'usanimere', 'reyhound'],
+    uncommon: ['stagg', 'hildegao'],
+    rare: ['rappy', 'booma-origin', 'hildegigas'],
+    bosses: ['hildegigas'],
+    elites: ['hildegao'],
   },
 
   ozette: {
     area: 'ozette',
-    common: ['seal', 'frog'],
-    uncommon: ['roc'],
-    rare: ['seal_rare', 'frog_rare', 'roc_rare', 'jigobooma'],
-    bosses: ['boss_octopus'],
-    elites: ['roc'],
+    common: ['porel', 'pomarr', 'hypao'],
+    uncommon: ['vespao', 'pelcatraz'],
+    rare: ['rappy', 'booma-origin', 'gigobooma-origin', 'pelcatobur'],
+    bosses: ['pelcatobur'],
+    elites: ['pelcatraz'],
   },
 
   paru: {
     area: 'paru',
-    common: ['shrimp', 'frog_bomb'],
-    uncommon: ['orangutan', 'quad'],
-    rare: ['shrimp_rare', 'orangutan_rare', 'quad_rare', 'rappy_blue'],
-    bosses: ['boss_robot'],
-    elites: ['quad'],
+    common: ['pobomma', 'bolix', 'izhirak-s6'],
+    uncommon: ['goldix', 'azherowa-b2', 'froutang'],
+    rare: ['ar-rappy', 'booma-origin', 'gigobooma-origin', 'frunaked'],
+    bosses: ['frunaked'],
+    elites: ['froutang'],
   },
 
   makara: {
     area: 'makara',
-    common: ['bat', 'mole'],
-    uncommon: ['bat_blue', 'tiger', 'armadillo'],
-    rare: ['armadillo_rare'],
-    bosses: [], // Makara may share boss or have story-specific boss
-    elites: ['tiger'],
+    common: ['batt', 'bullbatt', 'rumole'],
+    uncommon: ['kapantha', 'rohjade'],
+    rare: ['ar-rappy', 'booma-origin', 'gigobooma-origin', 'rohcrysta'],
+    bosses: ['rohcrysta'],
+    elites: ['rohjade'],
   },
 
   arca: {
     area: 'arca',
-    common: ['shooter', 'board'],
-    uncommon: ['shooter_leader', 'swordman', 'board_blue', 'board_green'],
-    rare: ['swordman_rare', 'rappy_red'],
-    bosses: ['boss_mother'],
-    elites: ['shooter_leader', 'swordman'],
+    common: ['korse', 'akorse', 'finjer-r'],
+    uncommon: ['finjer-g', 'finjer-b'],
+    rare: ['rab-rappy', 'booma-origin', 'gigobooma-origin'],
+    bosses: ['blade-mother'],
+    elites: ['akorse'],
   },
 
   dark: {
     area: 'dark',
-    common: ['circle', 'lower', 'leg'],
-    uncommon: ['circle_black', 'lower_black', 'leg_black', 'tank'],
-    rare: ['tank_rare', 'swordman_b', 'swordman_rare_b'],
-    bosses: ['boss_darkfalz'],
-    elites: ['mother', 'tank'],
+    common: ['eulid', 'eulidveil', 'eulada'],
+    uncommon: ['euladaveil', 'arkzein', 'arkzein-r'],
+    rare: ['rab-rappy', 'booma-origin', 'gigobooma-origin', 'derreo'],
+    bosses: ['dark-falz', 'chaos-mobius'],
+    elites: ['derreo', 'arkzein-r'],
   },
 };
 

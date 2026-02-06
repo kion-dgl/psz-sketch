@@ -11,7 +11,7 @@ import { generateEnemyComposition, createSeededRandom } from '../systems/stage/e
 import type { CombatStats, WeaponStats, Element } from '../systems/combat/types';
 import { addItem } from './inventory';
 import { MONOMATE, MONOFLUID } from '../systems/inventory/starting-items';
-import { getClassStatsAtLevel } from '../data/content-loader';
+import { getClassStatsAtLevel, getEnemy } from '../data/content-loader';
 
 export type Difficulty = 'normal' | 'hard' | 'super-hard';
 
@@ -149,13 +149,23 @@ export function getDroppedItems(characterId: string): DroppedItem[] {
 
 /**
  * Generate enemy stats based on difficulty and player level
+ * Uses enemy data from content/enemies/*.json for classification
  */
 function generateEnemyStats(enemyId: string, difficulty: Difficulty, playerLevel: number): CombatStats {
   const difficultyMult = difficulty === 'normal' ? 1 : difficulty === 'hard' ? 1.5 : 2;
   const levelMult = 1 + (playerLevel - 1) * 0.1;
 
-  const isElite = enemyId.includes('lion') || enemyId.includes('gorilla') || enemyId.includes('boss');
-  const isBoss = enemyId.startsWith('boss_');
+  // Get enemy data from content files
+  const enemyData = getEnemy(enemyId);
+  const isRare = enemyData?.isRare ?? false;
+  const isBoss = enemyData?.isBoss ?? (enemyId.includes('falz') || enemyId.includes('mother') || enemyId.includes('chaos'));
+
+  // Elite enemies: bosses, rare enemies, and certain types
+  const isElite = isBoss || isRare ||
+    enemyId.includes('helion') || enemyId.includes('hildegigas') ||
+    enemyId.includes('pelcatobur') || enemyId.includes('rohcrysta') ||
+    enemyId.includes('frunaked') || enemyId.includes('derreo');
+
   const baseHp = isBoss ? 500 : isElite ? 100 : 50;
   const baseAtk = isBoss ? 50 : isElite ? 25 : 15;
   const baseDef = isBoss ? 30 : isElite ? 15 : 8;
@@ -172,12 +182,38 @@ function generateEnemyStats(enemyId: string, difficulty: Difficulty, playerLevel
 
 /**
  * Format enemy ID to display name
+ * Uses enemy data from content/enemies/*.json for proper names
  */
 function formatEnemyName(enemyId: string): string {
+  // Look up proper name from content
+  const enemyData = getEnemy(enemyId);
+  if (enemyData?.name) {
+    return enemyData.name;
+  }
+
+  // Fallback: format the ID as a name
   return enemyId
-    .split('_')
+    .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+}
+
+/**
+ * Get enemy element from content files
+ */
+function getEnemyElement(enemyId: string): Element {
+  const enemyData = getEnemy(enemyId);
+  if (enemyData?.element) {
+    // Map content element names to combat element types
+    const elementMap: Record<string, Element> = {
+      'Native': 'native',
+      'Beast': 'beast',
+      'Machine': 'machine',
+      'Dark': 'dark',
+    };
+    return elementMap[enemyData.element] ?? null;
+  }
+  return null;
 }
 
 /**
@@ -225,7 +261,7 @@ export function spawnEnemies(
         enemyId: entry.enemyId,
         name: formatEnemyName(entry.enemyId),
         stats,
-        element: null, // Could derive from enemy type
+        element: getEnemyElement(entry.enemyId),
         expValue: Math.floor(stats.maxHp * 0.5),
         mesetaValue: Math.floor(stats.maxHp * 0.3),
       });

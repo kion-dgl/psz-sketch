@@ -430,6 +430,98 @@ export function getShop(id: string): ShopData | undefined {
   return getShops().get(id);
 }
 
+// ============================================================================
+// DROP TABLES
+// ============================================================================
+
+export interface DropTable {
+  [location: string]: {
+    [enemyName: string]: string[];
+  };
+}
+
+let dropTablesCache: Map<string, DropTable> | null = null;
+
+/**
+ * Get drop tables for a difficulty
+ */
+export function getDropTables(): Map<string, DropTable> {
+  if (!dropTablesCache) {
+    dropTablesCache = new Map();
+    for (const difficulty of ['normal', 'hard', 'super-hard']) {
+      const data = loadJsonFile<DropTable>(`drops/${difficulty}.json`);
+      if (data) {
+        dropTablesCache.set(difficulty, data);
+      }
+    }
+  }
+  return dropTablesCache;
+}
+
+/**
+ * Get drop table for a specific difficulty
+ */
+export function getDropTable(difficulty: string): DropTable | undefined {
+  return getDropTables().get(difficulty);
+}
+
+/**
+ * Get possible drops for an enemy in a location
+ */
+export function getEnemyDrops(difficulty: string, location: string, enemyName: string): string[] {
+  const table = getDropTable(difficulty);
+  if (!table) return [];
+
+  const locationDrops = table[location];
+  if (!locationDrops) return [];
+
+  return locationDrops[enemyName] ?? [];
+}
+
+// ============================================================================
+// MISSIONS
+// ============================================================================
+
+export interface MissionData {
+  id: string;
+  name: string;
+  area: string;
+  main: boolean;
+  requires: string[];
+  rewards: {
+    normal: { item: string; quantity: number; meseta: number };
+    hard: { item: string; quantity: number; meseta: number };
+    superHard: { item: string; quantity: number; meseta: number };
+  };
+}
+
+let missionsCache: Map<string, MissionData> | null = null;
+
+/**
+ * Get all missions
+ */
+export function getMissions(): Map<string, MissionData> {
+  if (!missionsCache) {
+    missionsCache = loadJsonDir<MissionData>('missions');
+  }
+  return missionsCache;
+}
+
+/**
+ * Get a specific mission by ID
+ */
+export function getMission(id: string): MissionData | undefined {
+  return getMissions().get(id);
+}
+
+/**
+ * Get missions for an area
+ */
+export function getMissionsForArea(area: string): MissionData[] {
+  return Array.from(getMissions().values())
+    .filter(m => m.area.toLowerCase().includes(area.toLowerCase()));
+}
+
 /**
  * Clear all caches (for testing)
  */
@@ -441,6 +533,8 @@ export function clearContentCaches(): void {
   experienceCache = null;
   classesCache = null;
   shopsCache = null;
+  dropTablesCache = null;
+  missionsCache = null;
 }
 
 /**
@@ -454,4 +548,6 @@ export function preloadContent(): void {
   getExperienceTable();
   getClasses();
   getShops();
+  getDropTables();
+  getMissions();
 }
