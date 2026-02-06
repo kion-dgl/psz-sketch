@@ -101,6 +101,18 @@ import {
   listAllPhotonArts,
 } from '../api/skills';
 
+// Import mag system
+import {
+  createMag,
+  getMagLevel,
+  getMagForm,
+  canFeedItem,
+  feedMag,
+  formatMagInfo,
+  getMagStatBonuses,
+  type MagState,
+} from '../systems/mag';
+
 // Initialize missions on module load
 initializeDefaultMissions();
 
@@ -108,6 +120,9 @@ const MAX_INVENTORY_SLOTS = 30;
 
 // Current character slot (which slot is active)
 let currentSlot: number | null = null;
+
+// Current mag state (per character, keyed by character ID)
+const characterMags = new Map<string, MagState>();
 
 /**
  * Convert API Character to CLI Character format
@@ -617,6 +632,32 @@ export function getAvailableCommands(): AvailableCommand[] {
       usage: 'show-stats',
       args: [],
     });
+
+    // Mag commands (always available when character loaded)
+    const mag = characterMags.get(charId);
+    if (!mag) {
+      commands.push({
+        name: 'create-mag',
+        description: 'Create a new MAG companion',
+        usage: 'create-mag',
+        args: [],
+      });
+    } else {
+      commands.push({
+        name: 'show-mag',
+        description: 'Show MAG status',
+        usage: 'show-mag',
+        args: [],
+      });
+      commands.push({
+        name: 'feed-mag',
+        description: 'Feed an item to your MAG',
+        usage: 'feed-mag <item-id>',
+        args: [
+          { name: 'item-id', type: 'string', required: true, description: 'Item to feed (monomate, dimate, etc.)' },
+        ],
+      });
+    }
   }
 
   return commands;
@@ -1728,6 +1769,19 @@ export function execute(commandLine: string): CommandResult {
     case 'available-arts':
       return executeAvailableArts();
 
+    // Mag commands
+    case 'create-mag':
+      return executeCreateMag();
+
+    case 'show-mag':
+      return executeShowMag();
+
+    case 'feed-mag':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: feed-mag <item-id>' };
+      }
+      return executeFeedMag(args[0].toLowerCase());
+
     default:
       return { success: false, message: `Unknown command: ${command}. Type 'help' for available commands.` };
   }
@@ -1961,10 +2015,109 @@ function executeAvailableArts(): CommandResult {
   };
 }
 
+// ============================================================================
+// MAG COMMANDS
+// ============================================================================
+
+function executeCreateMag(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  if (characterMags.has(charId)) {
+    return { success: false, message: 'You already have a MAG!' };
+  }
+
+  const mag = createMag(charId);
+  characterMags.set(charId, mag);
+
+  return {
+    success: true,
+    message: `Created a new MAG! It is a baby Mag at Level 0.\nPersonality: ${mag.personality}\nFeed it items to raise its stats and watch it evolve!`,
+    data: { mag },
+  };
+}
+
+function executeShowMag(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const mag = characterMags.get(charId);
+  if (!mag) {
+    return { success: false, message: 'You have no MAG. Use: create-mag' };
+  }
+
+  const form = getMagForm(mag);
+  const level = getMagLevel(mag);
+
+  return {
+    success: true,
+    message: formatMagInfo(mag),
+    data: { mag, form, level },
+  };
+}
+
+function executeFeedMag(itemId: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const mag = characterMags.get(charId);
+  if (!mag) {
+    return { success: false, message: 'You have no MAG. Use: create-mag' };
+  }
+
+  // Check if item can be fed
+  if (!canFeedItem(itemId)) {
+    return {
+      success: false,
+      message: `Cannot feed ${itemId} to MAG. Try: monomate, dimate, trimate, monofluid, difluid, trifluid, antidote, sol_atomizer, moon_atomizer, star_atomizer`,
+    };
+  }
+
+  // Check if player has the item
+  const inventory = getInventory(charId);
+  const invItem = inventory.find(i => i.item.id.toLowerCase() === itemId.toLowerCase());
+  if (!invItem || invItem.quantity <= 0) {
+    return { success: false, message: `You don't have any ${itemId}.` };
+  }
+
+  // Feed the mag
+  const { mag: updatedMag, result } = feedMag(mag, itemId);
+
+  if (!result.success) {
+    return { success: false, message: result.message };
+  }
+
+  // Update mag state
+  characterMags.set(charId, updatedMag);
+
+  // Consume the item
+  const removeResult = removeItem(charId, invItem.item.id, 1);
+  if (!removeResult.success) {
+    return { success: false, message: `Failed to consume item: ${removeResult.message}` };
+  }
+
+  return {
+    success: true,
+    message: result.message,
+    data: {
+      mag: updatedMag,
+      evolved: result.evolved,
+      leveledUp: result.leveledUp,
+    },
+  };
+}
+
 /**
  * Reset game state (for testing)
  */
 export function resetState(): void {
   currentSlot = null;
+  characterMags.clear();
   resetDatabase();
 }
