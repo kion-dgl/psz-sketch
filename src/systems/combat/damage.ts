@@ -48,15 +48,30 @@ export function calculateElementalMultiplier(
 /**
  * Calculate defense reduction
  * Returns the damage after defense is applied
+ *
+ * Class Balance: Uses a hybrid flat + percentage reduction formula
+ * that makes high defense more impactful. CASTs with high DFP become true tanks.
+ *
+ * Formula: damage - (defense * 0.25) - (damage * defense / 600)
+ * - Flat component: defense * 0.25 (direct damage reduction)
+ * - Percentage component: damage * defense / 600 (scales with incoming damage)
+ *
+ * This provides meaningful differentiation:
+ * - 0 DEF: 100% damage taken
+ * - 100 DEF: ~58% damage taken
+ * - 150 DEF: ~38% damage taken
+ * - 200 DEF: ~17% damage taken (CAST tank level)
+ * - 250+ DEF: Approaches minimum damage
  */
 export function applyDefense(damage: number, defense: number): number {
-  // Defense reduces damage by a percentage
-  // Formula: damage * (100 / (100 + defense))
-  // At 0 defense: 100% damage
-  // At 100 defense: 50% damage
-  // At 200 defense: 33% damage
-  const reduction = 100 / (100 + Math.max(0, defense));
-  return Math.max(1, Math.floor(damage * reduction));
+  const def = Math.max(0, defense);
+  // Flat reduction: defense * 0.25
+  const flatReduction = def * 0.25;
+  // Percentage reduction: scales with both damage and defense
+  const percentReduction = (damage * def) / 600;
+  // Total damage after reduction
+  const finalDamage = damage - flatReduction - percentReduction;
+  return Math.max(1, Math.floor(finalDamage));
 }
 
 /**

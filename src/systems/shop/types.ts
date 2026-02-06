@@ -26,6 +26,12 @@ export interface EquipmentShopItem extends ShopItem {
   evasion?: number;         // For armor: evasion value
 }
 
+// Technique disk shop item
+export interface TechDiskShopItem extends ShopItem {
+  techniqueId: string;
+  level: number;
+}
+
 export interface ShopInventory {
   shopId: string;
   items: ShopItem[];

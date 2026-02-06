@@ -6,7 +6,21 @@ import { db } from '../db';
 import { getCharacter, addExperience } from './character';
 import { getEquipment } from './equipment';
 import { getGameState, setCombatData, type CombatData, type EnemyData, type DroppedItem } from './location';
-import { resolveAttack, applyDamage, isDefeated } from '../systems/combat/combat';
+import {
+  resolveAttack,
+  resolveSpecialAttack,
+  applyDamage,
+  isDefeated,
+  type StatusEffect,
+  type StatusEffectType,
+  applyStatusEffect,
+  tickStatusEffects,
+  calculateDotDamage,
+  shouldSkipTurn,
+  processBreakOnHit,
+  getStatusEffectDisplay,
+  STATUS_EFFECT_DEFINITIONS,
+} from '../systems/combat/combat';
 import { generateEnemyComposition, createSeededRandom, getRareEnemies } from '../systems/stage/enemy-pools';
 import type { EnemyArea } from '../systems/stage/types';
 import type { CombatStats, WeaponStats, Element } from '../systems/combat/types';
@@ -19,6 +33,10 @@ import {
   createPhotonDrop,
   type EnemyPartDrop,
 } from '../systems/drops/enemy-parts';
+import { generateRandomDisk } from './skills';
+import { MONOGRINDER, DIGRINDER, TRIGRINDER, createUnidentifiedWeapon } from './tekker';
+import { getWeapons, type WeaponData } from '../data/content-loader';
+import type { WeaponItem } from '../systems/inventory/types';
 
 export type Difficulty = 'normal' | 'hard' | 'super-hard';
 
@@ -30,6 +48,7 @@ export interface EnemyInstance {
   element: Element;
   expValue: number;
   mesetaValue: number;
+  statusEffects: StatusEffect[];
 }
 
 export interface PlayerCombatState {
@@ -47,6 +66,8 @@ export interface AttackResultData {
   enemyName: string;
   playerDamage?: number;
   playerDefeated?: boolean;
+  statusApplied?: StatusEffectType;
+  dotDamage?: number;
 }
 
 export interface ApiResult<T = unknown> {
@@ -157,6 +178,16 @@ export function getDroppedItems(characterId: string): DroppedItem[] {
 /**
  * Generate enemy stats based on difficulty and player level
  * Uses enemy data from content/enemies/*.json for classification
+ *
+ * Class Balance Notes:
+ * - Evasion (EVP): Enemies now have meaningful evasion that scales with difficulty.
+ *   This makes Rangers (high ATA) essential for bosses and elite enemies.
+ *   - Normal mobs: ~50-80 EVP (all classes can hit reliably)
+ *   - Elite mobs: ~100-130 EVP (Rangers have advantage)
+ *   - Bosses: ~150-200 EVP (need high ATA or accuracy buffs)
+ *
+ * - Defense (DFP): Uses flat damage reduction formula for better tank differentiation.
+ *   CASTs with high DFP become true tanks, reducing incoming damage significantly.
  */
 function generateEnemyStats(enemyId: string, difficulty: Difficulty, playerLevel: number): CombatStats {
   const difficultyMult = difficulty === 'normal' ? 1 : difficulty === 'hard' ? 1.5 : 2;
@@ -177,13 +208,18 @@ function generateEnemyStats(enemyId: string, difficulty: Difficulty, playerLevel
   const baseAtk = isBoss ? 50 : isElite ? 25 : 15;
   const baseDef = isBoss ? 30 : isElite ? 15 : 8;
 
+  // Meaningful evasion that scales - makes Rangers essential for bosses
+  // Normal mobs: 50-80, Elite: 100-130, Boss: 150-200 (at higher difficulties/levels)
+  const baseEvp = isBoss ? 120 : isElite ? 80 : 50;
+  const evpScaling = isBoss ? 0.8 : isElite ? 0.5 : 0.3; // How much EVP scales with level
+
   return {
     hp: Math.floor(baseHp * difficultyMult * levelMult),
     maxHp: Math.floor(baseHp * difficultyMult * levelMult),
     attack: Math.floor(baseAtk * difficultyMult * levelMult),
     defense: Math.floor(baseDef * difficultyMult * levelMult),
     accuracy: 70 + (difficulty === 'super-hard' ? 10 : 0),
-    evasion: 10 + (isElite ? 10 : 0),
+    evasion: Math.floor(baseEvp + (playerLevel * evpScaling * difficultyMult)),
   };
 }
 
@@ -212,10 +248,9 @@ function getEnemyElement(enemyId: string): Element {
   const enemyData = getEnemy(enemyId);
   if (enemyData?.element) {
     // Map content element names to combat element types
+    // Only 'Dark' enemy type maps to a weapon element
+    // Native, Beast, Machine are enemy types, not weapon elements
     const elementMap: Record<string, Element> = {
-      'Native': 'native',
-      'Beast': 'beast',
-      'Machine': 'machine',
       'Dark': 'dark',
     };
     return elementMap[enemyData.element] ?? null;
@@ -271,6 +306,7 @@ export function spawnEnemies(
         element: getEnemyElement(entry.enemyId),
         expValue: Math.floor(stats.maxHp * 0.5),
         mesetaValue: Math.floor(stats.maxHp * 0.3),
+        statusEffects: [],
       });
     }
   }
@@ -354,6 +390,7 @@ export function spawnRareEnemies(
       element: getEnemyElement(enemyId),
       expValue: Math.floor(stats.maxHp * 0.5 * expMultiplier),
       mesetaValue: Math.floor(stats.maxHp * 0.3 * mesetaMultiplier),
+      statusEffects: [],
     });
   }
 
@@ -474,17 +511,21 @@ export function attack(characterId: string, targetIndex: number): ApiResult<Atta
   const playerStats = getPlayerCombatStats(characterId);
   const weaponStats = getPlayerWeaponStats(characterId);
 
-  // Resolve player attack
+  // Resolve player attack - pass enemy's status effects for modifier calculations
+  const defenderWithStatus = { ...enemy.stats, statusEffects: enemy.statusEffects };
   const result = resolveAttack({
     attacker: playerStats,
     weapon: weaponStats,
-    defender: enemy.stats,
+    defender: defenderWithStatus,
   });
 
   let message = '';
   let enemyDefeated = false;
 
   if (result.hit) {
+    // If enemy was frozen, break the freeze effect
+    enemy.statusEffects = processBreakOnHit(enemy.statusEffects);
+
     enemy.stats = applyDamage(enemy.stats, result.totalDamage);
     message = result.critical
       ? `Critical hit! ${result.totalDamage} damage to ${enemy.name}!`
@@ -557,10 +598,175 @@ export function attack(characterId: string, targetIndex: number): ApiResult<Atta
 }
 
 /**
+ * Special Attack - lower accuracy, lower damage, but can apply status effects
+ * Uses weapon's element to potentially inflict status effects on enemies
+ */
+export function specialAttack(characterId: string, targetIndex: number): ApiResult<AttackResultData> {
+  const char = getCharacter(characterId);
+  if (!char) {
+    return { success: false, message: 'Character not found.' };
+  }
+
+  const state = getCombatState(characterId);
+  const weaponStats = getPlayerWeaponStats(characterId);
+
+  // Check if weapon has an element
+  if (!weaponStats.element || weaponStats.elementPercent <= 0) {
+    return { success: false, message: 'Your weapon has no element. Special attack requires an elemental weapon.' };
+  }
+
+  if (state.player.hp <= 0) {
+    return { success: false, message: 'You are defeated!' };
+  }
+
+  if (state.enemies.length === 0) {
+    return { success: false, message: 'No enemies to attack.' };
+  }
+
+  if (targetIndex < 0 || targetIndex >= state.enemies.length) {
+    return { success: false, message: `Invalid target. Choose 0-${state.enemies.length - 1}.` };
+  }
+
+  const enemy = state.enemies[targetIndex];
+  const playerStats = getPlayerCombatStats(characterId);
+
+  // Resolve special attack (has accuracy penalty but can apply status)
+  const defenderWithStatus = { ...enemy.stats, statusEffects: enemy.statusEffects };
+  const result = resolveSpecialAttack({
+    attacker: playerStats,
+    weapon: weaponStats,
+    defender: defenderWithStatus,
+  });
+
+  let message = '';
+  let enemyDefeated = false;
+  let statusApplied: StatusEffectType | undefined;
+
+  if (result.hit) {
+    // If enemy was frozen, break the freeze effect
+    enemy.statusEffects = processBreakOnHit(enemy.statusEffects);
+
+    enemy.stats = applyDamage(enemy.stats, result.totalDamage);
+    message = `Special attack hits ${enemy.name} for ${result.totalDamage} damage!`;
+
+    // Apply status effect if rolled
+    if (result.statusApplied) {
+      enemy.statusEffects = applyStatusEffect(enemy.statusEffects, result.statusApplied);
+      const statusDef = STATUS_EFFECT_DEFINITIONS[result.statusApplied];
+      message += ` ${enemy.name} is ${statusDef.name}!`;
+      statusApplied = result.statusApplied;
+    }
+
+    if (isDefeated(enemy.stats)) {
+      enemyDefeated = true;
+
+      // Grant EXP
+      const expResult = addExperience(characterId, enemy.expValue);
+      if (expResult.data?.leveledUp) {
+        message += ` ${enemy.name} defeated! +${enemy.expValue} EXP. LEVEL UP to ${expResult.data.level}!`;
+      } else {
+        message += ` ${enemy.name} defeated! +${enemy.expValue} EXP.`;
+      }
+
+      // Generate drops
+      generateDrops(characterId, enemy);
+
+      // Remove defeated enemy
+      state.enemies.splice(targetIndex, 1);
+    }
+  } else {
+    message = `Special attack missed!`;
+  }
+
+  // Enemy counter-attack (same as regular attack)
+  let playerDamage = 0;
+  let playerDefeated = false;
+
+  if (state.enemies.length > 0 && result.hit) {
+    if (Math.random() < 0.5) {
+      const attacker = state.enemies[Math.floor(Math.random() * state.enemies.length)];
+      const counterResult = resolveAttack({
+        attacker: attacker.stats,
+        weapon: { attack: 0, accuracy: 60, element: attacker.element, elementPercent: 0, grindBonus: 0 },
+        defender: playerStats,
+      });
+
+      if (counterResult.hit) {
+        playerDamage = counterResult.totalDamage;
+        state.player.hp = Math.max(0, state.player.hp - playerDamage);
+        message += ` ${attacker.name} counter-attacks for ${playerDamage} damage!`;
+
+        if (state.player.hp <= 0) {
+          playerDefeated = true;
+          message += ' You have been defeated!';
+        }
+      }
+    }
+  }
+
+  syncCombatToDb(characterId);
+
+  return {
+    success: true,
+    message,
+    data: {
+      hit: result.hit,
+      damage: result.totalDamage,
+      critical: result.critical,
+      enemyDefeated,
+      enemyName: enemy.name,
+      playerDamage,
+      playerDefeated,
+      statusApplied,
+    },
+  };
+}
+
+/**
+ * Process status effects at end of turn
+ * Applies DoT damage and ticks duration
+ */
+export function processEnemyStatusEffects(characterId: string): ApiResult<{ messages: string[] }> {
+  const state = getCombatState(characterId);
+  const messages: string[] = [];
+
+  for (const enemy of state.enemies) {
+    if (enemy.statusEffects.length === 0) continue;
+
+    // Apply DoT damage
+    const dotDamage = calculateDotDamage(enemy.statusEffects, enemy.stats.maxHp);
+    if (dotDamage > 0) {
+      enemy.stats = applyDamage(enemy.stats, dotDamage);
+      messages.push(`${enemy.name} takes ${dotDamage} damage from status effects!`);
+
+      if (isDefeated(enemy.stats)) {
+        messages.push(`${enemy.name} defeated by status effects!`);
+        generateDrops(characterId, enemy);
+      }
+    }
+
+    // Tick status effects (decrement duration)
+    enemy.statusEffects = tickStatusEffects(enemy.statusEffects);
+  }
+
+  // Remove defeated enemies
+  state.enemies = state.enemies.filter(e => !isDefeated(e.stats));
+
+  syncCombatToDb(characterId);
+
+  return {
+    success: true,
+    message: messages.join(' '),
+    data: { messages },
+  };
+}
+
+/**
  * Generate drops from a defeated enemy
  */
 function generateDrops(characterId: string, enemy: EnemyInstance): void {
   const state = getCombatState(characterId);
+  const gameState = getGameState(characterId);
   let dropId = state.droppedItems.length;
 
   // Always drop meseta
@@ -599,6 +805,25 @@ function generateDrops(characterId: string, enemy: EnemyInstance): void {
     });
   }
 
+  // Technique Disk drops
+  // Drop rates: Normal enemies 3%, Rare 10%, Boss 25%
+  // Higher difficulties have better rates
+  const diskDropChance = isBoss ? 0.25 : isRare ? 0.10 : 0.03;
+  const difficultyBonus = gameState?.sessionData?.difficulty === 'super-hard' ? 0.05 :
+                          gameState?.sessionData?.difficulty === 'hard' ? 0.02 : 0;
+
+  if (Math.random() < diskDropChance + difficultyBonus) {
+    const areaId = gameState?.sessionData?.areaId ?? 'gurhacia';
+    const difficulty = (gameState?.sessionData?.difficulty as Difficulty) ?? 'normal';
+    const disk = generateRandomDisk(areaId, difficulty, isBoss, isRare);
+    state.droppedItems.push({
+      id: dropId++,
+      type: 'item',
+      itemId: disk.id,
+      itemData: JSON.stringify(disk),
+    });
+  }
+
   // Random consumable drop (10% chance)
   if (Math.random() < 0.1) {
     const items = ['monomate', 'monofluid'];
@@ -608,6 +833,115 @@ function generateDrops(characterId: string, enemy: EnemyInstance): void {
       type: 'item',
       itemId,
     });
+  }
+
+  // Grinder drops
+  // Normal enemies: 5% monogrinder
+  // Rare enemies: 10% monogrinder, 5% digrinder
+  // Bosses: 15% monogrinder, 10% digrinder, 5% trigrinder
+  const grinderRoll = Math.random();
+  let grinder = null;
+
+  if (isBoss) {
+    if (grinderRoll < 0.05) {
+      grinder = TRIGRINDER;
+    } else if (grinderRoll < 0.15) {
+      grinder = DIGRINDER;
+    } else if (grinderRoll < 0.30) {
+      grinder = MONOGRINDER;
+    }
+  } else if (isRare) {
+    if (grinderRoll < 0.05) {
+      grinder = DIGRINDER;
+    } else if (grinderRoll < 0.15) {
+      grinder = MONOGRINDER;
+    }
+  } else {
+    if (grinderRoll < 0.05) {
+      grinder = MONOGRINDER;
+    }
+  }
+
+  if (grinder) {
+    state.droppedItems.push({
+      id: dropId++,
+      type: 'item',
+      itemId: grinder.id,
+      itemData: JSON.stringify(grinder),
+    });
+  }
+
+  // Weapon drops
+  // Normal enemies: 1% any weapon (rarity 1-3)
+  // Rare enemies: 5% weapon (rarity 2-5)
+  // Bosses: 15% weapon (rarity 3-7)
+  const weaponRoll = Math.random();
+  let weaponDropChance = 0.01;
+  let minRarity = 1;
+  let maxRarity = 3;
+
+  if (isBoss) {
+    weaponDropChance = 0.15;
+    minRarity = 3;
+    maxRarity = 7;
+  } else if (isRare) {
+    weaponDropChance = 0.05;
+    minRarity = 2;
+    maxRarity = 5;
+  }
+
+  // Difficulty affects rarity range
+  const difficulty = gameState?.sessionData?.difficulty ?? 'normal';
+  if (difficulty === 'hard') {
+    minRarity = Math.min(minRarity + 1, 4);
+    maxRarity = Math.min(maxRarity + 1, 7);
+  } else if (difficulty === 'super-hard') {
+    minRarity = Math.min(minRarity + 2, 5);
+    maxRarity = 7;
+  }
+
+  if (weaponRoll < weaponDropChance) {
+    const allWeapons = Array.from(getWeapons().values());
+    const eligibleWeapons = allWeapons.filter(
+      w => w.rarity >= minRarity && w.rarity <= maxRarity
+    );
+
+    if (eligibleWeapons.length > 0) {
+      const weaponData = eligibleWeapons[Math.floor(Math.random() * eligibleWeapons.length)];
+
+      // Convert to WeaponItem
+      let droppedWeapon: WeaponItem = {
+        id: `${weaponData.name.toLowerCase().replace(/\s+/g, '-')}_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+        name: weaponData.name,
+        description: `${weaponData.weaponType} - ATK ${weaponData.attackBase}`,
+        type: 'weapon',
+        weaponType: weaponData.weaponType,
+        attack: weaponData.attackBase ?? 30,
+        accuracy: weaponData.accuracyBase ?? 50,
+        element: weaponData.element?.toLowerCase(),
+        elementPercent: weaponData.elementLevel ? weaponData.elementLevel * 10 : undefined,
+        grindLevel: 0,
+        maxGrind: weaponData.maxGrind ?? 10,
+        rarity: weaponData.rarity,
+        sellPrice: weaponData.resaleValue ?? (weaponData.rarity * 100),
+        requiredLevel: weaponData.level ?? 1,
+        stackable: false,
+        maxStack: 1,
+        identified: true, // Will be overridden for 5-7★
+      };
+
+      // Make 5-7★ weapons unidentified (SPECIAL WEAPON)
+      if (weaponData.rarity >= 5) {
+        droppedWeapon = createUnidentifiedWeapon(droppedWeapon);
+      }
+
+      state.droppedItems.push({
+        id: dropId++,
+        type: 'item',
+        itemId: droppedWeapon.id,
+        itemData: JSON.stringify(droppedWeapon),
+      });
+    }
   }
 }
 

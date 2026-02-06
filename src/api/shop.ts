@@ -13,9 +13,11 @@ import {
   purchaseItem as shopPurchase,
   removeShopItem,
   refreshWeaponShop,
+  refreshTechShop,
   SHOP_IDS,
 } from '../systems/shop/shop';
-import type { ShopItem, EquipmentShopItem } from '../systems/shop/types';
+import type { ShopItem, EquipmentShopItem, TechDiskShopItem } from '../systems/shop/types';
+import { createTechniqueDisk, type TechniqueDisk } from './skills';
 import {
   MONOMATE,
   MONOFLUID,
@@ -145,10 +147,24 @@ export function getWeaponShopInventory(): EquipmentShopItem[] {
 }
 
 /**
+ * Get technique shop inventory
+ */
+export function getTechShopInventory(): TechDiskShopItem[] {
+  return getShopItems(SHOP_IDS.TECH_SHOP) as TechDiskShopItem[];
+}
+
+/**
  * Refresh weapon shop inventory
  */
 export function refreshWeaponShopInventory(): void {
   refreshWeaponShop();
+}
+
+/**
+ * Refresh technique shop inventory
+ */
+export function refreshTechShopInventory(): void {
+  refreshTechShop();
 }
 
 /**
@@ -315,6 +331,50 @@ export function buyEquipment(characterId: string, itemId: string): ApiResult {
 }
 
 /**
+ * Buy a technique disk from the tech shop
+ */
+export function buyTechDisk(characterId: string, itemId: string): ApiResult {
+  const char = getCharacter(characterId);
+  if (!char) {
+    return { success: false, message: 'Character not found.' };
+  }
+
+  const location = getLocation(characterId);
+  if (location !== 'tech-shop') {
+    return { success: false, message: 'Must be at technique shop to buy disks.' };
+  }
+
+  // Find item in tech shop
+  const items = getShopItems(SHOP_IDS.TECH_SHOP);
+  const shopItem = items.find(i => i.id === itemId) as TechDiskShopItem | undefined;
+  if (!shopItem) {
+    return { success: false, message: 'Disk not found in shop.' };
+  }
+
+  if (char.meseta < shopItem.price) {
+    return { success: false, message: `Not enough meseta. Need ${shopItem.price}, have ${char.meseta}.` };
+  }
+
+  // Create the actual technique disk item
+  const disk = createTechniqueDisk(shopItem.techniqueId, shopItem.level);
+
+  // Add to inventory
+  const addResult = addItem(characterId, disk as unknown as GameItem, 1);
+  if (!addResult.success) {
+    return addResult;
+  }
+
+  // Deduct meseta
+  updateMeseta(characterId, -shopItem.price);
+
+  return {
+    success: true,
+    message: `Bought ${shopItem.name} for ${shopItem.price} meseta.`,
+    data: { itemId: disk.id, price: shopItem.price },
+  };
+}
+
+/**
  * Sell an item
  */
 export function sellItem(characterId: string, itemId: string, quantity: number = 1): ApiResult {
@@ -324,7 +384,7 @@ export function sellItem(characterId: string, itemId: string, quantity: number =
   }
 
   const location = getLocation(characterId);
-  if (location !== 'shop' && location !== 'weapon-shop') {
+  if (location !== 'shop' && location !== 'weapon-shop' && location !== 'tech-shop') {
     return { success: false, message: 'Must be at a shop to sell items.' };
   }
 

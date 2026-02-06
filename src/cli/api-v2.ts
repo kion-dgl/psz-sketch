@@ -58,6 +58,8 @@ import {
   spawnEnemies,
   spawnRareEnemies,
   attack as dbAttack,
+  specialAttack as dbSpecialAttack,
+  processEnemyStatusEffects,
   pickupItem,
   pickupAll,
   healPlayer,
@@ -99,6 +101,8 @@ import {
   usePhotonArt,
   listAllTechniques,
   listAllPhotonArts,
+  useDisk,
+  type TechniqueDisk,
 } from '../api/skills';
 
 // Import mag system
@@ -549,6 +553,14 @@ export function getAvailableCommands(): AvailableCommand[] {
           name: 'attack',
           description: 'Attack an enemy',
           usage: 'attack <target>',
+          args: [
+            { name: 'target', type: 'number', required: true, description: 'Enemy index (0-based)' },
+          ],
+        });
+        commands.push({
+          name: 'special-attack',
+          description: 'Elemental attack (lower ACC, can apply status)',
+          usage: 'special-attack <target>',
           args: [
             { name: 'target', type: 'number', required: true, description: 'Enemy index (0-based)' },
           ],
@@ -1075,6 +1087,21 @@ function executeUseItem(itemId: string): CommandResult {
     return { success: false, message: 'No character loaded.' };
   }
 
+  // Check if item is a technique disk
+  const inventoryItem = getItem(charId, itemId);
+  if (inventoryItem?.item) {
+    const item = inventoryItem.item as any;
+    if (item.type === 'disk' && item.techniqueId && item.level) {
+      // Use technique disk
+      const diskResult = useDisk(charId, item as TechniqueDisk);
+      if (diskResult.success) {
+        // Remove disk from inventory
+        removeItem(charId, itemId, 1);
+      }
+      return diskResult;
+    }
+  }
+
   // Special handling for telepipe - check if in field first
   if (itemId === 'telepipe') {
     const location = getLocation(charId);
@@ -1490,6 +1517,41 @@ function executeAttack(targetStr: string): CommandResult {
   return result;
 }
 
+function executeSpecialAttack(targetStr: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const targetIndex = parseInt(targetStr);
+  if (isNaN(targetIndex)) {
+    return { success: false, message: 'Target must be a number.' };
+  }
+
+  const result = dbSpecialAttack(charId, targetIndex);
+
+  // Check if player was defeated
+  if (result.data?.playerDefeated) {
+    // Lose half meseta
+    const char = getCharacter(charId);
+    if (char) {
+      const mesetaLost = Math.floor(char.meseta / 2);
+      dbUpdateMeseta(charId, char.meseta - mesetaLost);
+
+      // Clear mission/combat and return to city
+      returnToCity(charId);
+      clearCombat(charId);
+
+      return {
+        success: false,
+        message: `${result.message}\n\nYou lost ${mesetaLost} meseta. Returned to city.`,
+      };
+    }
+  }
+
+  return result;
+}
+
 function executePickup(dropIdStr: string): CommandResult {
   const charId = getCurrentCharacterId();
   if (!charId) {
@@ -1718,6 +1780,12 @@ export function execute(commandLine: string): CommandResult {
         return { success: false, message: 'Usage: attack <target-index>' };
       }
       return executeAttack(args[0]);
+
+    case 'special-attack':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: special-attack <target-index>' };
+      }
+      return executeSpecialAttack(args[0]);
 
     case 'pickup':
       if (!args[0]) {

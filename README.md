@@ -1,222 +1,292 @@
 # Density Dwarf (PSZ Sketch)
 
-A Phantom Star Zero inspired game with modern web technologies and cryptographic authentication.
+A Phantasy Star Zero inspired action RPG with complete game systems implemented as a testable API layer, ready for Godot engine transition.
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+## Game Systems Overview
 
-## ✨ Features
+This project implements the core gameplay systems of a PSZ-style action RPG. All systems are fully functional and tested via a SQLite-backed API layer.
 
-### 🔐 Cryptographic Authentication
-- **Zero-friction onboarding**: No passwords, no sign-ups, just play
-- **ECDSA P-256**: Modern elliptic curve cryptography
-- **Non-extractable keys**: Secure key storage in IndexedDB
-- **Challenge-response**: Prevents replay attacks
-- **JWT sessions**: Stateless authentication
+### Implemented Systems
 
-### 📚 Documentation Site
-Built with Astro Starlight for comprehensive game documentation:
-- Architecture diagrams (Mermaid)
-- Screen flow documentation
-- Mechanics and game systems
-- API contracts
+| System | Status | Description |
+|--------|--------|-------------|
+| Character Creation | ✅ | 12 classes (HU/RA/FO × Human/Newman/Cast), 4 save slots |
+| Combat System | ✅ | Attacks, criticals, accuracy vs evasion, status effects |
+| Inventory | ✅ | 40-slot inventory, stacking, equipment management |
+| Equipment | ✅ | Weapons, armor (frames), units (1-4 slots) |
+| Techniques | ✅ | 17 techniques, class limits, disk learning system |
+| Photon Arts | ✅ | Weapon-type specific skills with PP cost |
+| Shops | ✅ | Item shop, Weapon shop, Tech shop, Tekker |
+| Enemies | ✅ | 65+ enemies across 7 areas with drops |
+| Missions | ✅ | 15 missions with objectives, grades, rewards |
+| MAG System | ✅ | Feeding, evolution (3 stages), stat bonuses |
+| Status Effects | ✅ | Freeze, stun, poison, slow, paralysis, burn |
+| Grinding | ✅ | Grinder items (+1/+2/+3), Tekker shop |
+| Special Weapons | ✅ | 5-7★ weapons drop unidentified, require appraisal |
+| Storage | ✅ | Shared storage across characters |
 
-### 🎮 Game Systems
-- Character creation and management
-- Quest system
-- Storage and inventory
-- Shops and crafting
+## Architecture
 
-## 🚀 Quick Start
+```mermaid
+graph TB
+    subgraph "Game Client (Future: Godot)"
+        UI[UI Layer]
+        Input[Input Handler]
+    end
 
-### With Docker (Recommended)
+    subgraph "API Layer (src/api/)"
+        CharAPI[Character API]
+        CombatAPI[Combat API]
+        InvAPI[Inventory API]
+        ShopAPI[Shop API]
+        SkillAPI[Skills API]
+        LocAPI[Location API]
+    end
 
-```bash
-# Clone the repository
-git clone https://github.com/kion-dgl/psz-sketch.git
-cd psz-sketch
+    subgraph "Systems Layer (src/systems/)"
+        Combat[Combat System]
+        Stage[Stage System]
+        Shop[Shop System]
+        Inv[Inventory System]
+        Mag[MAG System]
+        Mission[Mission System]
+    end
 
-# Install dependencies
-npm install
+    subgraph "Data Layer"
+        DB[(SQLite)]
+        Content[Content JSON]
+    end
 
-# Start MongoDB and Redis (uses .env.local - already configured!)
-docker-compose up -d
+    UI --> CharAPI
+    UI --> CombatAPI
+    UI --> InvAPI
+    UI --> ShopAPI
 
-# Start development server
-npm run dev
+    CharAPI --> DB
+    CombatAPI --> Combat
+    CombatAPI --> Stage
+    InvAPI --> Inv
+    ShopAPI --> Shop
+    SkillAPI --> Content
 
-# Visit the application
-# Open http://localhost:4321
+    Combat --> DB
+    Stage --> Content
+    Shop --> Content
+    Inv --> DB
 ```
 
-**No environment setup needed!** The `.env.local` file is pre-configured and committed to the repo.
+## Combat Flow
 
-Astro automatically loads `.env.local` via Vite. To verify it's working:
-```bash
-npm run check-env
+```mermaid
+sequenceDiagram
+    participant P as Player
+    participant C as Combat API
+    participant E as Enemy System
+    participant D as Drop System
+
+    P->>C: enterField(area, difficulty)
+    C->>E: spawnEnemies()
+    E-->>C: EnemyInstance[]
+
+    loop Combat Round
+        P->>C: attack(targetIndex)
+        C->>C: resolveAttack()
+        C-->>P: damage, critical, status
+
+        alt Enemy Defeated
+            C->>D: generateDrops()
+            D-->>C: items, meseta, grinders
+        end
+
+        C->>C: enemyCounterAttack()
+        C-->>P: playerDamage
+    end
+
+    P->>C: pickupAll()
+    P->>C: nextStage() or returnToCity()
 ```
 
-### Without Docker
+## Class System
 
-```bash
-# Install dependencies
-npm install
+```mermaid
+graph LR
+    subgraph Hunters
+        HUmar[HUmar<br/>Balanced]
+        HUmarl[HUmarl<br/>Technique]
+        HUnewm[HUnewm<br/>Technique]
+        HUnewearl[HUnewearl<br/>Technique]
+        HUcast[HUcast<br/>Tank]
+        HUcaseal[HUcaseal<br/>Speed]
+    end
 
-# Start development server (uses in-memory storage)
-npm run dev
+    subgraph Rangers
+        RAmar[RAmar<br/>Accuracy]
+        RAmarl[RAmarl<br/>Support]
+        RAcast[RAcast<br/>Heavy]
+        RAcaseal[RAcaseal<br/>Evasion]
+    end
+
+    subgraph Forces
+        FOmar[FOmar<br/>Attack Magic]
+        FOmarl[FOmarl<br/>Healing]
+        FOnewm[FOnewm<br/>Dark Magic]
+        FOnewearl[FOnewearl<br/>Light Magic]
+    end
 ```
 
-See [docs/LOCAL_DEVELOPMENT.md](docs/LOCAL_DEVELOPMENT.md) for detailed local development setup including database management UIs.
+## Areas & Bosses
 
-## 🏗️ Project Structure
+| Area | Boss | Enemy Types |
+|------|------|-------------|
+| Gurhacia Valley | Reyburn | Native, Beast |
+| Rioh Snowfield | Hildegao (wave) | Native, Beast |
+| Ozette Wetland | Octo Diablo | Native, Beast |
+| Oblivion City Paru | Chaos & Mobius | Native, Machine |
+| Makara Ruins | Rohcrysta | Native, Beast |
+| Arca Plant | Blade Mother | Machine |
+| Dark Shrine | Dark Falz | Dark |
+
+## Drop System
 
 ```mermaid
 graph TD
-    root["/"]
+    Enemy[Enemy Defeated]
 
-    root --> docs["docs/<br/><small>Additional documentation</small>"]
-    root --> public["public/<br/><small>Static assets</small>"]
-    root --> src["src/<br/><small>Source code</small>"]
-    root --> config["astro.config.mjs<br/><small>Astro configuration</small>"]
+    Enemy --> Meseta[Meseta<br/>Always]
+    Enemy --> Consumable[Consumables<br/>10%]
+    Enemy --> Photon[Photon Drop<br/>5-30%]
+    Enemy --> Disk[Technique Disk<br/>3-25%]
+    Enemy --> Grinder[Grinder<br/>5-30%]
+    Enemy --> Weapon[Weapon<br/>1-15%]
+    Enemy --> Parts[Enemy Parts<br/>Variable]
 
-    docs --> auth_doc["AUTHENTICATION.md"]
-    docs --> test_doc["test-results.md"]
-    docs --> arch_dir["architecture/<br/><small>Mermaid diagrams</small>"]
-
-    public --> logo["logo.svg"]
-    public --> screenshots["screenshots/"]
-    public --> assets_img["assets/img/<br/><small>logo.png</small>"]
-
-    src --> assets["assets/<br/><small>Images & media</small>"]
-    src --> components["components/<br/><small>React components</small>"]
-    src --> content["content/<br/><small>Starlight docs</small>"]
-    src --> layouts["layouts/<br/><small>Page layouts</small>"]
-    src --> lib["lib/<br/><small>Client libraries</small>"]
-    src --> mod["mod/<br/><small>Server libraries</small>"]
-    src --> pages["pages/<br/><small>Routes & endpoints</small>"]
-
-    components --> comp_title["title/<br/><small>SpaceScene.tsx</small>"]
-    components --> comp_docs["docs/<br/><small>MermaidDiagram.tsx</small>"]
-
-    lib --> auth_client["authService.ts<br/><small>Client auth flow</small>"]
-    lib --> key_mgr["keyManager.ts<br/><small>Key generation & storage</small>"]
-
-    mod --> server_crypto["serverCrypto.ts<br/><small>JWT & signature verification</small>"]
-    mod --> server_storage["serverStorage.ts<br/><small>In-memory storage</small>"]
-
-    pages --> api["api/<br/><small>API endpoints</small>"]
-    pages --> title_page["title.astro<br/><small>Title screen</small>"]
-    pages --> sync_page["sync.astro<br/><small>Asset sync screen</small>"]
-    pages --> diagrams["diagrams/<br/><small>Mermaid diagram pages</small>"]
-
-    api --> challenge["challenge.ts<br/><small>POST /api/challenge</small>"]
-    api --> authenticate["authenticate.ts<br/><small>POST /api/authenticate</small>"]
-
-    style root fill:#e1f5ff
-    style src fill:#fff3e0
-    style lib fill:#e8f5e9
-    style mod fill:#fce4ec
-    style components fill:#f3e5f5
-    style pages fill:#fff9c4
+    Weapon --> |"Rarity 1-4"| Identified[Identified]
+    Weapon --> |"Rarity 5-7"| Special[SPECIAL WEAPON]
+    Special --> Tekker[Tekker Shop]
+    Tekker --> Revealed[Revealed Stats]
 ```
 
-### Key Directories
+## Project Structure
 
-- **`src/lib/`** - Client-side libraries (browser APIs: IndexedDB, Web Crypto, sessionStorage)
-- **`src/mod/`** - Server-side libraries (Node.js: crypto, JWT signing)
-- **`src/components/`** - Feature-organized React components (title/, docs/)
-- **`src/pages/api/`** - Server API endpoints (challenge, authenticate)
+```
+src/
+├── api/              # Game API layer
+│   ├── character.ts  # Character CRUD, leveling
+│   ├── combat.ts     # Combat, attacks, enemies
+│   ├── equipment.ts  # Equip/unequip items
+│   ├── inventory.ts  # Item management
+│   ├── location.ts   # Navigation, sessions
+│   ├── shop.ts       # Buy/sell items
+│   ├── skills.ts     # Techniques, Photon Arts
+│   ├── storage.ts    # Shared storage
+│   ├── tekker.ts     # Grinding, identification
+│   └── progression.ts # Materials, set bonuses
+├── systems/          # Game logic
+│   ├── combat/       # Damage, accuracy, status
+│   ├── inventory/    # Item types, starting gear
+│   ├── mag/          # MAG evolution, feeding
+│   ├── mission/      # Objectives, rewards
+│   ├── shop/         # Shop inventories
+│   └── stage/        # Enemy pools, spawning
+├── content/          # Game data (JSON)
+│   ├── enemies/      # 65+ enemy definitions
+│   ├── weapons/      # 300+ weapons
+│   ├── armors/       # Armor definitions
+│   ├── classes/      # Class stats & limits
+│   ├── missions/     # 15 mission definitions
+│   ├── drops/        # Drop tables by difficulty
+│   └── mags/         # MAG evolution data
+├── db/               # SQLite database
+└── components/       # React components (Storybook)
+```
 
-## 🧞 Commands
+## Quick Start
 
-All commands are run from the root of the project, from a terminal:
+```bash
+# Install dependencies
+npm install
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+# Run tests
+npm test
 
-## 👀 Want to learn more?
+# Start development server (Storybook)
+npm run dev
 
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+# View enemy gallery
+open http://localhost:4321/storybook/enemies
+```
 
-## 🔐 Authentication System
+## API Examples
 
-The game uses a modern cryptographic authentication system:
+### Create Character
+```typescript
+import { createCharacter } from './src/api/character';
 
-### How It Works
+const result = createCharacter(0, 'HUmar', 'Kireek');
+// { success: true, data: { id: '...', name: 'Kireek', class_id: 'HUmar', level: 1 } }
+```
 
-1. **Key Generation**: ECDSA P-256 key pair generated on first visit
-2. **Fingerprint**: 40-character ID derived from public key hash
-3. **Challenge-Response**: Server sends challenge, client signs it
-4. **JWT Token**: Server verifies signature and issues JWT
+### Combat Flow
+```typescript
+import { enterField, spawnEnemies, attack, pickupAll } from './src/api';
 
-### Security Features
+enterField(charId, 'gurhacia', 'normal');
+spawnEnemies(charId, 'gurhacia', 'normal', 1, 1);
+attack(charId, 0); // Attack first enemy
+pickupAll(charId); // Collect drops
+```
 
-- ✅ Non-extractable keys (stored in IndexedDB)
-- ✅ Challenge expiry (2 minutes)
-- ✅ Single-use challenges (replay attack prevention)
-- ✅ Fingerprint verification
-- ✅ Zero security vulnerabilities (CodeQL scan)
+### Equipment
+```typescript
+import { equipWeapon, equipFrame, equipUnit } from './src/api/equipment';
 
-See [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md) for complete documentation.
+equipWeapon(charId, 'saber_123');
+equipFrame(charId, 'frame_456');
+equipUnit(charId, 'knight-power'); // Auto-assigns to available slot
+```
 
-## 📖 Documentation
+## Database Schema
 
-Visit the documentation site for:
-- [Architecture Overview](src/content/docs/architecture/overview.md)
-- [Title Screen](src/content/docs/screens/title-screen.md)
-- [System Architecture](docs/architecture/system-architecture.mmd)
-- [Data Flow](docs/architecture/data-flow.mmd)
-- [MongoDB Collections](docs/COLLECTIONS.md) - Schema definitions and management
-- [Local Development](docs/LOCAL_DEVELOPMENT.md) - Docker setup and workflow
+All game state is persisted in SQLite:
 
-## 🚢 Deployment
+- `characters` - Character data, class, level, meseta
+- `inventory` - Items owned by characters
+- `equipment` - Equipped items per character
+- `game_state` - Location, combat, session data
+- `storage_items` - Shared storage items
+- `material_bonuses` - Permanent stat bonuses
 
-The application is configured for deployment to Vercel with:
+## Testing
 
-- **Redis**: Session management (shared across staging + production)
-- **MongoDB Atlas**: Persistent storage for users and challenges (separate staging + production databases)
-- **CI/CD**: Automatic deployments on push to `main`, preview deployments for PRs
+```bash
+# Run all tests
+npm test
 
-### Environment Strategy
+# Run specific test file
+npx vitest run src/api/combat.ts
 
-- **Shared**: `JWT_SECRET` and `REDIS_URL` work across staging + production
-- **Separate**: `MONGODB_URI` uses different databases for safe testing
+# Run with coverage
+npx vitest run --coverage
+```
 
-Quick reference: [ENVIRONMENTS.md](ENVIRONMENTS.md)
+## Godot Transition
 
-See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for complete deployment guide including:
-- MongoDB Atlas setup (staging + production)
-- Redis configuration
-- Environment variable configuration
-- CI/CD workflows
-- Troubleshooting
+The API layer is designed for easy integration with Godot:
 
-## 🧪 Testing
+1. **GDScript bindings** - API functions map directly to game actions
+2. **JSON serialization** - All data structures are JSON-compatible
+3. **SQLite** - Native Godot SQLite plugin available
+4. **Event-driven** - Combat results return all needed display data
 
-Test results: [docs/test-results.md](docs/test-results.md)
+## Technology Stack
 
-## 🔧 Technology Stack
+- **Runtime**: Node.js / Bun
+- **Database**: SQLite (better-sqlite3)
+- **Testing**: Vitest
+- **UI Preview**: Astro + React (Storybook)
+- **3D Models**: Three.js (enemy gallery)
+- **Target Engine**: Godot 4.x
 
-- **Framework**: [Astro](https://astro.build) v5.15.2
-- **Documentation**: [Starlight](https://starlight.astro.build)
-- **Authentication**: Web Crypto API (ECDSA P-256)
-- **Database**: MongoDB with automatic schema initialization
-  - Production: MongoDB Atlas
-  - Development: Docker (local)
-- **Sessions**: Redis (cloud provider for production), Docker (development)
-- **JWT**: jsonwebtoken for API authentication
-- **Adapter**: @astrojs/vercel (SSR)
-- **Schema Management**: Code-first with automatic collection initialization
+## License
 
-## 🛡️ Security
-
-- **CodeQL Scan**: 0 vulnerabilities
-- **Non-extractable Keys**: Private keys cannot be exported
-- **Challenge-Response**: Prevents replay attacks
-- **Short-lived Challenges**: 2-minute expiry
-- **JWT Expiry**: 1 hour default
+MIT

@@ -82,19 +82,22 @@ describe('Combat - Elemental Multiplier', () => {
 });
 
 describe('Combat - Defense Reduction', () => {
+  // New formula: damage - (defense * 0.25) - (damage * defense / 600)
+  // Flat reduction + percentage reduction for meaningful tank differentiation
+
   it('reduces damage based on defense', () => {
-    // At 100 defense: 100 / (100 + 100) = 50%
-    expect(applyDefense(100, 100)).toBe(50);
+    // 100 - (100 * 0.25) - (100 * 100 / 600) = 100 - 25 - 16.67 = 58
+    expect(applyDefense(100, 100)).toBe(58);
   });
 
   it('handles zero defense', () => {
-    // At 0 defense: 100 / (100 + 0) = 100%
+    // 100 - 0 - 0 = 100
     expect(applyDefense(100, 0)).toBe(100);
   });
 
-  it('handles high defense', () => {
-    // At 200 defense: 100 / (100 + 200) = 33%
-    expect(applyDefense(100, 200)).toBe(33);
+  it('handles high defense (CAST tank level)', () => {
+    // 100 - (200 * 0.25) - (100 * 200 / 600) = 100 - 50 - 33.33 = 16
+    expect(applyDefense(100, 200)).toBe(16);
   });
 
   it('returns minimum of 1', () => {
@@ -179,9 +182,9 @@ describe('Combat - Damage Range Display', () => {
 
   it('gets damage range for UI', () => {
     const range = getDamageRange(50, 100, 50);
-    // Base: 150, after defense: 100
-    expect(range.min).toBe(90);
-    expect(range.max).toBe(110);
+    // Base: 150, after defense: 150 - (50 * 0.25) - (150 * 50 / 600) = 150 - 12.5 - 12.5 = 125
+    expect(range.min).toBe(112); // floor(125 * 0.9)
+    expect(range.max).toBe(137); // floor(125 * 1.1)
   });
 });
 

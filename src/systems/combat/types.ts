@@ -2,6 +2,8 @@
  * Combat System Types
  */
 
+import type { StatusEffect, StatusEffectType } from './status-effects';
+
 export type Element = 'fire' | 'ice' | 'lightning' | 'light' | 'dark' | null;
 
 export interface CombatStats {
@@ -11,6 +13,8 @@ export interface CombatStats {
   evasion: number;
   hp: number;
   maxHp: number;
+  // Status effects on this combatant
+  statusEffects?: StatusEffect[];
 }
 
 export interface WeaponStats {
@@ -27,6 +31,8 @@ export interface AttackResult {
   critical: boolean;
   elementalDamage: number;
   totalDamage: number;
+  // Status effect applied by this attack
+  statusApplied?: StatusEffectType;
 }
 
 export interface DamageCalculation {

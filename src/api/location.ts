@@ -4,7 +4,7 @@
  */
 import { db } from '../db';
 
-export type Location = 'city' | 'shop' | 'weapon-shop' | 'guild' | 'teleporter' | 'storage' | 'sewer' | 'field';
+export type Location = 'city' | 'shop' | 'weapon-shop' | 'tech-shop' | 'tekker' | 'guild' | 'teleporter' | 'storage' | 'sewer' | 'field';
 
 export interface GameStateData {
   location: Location;

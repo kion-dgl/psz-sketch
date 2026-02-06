@@ -4,24 +4,46 @@
  */
 
 import type { Element, WeaponStats, AttackResult, CombatStats } from './types';
+import type { StatusEffectType } from './status-effects';
 import { calculateDamage } from './damage';
 import { calculateHitChance, calculateCriticalChance, rollHit, rollCritical } from './accuracy';
+import {
+  rollStatusEffect,
+  getEvasionModifier,
+  getDefenseModifier,
+  getDamageTakenModifier,
+  processBreakOnHit,
+} from './status-effects';
 
 export interface AttackParams {
   attacker: CombatStats & { luck?: number };
   weapon: WeaponStats & { critBonus?: number };
   defender: CombatStats & { weakness?: Element };
-  seeds?: { hit?: number; crit?: number; damage?: number };
+  seeds?: { hit?: number; crit?: number; damage?: number; status?: number };
+  isSpecialAttack?: boolean; // Special attack has lower accuracy but can apply status
 }
+
+// Special attack accuracy penalty
+const SPECIAL_ATTACK_ACCURACY_PENALTY = 30;
+// Special attack damage multiplier
+const SPECIAL_ATTACK_DAMAGE_MULTIPLIER = 0.7;
 
 /**
  * Resolve a single attack
  */
 export function resolveAttack(params: AttackParams): AttackResult {
-  const { attacker, weapon, defender, seeds } = params;
+  const { attacker, weapon, defender, seeds, isSpecialAttack } = params;
 
-  // Calculate hit chance
-  const hitChance = calculateHitChance(attacker.accuracy, defender.evasion);
+  // Apply status effect modifiers to defender's evasion
+  const defenderEvasion = Math.floor(
+    defender.evasion * getEvasionModifier(defender.statusEffects ?? [])
+  );
+
+  // Calculate hit chance (special attacks have accuracy penalty)
+  const effectiveAccuracy = isSpecialAttack
+    ? attacker.accuracy - SPECIAL_ATTACK_ACCURACY_PENALTY
+    : attacker.accuracy;
+  const hitChance = calculateHitChance(effectiveAccuracy, defenderEvasion);
   const hit = rollHit(hitChance, seeds?.hit);
 
   if (!hit) {
@@ -38,21 +60,50 @@ export function resolveAttack(params: AttackParams): AttackResult {
   const critChance = calculateCriticalChance(attacker.luck, weapon.critBonus);
   const critical = rollCritical(critChance, seeds?.crit);
 
+  // Apply status effect modifiers to defender's defense
+  const defenderDefense = Math.floor(
+    defender.defense * getDefenseModifier(defender.statusEffects ?? [])
+  );
+
   // Calculate damage
   const damageResult = calculateDamage(
     { attack: attacker.attack },
     weapon,
-    { defense: defender.defense, weakness: defender.weakness },
+    { defense: defenderDefense, weakness: defender.weakness },
     { isCritical: critical, varianceSeed: seeds?.damage }
   );
+
+  // Apply damage taken modifier (e.g., frozen targets take 1.5x)
+  const damageTakenMod = getDamageTakenModifier(defender.statusEffects ?? []);
+  let finalDamage = Math.floor(damageResult.finalDamage * damageTakenMod);
+
+  // Special attacks deal reduced damage
+  if (isSpecialAttack) {
+    finalDamage = Math.floor(finalDamage * SPECIAL_ATTACK_DAMAGE_MULTIPLIER);
+  }
+
+  // Roll for status effect application (only on special attacks or element hits)
+  let statusApplied: StatusEffectType | undefined;
+  if (isSpecialAttack && weapon.element && weapon.elementPercent > 0) {
+    statusApplied = rollStatusEffect(weapon.element, weapon.elementPercent, seeds?.status) ?? undefined;
+  }
 
   return {
     hit: true,
     damage: damageResult.baseDamage,
     critical,
     elementalDamage: damageResult.elementalBonus,
-    totalDamage: damageResult.finalDamage,
+    totalDamage: finalDamage,
+    statusApplied,
   };
+}
+
+/**
+ * Resolve a special attack (elemental attack with status chance)
+ * Lower accuracy, lower damage, but can apply status effects
+ */
+export function resolveSpecialAttack(params: Omit<AttackParams, 'isSpecialAttack'>): AttackResult {
+  return resolveAttack({ ...params, isSpecialAttack: true });
 }
 
 /**
@@ -141,3 +192,4 @@ export function estimateDps(
 export * from './types';
 export * from './damage';
 export * from './accuracy';
+export * from './status-effects';

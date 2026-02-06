@@ -13,6 +13,8 @@ import {
   getPhotonArts,
   getPhotonArtsForWeapon,
   getClassStatsAtLevel,
+  getClass,
+  getClassByName,
   type TechniqueData,
   type PhotonArtData,
 } from '../data/content-loader';
@@ -334,4 +336,226 @@ export function listAllPhotonArts(): ApiResult<PhotonArtData[]> {
     message: `${arts.length} photon arts available`,
     data: arts,
   };
+}
+
+// ============================================================================
+// TECHNIQUE DISKS
+// ============================================================================
+
+/**
+ * Technique disk item structure
+ */
+export interface TechniqueDisk {
+  id: string;
+  type: 'disk';
+  name: string;
+  description: string;
+  techniqueId: string;
+  level: number;
+  rarity: number;
+  sellPrice: number;
+  stackable: false;
+  maxStack: 1;
+}
+
+/**
+ * Map technique ID to its limit group
+ */
+function getTechniqueLimitGroup(techniqueId: string): string {
+  const id = techniqueId.toLowerCase();
+
+  // Basic attack techs
+  if (['foie', 'gifoie', 'rafoie', 'barta', 'gibarta', 'rabarta', 'zonde', 'gizonde', 'razonde'].includes(id)) {
+    return 'foieBartaZonde';
+  }
+  // Light attack
+  if (id === 'grants') {
+    return 'grants';
+  }
+  // Dark attack
+  if (id === 'megid') {
+    return 'megid';
+  }
+  // Healing
+  if (['resta', 'reverser', 'anti'].includes(id)) {
+    return 'restaReverser';
+  }
+  // Buffs
+  if (['shifta', 'deband'].includes(id)) {
+    return 'shiftaDeband';
+  }
+  // Debuffs
+  if (['jellen', 'zalure'].includes(id)) {
+    return 'jellenZalure';
+  }
+  // Default (ryuker, etc.)
+  return 'restaReverser';
+}
+
+/**
+ * Get technique level limit for a class
+ */
+export function getTechniqueLimit(classId: string, techniqueId: string): number | null {
+  const classData = getClass(classId.toLowerCase()) ?? getClassByName(classId);
+
+  if (!classData || !classData.techniqueLimits) {
+    return null; // CASTs can't use techniques
+  }
+
+  const limitGroup = getTechniqueLimitGroup(techniqueId);
+  const limit = classData.techniqueLimits[limitGroup];
+
+  return limit ?? null;
+}
+
+/**
+ * Use a technique disk to learn or upgrade a technique
+ */
+export function useDisk(
+  characterId: string,
+  disk: TechniqueDisk
+): ApiResult<{ techniqueId: string; newLevel: number }> {
+  const char = getCharacter(characterId);
+  if (!char) {
+    return { success: false, message: 'Character not found.' };
+  }
+
+  // Check if technique exists
+  const technique = getTechnique(disk.techniqueId);
+  if (!technique) {
+    return { success: false, message: 'Unknown technique on disk.' };
+  }
+
+  // Check class can use techniques
+  const limit = getTechniqueLimit(char.class_id, disk.techniqueId);
+  if (limit === null) {
+    return { success: false, message: `${char.class_id} cannot use techniques.` };
+  }
+
+  // Check disk level doesn't exceed class limit
+  if (disk.level > limit) {
+    return {
+      success: false,
+      message: `${char.class_id} can only learn ${technique.name} up to level ${limit}.`
+    };
+  }
+
+  // Get current technique level
+  const levels = getTechniqueLevels(characterId);
+  const currentLevel = levels[disk.techniqueId] ?? 0;
+
+  // Check if disk is useful
+  if (currentLevel >= disk.level) {
+    return {
+      success: false,
+      message: `Already know ${technique.name} at level ${currentLevel}. Disk is level ${disk.level}.`
+    };
+  }
+
+  // Learn or upgrade the technique
+  setTechniqueLevel(characterId, disk.techniqueId, disk.level);
+
+  const action = currentLevel === 0 ? 'Learned' : `Upgraded to`;
+  return {
+    success: true,
+    message: `${action} ${technique.name} Lv.${disk.level}!`,
+    data: { techniqueId: disk.techniqueId, newLevel: disk.level },
+  };
+}
+
+/**
+ * Create a technique disk item
+ */
+export function createTechniqueDisk(techniqueId: string, level: number): TechniqueDisk {
+  const technique = getTechnique(techniqueId);
+  const name = technique?.name ?? techniqueId;
+
+  // Rarity based on technique tier and level
+  const isAdvanced = ['gifoie', 'gibarta', 'gizonde', 'rafoie', 'rabarta', 'razonde', 'grants', 'megid'].includes(techniqueId);
+  const baseRarity = isAdvanced ? 3 : 2;
+  const levelRarity = Math.floor(level / 10);
+  const rarity = Math.min(5, baseRarity + levelRarity);
+
+  // Unique ID with timestamp to allow multiple disks of same type
+  const uniqueId = `disk_${techniqueId}_${level}_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+
+  return {
+    id: uniqueId,
+    type: 'disk',
+    name: `Disk: ${name} Lv.${level}`,
+    description: technique?.description ?? `${name} technique disk`,
+    techniqueId,
+    level,
+    rarity,
+    sellPrice: 50 * level * (isAdvanced ? 3 : 1),
+    stackable: false,
+    maxStack: 1,
+  };
+}
+
+/**
+ * Generate a random technique disk based on area and difficulty
+ */
+export function generateRandomDisk(
+  areaId: string,
+  difficulty: 'normal' | 'hard' | 'super-hard',
+  isBoss: boolean = false,
+  isRare: boolean = false
+): TechniqueDisk {
+  // Base level range by difficulty
+  const levelRanges: Record<string, { min: number; max: number }> = {
+    'normal': { min: 1, max: 10 },
+    'hard': { min: 8, max: 20 },
+    'super-hard': { min: 15, max: 30 },
+  };
+
+  // Bonus for boss/rare enemies
+  const range = levelRanges[difficulty] || levelRanges['normal'];
+  let minLevel = range.min;
+  let maxLevel = range.max;
+
+  if (isBoss) {
+    minLevel += 5;
+    maxLevel += 5;
+  } else if (isRare) {
+    minLevel += 3;
+    maxLevel += 3;
+  }
+
+  // Cap at 30
+  maxLevel = Math.min(30, maxLevel);
+  minLevel = Math.min(minLevel, maxLevel);
+
+  // Random level within range
+  const level = Math.floor(Math.random() * (maxLevel - minLevel + 1)) + minLevel;
+
+  // Select technique based on area theme
+  const areaTechniques: Record<string, string[]> = {
+    'gurhacia': ['foie', 'barta', 'zonde', 'resta'],
+    'rioh': ['barta', 'gibarta', 'rabarta', 'deband'],
+    'ozette': ['zonde', 'gizonde', 'razonde', 'jellen'],
+    'paru': ['foie', 'gifoie', 'rafoie', 'shifta'],
+    'arca': ['zonde', 'barta', 'anti', 'zalure'],
+    'dark': ['megid', 'grants', 'reverser', 'resta'],
+  };
+
+  // Default techniques if area not found
+  const basicTechniques = ['foie', 'barta', 'zonde', 'resta', 'anti', 'shifta', 'deband'];
+  const advancedTechniques = ['gifoie', 'gibarta', 'gizonde', 'rafoie', 'rabarta', 'razonde', 'grants', 'megid'];
+
+  let pool = areaTechniques[areaId] ?? basicTechniques;
+
+  // Boss/rare enemies can drop advanced techniques
+  if ((isBoss || isRare) && difficulty !== 'normal') {
+    pool = [...pool, ...advancedTechniques.slice(0, 3)];
+  }
+
+  // Super-hard can drop any technique
+  if (difficulty === 'super-hard') {
+    pool = [...new Set([...pool, ...advancedTechniques])];
+  }
+
+  const techniqueId = pool[Math.floor(Math.random() * pool.length)];
+
+  return createTechniqueDisk(techniqueId, level);
 }

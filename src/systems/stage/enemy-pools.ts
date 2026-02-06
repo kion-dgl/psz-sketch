@@ -21,18 +21,18 @@ export const ENEMY_POOLS: Record<EnemyArea, EnemyPool> = {
     area: 'gurhacia',
     common: ['ghowl', 'vulkure', 'garapython'],
     uncommon: ['garahadan', 'grimble', 'tormatible'],
-    rare: ['rappy', 'booma-origin', 'helion'],
-    bosses: ['blaze-helion'],
+    rare: ['rappy', 'booma-origin', 'blaze-helion'],
+    bosses: ['reyburn'],
     elites: ['helion'],
   },
 
   rioh: {
     area: 'rioh',
     common: ['usanny', 'usanimere', 'reyhound'],
-    uncommon: ['stagg', 'hildegao'],
-    rare: ['rappy', 'booma-origin', 'hildegigas'],
-    bosses: ['hildegigas'],
-    elites: ['hildegao'],
+    uncommon: ['stagg', 'hildeghana'],
+    rare: ['rappy', 'booma-origin', 'hildegigas', 'usanimere'],
+    bosses: ['hildegao'], // Boss wave of Hildegao
+    elites: ['hildegigas'],
   },
 
   ozette: {
@@ -40,8 +40,8 @@ export const ENEMY_POOLS: Record<EnemyArea, EnemyPool> = {
     common: ['porel', 'pomarr', 'hypao'],
     uncommon: ['vespao', 'pelcatraz'],
     rare: ['rappy', 'booma-origin', 'gigobooma-origin', 'pelcatobur'],
-    bosses: ['pelcatobur'],
-    elites: ['pelcatraz'],
+    bosses: ['octo-diablo'],
+    elites: ['pelcatobur'],
   },
 
   paru: {
