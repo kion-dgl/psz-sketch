@@ -93,6 +93,8 @@ export {
   spawnEnemies,
   spawnRareEnemies,
   attack,
+  specialAttack,
+  processEnemyStatusEffects,
   pickupItem,
   pickupAll,
   healPlayer,
