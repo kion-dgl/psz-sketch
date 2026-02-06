@@ -390,7 +390,7 @@ export function refreshWeaponShop(): void {
   shopSeed = Date.now();
 
   registerShopInventory({
-    shopId: SHOP_IDS.ARMOR_SHOP,
+    shopId: SHOP_IDS.WEAPON_SHOP,
     items: [
       ...generateWeaponShopInventory(),
       ...generateArmorShopInventory(),
