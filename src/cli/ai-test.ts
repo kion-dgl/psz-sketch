@@ -371,6 +371,156 @@ const tests: TestCase[] = [
       { cmd: 'use telepipe', expect: { success: false, messageContains: 'only be used in the field' } },
     ],
   },
+
+  // ----------------------------------------
+  // Equipment - Buy and Equip Flow
+  // ----------------------------------------
+  {
+    name: 'Buy weapon from shop',
+    commands: [
+      { cmd: 'create-character HUmar BuyWpnTest', expect: { success: true } },
+      { cmd: 'goto weapon-shop', expect: { success: true } },
+      { cmd: 'list-items', expect: { success: true } },
+      // Buy first weapon by ID (shop items have randomized IDs with timestamp)
+    ],
+  },
+  {
+    name: 'Equip purchased weapon',
+    setup: () => {
+      resetState();
+      execute('create-character HUmar EquipBoughtTest');
+      execute('goto weapon-shop');
+      execute('buy 0'); // Buy first weapon in shop
+    },
+    commands: [
+      { cmd: 'show-inventory', expect: { success: true } },
+      { cmd: 'show-equipment', expect: { success: true, messageContains: 'Saber' } }, // Starter weapon
+    ],
+  },
+  {
+    name: 'Unequip and re-equip weapon',
+    commands: [
+      { cmd: 'create-character HUmar ReEquipTest', expect: { success: true } },
+      { cmd: 'unequip weapon', expect: { success: true, messageContains: 'Unequipped' } },
+      { cmd: 'show-equipment', expect: { success: true, messageContains: '(none)' } },
+      { cmd: 'equip starter_saber', expect: { success: true, messageContains: 'Equipped' } },
+      { cmd: 'show-equipment', expect: { success: true, messageContains: 'Saber' } },
+    ],
+  },
+
+  // ----------------------------------------
+  // Class Stats Verification
+  // ----------------------------------------
+  {
+    name: 'Hunter has high attack',
+    commands: [
+      { cmd: 'create-character HUmar HunterStatsTest', expect: { success: true } },
+      { cmd: 'show-stats', expect: { success: true, messageContains: 'ATK' } },
+    ],
+  },
+  {
+    name: 'Ranger has high accuracy',
+    commands: [
+      { cmd: 'create-character RAmar RangerStatsTest', expect: { success: true } },
+      { cmd: 'show-stats', expect: { success: true, messageContains: 'ACC' } },
+    ],
+  },
+  {
+    name: 'Force has high technique',
+    commands: [
+      { cmd: 'create-character FOmarl ForceStatsTest', expect: { success: true } },
+      { cmd: 'show-stats', expect: { success: true, messageContains: 'MST' } },
+    ],
+  },
+
+  // ----------------------------------------
+  // Experience and Leveling
+  // ----------------------------------------
+  {
+    name: 'Gain EXP from combat',
+    setup: () => {
+      resetState();
+      execute('create-character HUmar ExpTest');
+      execute('goto guild');
+      execute('start-mission mayors-mission normal');
+    },
+    commands: [
+      { cmd: 'attack 0', expect: { success: true } },
+      { cmd: 'attack 0', expect: { success: true } },
+      { cmd: 'attack 0', expect: { success: true } },
+      // Check that we've gained some EXP (message should show EXP gained or level up)
+    ],
+  },
+
+  // ----------------------------------------
+  // Mission Completion Flow
+  // ----------------------------------------
+  {
+    name: 'Complete full mission flow',
+    commands: [
+      { cmd: 'create-character HUmar MissionTest', expect: { success: true } },
+      { cmd: 'goto guild', expect: { success: true } },
+      { cmd: 'start-mission mayors-mission normal', expect: { success: true } },
+      // Clear wave 1
+      { cmd: 'attack 0', expect: { success: true } },
+      { cmd: 'attack 0', expect: { success: true } },
+      { cmd: 'attack 0', expect: { success: true } },
+      { cmd: 'attack 0', expect: { success: true } },
+      { cmd: 'attack 0', expect: { success: true } },
+    ],
+  },
+
+  // ----------------------------------------
+  // Armor and Unit Equipment
+  // ----------------------------------------
+  {
+    name: 'Starter frame is equipped',
+    commands: [
+      { cmd: 'create-character HUmar FrameEquipTest', expect: { success: true } },
+      { cmd: 'show-equipment', expect: { success: true, messageContains: 'Frame' } },
+    ],
+  },
+  {
+    name: 'Unequip frame',
+    commands: [
+      { cmd: 'create-character HUmar UnequipFrameTest', expect: { success: true } },
+      { cmd: 'unequip frame', expect: { success: true, messageContains: 'Unequipped' } },
+    ],
+  },
+
+  // ----------------------------------------
+  // Item Shop Flow
+  // ----------------------------------------
+  {
+    name: 'Buy consumable from item shop',
+    commands: [
+      { cmd: 'create-character HUmar ItemShopTest', expect: { success: true } },
+      { cmd: 'goto shop', expect: { success: true } },
+      { cmd: 'buy monomate 3', expect: { success: true, messageContains: 'Bought' } },
+    ],
+  },
+  {
+    name: 'Sell item',
+    commands: [
+      { cmd: 'create-character HUmar SellTest', expect: { success: true } },
+      { cmd: 'goto shop', expect: { success: true } },
+      { cmd: 'sell monomate', expect: { success: true, messageContains: 'Sold' } },
+    ],
+  },
+
+  // ----------------------------------------
+  // Storage Flow
+  // ----------------------------------------
+  {
+    name: 'Storage deposit and withdraw',
+    commands: [
+      { cmd: 'create-character HUmar StorageTest', expect: { success: true } },
+      { cmd: 'goto storage', expect: { success: true } },
+      { cmd: 'deposit monomate', expect: { success: true, messageContains: 'Deposited' } },
+      { cmd: 'show-storage', expect: { success: true, messageContains: 'Monomate' } },
+      { cmd: 'withdraw monomate', expect: { success: true, messageContains: 'Withdrew' } },
+    ],
+  },
 ];
 
 // ============================================

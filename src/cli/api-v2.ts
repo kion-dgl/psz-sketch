@@ -74,6 +74,7 @@ import {
 
 // Import mission data
 import { getAllMissions, initializeDefaultMissions } from '../systems/mission';
+import { getClassStatsAtLevel } from '../data/content-loader';
 
 // Initialize missions on module load
 initializeDefaultMissions();
@@ -696,10 +697,30 @@ function executeShowStats(): CommandResult {
     return { success: false, message: 'Character not found.' };
   }
 
-  // Calculate stats based on level (simple formula)
-  const level = char.level;
-  const maxHp = 100 + level * 20;
-  const maxTp = 50 + level * 10;
+  // Get class-based stats from content loader
+  const classStats = getClassStatsAtLevel(char.class_id, char.level);
+
+  // Get equipment for bonus stats
+  const equipment = getEquipment(charId);
+  let weaponAtk = 0;
+  let armorDef = 0;
+  let armorEva = 0;
+
+  if (equipment?.weapon) {
+    weaponAtk = (equipment.weapon as WeaponItem).attack ?? 0;
+  }
+  if (equipment?.frame) {
+    armorDef = (equipment.frame as ArmorItem).defense ?? 0;
+    armorEva = (equipment.frame as ArmorItem).evasion ?? 0;
+  }
+
+  const hp = classStats?.hp ?? (100 + char.level * 20);
+  const tp = classStats?.pp ?? (50 + char.level * 10);
+  const atk = (classStats?.attack ?? (15 + char.level * 3)) + weaponAtk;
+  const def = (classStats?.defense ?? (10 + char.level * 2)) + armorDef;
+  const acc = classStats?.accuracy ?? (100 + char.level * 2);
+  const eva = (classStats?.evasion ?? (50 + char.level)) + armorEva;
+  const mst = classStats?.technique ?? (10 + char.level);
 
   const lines = [
     `Name: ${char.name}`,
@@ -707,8 +728,10 @@ function executeShowStats(): CommandResult {
     `Level: ${char.level}`,
     `EXP: ${char.experience}`,
     `Meseta: ${char.meseta}`,
-    `HP: ${maxHp}`,
-    `TP: ${maxTp}`,
+    `HP: ${hp} | TP: ${tp}`,
+    `ATK: ${atk} | DEF: ${def}`,
+    `ACC: ${acc} | EVA: ${eva}`,
+    `MST: ${mst}`,
   ];
 
   return {

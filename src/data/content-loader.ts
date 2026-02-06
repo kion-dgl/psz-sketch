@@ -344,6 +344,76 @@ export function getClassByName(name: string): ClassData | undefined {
 }
 
 /**
+ * Interpolate a stat value between key levels
+ * Class stats are defined at levels 1, 20, 40, 60, 80, 100
+ */
+function interpolateStat(statMap: Record<number, number>, level: number): number {
+  const keyLevels = [1, 20, 40, 60, 80, 100];
+
+  // Clamp level to valid range
+  level = Math.max(1, Math.min(100, level));
+
+  // Find the two key levels we're between
+  let lowerKey = 1;
+  let upperKey = 20;
+
+  for (let i = 0; i < keyLevels.length - 1; i++) {
+    if (level >= keyLevels[i] && level <= keyLevels[i + 1]) {
+      lowerKey = keyLevels[i];
+      upperKey = keyLevels[i + 1];
+      break;
+    }
+  }
+
+  // Handle exact key level matches
+  if (level === lowerKey) return statMap[lowerKey] ?? 0;
+  if (level === upperKey) return statMap[upperKey] ?? 0;
+
+  // Linear interpolation between key levels
+  const lowerVal = statMap[lowerKey] ?? 0;
+  const upperVal = statMap[upperKey] ?? 0;
+  const progress = (level - lowerKey) / (upperKey - lowerKey);
+
+  return Math.floor(lowerVal + (upperVal - lowerVal) * progress);
+}
+
+/**
+ * Get all stats for a class at a specific level
+ */
+export function getClassStatsAtLevel(classId: string, level: number): {
+  hp: number;
+  pp: number;
+  attack: number;
+  defense: number;
+  accuracy: number;
+  evasion: number;
+  technique: number;
+} | null {
+  const classData = getClass(classId.toLowerCase()) ?? getClassByName(classId);
+  if (!classData) return null;
+
+  return {
+    hp: interpolateStat(classData.stats.hp, level),
+    pp: interpolateStat(classData.stats.pp, level),
+    attack: interpolateStat(classData.stats.attack, level),
+    defense: interpolateStat(classData.stats.defense, level),
+    accuracy: interpolateStat(classData.stats.accuracy, level),
+    evasion: interpolateStat(classData.stats.evasion, level),
+    technique: interpolateStat(classData.stats.technique, level),
+  };
+}
+
+/**
+ * Get a single stat for a class at a specific level
+ */
+export function getClassStat(classId: string, stat: 'hp' | 'pp' | 'attack' | 'defense' | 'accuracy' | 'evasion' | 'technique', level: number): number {
+  const classData = getClass(classId.toLowerCase()) ?? getClassByName(classId);
+  if (!classData) return 0;
+
+  return interpolateStat(classData.stats[stat], level);
+}
+
+/**
  * Get all shops
  */
 export function getShops(): Map<string, ShopData> {

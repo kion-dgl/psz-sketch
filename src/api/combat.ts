@@ -11,6 +11,7 @@ import { generateEnemyComposition, createSeededRandom } from '../systems/stage/e
 import type { CombatStats, WeaponStats, Element } from '../systems/combat/types';
 import { addItem } from './inventory';
 import { MONOMATE, MONOFLUID } from '../systems/inventory/starting-items';
+import { getClassStatsAtLevel } from '../data/content-loader';
 
 export type Difficulty = 'normal' | 'hard' | 'super-hard';
 
@@ -57,6 +58,7 @@ const combatState: Map<string, {
 
 /**
  * Get or initialize combat state for a character
+ * Uses class stats from content/classes/*.json
  */
 function getCombatState(characterId: string): {
   enemies: EnemyInstance[];
@@ -68,13 +70,19 @@ function getCombatState(characterId: string): {
   if (!state) {
     const char = getCharacter(characterId);
     const level = char?.level ?? 1;
+    const classId = char?.class_id ?? 'HUmar';
+    const classStats = getClassStatsAtLevel(classId, level);
+
+    const hp = classStats?.hp ?? (100 + level * 20);
+    const pp = classStats?.pp ?? (50 + level * 10);
+
     state = {
       enemies: [],
       player: {
-        hp: 100 + level * 20,
-        maxHp: 100 + level * 20,
-        tp: 50 + level * 10,
-        maxTp: 50 + level * 10,
+        hp,
+        maxHp: hp,
+        tp: pp,
+        maxTp: pp,
       },
       droppedItems: [],
       enemyIdCounter: 0,
@@ -86,6 +94,7 @@ function getCombatState(characterId: string): {
 
 /**
  * Initialize player combat state
+ * Uses class stats from content/classes/*.json
  */
 export function initCombat(characterId: string): ApiResult<PlayerCombatState> {
   const char = getCharacter(characterId);
@@ -94,13 +103,19 @@ export function initCombat(characterId: string): ApiResult<PlayerCombatState> {
   }
 
   const level = char.level;
+  const classId = char.class_id ?? 'HUmar';
+  const classStats = getClassStatsAtLevel(classId, level);
+
+  const hp = classStats?.hp ?? (100 + level * 20);
+  const pp = classStats?.pp ?? (50 + level * 10);
+
   const state = getCombatState(characterId);
 
   state.player = {
-    hp: 100 + level * 20,
-    maxHp: 100 + level * 20,
-    tp: 50 + level * 10,
-    maxTp: 50 + level * 10,
+    hp,
+    maxHp: hp,
+    tp: pp,
+    maxTp: pp,
   };
   state.enemies = [];
   state.droppedItems = [];
@@ -228,27 +243,50 @@ export function spawnEnemies(
 }
 
 /**
- * Get player combat stats from character and equipment
+ * Get player combat stats from character class and equipment
+ * Uses class stats from content/classes/*.json
  */
 function getPlayerCombatStats(characterId: string): CombatStats & { luck: number } {
   const char = getCharacter(characterId);
   const equipment = getEquipment(characterId);
   const level = char?.level ?? 1;
+  const classId = char?.class_id ?? 'HUmar';
 
-  let defense = 8 + level * 2;
-  let evasion = 10 + level;
+  // Get base stats from class data
+  const classStats = getClassStatsAtLevel(classId, level);
 
+  // Fallback stats if class not found
+  let hp = classStats?.hp ?? (100 + level * 20);
+  let attack = classStats?.attack ?? (15 + level * 3);
+  let defense = classStats?.defense ?? (8 + level * 2);
+  let accuracy = classStats?.accuracy ?? (75 + level);
+  let evasion = classStats?.evasion ?? (10 + level);
+
+  // Add equipment bonuses
   if (equipment.frame) {
-    defense += equipment.frame.defense;
-    evasion += equipment.frame.evasion;
+    defense += equipment.frame.defense ?? 0;
+    evasion += equipment.frame.evasion ?? 0;
+  }
+
+  // Add unit bonuses
+  const unitSlots = ['unit1', 'unit2', 'unit3', 'unit4'] as const;
+  for (const slot of unitSlots) {
+    const unit = equipment[slot];
+    if (unit) {
+      attack += unit.attackBonus ?? 0;
+      defense += unit.defenseBonus ?? 0;
+      accuracy += unit.accuracyBonus ?? 0;
+      evasion += unit.evasionBonus ?? 0;
+      hp += unit.hpBonus ?? 0;
+    }
   }
 
   return {
-    hp: 100 + level * 20,
-    maxHp: 100 + level * 20,
-    attack: 15 + level * 3,
+    hp,
+    maxHp: hp,
+    attack,
     defense,
-    accuracy: 75 + level,
+    accuracy,
     evasion,
     luck: 10 + Math.floor(level / 2),
   };
