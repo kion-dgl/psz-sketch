@@ -5,7 +5,7 @@
  */
 
 import { execute, getState, resetState } from './api-v2';
-import { getClassStatsAtLevel, getEnemies, getWeapons, getArmors, getMissions, getDropTables } from '../data/content-loader';
+import { getClassStatsAtLevel, getEnemies, getWeapons, getArmors, getMissions, getDropTables, getMaterials, getSetBonuses, getWeaponRestrictions } from '../data/content-loader';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -207,6 +207,50 @@ function runAutomatedTests() {
       const r = execute('equip fake_weapon');
       return !r.success;
     }},
+    // Progression tests
+    { name: 'Weapon types - Hunter can use sword', fn: () => {
+      resetState();
+      execute('create-character HUmar Test');
+      const r = execute('weapon-types');
+      return r.success && r.message.includes('sword');
+    }},
+    { name: 'Weapon types - Force can use rod', fn: () => {
+      resetState();
+      execute('create-character FOmarl Test');
+      const r = execute('weapon-types');
+      return r.success && r.message.includes('rod');
+    }},
+    { name: 'Material bonuses display', fn: () => {
+      resetState();
+      execute('create-character HUmar Test');
+      const r = execute('show-bonuses');
+      return r.success && r.message.includes('ATK');
+    }},
+    { name: 'Set bonus info display', fn: () => {
+      resetState();
+      execute('create-character HUmar Test');
+      const r = execute('show-set-bonus');
+      return r.success;
+    }},
+    { name: 'Grind info works', fn: () => {
+      resetState();
+      execute('create-character HUmar Test');
+      const r = execute('grind-info starter_saber');
+      return r.success && r.message.includes('+0');
+    }},
+    { name: 'Grind requires weapon shop', fn: () => {
+      resetState();
+      execute('create-character HUmar Test');
+      const r = execute('grind starter_saber');
+      return !r.success && r.message.includes('weapon shop');
+    }},
+    { name: 'Grind works at weapon shop', fn: () => {
+      resetState();
+      execute('create-character HUmar Test');
+      execute('goto weapon-shop');
+      const r = execute('grind starter_saber');
+      return r.success && r.message.includes('+1');
+    }},
   ];
 
   for (const test of tests) {
@@ -351,6 +395,30 @@ function runContentTests() {
     name: 'Class stats interpolation',
     passed: humarStats !== null && humarStats.hp > 100,
     details: humarStats ? `HUmar L10: HP ${humarStats.hp}` : 'Failed'
+  });
+
+  // Materials loaded
+  const materials = getMaterials();
+  results.content.push({
+    name: 'Materials loaded',
+    passed: materials.size >= 5,
+    details: `${materials.size} materials`
+  });
+
+  // Set bonuses loaded
+  const setBonuses = getSetBonuses();
+  results.content.push({
+    name: 'Set bonuses loaded',
+    passed: setBonuses.size >= 10,
+    details: `${setBonuses.size} set bonuses`
+  });
+
+  // Weapon restrictions loaded
+  const restrictions = getWeaponRestrictions();
+  results.content.push({
+    name: 'Weapon restrictions loaded',
+    passed: restrictions !== null,
+    details: restrictions ? `${Object.keys(restrictions.weaponTypes).length} weapon types` : 'Failed'
   });
 }
 

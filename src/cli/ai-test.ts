@@ -521,6 +521,67 @@ const tests: TestCase[] = [
       { cmd: 'withdraw monomate', expect: { success: true, messageContains: 'Withdrew' } },
     ],
   },
+
+  // ----------------------------------------
+  // Progression Systems
+  // ----------------------------------------
+  {
+    name: 'Weapon types - Hunter can use sword',
+    commands: [
+      { cmd: 'create-character HUmar WeaponTypeTest', expect: { success: true } },
+      { cmd: 'weapon-types', expect: { success: true, messageContains: 'sword' } },
+    ],
+  },
+  {
+    name: 'Weapon types - Force cannot use sword',
+    commands: [
+      { cmd: 'create-character FOmarl WeaponTypeTest2', expect: { success: true } },
+      { cmd: 'weapon-types', expect: { success: true, messageNotContains: 'sword' } },
+    ],
+  },
+  {
+    name: 'Weapon types - Force can use rod',
+    commands: [
+      { cmd: 'create-character FOmarl RodTest', expect: { success: true } },
+      { cmd: 'weapon-types', expect: { success: true, messageContains: 'rod' } },
+    ],
+  },
+  {
+    name: 'Material bonuses - initially empty',
+    commands: [
+      { cmd: 'create-character HUmar BonusTest', expect: { success: true } },
+      { cmd: 'show-bonuses', expect: { success: true, messageContains: '0/1' } },
+    ],
+  },
+  {
+    name: 'Set bonus - no bonus with starter gear',
+    commands: [
+      { cmd: 'create-character HUmar SetBonusTest', expect: { success: true } },
+      { cmd: 'show-set-bonus', expect: { success: true, messageContains: 'No set bonus' } },
+    ],
+  },
+  {
+    name: 'Grind info - shows weapon status',
+    commands: [
+      { cmd: 'create-character HUmar GrindInfoTest', expect: { success: true } },
+      { cmd: 'grind-info starter_saber', expect: { success: true, messageContains: '+0' } },
+    ],
+  },
+  {
+    name: 'Grind - requires weapon shop',
+    commands: [
+      { cmd: 'create-character HUmar GrindLocTest', expect: { success: true } },
+      { cmd: 'grind starter_saber', expect: { success: false, messageContains: 'weapon shop' } },
+    ],
+  },
+  {
+    name: 'Grind - works at weapon shop',
+    commands: [
+      { cmd: 'create-character HUmar GrindTest', expect: { success: true } },
+      { cmd: 'goto weapon-shop', expect: { success: true } },
+      { cmd: 'grind starter_saber', expect: { success: true, messageContains: '+1' } },
+    ],
+  },
 ];
 
 // ============================================

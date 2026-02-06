@@ -1,11 +1,11 @@
 # AI Test Report
 
-Generated: 2026-02-06 06:35:01
+Generated: 2026-02-06 07:05:44
 
 ## Test Suite Summary
 
 ### Automated Tests
-**25/25 tests passed**
+**32/32 tests passed**
 
 - ✓ Character Creation - Hunter
 - ✓ Character Creation - Ranger
@@ -32,6 +32,13 @@ Generated: 2026-02-06 06:35:01
 - ✓ Return from field works
 - ✓ Attack invalid target rejected
 - ✓ Equip non-existent item rejected
+- ✓ Weapon types - Hunter can use sword
+- ✓ Weapon types - Force can use rod
+- ✓ Material bonuses display
+- ✓ Set bonus info display
+- ✓ Grind info works
+- ✓ Grind requires weapon shop
+- ✓ Grind works at weapon shop
 
 
 ### Integration Tests
@@ -48,6 +55,9 @@ Generated: 2026-02-06 06:35:01
 - ✓ Missions loaded: 15 missions
 - ✓ Drop tables loaded: 3 difficulty levels
 - ✓ Class stats interpolation: HUmar L10: HP 165
+- ✓ Materials loaded: 8 materials
+- ✓ Set bonuses loaded: 21 set bonuses
+- ✓ Weapon restrictions loaded: 13 weapon types
 
 
 ### Manual Game Flow Test
@@ -59,9 +69,9 @@ Generated: 2026-02-06 06:35:01
 3. Go to guild and start mission...
    ✓ Started mayors-mission on normal.
 4. Fight enemies...
-   ✓ Defeated 4 enemies
+   ✓ Defeated 5 enemies
 5. Check EXP gained...
-   ✓ EXP: 125, Level: 2
+   ✓ EXP: 175, Level: 3
 6. Return to city (abandon mission)...
 
 Game flow test complete!
@@ -111,10 +121,10 @@ Item Shop: 9 items available
 Weapon Shop: 18 items available
 
 Sample weapon shop items:
-  saber-1770381300548 Saber [Ice 13%]      661 meseta
-  blade-1770381300548 Blade [Thunder 16%]  696 meseta
-  daggers-1770381300548 Daggers [Fire 6%]    492 meseta
-  handgun-1770381300548 Handgun [Ice 8%]     437 meseta
+  saber-1770383143947 Saber [Dark 6%]      620 meseta
+  blade-1770383143947 Blade [Thunder 15%]  690 meseta
+  daggers-1770383143947 Daggers [Fire 17%]   544 meseta
+  handgun-1770383143947 Handgun              405 meseta
 ```
 
 ---

@@ -9,6 +9,7 @@ import { getItem, removeItem } from './inventory';
 import {
   getMaterial,
   checkSetBonus,
+  getSetBonusForArmor,
   canClassUseWeaponType,
   getUsableWeaponTypes,
   getClass,
@@ -223,7 +224,6 @@ export function getSetBonusInfo(characterId: string): ApiResult<{
   }
 
   // Check if armor has a set bonus with other weapons
-  const { getSetBonusForArmor } = require('../data/content-loader');
   const possibleSet = getSetBonusForArmor(armorName);
 
   if (possibleSet) {
