@@ -16,6 +16,7 @@
     "test:all": "vitest run && playwright test",
     "cli": "npx tsx src/cli/game.ts",
     "cli:api": "npx tsx src/cli/game.ts --api",
+    "tui": "npx tsx src/cli/tui.ts",
     "ai-test": "npx tsx src/cli/ai-test.ts"
   },
   "dependencies": {
@@ -23,6 +24,7 @@
     "@astrojs/react": "^4.4.1",
     "@astrojs/starlight": "^0.36.1",
     "@astrojs/vercel": "^9.0.0",
+    "@inquirer/prompts": "^8.2.0",
     "@react-three/drei": "^10.7.6",
     "@react-three/fiber": "^9.4.0",
     "@tailwindcss/vite": "^4.1.17",
