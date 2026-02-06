@@ -91,6 +91,17 @@ export interface CurrentStageInfo {
   variantName: string;  // e.g., 'A' or 'Boss'
 }
 
+export interface StorageItemInfo {
+  id: string;
+  name: string;
+  quantity: number;
+}
+
+export interface StorageInfo {
+  items: StorageItemInfo[];
+  meseta: number;
+}
+
 export interface GameState {
   character: Character | null;
   location: Location;
@@ -109,6 +120,7 @@ export interface GameState {
   currentWave?: number;
   totalWaves?: number;
   sessionType?: 'field' | 'mission' | null;
+  storage?: StorageInfo;
 }
 
 export interface CommandResult {

@@ -13,19 +13,67 @@ import {
   purchaseItem as shopPurchase,
   removeShopItem,
   refreshWeaponShop,
-  getWeaponShopItems,
   SHOP_IDS,
 } from '../systems/shop/shop';
 import type { ShopItem, EquipmentShopItem } from '../systems/shop/types';
 import {
   MONOMATE,
-  DIMATE,
-  TRIMATE,
   MONOFLUID,
-  DIFLUID,
-  TRIFLUID,
 } from '../systems/inventory/starting-items';
 import type { GameItem, ConsumableItem } from '../systems/inventory/types';
+
+// Define consumable items not in starting-items
+const DIMATE: ConsumableItem = {
+  id: 'dimate',
+  name: 'Dimate',
+  description: 'Restores 200 HP.',
+  type: 'consumable',
+  effect: 'heal',
+  effectValue: 200,
+  rarity: 2,
+  sellPrice: 60,
+  stackable: true,
+  maxStack: 10,
+};
+
+const TRIMATE: ConsumableItem = {
+  id: 'trimate',
+  name: 'Trimate',
+  description: 'Restores 500 HP.',
+  type: 'consumable',
+  effect: 'heal',
+  effectValue: 500,
+  rarity: 3,
+  sellPrice: 200,
+  stackable: true,
+  maxStack: 10,
+};
+
+const DIFLUID: ConsumableItem = {
+  id: 'difluid',
+  name: 'Difluid',
+  description: 'Restores 100 TP.',
+  type: 'consumable',
+  effect: 'restore_tp',
+  effectValue: 100,
+  rarity: 2,
+  sellPrice: 75,
+  stackable: true,
+  maxStack: 10,
+};
+
+const TRIFLUID: ConsumableItem = {
+  id: 'trifluid',
+  name: 'Trifluid',
+  description: 'Restores 250 TP.',
+  type: 'consumable',
+  effect: 'restore_tp',
+  effectValue: 250,
+  rarity: 3,
+  sellPrice: 250,
+  stackable: true,
+  maxStack: 10,
+};
 
 export interface ApiResult<T = unknown> {
   success: boolean;
@@ -93,7 +141,7 @@ export function getItemShopInventory(): ShopItem[] {
  * Get weapon shop inventory
  */
 export function getWeaponShopInventory(): EquipmentShopItem[] {
-  return getWeaponShopItems();
+  return getShopItems(SHOP_IDS.WEAPON_SHOP) as EquipmentShopItem[];
 }
 
 /**
@@ -178,7 +226,7 @@ export function buyEquipment(characterId: string, itemId: string): ApiResult {
   }
 
   // Find item in weapon shop
-  const items = getWeaponShopItems();
+  const items = getShopItems(SHOP_IDS.WEAPON_SHOP);
   const shopItem = items.find(i => i.id === itemId) as EquipmentShopItem | undefined;
   if (!shopItem) {
     return { success: false, message: 'Equipment not found in shop.' };
@@ -215,6 +263,7 @@ export function buyEquipment(characterId: string, itemId: string): ApiResult {
       name: shopItem.name,
       description: shopItem.description,
       type: 'armor',
+      armorSlot: 'frame',
       rarity: shopItem.rarity,
       sellPrice: shopItem.sellPrice,
       stackable: false,

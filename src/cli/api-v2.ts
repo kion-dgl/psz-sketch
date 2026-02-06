@@ -1,0 +1,1170 @@
+/**
+ * CLI API v2
+ * Refactored to use SQLite-backed API
+ */
+
+import type { GameState, CommandResult, AvailableCommand, Location, DetailedItem, EquipmentSlots } from './types';
+import type { Character as SystemCharacter } from '../systems/character/types';
+import type { GameItem, WeaponItem, ArmorItem, UnitItem, ConsumableItem } from '../systems/inventory/types';
+import { VALID_CLASS_IDS } from '../systems/character/types';
+
+// Import SQLite-backed API
+import {
+  resetDatabase,
+  createCharacter as dbCreateCharacter,
+  getCharacter,
+  getCharacterBySlot,
+  getAllCharacters,
+  deleteCharacter as dbDeleteCharacter,
+  updateMeseta,
+  addExperience,
+  getInventory,
+  addItem,
+  removeItem,
+  getItem,
+  useConsumable,
+  getEquipment,
+  equipWeapon,
+  equipFrame,
+  equipUnit,
+  unequipWeapon,
+  unequipFrame,
+  unequipUnit,
+  getStorage,
+  depositMeseta,
+  withdrawMeseta,
+  depositItem,
+  withdrawItem,
+  getLocation,
+  goto as dbGoto,
+  getGameState,
+  enterMission,
+  enterField,
+  returnToCity,
+  nextStage,
+  initCombat,
+  getEnemies,
+  getPlayerState,
+  getDroppedItems,
+  spawnEnemies,
+  attack as dbAttack,
+  pickupItem,
+  pickupAll,
+  healPlayer,
+  restoreTP,
+  clearCombat,
+  isWaveCleared,
+  getItemShopInventory,
+  getWeaponShopInventory,
+  refreshWeaponShopInventory,
+  buyItem,
+  buyEquipment,
+  sellItem,
+  type Character as ApiCharacter,
+  type Difficulty,
+} from '../api';
+
+// Import mission data
+import { getAllMissions } from '../systems/mission';
+
+const MAX_INVENTORY_SLOTS = 30;
+
+// Current character slot (which slot is active)
+let currentSlot: number | null = null;
+
+/**
+ * Convert API Character to CLI Character format
+ */
+function toCliCharacter(apiChar: ApiCharacter): SystemCharacter {
+  return {
+    character_id: apiChar.id,
+    character_name: apiChar.name,
+    level: apiChar.level,
+    experience: apiChar.experience,
+    slot: apiChar.slot,
+    class_id: apiChar.class_id,
+    variation_index: apiChar.variation_index,
+    texture_id: apiChar.texture_id,
+    created_at: apiChar.created_at,
+    meseta: apiChar.meseta,
+  };
+}
+
+/**
+ * Get current character ID
+ */
+function getCurrentCharacterId(): string | null {
+  if (currentSlot === null) return null;
+  const char = getCharacterBySlot(currentSlot);
+  return char?.id ?? null;
+}
+
+/**
+ * Convert a GameItem to DetailedItem for UI display
+ */
+function toDetailedItem(item: GameItem, quantity: number): DetailedItem {
+  const base: DetailedItem = {
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    type: item.type,
+    rarity: item.rarity,
+    quantity,
+  };
+
+  // Add type-specific properties
+  if (item.type === 'weapon') {
+    const weapon = item as WeaponItem;
+    base.attack = weapon.attack;
+    base.accuracy = weapon.accuracy;
+    base.weaponType = weapon.weaponType;
+    base.element = weapon.element ?? undefined;
+    base.elementPercent = weapon.elementPercent;
+    base.grindLevel = weapon.grindLevel;
+    base.maxGrind = weapon.maxGrind;
+    base.requiredLevel = weapon.requiredLevel;
+  } else if (item.type === 'armor') {
+    const armor = item as ArmorItem;
+    base.defense = armor.defense;
+    base.evasion = armor.evasion;
+    base.unitSlots = armor.unitSlots;
+    base.requiredLevel = armor.requiredLevel;
+  } else if (item.type === 'unit') {
+    const unit = item as UnitItem;
+    base.attackBonus = unit.attackBonus;
+    base.defenseBonus = unit.defenseBonus;
+    base.accuracyBonus = unit.accuracyBonus;
+    base.evasionBonus = unit.evasionBonus;
+    base.hpBonus = unit.hpBonus;
+    base.tpBonus = unit.tpBonus;
+    base.requiredLevel = unit.requiredLevel;
+  } else if (item.type === 'consumable') {
+    const consumable = item as ConsumableItem;
+    base.effect = consumable.effect;
+    base.effectValue = consumable.effectValue;
+  }
+
+  return base;
+}
+
+/**
+ * Get game state
+ */
+export function getState(): GameState {
+  const charId = getCurrentCharacterId();
+  const char = charId ? getCharacter(charId) : null;
+
+  // Default empty state
+  if (!char || !charId) {
+    return {
+      character: null,
+      location: 'city',
+      inventory: [],
+      equipment: {
+        weapon: null,
+        frame: null,
+        barrier: null,
+        unit1: null,
+        unit2: null,
+        unit3: null,
+        unit4: null,
+      },
+      meseta: 0,
+      inventorySlots: 0,
+      maxInventorySlots: MAX_INVENTORY_SLOTS,
+    };
+  }
+
+  // Get equipment
+  const equip = getEquipment(charId);
+  const equipment: EquipmentSlots = {
+    weapon: equip.weapon ? toDetailedItem(equip.weapon, 1) : null,
+    frame: equip.frame ? toDetailedItem(equip.frame, 1) : null,
+    barrier: null,
+    unit1: equip.unit1 ? toDetailedItem(equip.unit1, 1) : null,
+    unit2: equip.unit2 ? toDetailedItem(equip.unit2, 1) : null,
+    unit3: equip.unit3 ? toDetailedItem(equip.unit3, 1) : null,
+    unit4: equip.unit4 ? toDetailedItem(equip.unit4, 1) : null,
+  };
+
+  // Mark equipped items
+  if (equipment.weapon) equipment.weapon.equipped = true;
+  if (equipment.frame) equipment.frame.equipped = true;
+  if (equipment.unit1) equipment.unit1.equipped = true;
+  if (equipment.unit2) equipment.unit2.equipped = true;
+  if (equipment.unit3) equipment.unit3.equipped = true;
+  if (equipment.unit4) equipment.unit4.equipped = true;
+
+  // Get inventory
+  const inv = getInventory(charId);
+  const detailedInventory = inv.map(slot => toDetailedItem(slot.item, slot.quantity));
+
+  // Prepend equipped items to inventory list
+  const allItems: DetailedItem[] = [];
+  if (equipment.weapon) allItems.push(equipment.weapon);
+  if (equipment.frame) allItems.push(equipment.frame);
+  if (equipment.unit1) allItems.push(equipment.unit1);
+  if (equipment.unit2) allItems.push(equipment.unit2);
+  if (equipment.unit3) allItems.push(equipment.unit3);
+  if (equipment.unit4) allItems.push(equipment.unit4);
+  allItems.push(...detailedInventory);
+
+  // Get location and combat state
+  const location = getLocation(charId) as Location;
+  const gameState = getGameState(charId);
+  const sessionData = gameState?.sessionData;
+  const combatData = gameState?.combatData;
+
+  // Get enemies and combat info
+  const enemies = getEnemies(charId);
+  const playerState = getPlayerState(charId);
+  const droppedItems = getDroppedItems(charId);
+
+  // Get storage
+  const storage = getStorage();
+
+  return {
+    character: toCliCharacter(char),
+    location,
+    inventory: allItems,
+    equipment,
+    meseta: char.meseta ?? 0,
+    inventorySlots: inv.length,
+    maxInventorySlots: MAX_INVENTORY_SLOTS,
+    inCombat: enemies.length > 0,
+    enemies: enemies.map(e => ({
+      id: e.id,
+      name: e.name,
+      hp: e.stats.hp,
+      maxHp: e.stats.maxHp,
+    })),
+    playerCombat: playerState ? {
+      hp: playerState.hp,
+      maxHp: playerState.maxHp,
+      tp: playerState.tp,
+      maxTp: playerState.maxTp,
+    } : undefined,
+    stageIndex: sessionData?.currentStage,
+    isAtFinalStage: sessionData ? sessionData.currentStage >= sessionData.totalStages - 1 : false,
+    droppedItems: droppedItems.map(d => ({
+      dropId: d.id,
+      type: d.type,
+      itemId: d.type === 'item' ? d.itemId : undefined,
+      name: d.type === 'item' ? (d.itemData ? JSON.parse(d.itemData).name : d.itemId) : `${d.meseta} Meseta`,
+      meseta: d.type === 'meseta' ? d.meseta : undefined,
+    })),
+    currentStage: sessionData ? {
+      stageId: `${sessionData.areaId}_${sessionData.currentStage}`,
+      variant: 'a' as const,
+      areaId: sessionData.areaId,
+      areaName: sessionData.areaId.charAt(0).toUpperCase() + sessionData.areaId.slice(1),
+      variantName: 'A',
+    } : undefined,
+    currentWave: sessionData?.currentWave,
+    totalWaves: sessionData?.totalWaves,
+    sessionType: sessionData?.type ?? null,
+    storage: {
+      items: storage.items.map(s => ({
+        id: s.item_id,
+        name: s.item.name,
+        quantity: s.quantity,
+      })),
+      meseta: storage.meseta,
+    },
+  };
+}
+
+/**
+ * Get available commands based on current state
+ */
+export function getAvailableCommands(): AvailableCommand[] {
+  const commands: AvailableCommand[] = [];
+  const charId = getCurrentCharacterId();
+  const location = charId ? getLocation(charId) : null;
+
+  // Always available
+  commands.push({
+    name: 'help',
+    description: 'Show available commands',
+    usage: 'help',
+    args: [],
+  });
+
+  // Character management
+  if (!charId) {
+    commands.push({
+      name: 'list-classes',
+      description: 'List available character classes',
+      usage: 'list-classes',
+      args: [],
+    });
+    commands.push({
+      name: 'create-character',
+      description: 'Create a new character',
+      usage: 'create-character <class-id> <name>',
+      args: [
+        { name: 'class-id', type: 'string', required: true, description: 'Character class ID' },
+        { name: 'name', type: 'string', required: true, description: 'Character name' },
+      ],
+    });
+    commands.push({
+      name: 'load-character',
+      description: 'Load an existing character',
+      usage: 'load-character <slot>',
+      args: [
+        { name: 'slot', type: 'number', required: true, description: 'Character slot (0-3)' },
+      ],
+    });
+  } else {
+    // Navigation
+    if (location !== 'field') {
+      commands.push({
+        name: 'goto',
+        description: 'Go to a location',
+        usage: 'goto <location>',
+        args: [
+          { name: 'location', type: 'string', required: true, description: 'city, shop, weapon-shop, guild, teleporter, storage' },
+        ],
+      });
+    }
+
+    // Shop commands
+    if (location === 'shop') {
+      commands.push({
+        name: 'list-items',
+        description: 'List items for sale',
+        usage: 'list-items',
+        args: [],
+      });
+      commands.push({
+        name: 'buy',
+        description: 'Buy an item',
+        usage: 'buy <item-id> [quantity]',
+        args: [
+          { name: 'item-id', type: 'string', required: true, description: 'Item ID to buy' },
+          { name: 'quantity', type: 'number', required: false, description: 'Quantity to buy' },
+        ],
+      });
+    }
+
+    if (location === 'weapon-shop') {
+      commands.push({
+        name: 'list-items',
+        description: 'List equipment for sale',
+        usage: 'list-items',
+        args: [],
+      });
+      commands.push({
+        name: 'buy-equipment',
+        description: 'Buy equipment',
+        usage: 'buy-equipment <item-id>',
+        args: [
+          { name: 'item-id', type: 'string', required: true, description: 'Equipment ID to buy' },
+        ],
+      });
+    }
+
+    // Inventory commands (always available)
+    commands.push({
+      name: 'show-inventory',
+      description: 'Show inventory',
+      usage: 'show-inventory',
+      args: [],
+    });
+    commands.push({
+      name: 'show-equipment',
+      description: 'Show equipped items',
+      usage: 'show-equipment',
+      args: [],
+    });
+    commands.push({
+      name: 'equip',
+      description: 'Equip an item',
+      usage: 'equip <item-id>',
+      args: [
+        { name: 'item-id', type: 'string', required: true, description: 'Item ID to equip' },
+      ],
+    });
+    commands.push({
+      name: 'unequip',
+      description: 'Unequip an item',
+      usage: 'unequip <slot>',
+      args: [
+        { name: 'slot', type: 'string', required: true, description: 'weapon, frame, or unit1-4' },
+      ],
+    });
+    commands.push({
+      name: 'use',
+      description: 'Use a consumable item',
+      usage: 'use <item-id>',
+      args: [
+        { name: 'item-id', type: 'string', required: true, description: 'Item ID to use' },
+      ],
+    });
+
+    // Guild/mission commands
+    if (location === 'guild') {
+      commands.push({
+        name: 'list-missions',
+        description: 'List available missions',
+        usage: 'list-missions',
+        args: [],
+      });
+      commands.push({
+        name: 'start-mission',
+        description: 'Start a mission',
+        usage: 'start-mission <mission-id> <difficulty>',
+        args: [
+          { name: 'mission-id', type: 'string', required: true, description: 'Mission ID' },
+          { name: 'difficulty', type: 'string', required: true, description: 'normal, hard, or super' },
+        ],
+      });
+    }
+
+    // Teleporter commands
+    if (location === 'teleporter') {
+      commands.push({
+        name: 'enter-field',
+        description: 'Enter a field area',
+        usage: 'enter-field <area-id> <difficulty>',
+        args: [
+          { name: 'area-id', type: 'string', required: true, description: 'Field area ID' },
+          { name: 'difficulty', type: 'string', required: true, description: 'normal, hard, or super' },
+        ],
+      });
+    }
+
+    // Field/combat commands
+    if (location === 'field') {
+      const enemies = getEnemies(charId);
+      const droppedItems = getDroppedItems(charId);
+
+      if (enemies.length > 0) {
+        commands.push({
+          name: 'attack',
+          description: 'Attack an enemy',
+          usage: 'attack <target>',
+          args: [
+            { name: 'target', type: 'number', required: true, description: 'Enemy index (0-based)' },
+          ],
+        });
+      }
+
+      if (droppedItems.length > 0) {
+        commands.push({
+          name: 'pickup',
+          description: 'Pick up a dropped item',
+          usage: 'pickup <drop-id>',
+          args: [
+            { name: 'drop-id', type: 'number', required: true, description: 'Drop ID' },
+          ],
+        });
+        commands.push({
+          name: 'pickup-all',
+          description: 'Pick up all dropped items',
+          usage: 'pickup-all',
+          args: [],
+        });
+      }
+
+      commands.push({
+        name: 'next-wave',
+        description: 'Spawn next wave of enemies',
+        usage: 'next-wave',
+        args: [],
+      });
+      commands.push({
+        name: 'next-stage',
+        description: 'Advance to next stage',
+        usage: 'next-stage',
+        args: [],
+      });
+      commands.push({
+        name: 'return',
+        description: 'Return to city',
+        usage: 'return',
+        args: [],
+      });
+    }
+
+    // Storage commands
+    if (location === 'storage') {
+      commands.push({
+        name: 'show-storage',
+        description: 'Show storage contents',
+        usage: 'show-storage',
+        args: [],
+      });
+      commands.push({
+        name: 'deposit',
+        description: 'Deposit an item',
+        usage: 'deposit <item-id> [quantity]',
+        args: [
+          { name: 'item-id', type: 'string', required: true, description: 'Item ID to deposit' },
+          { name: 'quantity', type: 'number', required: false, description: 'Quantity to deposit' },
+        ],
+      });
+      commands.push({
+        name: 'withdraw',
+        description: 'Withdraw an item',
+        usage: 'withdraw <item-id> [quantity]',
+        args: [
+          { name: 'item-id', type: 'string', required: true, description: 'Item ID to withdraw' },
+          { name: 'quantity', type: 'number', required: false, description: 'Quantity to withdraw' },
+        ],
+      });
+      commands.push({
+        name: 'deposit-meseta',
+        description: 'Deposit meseta',
+        usage: 'deposit-meseta <amount>',
+        args: [
+          { name: 'amount', type: 'number', required: true, description: 'Amount to deposit' },
+        ],
+      });
+      commands.push({
+        name: 'withdraw-meseta',
+        description: 'Withdraw meseta',
+        usage: 'withdraw-meseta <amount>',
+        args: [
+          { name: 'amount', type: 'number', required: true, description: 'Amount to withdraw' },
+        ],
+      });
+    }
+
+    // Show stats
+    commands.push({
+      name: 'show-stats',
+      description: 'Show character stats',
+      usage: 'show-stats',
+      args: [],
+    });
+  }
+
+  return commands;
+}
+
+// ============================================================================
+// Command Handlers
+// ============================================================================
+
+function executeHelp(): CommandResult {
+  const commands = getAvailableCommands();
+  const lines = commands.map(c => `  ${c.name.padEnd(20)} - ${c.description}`);
+  return {
+    success: true,
+    message: 'Available commands:\n' + lines.join('\n'),
+  };
+}
+
+function executeListClasses(): CommandResult {
+  const classes = VALID_CLASS_IDS.map(id => `  ${id}`);
+  return {
+    success: true,
+    message: 'Available classes:\n' + classes.join('\n'),
+  };
+}
+
+function executeCreateCharacter(classId: string, name: string): CommandResult {
+  if (!classId || !name) {
+    return { success: false, message: 'Usage: create-character <class-id> <name>' };
+  }
+
+  // Find first available slot
+  const chars = getAllCharacters();
+  let slot = -1;
+  for (let i = 0; i < 4; i++) {
+    if (!chars[i]) {
+      slot = i;
+      break;
+    }
+  }
+
+  if (slot === -1) {
+    return { success: false, message: 'No available character slots.' };
+  }
+
+  const result = dbCreateCharacter(slot, classId.toUpperCase(), name);
+  if (!result.success) {
+    return result;
+  }
+
+  currentSlot = slot;
+  return {
+    success: true,
+    message: `Created ${result.data?.name} the ${result.data?.class_id}! (Slot ${slot})`,
+  };
+}
+
+function executeLoadCharacter(slotStr: string): CommandResult {
+  const slot = parseInt(slotStr);
+  if (isNaN(slot) || slot < 0 || slot > 3) {
+    return { success: false, message: 'Slot must be 0-3.' };
+  }
+
+  const char = getCharacterBySlot(slot);
+  if (!char) {
+    return { success: false, message: `No character in slot ${slot}.` };
+  }
+
+  currentSlot = slot;
+  return {
+    success: true,
+    message: `Loaded ${char.name} (Lv.${char.level} ${char.class_id})`,
+  };
+}
+
+function executeShowStats(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const char = getCharacter(charId);
+  if (!char) {
+    return { success: false, message: 'Character not found.' };
+  }
+
+  // Calculate stats based on level (simple formula)
+  const level = char.level;
+  const maxHp = 100 + level * 20;
+  const maxTp = 50 + level * 10;
+
+  const lines = [
+    `Name: ${char.name}`,
+    `Class: ${char.class_id}`,
+    `Level: ${char.level}`,
+    `EXP: ${char.experience}`,
+    `Meseta: ${char.meseta}`,
+    `HP: ${maxHp}`,
+    `TP: ${maxTp}`,
+  ];
+
+  return {
+    success: true,
+    message: lines.join('\n'),
+  };
+}
+
+function executeGoto(location: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const result = dbGoto(charId, location);
+  return result;
+}
+
+function executeListItems(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const location = getLocation(charId);
+
+  if (location === 'shop') {
+    const items = getItemShopInventory();
+    const lines = items.map(i => `  ${i.id.padEnd(15)} ${i.name.padEnd(20)} ${i.price} meseta`);
+    return {
+      success: true,
+      message: 'Item Shop:\n' + lines.join('\n'),
+    };
+  }
+
+  if (location === 'weapon-shop') {
+    const items = getWeaponShopInventory();
+    const lines = items.map(i => `  ${i.id.padEnd(15)} ${i.name.padEnd(20)} ${i.price} meseta`);
+    return {
+      success: true,
+      message: 'Weapon Shop:\n' + lines.join('\n'),
+    };
+  }
+
+  return { success: false, message: 'Must be at a shop.' };
+}
+
+function executeBuy(itemId: string, quantity: number): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  return buyItem(charId, itemId, quantity);
+}
+
+function executeBuyEquipment(itemId: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  return buyEquipment(charId, itemId);
+}
+
+function executeSell(itemId: string, quantity: number): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  return sellItem(charId, itemId, quantity);
+}
+
+function executeShowInventory(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const inv = getInventory(charId);
+  if (inv.length === 0) {
+    return { success: true, message: 'Inventory is empty.' };
+  }
+
+  const lines = inv.map(slot => {
+    const qty = slot.quantity > 1 ? ` x${slot.quantity}` : '';
+    return `  ${slot.item.id.padEnd(15)} ${slot.item.name}${qty}`;
+  });
+
+  return {
+    success: true,
+    message: `Inventory (${inv.length}/${MAX_INVENTORY_SLOTS}):\n` + lines.join('\n'),
+  };
+}
+
+function executeShowEquipment(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const equip = getEquipment(charId);
+
+  const lines = [
+    `Weapon: ${equip.weapon?.name ?? '(none)'}`,
+    `Frame:  ${equip.frame?.name ?? '(none)'}`,
+    `Unit 1: ${equip.unit1?.name ?? '(none)'}`,
+    `Unit 2: ${equip.unit2?.name ?? '(none)'}`,
+    `Unit 3: ${equip.unit3?.name ?? '(none)'}`,
+    `Unit 4: ${equip.unit4?.name ?? '(none)'}`,
+  ];
+
+  return {
+    success: true,
+    message: 'Equipment:\n' + lines.join('\n'),
+  };
+}
+
+function executeEquip(itemId: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const item = getItem(charId, itemId);
+  if (!item) {
+    return { success: false, message: 'Item not in inventory.' };
+  }
+
+  const itemType = item.item.type;
+
+  if (itemType === 'weapon') {
+    return equipWeapon(charId, itemId);
+  } else if (itemType === 'armor') {
+    return equipFrame(charId, itemId);
+  } else if (itemType === 'unit') {
+    return equipUnit(charId, itemId);
+  }
+
+  return { success: false, message: 'Cannot equip this item type.' };
+}
+
+function executeUnequip(slot: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  if (slot === 'weapon') {
+    return unequipWeapon(charId);
+  } else if (slot === 'frame') {
+    return unequipFrame(charId);
+  } else if (slot.startsWith('unit')) {
+    const slotNum = parseInt(slot.replace('unit', ''));
+    if (slotNum >= 1 && slotNum <= 4) {
+      return unequipUnit(charId, slotNum - 1);
+    }
+  }
+
+  return { success: false, message: 'Invalid slot. Use: weapon, frame, unit1, unit2, unit3, unit4' };
+}
+
+function executeUseItem(itemId: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  return useConsumable(charId, itemId);
+}
+
+function executeListMissions(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const location = getLocation(charId);
+  if (location !== 'guild') {
+    return { success: false, message: 'Must be at guild to view missions.' };
+  }
+
+  const missions = getAllMissions();
+  const lines = missions.map(m => `  ${m.id.padEnd(20)} ${m.name}`);
+  return {
+    success: true,
+    message: 'Available Missions:\n' + lines.join('\n'),
+  };
+}
+
+function executeStartMission(missionId: string, difficulty: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const result = enterMission(charId, missionId, difficulty);
+  if (result.success) {
+    // Initialize combat state
+    initCombat(charId);
+  }
+  return result;
+}
+
+function executeEnterField(areaId: string, difficulty: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const result = enterField(charId, areaId, difficulty);
+  if (result.success) {
+    initCombat(charId);
+  }
+  return result;
+}
+
+function executeNextWave(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const gameState = getGameState(charId);
+  if (!gameState?.sessionData) {
+    return { success: false, message: 'Not in a mission or field.' };
+  }
+
+  // Check if current wave is cleared
+  if (!isWaveCleared(charId)) {
+    return { success: false, message: 'Defeat all enemies first.' };
+  }
+
+  // Spawn next wave
+  const difficulty = gameState.sessionData.difficulty as Difficulty;
+  const result = spawnEnemies(charId, gameState.sessionData.areaId, difficulty, Date.now());
+  return result;
+}
+
+function executeNextStage(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  return nextStage(charId);
+}
+
+function executeReturn(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  return returnToCity(charId);
+}
+
+function executeAttack(targetStr: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const targetIndex = parseInt(targetStr);
+  if (isNaN(targetIndex)) {
+    return { success: false, message: 'Target must be a number.' };
+  }
+
+  return dbAttack(charId, targetIndex);
+}
+
+function executePickup(dropIdStr: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const dropId = parseInt(dropIdStr);
+  if (isNaN(dropId)) {
+    return { success: false, message: 'Drop ID must be a number.' };
+  }
+
+  return pickupItem(charId, dropId);
+}
+
+function executePickupAll(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  return pickupAll(charId);
+}
+
+function executeShowStorage(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const storage = getStorage();
+
+  const lines = [`Meseta: ${storage.meseta}`];
+
+  if (storage.items.length === 0) {
+    lines.push('Items: (empty)');
+  } else {
+    lines.push('Items:');
+    for (const storageItem of storage.items) {
+      const qty = storageItem.quantity > 1 ? ` x${storageItem.quantity}` : '';
+      lines.push(`  ${storageItem.item_id.padEnd(15)} ${storageItem.item.name}${qty}`);
+    }
+  }
+
+  return {
+    success: true,
+    message: 'Storage:\n' + lines.join('\n'),
+  };
+}
+
+function executeDeposit(itemId: string, quantity: number): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  return depositItem(charId, itemId, quantity);
+}
+
+function executeWithdraw(itemId: string, quantity: number): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  return withdrawItem(charId, itemId, quantity);
+}
+
+function executeDepositMeseta(amountStr: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const amount = parseInt(amountStr);
+  if (isNaN(amount) || amount <= 0) {
+    return { success: false, message: 'Amount must be a positive number.' };
+  }
+
+  return depositMeseta(charId, amount);
+}
+
+function executeWithdrawMeseta(amountStr: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const amount = parseInt(amountStr);
+  if (isNaN(amount) || amount <= 0) {
+    return { success: false, message: 'Amount must be a positive number.' };
+  }
+
+  return withdrawMeseta(charId, amount);
+}
+
+// ============================================================================
+// Main Command Dispatcher
+// ============================================================================
+
+/**
+ * Execute a command
+ */
+export function execute(commandLine: string): CommandResult {
+  const trimmed = commandLine.trim();
+
+  // Ignore comments and empty lines
+  if (!trimmed || trimmed.startsWith('#')) {
+    return { success: true, message: '' };
+  }
+
+  const parts = trimmed.split(/\s+/);
+  const command = parts[0]?.toLowerCase();
+  const args = parts.slice(1);
+
+  switch (command) {
+    case 'help':
+      return executeHelp();
+
+    case 'list-classes':
+      return executeListClasses();
+
+    case 'create-character':
+      return executeCreateCharacter(args[0], args.slice(1).join(' '));
+
+    case 'load-character':
+      return executeLoadCharacter(args[0]);
+
+    case 'show-stats':
+      return executeShowStats();
+
+    case 'goto':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: goto <location>' };
+      }
+      return executeGoto(args[0].toLowerCase());
+
+    case 'list-items':
+      return executeListItems();
+
+    case 'buy':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: buy <item-id> [quantity]' };
+      }
+      return executeBuy(args[0], args[1] ? parseInt(args[1]) : 1);
+
+    case 'buy-equipment':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: buy-equipment <item-id>' };
+      }
+      return executeBuyEquipment(args[0]);
+
+    case 'sell':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: sell <item-id> [quantity]' };
+      }
+      return executeSell(args[0], args[1] ? parseInt(args[1]) : 1);
+
+    case 'show-inventory':
+      return executeShowInventory();
+
+    case 'show-equipment':
+      return executeShowEquipment();
+
+    case 'equip':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: equip <item-id>' };
+      }
+      return executeEquip(args[0]);
+
+    case 'unequip':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: unequip <slot>' };
+      }
+      return executeUnequip(args[0].toLowerCase());
+
+    case 'use':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: use <item-id>' };
+      }
+      return executeUseItem(args[0]);
+
+    case 'list-missions':
+      return executeListMissions();
+
+    case 'start-mission':
+      if (!args[0] || !args[1]) {
+        return { success: false, message: 'Usage: start-mission <mission-id> <difficulty>' };
+      }
+      return executeStartMission(args[0], args[1].toLowerCase());
+
+    case 'enter-field':
+      if (!args[0] || !args[1]) {
+        return { success: false, message: 'Usage: enter-field <area-id> <difficulty>' };
+      }
+      return executeEnterField(args[0], args[1].toLowerCase());
+
+    case 'next-wave':
+      return executeNextWave();
+
+    case 'next-stage':
+      return executeNextStage();
+
+    case 'return':
+      return executeReturn();
+
+    case 'attack':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: attack <target-index>' };
+      }
+      return executeAttack(args[0]);
+
+    case 'pickup':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: pickup <drop-id>' };
+      }
+      return executePickup(args[0]);
+
+    case 'pickup-all':
+      return executePickupAll();
+
+    case 'show-storage':
+      return executeShowStorage();
+
+    case 'deposit':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: deposit <item-id> [quantity]' };
+      }
+      return executeDeposit(args[0], args[1] ? parseInt(args[1]) : 1);
+
+    case 'withdraw':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: withdraw <item-id> [quantity]' };
+      }
+      return executeWithdraw(args[0], args[1] ? parseInt(args[1]) : 1);
+
+    case 'deposit-meseta':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: deposit-meseta <amount>' };
+      }
+      return executeDepositMeseta(args[0]);
+
+    case 'withdraw-meseta':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: withdraw-meseta <amount>' };
+      }
+      return executeWithdrawMeseta(args[0]);
+
+    default:
+      return { success: false, message: `Unknown command: ${command}. Type 'help' for available commands.` };
+  }
+}
+
+/**
+ * Reset game state (for testing)
+ */
+export function resetState(): void {
+  currentSlot = null;
+  resetDatabase();
+}
