@@ -4,7 +4,7 @@
  */
 import { db } from '../db';
 
-export type Location = 'city' | 'shop' | 'weapon-shop' | 'guild' | 'teleporter' | 'storage' | 'field';
+export type Location = 'city' | 'shop' | 'weapon-shop' | 'guild' | 'teleporter' | 'storage' | 'sewer' | 'field';
 
 export interface GameStateData {
   location: Location;
@@ -64,7 +64,7 @@ export interface ApiResult<T = unknown> {
   data?: T;
 }
 
-const VALID_LOCATIONS: Location[] = ['city', 'shop', 'weapon-shop', 'guild', 'teleporter', 'storage', 'field'];
+const VALID_LOCATIONS: Location[] = ['city', 'shop', 'weapon-shop', 'guild', 'teleporter', 'storage', 'sewer', 'field'];
 
 /**
  * Get current game state for a character

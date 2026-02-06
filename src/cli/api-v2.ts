@@ -5,7 +5,7 @@
 
 import type { GameState, CommandResult, AvailableCommand, Location, DetailedItem, EquipmentSlots } from './types';
 import type { Character as SystemCharacter } from '../systems/character/types';
-import type { GameItem, WeaponItem, ArmorItem, UnitItem, ConsumableItem } from '../systems/inventory/types';
+import type { GameItem, WeaponItem, ArmorItem, UnitItem, ConsumableItem, MaterialItem } from '../systems/inventory/types';
 import { VALID_CLASS_IDS } from '../systems/character/types';
 
 // Import SQLite-backed API
@@ -112,6 +112,17 @@ import {
   getMagStatBonuses,
   type MagState,
 } from '../systems/mag';
+
+// Import sewer shops
+import {
+  getPhotonCollectorItems,
+  getPhotonCollectorItemsByCategory,
+  getEnemyCollectorTrades,
+  getTradeForPart,
+  createTradeResultWeapon,
+  type PhotonCollectorItem,
+  type EnemyCollectorTrade,
+} from '../systems/shop/sewer-shops';
 
 // Initialize missions on module load
 initializeDefaultMissions();
@@ -621,6 +632,40 @@ export function getAvailableCommands(): AvailableCommand[] {
         usage: 'withdraw-meseta <amount>',
         args: [
           { name: 'amount', type: 'number', required: true, description: 'Amount to withdraw' },
+        ],
+      });
+    }
+
+    // Sewer shop commands (Photon Collector & Enemy Collector)
+    if (location === 'sewer') {
+      commands.push({
+        name: 'list-photon-collector',
+        description: 'List items at Photon Collector',
+        usage: 'list-photon-collector [category]',
+        args: [
+          { name: 'category', type: 'string', required: false, description: 'Weapons, Armors, Mags, Elements, Weapon Modifiers, Consumables' },
+        ],
+      });
+      commands.push({
+        name: 'buy-photon',
+        description: 'Buy an item with Photon Drops',
+        usage: 'buy-photon <item-id>',
+        args: [
+          { name: 'item-id', type: 'string', required: true, description: 'Item ID to buy' },
+        ],
+      });
+      commands.push({
+        name: 'list-enemy-collector',
+        description: 'List trades at Enemy Collector',
+        usage: 'list-enemy-collector',
+        args: [],
+      });
+      commands.push({
+        name: 'trade-part',
+        description: 'Trade enemy part + meseta for weapon',
+        usage: 'trade-part <part-id>',
+        args: [
+          { name: 'part-id', type: 'string', required: true, description: 'Enemy part ID to trade' },
         ],
       });
     }
@@ -1782,6 +1827,25 @@ export function execute(commandLine: string): CommandResult {
       }
       return executeFeedMag(args[0].toLowerCase());
 
+    // Sewer shop commands
+    case 'list-photon-collector':
+      return executeListPhotonCollector(args[0]);
+
+    case 'buy-photon':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: buy-photon <item-id>' };
+      }
+      return executeBuyPhoton(args[0]);
+
+    case 'list-enemy-collector':
+      return executeListEnemyCollector();
+
+    case 'trade-part':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: trade-part <part-id>' };
+      }
+      return executeTradePart(args[0]);
+
     default:
       return { success: false, message: `Unknown command: ${command}. Type 'help' for available commands.` };
   }
@@ -2110,6 +2174,283 @@ function executeFeedMag(itemId: string): CommandResult {
       evolved: result.evolved,
       leveledUp: result.leveledUp,
     },
+  };
+}
+
+// ============================================================================
+// SEWER SHOP COMMANDS
+// ============================================================================
+
+function executeListPhotonCollector(category?: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const location = getLocation(charId);
+  if (location !== 'sewer') {
+    return { success: false, message: 'Must be at sewer to access Photon Collector.' };
+  }
+
+  // Count player's Photon Drops
+  const inventory = getInventory(charId);
+  const photonDrops = inventory.find(i => i.item.id === 'photon_drop');
+  const dropCount = photonDrops?.quantity ?? 0;
+
+  let items: PhotonCollectorItem[];
+  let title: string;
+
+  if (category) {
+    items = getPhotonCollectorItemsByCategory(category);
+    title = `Photon Collector - ${category}`;
+    if (items.length === 0) {
+      return {
+        success: false,
+        message: `No items in category "${category}". Try: Weapons, Armors, Mags, Elements, Weapon Modifiers, Consumables`,
+      };
+    }
+  } else {
+    items = getPhotonCollectorItems();
+    title = 'Photon Collector';
+  }
+
+  const lines = [`You have ${dropCount} Photon Drops.\n`, `${title}:`];
+
+  // Group by category if showing all
+  if (!category) {
+    const categories = ['Weapons', 'Armors', 'Mags', 'Elements', 'Weapon Modifiers', 'Consumables'];
+    for (const cat of categories) {
+      const catItems = items.filter(i => i.category === cat);
+      if (catItems.length > 0) {
+        lines.push(`\n[${cat}]`);
+        for (const item of catItems) {
+          lines.push(`  ${item.itemId.padEnd(20)} ${item.itemName.padEnd(20)} ${item.cost} PD`);
+        }
+      }
+    }
+  } else {
+    for (const item of items) {
+      lines.push(`  ${item.itemId.padEnd(20)} ${item.itemName.padEnd(20)} ${item.cost} PD`);
+    }
+  }
+
+  return { success: true, message: lines.join('\n') };
+}
+
+function executeBuyPhoton(itemId: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const location = getLocation(charId);
+  if (location !== 'sewer') {
+    return { success: false, message: 'Must be at sewer to access Photon Collector.' };
+  }
+
+  // Find the item
+  const items = getPhotonCollectorItems();
+  const shopItem = items.find(i => i.itemId.toLowerCase() === itemId.toLowerCase());
+  if (!shopItem) {
+    return { success: false, message: `Item "${itemId}" not found at Photon Collector.` };
+  }
+
+  // Check Photon Drops
+  const inventory = getInventory(charId);
+  const photonDrops = inventory.find(i => i.item.id === 'photon_drop');
+  const dropCount = photonDrops?.quantity ?? 0;
+
+  if (dropCount < shopItem.cost) {
+    return {
+      success: false,
+      message: `Not enough Photon Drops. Need ${shopItem.cost}, have ${dropCount}.`,
+    };
+  }
+
+  // Consume Photon Drops
+  const removeResult = removeItem(charId, 'photon_drop', shopItem.cost);
+  if (!removeResult.success) {
+    return { success: false, message: `Failed to spend Photon Drops: ${removeResult.message}` };
+  }
+
+  // Create and add the item based on category
+  let newItem: GameItem;
+  if (shopItem.category === 'Weapons') {
+    newItem = {
+      id: `${shopItem.itemId}-${Date.now()}`,
+      name: shopItem.itemName,
+      type: 'weapon',
+      weaponType: 'special',
+      rarity: 5,
+      description: `A weapon from the Photon Collector.`,
+      sellPrice: shopItem.cost * 100,
+      stackable: false,
+      maxStack: 1,
+      attack: 150 + Math.floor(Math.random() * 50),
+      accuracy: 120 + Math.floor(Math.random() * 30),
+      grindLevel: 0,
+      maxGrind: 10,
+      requiredLevel: 30,
+    };
+  } else if (shopItem.category === 'Armors') {
+    newItem = {
+      id: `${shopItem.itemId}-${Date.now()}`,
+      name: shopItem.itemName,
+      type: 'armor',
+      armorSlot: 'frame',
+      rarity: 5,
+      description: `Armor from the Photon Collector.`,
+      sellPrice: shopItem.cost * 100,
+      stackable: false,
+      maxStack: 1,
+      defense: 80 + Math.floor(Math.random() * 40),
+      evasion: 40 + Math.floor(Math.random() * 20),
+      unitSlots: 3,
+      requiredLevel: 30,
+    };
+  } else if (shopItem.category === 'Mags') {
+    // For mags, just give them a mag creation item
+    newItem = {
+      id: 'mag-cell',
+      name: 'Mag Cell',
+      type: 'consumable',
+      rarity: 4,
+      description: 'A cell that can create a new Mag.',
+      sellPrice: 0,
+      stackable: true,
+      maxStack: 99,
+      effect: 'create_mag',
+    };
+  } else {
+    // Elements, Grinders, Materials, Consumables
+    newItem = {
+      id: shopItem.itemId,
+      name: shopItem.itemName,
+      type: 'consumable',
+      rarity: 3,
+      description: `An item from the Photon Collector.`,
+      sellPrice: shopItem.cost * 50,
+      stackable: true,
+      maxStack: 99,
+      effect: 'special',
+    };
+  }
+
+  const addResult = addItem(charId, newItem);
+  if (!addResult.success) {
+    // Refund the Photon Drops if we can't add the item
+    const refundItem: ConsumableItem = {
+      id: 'photon_drop',
+      name: 'Photon Drop',
+      type: 'consumable',
+      rarity: 4,
+      description: 'A crystallized photon.',
+      sellPrice: 100,
+      stackable: true,
+      maxStack: 999,
+      effect: 'currency',
+    };
+    addItem(charId, refundItem, shopItem.cost);
+    return { success: false, message: `Inventory full! ${addResult.message}` };
+  }
+
+  return {
+    success: true,
+    message: `Purchased ${shopItem.itemName} for ${shopItem.cost} Photon Drops!`,
+  };
+}
+
+function executeListEnemyCollector(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const location = getLocation(charId);
+  if (location !== 'sewer') {
+    return { success: false, message: 'Must be at sewer to access Enemy Collector.' };
+  }
+
+  const char = getCharacter(charId);
+  const meseta = char?.meseta ?? 0;
+
+  // Check player's enemy parts
+  const inventory = getInventory(charId);
+
+  const trades = getEnemyCollectorTrades();
+  const lines = [`Your Meseta: ${meseta}\n`, 'Enemy Collector - Trade Parts for Weapons:\n'];
+
+  for (const trade of trades) {
+    const hasPart = inventory.some(i => i.item.id === trade.requiredPartId);
+    const partStatus = hasPart ? '[HAVE]' : '';
+    lines.push(
+      `  ${trade.requiredPartId.padEnd(20)} -> ${trade.resultItemName.padEnd(18)} (${trade.mesetaCost} meseta) ${partStatus}`
+    );
+  }
+
+  return { success: true, message: lines.join('\n') };
+}
+
+function executeTradePart(partId: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const location = getLocation(charId);
+  if (location !== 'sewer') {
+    return { success: false, message: 'Must be at sewer to access Enemy Collector.' };
+  }
+
+  // Find the trade
+  const trade = getTradeForPart(partId.toLowerCase());
+  if (!trade) {
+    return { success: false, message: `No trade found for part "${partId}".` };
+  }
+
+  // Check if player has the part
+  const inventory = getInventory(charId);
+  const partItem = inventory.find(i => i.item.id.toLowerCase() === partId.toLowerCase());
+  if (!partItem || partItem.quantity <= 0) {
+    return { success: false, message: `You don't have any ${trade.requiredPartName}.` };
+  }
+
+  // Check meseta
+  const char = getCharacter(charId);
+  if (!char || char.meseta < trade.mesetaCost) {
+    return {
+      success: false,
+      message: `Not enough Meseta. Need ${trade.mesetaCost}, have ${char?.meseta ?? 0}.`,
+    };
+  }
+
+  // Consume the part
+  const removeResult = removeItem(charId, partItem.item.id, 1);
+  if (!removeResult.success) {
+    return { success: false, message: `Failed to use part: ${removeResult.message}` };
+  }
+
+  // Deduct meseta
+  updateMeseta(charId, char.meseta - trade.mesetaCost);
+
+  // Create and add the weapon
+  const weapon = createTradeResultWeapon(trade);
+  const addResult = addItem(charId, weapon);
+  if (!addResult.success) {
+    // Refund if inventory full
+    addItem(charId, partItem.item, 1);
+    updateMeseta(charId, char.meseta);
+    return { success: false, message: `Inventory full! ${addResult.message}` };
+  }
+
+  const elementInfo = weapon.element
+    ? ` [${weapon.element} ${weapon.elementPercent}%]`
+    : '';
+
+  return {
+    success: true,
+    message: `Traded ${trade.requiredPartName} + ${trade.mesetaCost} meseta for ${weapon.name}!${elementInfo}\nATK: ${weapon.attack} | ACC: ${weapon.accuracy}`,
+    data: { weapon },
   };
 }
 

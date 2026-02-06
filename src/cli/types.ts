@@ -7,7 +7,7 @@ import type { Character } from '../systems/character/types';
 import type { ShopItem } from '../systems/shop/types';
 import type { Mission, Difficulty } from '../systems/mission/types';
 
-export type Location = 'city' | 'shop' | 'weapon-shop' | 'missions' | 'inventory' | 'storage' | 'guild' | 'teleporter' | 'field';
+export type Location = 'city' | 'shop' | 'weapon-shop' | 'missions' | 'inventory' | 'storage' | 'guild' | 'teleporter' | 'sewer' | 'field';
 
 /** Detailed item info for UI display */
 export interface DetailedItem {

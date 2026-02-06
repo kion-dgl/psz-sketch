@@ -13,6 +13,12 @@ import type { CombatStats, WeaponStats, Element } from '../systems/combat/types'
 import { addItem } from './inventory';
 import { MONOMATE, MONOFLUID } from '../systems/inventory/starting-items';
 import { getClassStatsAtLevel, getEnemy } from '../data/content-loader';
+import {
+  rollEnemyPartDrops,
+  rollPhotonDrop,
+  createPhotonDrop,
+  type EnemyPartDrop,
+} from '../systems/drops/enemy-parts';
 
 export type Difficulty = 'normal' | 'hard' | 'super-hard';
 
@@ -555,24 +561,50 @@ export function attack(characterId: string, targetIndex: number): ApiResult<Atta
  */
 function generateDrops(characterId: string, enemy: EnemyInstance): void {
   const state = getCombatState(characterId);
-  const dropId = state.droppedItems.length;
+  let dropId = state.droppedItems.length;
 
   // Always drop meseta
   if (enemy.mesetaValue > 0) {
     state.droppedItems.push({
-      id: dropId,
+      id: dropId++,
       type: 'meseta',
       meseta: enemy.mesetaValue,
     });
   }
 
-  // Random item drop (10% chance)
+  // Check enemy data for rare/boss status
+  const enemyData = getEnemy(enemy.enemyId);
+  const isRare = enemyData?.isRare ?? false;
+  const isBoss = enemyData?.isBoss ?? false;
+
+  // Photon Drop (5% normal, 15% rare, 30% boss)
+  if (rollPhotonDrop(isRare, isBoss)) {
+    const photonDrop = createPhotonDrop();
+    state.droppedItems.push({
+      id: dropId++,
+      type: 'item',
+      itemId: photonDrop.id,
+      itemData: JSON.stringify(photonDrop),
+    });
+  }
+
+  // Enemy-specific parts
+  const partDrops = rollEnemyPartDrops(enemy.name);
+  for (const part of partDrops) {
+    state.droppedItems.push({
+      id: dropId++,
+      type: 'item',
+      itemId: part.id,
+      itemData: JSON.stringify(part),
+    });
+  }
+
+  // Random consumable drop (10% chance)
   if (Math.random() < 0.1) {
-    // Simple random drop - could be expanded
     const items = ['monomate', 'monofluid'];
     const itemId = items[Math.floor(Math.random() * items.length)];
     state.droppedItems.push({
-      id: dropId + 1,
+      id: dropId++,
       type: 'item',
       itemId,
     });
@@ -605,7 +637,23 @@ export function pickupItem(characterId: string, dropId: number): ApiResult {
   }
 
   if (drop.type === 'item' && drop.itemId) {
-    // Add item to inventory
+    // Check if item has embedded data (enemy parts, photon drops, etc.)
+    if (drop.itemData) {
+      try {
+        const item = JSON.parse(drop.itemData);
+        const result = addItem(characterId, item, 1);
+        if (result.success) {
+          state.droppedItems.splice(dropIndex, 1);
+          syncCombatToDb(characterId);
+          return { success: true, message: `Picked up ${item.name}!` };
+        }
+        return result;
+      } catch (e) {
+        // Fall through to legacy handling
+      }
+    }
+
+    // Legacy handling for monomate/monofluid
     const items: Record<string, any> = { monomate: MONOMATE, monofluid: MONOFLUID };
     const item = items[drop.itemId];
 
