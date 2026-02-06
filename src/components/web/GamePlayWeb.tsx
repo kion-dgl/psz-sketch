@@ -4,8 +4,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { execute, resetState, getState, getAvailableCommands } from '../../cli/api';
-import type { DetailedItem } from '../../cli/types';
+import type { DetailedItem, GameState } from '../../cli/types';
 import {
   getShopItems,
   purchaseItem,
@@ -23,22 +22,36 @@ import {
 } from '../../systems/field';
 import type { Field } from '../../systems/field/types';
 import type { Difficulty } from '../../systems/mission/types';
-import { meetsLevelForDifficulty, getCompletedMissions, restoreCompletedMissions } from '../../systems/mission';
-import { getCompletedFields, restoreCompletedFields } from '../../systems/field';
-import { VALID_CLASS_IDS, MAX_SLOTS } from '../../systems/character/types';
+import { meetsLevelForDifficulty } from '../../systems/mission';
+import { VALID_CLASS_IDS } from '../../systems/character/types';
 import type { Character, CharacterSlots } from '../../systems/character/types';
-import {
-  loadGameData,
-  saveGameData,
-  resetAllGameData,
-  type PersistedCharacterData,
-  type PersistedGameData,
-  type PersistedEquipment,
-} from '../../systems/persistence';
 import type { WeaponItem, ArmorItem, UnitItem } from '../../systems/inventory/types';
 
+// API helper functions
+async function apiExecute(command: string): Promise<{ success: boolean; message: string; state?: GameState }> {
+  const response = await fetch('/api/game/execute', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ command }),
+  });
+  return response.json();
+}
+
+async function apiGetState(): Promise<GameState> {
+  const response = await fetch('/api/game/state');
+  return response.json();
+}
+
+async function apiReset(): Promise<void> {
+  await fetch('/api/game/execute', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ command: 'reset' }),
+  });
+}
+
 export default function GamePlayWeb() {
-  const [gameState, setGameState] = useState<ReturnType<typeof getState> | null>(null);
+  const [gameState, setGameState] = useState<GameState | null>(null);
   const [logs, setLogs] = useState<{ id: number; message: string }[]>([]);
   const [logCounter, setLogCounter] = useState(0);
   const [commandInput, setCommandInput] = useState('');
@@ -53,39 +66,41 @@ export default function GamePlayWeb() {
   const [resetConfirm, setResetConfirm] = useState(false);
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Initialize game systems and load persisted data
+  // Initialize game systems and load character data from API
   useEffect(() => {
     const initGame = async () => {
       initializeDefaultShops();
       initializeDefaultFields();
-      resetState();
 
-      // Load persisted game data from IndexedDB
-      const gameData = await loadGameData();
+      // Load characters from API
+      try {
+        const response = await fetch('/api/characters');
+        if (response.ok) {
+          const chars = await response.json();
+          const slots: CharacterSlots = [null, null, null, null];
+          for (let i = 0; i < 4; i++) {
+            slots[i] = chars[i] || null;
+          }
+          setCharacterSlots(slots);
 
-      // Convert persisted data to character slots
-      const slots: CharacterSlots = [null, null, null, null];
-      for (let i = 0; i < 4; i++) {
-        const charData = gameData.characters[i];
-        if (charData) {
-          slots[i] = charData.character;
+          // Check for last selected character in localStorage
+          const lastCharId = localStorage.getItem('selectedCharacterId');
+          if (lastCharId) {
+            const charSlot = slots.findIndex(c => c?.character_id === lastCharId);
+            if (charSlot >= 0 && slots[charSlot]) {
+              // Load this character
+              await apiExecute(`load-character ${charSlot}`);
+              const state = await apiGetState();
+              setGameState(state);
+              setActiveSlot(charSlot);
+            }
+          }
         }
-      }
-      setCharacterSlots(slots);
-
-      // If there was a last active slot with a character, auto-select it
-      if (gameData.lastActiveSlot !== null && slots[gameData.lastActiveSlot]) {
-        const char = slots[gameData.lastActiveSlot]!;
-        const charData = gameData.characters[gameData.lastActiveSlot];
-        if (charData) {
-          // Load the full character state including inventory
-          loadCharacterWithData(char, gameData.lastActiveSlot, charData);
-        }
+      } catch (error) {
+        console.error('Failed to load characters:', error);
       }
 
-      refreshState();
       setIsLoading(false);
       addLog('Welcome! Select or create a character to begin.');
     };
@@ -93,164 +108,55 @@ export default function GamePlayWeb() {
     initGame();
   }, []);
 
-  // Auto-save game state when it changes (debounced)
-  useEffect(() => {
-    if (isLoading || activeSlot === null || !gameState?.character) return;
-
-    // Debounce saves to avoid too many writes
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    saveTimeoutRef.current = setTimeout(() => {
-      saveCurrentCharacter();
-    }, 1000);
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [gameState, activeSlot, isLoading]);
-
-  const loadCharacterWithData = (character: Character, slot: number, data: PersistedCharacterData) => {
-    // Load character into game state
-    const charJson = JSON.stringify(character);
-    execute(`load-character ${charJson}`);
-
-    // Restore inventory
-    if (data.inventory) {
-      for (const entry of data.inventory) {
-        execute(`add-item ${JSON.stringify(entry.item)} ${entry.quantity}`);
-      }
-    }
-
-    // Restore equipment (use set-weapon/set-frame/set-unit to directly restore without inventory swap)
-    if (data.equipment?.weapon) {
-      execute(`set-weapon ${JSON.stringify(data.equipment.weapon)}`);
-    }
-    if (data.equipment?.frame) {
-      execute(`set-frame ${JSON.stringify(data.equipment.frame)}`);
-    }
-    if (data.equipment?.unit1) {
-      execute(`set-unit 1 ${JSON.stringify(data.equipment.unit1)}`);
-    }
-    if (data.equipment?.unit2) {
-      execute(`set-unit 2 ${JSON.stringify(data.equipment.unit2)}`);
-    }
-    if (data.equipment?.unit3) {
-      execute(`set-unit 3 ${JSON.stringify(data.equipment.unit3)}`);
-    }
-    if (data.equipment?.unit4) {
-      execute(`set-unit 4 ${JSON.stringify(data.equipment.unit4)}`);
-    }
-
-    // Restore completed missions and fields
-    if (data.completedMissions && data.completedMissions.length > 0) {
-      restoreCompletedMissions(character.character_id, data.completedMissions);
-    }
-    if (data.completedFields && data.completedFields.length > 0) {
-      restoreCompletedFields(character.character_id, data.completedFields);
-    }
-
-    setActiveSlot(slot);
-  };
-
-  const saveCurrentCharacter = async () => {
-    if (activeSlot === null || !gameState?.character) return;
-
-    const gameData = await loadGameData();
-
-    // Build persisted character data from current state
-    const charData: PersistedCharacterData = {
-      character: gameState.character,
-      inventory: gameState.inventory?.map(item => ({
-        item: item as any, // Full item data
-        quantity: item.quantity,
-      })) || [],
-      equipment: {
-        weapon: (gameState.equipment?.weapon as WeaponItem) || null,
-        frame: (gameState.equipment?.frame as ArmorItem) || null,
-        unit1: (gameState.equipment?.unit1 as UnitItem) || null,
-        unit2: (gameState.equipment?.unit2 as UnitItem) || null,
-        unit3: (gameState.equipment?.unit3 as UnitItem) || null,
-        unit4: (gameState.equipment?.unit4 as UnitItem) || null,
-      },
-      completedMissions: getCompletedMissions(gameState.character.character_id),
-      completedFields: getCompletedFields(gameState.character.character_id),
-    };
-
-    gameData.characters[activeSlot] = charData;
-    gameData.lastActiveSlot = activeSlot;
-    await saveGameData(gameData);
-  };
+  // No auto-save needed - server persists state automatically
 
   const handleSelectCharacter = async (character: Character, slot: number) => {
-    // Save current character before switching
-    if (activeSlot !== null) {
-      await saveCurrentCharacter();
-    }
+    // Load character from server
+    await apiExecute(`load-character ${slot}`);
+    const state = await apiGetState();
+    setGameState(state);
+    setActiveSlot(slot);
 
-    // Load persisted data for this character
-    const gameData = await loadGameData();
-    const charData = gameData.characters[slot];
+    // Store selected character ID for persistence
+    localStorage.setItem('selectedCharacterId', character.character_id);
 
-    if (charData) {
-      loadCharacterWithData(character, slot, charData);
-    } else {
-      // No persisted data, just load character
-      const charJson = JSON.stringify(character);
-      execute(`load-character ${charJson}`);
-      setActiveSlot(slot);
-    }
-
-    refreshState();
     addLog(`Selected ${character.character_name} (${character.class_id})`);
     setSelectedSlot(null);
-
-    // Update last active slot
-    gameData.lastActiveSlot = slot;
-    await saveGameData(gameData);
   };
 
   const handleCreateCharacter = async (classId: string) => {
     if (selectedSlot === null) return;
 
-    const result = executeCommand(`create-character ${classId} Hero`);
-    if (result.success) {
-      // Get the created character from game state
-      const newState = getState();
-      if (newState.character) {
-        const newSlots = [...characterSlots] as CharacterSlots;
-        const newChar = { ...newState.character, slot: selectedSlot };
-        newSlots[selectedSlot] = newChar;
-        setCharacterSlots(newSlots);
-        setActiveSlot(selectedSlot);
+    // Create character via API
+    const response = await fetch('/api/characters', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        slot: selectedSlot,
+        classId,
+        name: 'Hero',
+      }),
+    });
 
-        // Save to IndexedDB
-        const gameData = await loadGameData();
-        gameData.characters[selectedSlot] = {
-          character: newChar,
-          inventory: newState.inventory?.map(item => ({
-            item: item as any,
-            quantity: item.quantity,
-          })) || [],
-          equipment: {
-            weapon: (newState.equipment?.weapon as WeaponItem) || null,
-            frame: (newState.equipment?.frame as ArmorItem) || null,
-            unit1: (newState.equipment?.unit1 as UnitItem) || null,
-            unit2: (newState.equipment?.unit2 as UnitItem) || null,
-            unit3: (newState.equipment?.unit3 as UnitItem) || null,
-            unit4: (newState.equipment?.unit4 as UnitItem) || null,
-          },
-          completedMissions: getCompletedMissions(newChar.character_id),
-          completedFields: getCompletedFields(newChar.character_id),
-        };
-        gameData.lastActiveSlot = selectedSlot;
-        await saveGameData(gameData);
+    if (response.ok) {
+      const newChar = await response.json();
 
-        addLog(`Created ${newState.character.character_name} in slot ${selectedSlot + 1}`);
-      }
+      // Update local slots
+      const newSlots = [...characterSlots] as CharacterSlots;
+      newSlots[selectedSlot] = newChar;
+      setCharacterSlots(newSlots);
+
+      // Load the character
+      await apiExecute(`load-character ${selectedSlot}`);
+      const state = await apiGetState();
+      setGameState(state);
+      setActiveSlot(selectedSlot);
+
+      localStorage.setItem('selectedCharacterId', newChar.character_id);
+      addLog(`Created ${newChar.character_name} in slot ${selectedSlot + 1}`);
+    } else {
+      const error = await response.json();
+      addLog(`Failed to create character: ${error.error}`);
     }
     setSelectedSlot(null);
   };
@@ -259,45 +165,53 @@ export default function GamePlayWeb() {
     if (deleteConfirm === null) return;
 
     const charToDelete = characterSlots[deleteConfirm];
-    const newSlots = [...characterSlots] as CharacterSlots;
-    newSlots[deleteConfirm] = null;
-    setCharacterSlots(newSlots);
-
-    // Update IndexedDB
-    const gameData = await loadGameData();
-    gameData.characters[deleteConfirm] = null;
-    if (gameData.lastActiveSlot === deleteConfirm) {
-      gameData.lastActiveSlot = null;
-    }
-    await saveGameData(gameData);
-
-    // If this was the active character, reset game state
-    if (gameState?.character?.character_id === charToDelete?.character_id) {
-      resetState();
-      setActiveSlot(null);
-      refreshState();
+    if (!charToDelete) {
+      setDeleteConfirm(null);
+      return;
     }
 
-    addLog(`Deleted character from slot ${deleteConfirm + 1}`);
+    // Delete via API
+    const response = await fetch(`/api/characters/${charToDelete.character_id}`, {
+      method: 'DELETE',
+    });
+
+    if (response.ok) {
+      const newSlots = [...characterSlots] as CharacterSlots;
+      newSlots[deleteConfirm] = null;
+      setCharacterSlots(newSlots);
+
+      // If this was the active character, reset state
+      if (gameState?.character?.character_id === charToDelete.character_id) {
+        await apiReset();
+        setActiveSlot(null);
+        setGameState(null);
+        localStorage.removeItem('selectedCharacterId');
+      }
+
+      addLog(`Deleted character from slot ${deleteConfirm + 1}`);
+    } else {
+      addLog('Failed to delete character');
+    }
     setDeleteConfirm(null);
   };
 
   const handleResetAll = async () => {
-    // Reset all persisted data
-    await resetAllGameData();
+    // Reset server state
+    await apiReset();
 
-    // Reset in-memory state
-    resetState();
+    // Reset client state
     setCharacterSlots([null, null, null, null]);
     setActiveSlot(null);
+    setGameState(null);
     setResetConfirm(false);
-    refreshState();
+    localStorage.removeItem('selectedCharacterId');
 
     addLog('All game data has been reset.');
   };
 
-  const refreshState = useCallback(() => {
-    setGameState(getState());
+  const refreshState = useCallback(async () => {
+    const state = await apiGetState();
+    setGameState(state);
   }, []);
 
   const addLog = useCallback((message: string) => {
@@ -308,10 +222,14 @@ export default function GamePlayWeb() {
     });
   }, []);
 
-  const executeCommand = useCallback((command: string) => {
-    const result = execute(command);
+  const executeCommand = useCallback(async (command: string) => {
+    const result = await apiExecute(command);
     addLog(`> ${command}\n${result.message}`);
-    refreshState();
+    if (result.state) {
+      setGameState(result.state);
+    } else {
+      await refreshState();
+    }
     return result;
   }, [addLog, refreshState]);
 
