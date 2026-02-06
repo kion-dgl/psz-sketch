@@ -756,6 +756,133 @@ export function getPhotonArtsForClass(classType: string): PhotonArtData[] {
 }
 
 // ============================================================================
+// QUEST DEFINITIONS (Detailed quest data)
+// ============================================================================
+
+export interface QuestDifficultyData {
+  difficulty: 'Normal' | 'Hard' | 'Super Hard' | 'Ultimate';
+  recommendedLevel?: number;
+  rewards: {
+    meseta: number;
+    experience: number;
+    items?: Array<{
+      itemId: string;
+      itemName: string;
+      quantity: number;
+    }>;
+  };
+}
+
+export interface QuestObjectiveData {
+  type: 'defeat_enemies' | 'collect_items' | 'reach_location' | 'defeat_boss' | 'escort_npc';
+  description: string;
+  target?: string;
+  required?: number;
+}
+
+export interface QuestDefinitionData {
+  id: string;
+  questId: string;
+  questName: string;
+  questType: 'story' | 'side' | 'multiplayer' | 'post_game';
+  area: string;
+  description: string;
+  race?: 'Human' | 'Newman' | 'CAST';
+  difficulties: QuestDifficultyData[];
+  requirements?: {
+    minLevel: number;
+    prerequisiteQuests: string[];
+    unlockCondition?: string;
+  };
+  objectives: QuestObjectiveData[];
+  multiplayerType?: 'solo' | 'co-op' | 'boss';
+  isRepeatable: boolean;
+  isSecret: boolean;
+  floors?: number;
+  bossFrequency?: number;
+}
+
+let questDefinitionsCache: Map<string, QuestDefinitionData> | null = null;
+
+/**
+ * Get all quest definitions
+ */
+export function getQuestDefinitions(): Map<string, QuestDefinitionData> {
+  if (!questDefinitionsCache) {
+    questDefinitionsCache = loadJsonDir<QuestDefinitionData>('quest-definitions');
+  }
+  return questDefinitionsCache;
+}
+
+/**
+ * Get a specific quest definition by ID
+ */
+export function getQuestDefinition(id: string): QuestDefinitionData | undefined {
+  return getQuestDefinitions().get(id);
+}
+
+/**
+ * Get quest definitions by type (story, side, etc.)
+ */
+export function getQuestsByType(questType: string): QuestDefinitionData[] {
+  return Array.from(getQuestDefinitions().values())
+    .filter(q => q.questType === questType);
+}
+
+/**
+ * Get story quests in order (by chapter/prerequisite chain)
+ */
+export function getStoryQuests(): QuestDefinitionData[] {
+  const storyQuests = getQuestsByType('story');
+
+  // Sort by prerequisite chain - quests with no prerequisites come first
+  const sorted: QuestDefinitionData[] = [];
+  const remaining = [...storyQuests];
+  const addedIds = new Set<string>();
+
+  // Keep adding quests whose prerequisites are all satisfied
+  while (remaining.length > 0) {
+    const canAdd = remaining.filter(q => {
+      const prereqs = q.requirements?.prerequisiteQuests ?? [];
+      return prereqs.every(p => addedIds.has(p));
+    });
+
+    if (canAdd.length === 0) {
+      // No more can be added (circular dependency or missing prereq)
+      sorted.push(...remaining);
+      break;
+    }
+
+    // Sort by minLevel among those that can be added
+    canAdd.sort((a, b) => (a.requirements?.minLevel ?? 1) - (b.requirements?.minLevel ?? 1));
+
+    for (const q of canAdd) {
+      sorted.push(q);
+      addedIds.add(q.questId);
+      remaining.splice(remaining.indexOf(q), 1);
+    }
+  }
+
+  return sorted;
+}
+
+/**
+ * Get side quests available after completing a story quest
+ */
+export function getSideQuestsUnlockedBy(storyQuestId: string): QuestDefinitionData[] {
+  return getQuestsByType('side')
+    .filter(q => q.requirements?.prerequisiteQuests?.includes(storyQuestId));
+}
+
+/**
+ * Get quests for a specific area
+ */
+export function getQuestsForArea(area: string): QuestDefinitionData[] {
+  return Array.from(getQuestDefinitions().values())
+    .filter(q => q.area.toLowerCase().includes(area.toLowerCase()));
+}
+
+// ============================================================================
 // TECHNIQUES (Spells)
 // ============================================================================
 
@@ -848,6 +975,7 @@ export function clearContentCaches(): void {
   weaponRestrictionsCache = null;
   photonArtsCache = null;
   techniquesCache = null;
+  questDefinitionsCache = null;
 }
 
 /**
@@ -863,4 +991,5 @@ export function preloadContent(): void {
   getShops();
   getDropTables();
   getMissions();
+  getQuestDefinitions();
 }

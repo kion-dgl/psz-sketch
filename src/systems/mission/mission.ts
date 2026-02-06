@@ -11,12 +11,15 @@ import type {
   Difficulty,
   RewardItem,
   ObjectiveProgress,
+  MissionObjective,
+  UnlockRequirement,
 } from './types';
 import {
   DIFFICULTY_EXP_MULTIPLIERS,
   DIFFICULTY_MESETA_MULTIPLIERS,
   GRADE_THRESHOLDS,
 } from './types';
+import { getQuestDefinitions, type QuestDefinitionData } from '../../data/content-loader';
 
 // Mission database (would be loaded from JSON in production)
 const missions = new Map<string, Mission>();
@@ -379,112 +382,117 @@ export function clearMissions(): void {
 }
 
 /**
- * Initialize default missions
+ * Convert area name to area ID
+ */
+function areaNameToId(areaName: string): string {
+  return areaName.toLowerCase().replace(/\s+/g, '-');
+}
+
+/**
+ * Convert objective type from quest definition to mission objective type
+ */
+function convertObjectiveType(type: string): 'defeat' | 'collect' | 'reach' | 'protect' {
+  switch (type) {
+    case 'defeat_enemies':
+    case 'defeat_boss':
+      return 'defeat';
+    case 'collect_items':
+      return 'collect';
+    case 'reach_location':
+      return 'reach';
+    case 'escort_npc':
+      return 'protect';
+    default:
+      return 'defeat';
+  }
+}
+
+/**
+ * Convert quest definition to Mission type
+ */
+function questDefinitionToMission(quest: QuestDefinitionData): Mission {
+  // Get normal difficulty rewards as base
+  const normalDiff = quest.difficulties.find(d => d.difficulty === 'Normal');
+
+  // Convert objectives
+  const objectives: MissionObjective[] = quest.objectives.map((obj, i) => ({
+    id: `obj${i + 1}`,
+    type: convertObjectiveType(obj.type),
+    target: obj.target ?? 'any',
+    count: obj.required,
+    description: obj.description,
+  }));
+
+  // Convert unlock requirements
+  const unlockRequirements: UnlockRequirement[] = [];
+  if (quest.requirements?.prerequisiteQuests) {
+    for (const prereq of quest.requirements.prerequisiteQuests) {
+      unlockRequirements.push({ type: 'mission', id: prereq });
+    }
+  }
+  if (quest.requirements?.minLevel && quest.requirements.minLevel > 1) {
+    unlockRequirements.push({ type: 'level', value: quest.requirements.minLevel });
+  }
+
+  // Convert reward items (guaranteed drops from quest rewards)
+  const rewardItems: RewardItem[] = [];
+  if (normalDiff?.rewards?.items) {
+    for (const item of normalDiff.rewards.items) {
+      rewardItems.push({
+        itemId: item.itemId,
+        quantity: item.quantity,
+        chance: 1.0, // Quest rewards are guaranteed
+      });
+    }
+  }
+
+  return {
+    id: quest.questId,
+    name: quest.questName,
+    description: quest.description,
+    areaId: areaNameToId(quest.area),
+    requiredLevel: quest.requirements?.minLevel ?? 1,
+    recommendedLevel: normalDiff?.recommendedLevel ?? quest.requirements?.minLevel ?? 1,
+    partySize: 4, // Default party size
+    objectives,
+    rewards: {
+      baseExp: normalDiff?.rewards?.experience ?? 500,
+      baseMeseta: normalDiff?.rewards?.meseta ?? 500,
+      items: rewardItems.length > 0 ? rewardItems : undefined,
+    },
+    unlockRequirements: unlockRequirements.length > 0 ? unlockRequirements : undefined,
+    missionType: quest.questType === 'story' ? 'story' : 'side',
+  };
+}
+
+/**
+ * Initialize missions from quest definitions
  */
 export function initializeDefaultMissions(): void {
-  // First mission - standard introductory quest
-  registerMission({
-    id: 'mayors-mission',
-    name: "Mayor's Mission",
-    description: 'Help the Mayor investigate strange occurrences in the forest.',
-    areaId: 'naura-bakery',
-    requiredLevel: 1,
-    recommendedLevel: 5,
-    partySize: 4,
-    objectives: [
-      { id: 'obj1', type: 'defeat', target: 'booma', count: 10, description: 'Defeat 10 Boomas' },
-      { id: 'obj2', type: 'reach', target: 'boss-area', description: 'Reach the boss area' },
-      { id: 'obj3', type: 'defeat', target: 'hildebear', count: 1, description: 'Defeat Hildebear' },
-    ],
-    rewards: {
-      baseExp: 500,
-      baseMeseta: 1000,
-      items: [
-        { itemId: 'saber', quantity: 1, chance: 0.2 },
-        { itemId: 'monomate', quantity: 5, chance: 0.8 },
-      ],
-    },
-  });
+  const questDefs = getQuestDefinitions();
 
-  registerMission({
-    id: 'third-daughter',
-    name: 'The Third Daughter',
-    description: 'Search for the missing daughter in the caves.',
-    areaId: 'oberon-caves',
-    requiredLevel: 10,
-    recommendedLevel: 15,
-    partySize: 4,
-    objectives: [
-      { id: 'obj1', type: 'collect', target: 'clue', count: 3, description: 'Find 3 clues' },
-      { id: 'obj2', type: 'defeat', target: 'boss', count: 1, description: 'Defeat the kidnapper' },
-      { id: 'obj3', type: 'protect', target: 'daughter', description: 'Protect the daughter' },
-    ],
-    rewards: {
-      baseExp: 1500,
-      baseMeseta: 3000,
-      items: [
-        { itemId: 'brand', quantity: 1, chance: 0.15 },
-        { itemId: 'dimate', quantity: 3, chance: 0.5 },
-      ],
-    },
-    unlockRequirements: [
-      { type: 'mission', id: 'mayors-mission' },
-    ],
-  });
+  for (const [_id, questDef] of questDefs) {
+    const mission = questDefinitionToMission(questDef);
+    registerMission(mission);
+  }
 
-  // Third mission - the tone shift, shows the world has real stakes
-  registerMission({
-    id: 'fallen-hunter',
-    name: 'Retrieve the Fallen',
-    description: 'A hunter went missing in Gurhacia Valley three days ago. The guild has given up hope of finding them alive. Recover their belongings so we can return them to the family.',
-    areaId: 'valley',
-    requiredLevel: 10,
-    recommendedLevel: 12,
-    partySize: 1,
-    objectives: [
-      { id: 'obj1', type: 'reach', target: 'valley-camp', description: 'Find the abandoned camp' },
-      { id: 'obj2', type: 'collect', target: 'hunter-id', count: 1, description: 'Recover hunter ID card' },
-      { id: 'obj3', type: 'collect', target: 'hunter-letter', count: 1, description: 'Find the unfinished letter' },
-    ],
-    rewards: {
-      baseExp: 200,
-      baseMeseta: 300,
-      items: [
-        { itemId: 'monomate', quantity: 3, chance: 1.0 },
-      ],
-    },
-    unlockRequirements: [
-      { type: 'mission', id: 'third-daughter' },
-    ],
-    narrative: {
-      intro: "The guild clerk's voice is quiet. \"Mira was... experienced. Twenty years hunting these valleys. If she couldn't make it back...\" She slides a worn photograph across the counter. A woman with kind eyes, arm around a teenage boy. \"Her son deserves to know what happened. Bring back what you can.\"",
-      complete: "The clerk takes the ID card with trembling hands. She reads the half-finished letter silently, then folds it carefully. \"Thank you. I'll make sure Kai receives these.\" She pauses. \"The rescue team found her, you know. Too late. Cost them 2,000 Meseta to bring her home.\" Her eyes meet yours. \"Be careful out there. The valley doesn't care how experienced you are.\"",
-    },
-  });
+  // Log loaded missions count
+  console.log(`Loaded ${missions.size} missions from quest definitions`);
+}
 
-  registerMission({
-    id: 'valley-king',
-    name: 'The Valley King',
-    description: 'Defeat the dragon terrorizing Gurhacia Valley.',
-    areaId: 'gurhacia-valley',
-    requiredLevel: 30,
-    recommendedLevel: 40,
-    partySize: 4,
-    objectives: [
-      { id: 'obj1', type: 'defeat', target: 'dragon-spawn', count: 20, description: 'Clear the path' },
-      { id: 'obj2', type: 'defeat', target: 'de-rol-le', count: 1, description: 'Defeat De Rol Le' },
-    ],
-    rewards: {
-      baseExp: 5000,
-      baseMeseta: 10000,
-      items: [
-        { itemId: 'buster', quantity: 1, chance: 0.1 },
-        { itemId: 'trimate', quantity: 5, chance: 0.6 },
-      ],
-    },
-    unlockRequirements: [
-      { type: 'mission', id: 'fallen-hunter' },
-      { type: 'level', value: 30 },
-    ],
-  });
+/**
+ * Get story missions in order
+ */
+export function getStoryMissions(): Mission[] {
+  return getAllMissions()
+    .filter(m => m.missionType === 'story')
+    .sort((a, b) => a.requiredLevel - b.requiredLevel);
+}
+
+/**
+ * Get side missions
+ */
+export function getSideMissions(): Mission[] {
+  return getAllMissions()
+    .filter(m => m.missionType !== 'story');
 }

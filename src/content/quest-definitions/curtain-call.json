@@ -1,0 +1,65 @@
+{
+  "questId": "curtain_call",
+  "questName": "Curtain Call",
+  "questType": "story",
+  "area": "Dark Shrine",
+  "description": "Chapter 7: Enter the Dark Shrine, a dimension of pure darkness. The source of all corruption awaits. Steel yourself for the final battle.",
+  "difficulties": [
+    {
+      "difficulty": "Normal",
+      "recommendedLevel": 50,
+      "rewards": {
+        "meseta": 10000,
+        "experience": 5000,
+        "items": [
+          { "itemId": "trigrinder", "itemName": "Trigrinder", "quantity": 5 }
+        ]
+      }
+    },
+    {
+      "difficulty": "Hard",
+      "recommendedLevel": 65,
+      "rewards": {
+        "meseta": 20000,
+        "experience": 10000,
+        "items": [
+          { "itemId": "photon_drop", "itemName": "Photon Drop", "quantity": 3 }
+        ]
+      }
+    },
+    {
+      "difficulty": "Super Hard",
+      "recommendedLevel": 80,
+      "rewards": {
+        "meseta": 40000,
+        "experience": 20000,
+        "items": [
+          { "itemId": "photon_sphere", "itemName": "Photon Sphere", "quantity": 1 }
+        ]
+      }
+    }
+  ],
+  "requirements": {
+    "minLevel": 50,
+    "prerequisiteQuests": ["truth_revealed"]
+  },
+  "objectives": [
+    {
+      "type": "defeat_enemies",
+      "description": "Destroy dark manifestations",
+      "target": "dark_enemy",
+      "required": 50
+    },
+    {
+      "type": "reach_location",
+      "description": "Traverse the dark corridors"
+    },
+    {
+      "type": "defeat_boss",
+      "description": "Defeat Dark Falz",
+      "target": "dark_falz"
+    }
+  ],
+  "isRepeatable": true,
+  "isSecret": false
+}

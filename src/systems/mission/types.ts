@@ -10,6 +10,8 @@ export interface MissionNarrative {
   failure?: string;   // Shown if mission failed (optional)
 }
 
+export type MissionType = 'story' | 'side';
+
 export interface Mission {
   id: string;
   name: string;
@@ -23,6 +25,8 @@ export interface Mission {
   unlockRequirements?: UnlockRequirement[];
   stageSequence?: MissionStage[];
   narrative?: MissionNarrative;  // Story dialogue for narrative missions
+  missionType?: MissionType;     // Story or side quest (defaults to 'side')
+  chapter?: number;              // Story chapter for ordering
 }
 
 export interface MissionObjective {
