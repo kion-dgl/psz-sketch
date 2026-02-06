@@ -22,7 +22,7 @@ import {
 } from '../../systems/field';
 import type { Field } from '../../systems/field/types';
 import type { Difficulty } from '../../systems/mission/types';
-import { meetsLevelForDifficulty } from '../../systems/mission';
+import { meetsLevelForDifficulty, getAllMissions, isMissionUnlocked } from '../../systems/mission';
 import { VALID_CLASS_IDS } from '../../systems/character/types';
 import type { Character, CharacterSlots } from '../../systems/character/types';
 import type { WeaponItem, ArmorItem, UnitItem } from '../../systems/inventory/types';
@@ -629,18 +629,21 @@ export default function GamePlayWeb() {
   };
 
   const renderGuildContent = () => {
-    // Get missions from the list-missions command
-    const missionsResult = execute('list-missions');
-    const missions = missionsResult.data as Array<{
-      id: string;
-      name: string;
-      description: string;
-      areaId: string;
-      requiredLevel: number;
-      recommendedLevel: number;
-      rewards: { baseExp: number; baseMeseta: number };
-      unlocked: boolean;
-    }> || [];
+    // Get missions from the mission system directly
+    const allMissions = getAllMissions();
+    const charId = gameState?.character?.character_id;
+    const charLevel = gameState?.character?.level || 1;
+
+    const missions = allMissions.map((m) => ({
+      id: m.id,
+      name: m.name,
+      description: m.description,
+      areaId: m.areaId,
+      requiredLevel: m.requiredLevel,
+      recommendedLevel: m.recommendedLevel,
+      rewards: m.rewards,
+      unlocked: charId ? isMissionUnlocked(m.id, charId, charLevel) : m.requiredLevel <= 1,
+    }));
 
     const handleAcceptMission = (missionId: string) => {
       executeCommand(`enter-mission ${missionId} normal`);
