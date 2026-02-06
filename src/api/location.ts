@@ -10,6 +10,16 @@ export interface GameStateData {
   location: Location;
   sessionData: SessionData | null;
   combatData: CombatData | null;
+  pendingMission: PendingMission | null;
+}
+
+export interface PendingMission {
+  missionId: string;
+  difficulty: string;
+  completed: boolean;
+  expReward: number;
+  mesetaReward: number;
+  grade: 'S' | 'A' | 'B' | 'C' | 'D';
 }
 
 export interface SessionData {
@@ -20,6 +30,7 @@ export interface SessionData {
   totalStages: number;
   currentWave: number;
   totalWaves: number;
+  suspended?: boolean;  // True when player used telepipe
 }
 
 export interface CombatData {
@@ -59,8 +70,8 @@ const VALID_LOCATIONS: Location[] = ['city', 'shop', 'weapon-shop', 'guild', 'te
  */
 export function getGameState(characterId: string): GameStateData | null {
   const row = db.prepare(`
-    SELECT location, session_data, combat_data FROM game_state WHERE character_id = ?
-  `).get(characterId) as { location: string; session_data: string | null; combat_data: string | null } | undefined;
+    SELECT location, session_data, combat_data, pending_mission FROM game_state WHERE character_id = ?
+  `).get(characterId) as { location: string; session_data: string | null; combat_data: string | null; pending_mission: string | null } | undefined;
 
   if (!row) return null;
 
@@ -68,6 +79,7 @@ export function getGameState(characterId: string): GameStateData | null {
     location: row.location as Location,
     sessionData: row.session_data ? JSON.parse(row.session_data) : null,
     combatData: row.combat_data ? JSON.parse(row.combat_data) : null,
+    pendingMission: row.pending_mission ? JSON.parse(row.pending_mission) : null,
   };
 }
 
@@ -120,6 +132,77 @@ export function setCombatData(characterId: string, data: CombatData | null): voi
 }
 
 /**
+ * Get pending mission
+ */
+export function getPendingMission(characterId: string): PendingMission | null {
+  const state = getGameState(characterId);
+  return state?.pendingMission ?? null;
+}
+
+/**
+ * Set pending mission
+ */
+export function setPendingMission(characterId: string, data: PendingMission | null): void {
+  db.prepare(`
+    UPDATE game_state SET pending_mission = ? WHERE character_id = ?
+  `).run(data ? JSON.stringify(data) : null, characterId);
+}
+
+/**
+ * Suspend current session (telepipe) - returns to city but keeps session
+ */
+export function suspendSession(characterId: string): ApiResult {
+  const state = getGameState(characterId);
+  if (!state || state.location !== 'field' || !state.sessionData) {
+    return { success: false, message: 'Not in a mission or field.' };
+  }
+
+  // Mark session as suspended
+  const session = { ...state.sessionData, suspended: true };
+
+  db.prepare(`
+    UPDATE game_state SET location = 'city', session_data = ? WHERE character_id = ?
+  `).run(JSON.stringify(session), characterId);
+
+  return { success: true, message: 'Telepipe activated! Returned to city. Go to Guild to resume.' };
+}
+
+/**
+ * Resume suspended session
+ */
+export function resumeSession(characterId: string): ApiResult {
+  const state = getGameState(characterId);
+  if (!state?.sessionData?.suspended) {
+    return { success: false, message: 'No suspended mission to resume.' };
+  }
+
+  // Un-suspend and return to field
+  const session = { ...state.sessionData, suspended: false };
+
+  db.prepare(`
+    UPDATE game_state SET location = 'field', session_data = ? WHERE character_id = ?
+  `).run(JSON.stringify(session), characterId);
+
+  const stageNum = session.currentStage + 1;
+  return {
+    success: true,
+    message: `Resumed ${session.type}! Stage ${stageNum}, Wave ${session.currentWave}/${session.totalWaves}`,
+    data: session,
+  };
+}
+
+/**
+ * Get suspended session info
+ */
+export function getSuspendedSession(characterId: string): SessionData | null {
+  const state = getGameState(characterId);
+  if (state?.sessionData?.suspended) {
+    return state.sessionData;
+  }
+  return null;
+}
+
+/**
  * Enter field
  */
 export function enterField(characterId: string, areaId: string, difficulty: string): ApiResult {
@@ -152,6 +235,18 @@ export function enterMission(characterId: string, missionId: string, difficulty:
   const currentLocation = getLocation(characterId);
   if (currentLocation !== 'guild') {
     return { success: false, message: 'Must be at guild to start mission.' };
+  }
+
+  // Check for pending mission
+  const pending = getPendingMission(characterId);
+  if (pending) {
+    return { success: false, message: 'You must report your completed mission first.' };
+  }
+
+  // Check for suspended session
+  const suspended = getSuspendedSession(characterId);
+  if (suspended) {
+    return { success: false, message: 'You have a suspended mission. Resume or abandon it first.' };
   }
 
   const sessionData: SessionData = {

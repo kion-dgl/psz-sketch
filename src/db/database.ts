@@ -86,6 +86,7 @@ export function initializeDatabase(): void {
       location TEXT NOT NULL DEFAULT 'city',
       session_data TEXT,  -- JSON blob for mission/field state
       combat_data TEXT,   -- JSON blob for combat state
+      pending_mission TEXT,  -- JSON blob for completed mission awaiting report
       FOREIGN KEY (character_id) REFERENCES characters(id) ON DELETE CASCADE
     );
 
@@ -93,6 +94,13 @@ export function initializeDatabase(): void {
     CREATE INDEX IF NOT EXISTS idx_inventory_character ON inventory(character_id);
     CREATE INDEX IF NOT EXISTS idx_equipment_character ON equipment(character_id);
   `);
+
+  // Migration: Add pending_mission column if it doesn't exist
+  try {
+    db.exec(`ALTER TABLE game_state ADD COLUMN pending_mission TEXT`);
+  } catch {
+    // Column already exists, ignore error
+  }
 }
 
 /**

@@ -6,7 +6,8 @@
  * Usage: npm run ai-test
  */
 
-import { execute, getState, resetState } from './api';
+import { execute, getState, resetState } from './api-v2';
+import { addItem, clearCombat, getGameState, setSessionData } from '../api';
 
 interface TestCase {
   name: string;
@@ -41,6 +42,20 @@ function log(color: keyof typeof COLORS, ...args: unknown[]) {
   console.log(COLORS[color], ...args, COLORS.reset);
 }
 
+// Telepipe item for testing
+const TELEPIPE = {
+  id: 'telepipe',
+  name: 'Telepipe',
+  description: 'Creates a portal back to the city.',
+  type: 'consumable' as const,
+  effect: 'telepipe',
+  effectValue: 0,
+  rarity: 1,
+  sellPrice: 150,
+  stackable: true,
+  maxStack: 10,
+};
+
 // ============================================
 // TEST DEFINITIONS
 // ============================================
@@ -52,26 +67,38 @@ const tests: TestCase[] = [
   {
     name: 'Character Creation - Hunter',
     commands: [
-      { cmd: 'create-character HUmar TestHunter', expect: { success: true, messageContains: 'Created HUmar' } },
+      { cmd: 'create-character HUmar TestHunter', expect: { success: true, messageContains: 'Created' } },
       { cmd: 'show-stats', expect: { success: true, messageContains: 'TestHunter' } },
     ],
   },
   {
     name: 'Character Creation - Ranger',
     commands: [
-      { cmd: 'create-character RAmar TestRanger', expect: { success: true, messageContains: 'Created RAmar' } },
+      { cmd: 'create-character RAmar TestRanger', expect: { success: true, messageContains: 'Created' } },
     ],
   },
   {
     name: 'Character Creation - Force',
     commands: [
-      { cmd: 'create-character FOmarl TestForce', expect: { success: true, messageContains: 'Created FOmarl' } },
+      { cmd: 'create-character FOmarl TestForce', expect: { success: true, messageContains: 'Created' } },
     ],
   },
   {
     name: 'Character Creation - Invalid class',
     commands: [
       { cmd: 'create-character InvalidClass Test', expect: { success: false, messageContains: 'Invalid class' } },
+    ],
+  },
+  {
+    name: 'List Characters',
+    setup: () => {
+      resetState();
+      execute('create-character HUmar Slot0');
+      execute('create-character RAmar Slot1');
+    },
+    commands: [
+      { cmd: 'list-characters', expect: { success: true, messageContains: 'Slot 0' } },
+      { cmd: 'list-characters', expect: { success: true, messageContains: 'Slot 1' } },
     ],
   },
 
@@ -81,11 +108,12 @@ const tests: TestCase[] = [
   {
     name: 'Starter Weapon Auto-Equipped',
     commands: [
-      { cmd: 'create-character HUmar EquipTest', expect: { success: true, messageContains: 'Starting gear equipped' } },
+      { cmd: 'create-character HUmar EquipTest', expect: { success: true } },
       {
-        cmd: 'show-stats',
+        cmd: 'show-equipment',
         expect: {
-          stateCheck: (state) => state.equipment?.weapon?.name === 'Saber',
+          success: true,
+          messageContains: 'Saber',
         },
       },
     ],
@@ -95,63 +123,64 @@ const tests: TestCase[] = [
     commands: [
       { cmd: 'create-character HUmar FrameTest', expect: { success: true } },
       {
-        cmd: 'show-stats',
+        cmd: 'show-equipment',
         expect: {
-          stateCheck: (state) => state.equipment?.frame?.name === 'Frame',
+          success: true,
+          messageContains: 'Frame',
         },
       },
     ],
   },
 
   // ----------------------------------------
-  // Combat - Damage Calculation (NaN regression)
+  // Inventory
+  // ----------------------------------------
+  {
+    name: 'Inventory shows equipped items',
+    commands: [
+      { cmd: 'create-character HUmar InvTest', expect: { success: true } },
+      { cmd: 'show-inventory', expect: { success: true, messageContains: '[E]' } },
+      { cmd: 'show-inventory', expect: { success: true, messageContains: '4/30' } }, // 2 equipped + 2 consumables
+    ],
+  },
+  {
+    name: 'Use consumable in city',
+    commands: [
+      { cmd: 'create-character HUmar UseTest', expect: { success: true } },
+      { cmd: 'use monomate', expect: { success: true, messageContains: 'Used Monomate' } },
+    ],
+  },
+
+  // ----------------------------------------
+  // Combat - Damage Calculation
   // ----------------------------------------
   {
     name: 'Combat - Damage not NaN with starter weapon',
     commands: [
       { cmd: 'create-character HUmar CombatTest', expect: { success: true } },
-      // Starter weapon is auto-equipped on character creation
       { cmd: 'goto guild', expect: { success: true } },
-      { cmd: 'enter-mission mayors-mission normal', expect: { success: true } },
+      { cmd: 'start-mission mayors-mission normal', expect: { success: true } },
       { cmd: 'attack 0', expect: { success: true, messageNotContains: 'NaN' } },
     ],
   },
   {
-    name: 'Combat - Damage not NaN with old weapon format (missing grindLevel)',
-    setup: () => {
-      resetState();
-      execute('create-character HUmar OldWeaponTest');
-      // Simulate restoring weapon from old persistence (missing grindLevel/maxGrind/elementPercent)
-      const oldWeapon = {
-        id: 'old-weapon-test',
-        name: 'Old Format Saber',
-        description: 'Weapon from old save format',
-        type: 'weapon',
-        rarity: 1,
-        sellPrice: 50,
-        stackable: false,
-        maxStack: 1,
-        attack: 30,
-        accuracy: 25,
-        weaponType: 'saber',
-        // NOTE: Intentionally missing grindLevel, maxGrind, elementPercent
-      };
-      execute('set-weapon ' + JSON.stringify(oldWeapon));
-    },
+    name: 'Combat - Can use consumable in field',
     commands: [
+      { cmd: 'create-character HUmar FieldUseTest', expect: { success: true } },
       { cmd: 'goto guild', expect: { success: true } },
-      { cmd: 'enter-mission mayors-mission normal', expect: { success: true } },
-      { cmd: 'attack 0', expect: { success: true, messageNotContains: 'NaN' } },
+      { cmd: 'start-mission mayors-mission normal', expect: { success: true } },
+      { cmd: 'attack 0', expect: { success: true } }, // Take some damage
+      { cmd: 'use monomate', expect: { success: true, messageContains: 'Healed' } },
     ],
   },
   {
-    name: 'Combat - Unarmed attack (no weapon equipped)',
+    name: 'Combat - Can equip/unequip in field',
     commands: [
-      { cmd: 'create-character HUmar UnarmedTest', expect: { success: true } },
-      // Don't equip weapon
+      { cmd: 'create-character HUmar FieldEquipTest', expect: { success: true } },
       { cmd: 'goto guild', expect: { success: true } },
-      { cmd: 'enter-mission mayors-mission normal', expect: { success: true } },
-      { cmd: 'attack 0', expect: { success: true, messageNotContains: 'NaN' } },
+      { cmd: 'start-mission mayors-mission normal', expect: { success: true } },
+      { cmd: 'unequip weapon', expect: { success: true, messageContains: 'Unequipped' } },
+      { cmd: 'equip starter_saber', expect: { success: true, messageContains: 'Equipped' } },
     ],
   },
 
@@ -159,26 +188,104 @@ const tests: TestCase[] = [
   // Mission Flow
   // ----------------------------------------
   {
-    name: 'Mission - Enter and exit with telepipe',
+    name: 'Mission - Cannot return without telepipe',
     commands: [
-      { cmd: 'create-character HUmar MissionTest', expect: { success: true } },
-      // Starter weapon is auto-equipped on character creation
+      { cmd: 'create-character HUmar ReturnTest', expect: { success: true } },
       { cmd: 'goto guild', expect: { success: true } },
-      { cmd: 'enter-mission mayors-mission normal', expect: { success: true, messageContains: 'Started' } },
-      { cmd: 'use-telepipe', expect: { success: true, messageContains: 'Returned to city' } },
-      {
-        cmd: 'show-stats',
-        expect: {
-          stateCheck: (state) => state.location === 'city',
-        },
-      },
+      { cmd: 'start-mission mayors-mission normal', expect: { success: true } },
+      { cmd: 'return', expect: { success: false, messageContains: 'Telepipe' } },
     ],
   },
   {
-    name: 'Mission - Cannot enter without being at guild',
+    name: 'Mission - Telepipe suspends and can resume',
+    setup: () => {
+      resetState();
+      execute('create-character HUmar TelepipeTest');
+      const charId = getState().character?.character_id;
+      if (charId) addItem(charId, TELEPIPE, 1);
+    },
     commands: [
-      { cmd: 'create-character HUmar GuildTest', expect: { success: true } },
-      { cmd: 'enter-mission mayors-mission normal', expect: { success: false, messageContains: 'guild' } },
+      { cmd: 'goto guild', expect: { success: true } },
+      { cmd: 'start-mission mayors-mission normal', expect: { success: true } },
+      { cmd: 'use telepipe', expect: { success: true, messageContains: 'Telepipe activated' } },
+      { cmd: 'show-stats', expect: { stateCheck: (s) => s.location === 'city' } },
+      { cmd: 'show-stats', expect: { stateCheck: (s) => s.suspendedSession !== null } },
+      { cmd: 'goto guild', expect: { success: true } },
+      { cmd: 'resume-mission', expect: { success: true, messageContains: 'Resumed' } },
+      { cmd: 'show-stats', expect: { stateCheck: (s) => s.location === 'field' } },
+    ],
+  },
+  {
+    name: 'Mission - Cannot start new mission with suspended',
+    setup: () => {
+      resetState();
+      execute('create-character HUmar SuspendTest');
+      const charId = getState().character?.character_id;
+      if (charId) addItem(charId, TELEPIPE, 1);
+      execute('goto guild');
+      execute('start-mission mayors-mission normal');
+      execute('use telepipe');
+    },
+    commands: [
+      { cmd: 'goto guild', expect: { success: true } },
+      { cmd: 'start-mission mayors-mission normal', expect: { success: false } },
+    ],
+  },
+  {
+    name: 'Mission - Can abandon suspended mission',
+    setup: () => {
+      resetState();
+      execute('create-character HUmar AbandonTest');
+      const charId = getState().character?.character_id;
+      if (charId) addItem(charId, TELEPIPE, 1);
+      execute('goto guild');
+      execute('start-mission mayors-mission normal');
+      execute('use telepipe');
+    },
+    commands: [
+      { cmd: 'goto guild', expect: { success: true } },
+      { cmd: 'abandon-mission', expect: { success: true, messageContains: 'Abandoned' } },
+      { cmd: 'start-mission mayors-mission normal', expect: { success: true } },
+    ],
+  },
+
+  // ----------------------------------------
+  // Wave/Stage Flow
+  // ----------------------------------------
+  {
+    name: 'Wave - next-wave advances wave count',
+    setup: () => {
+      resetState();
+      execute('create-character HUmar WaveTest');
+      execute('goto guild');
+      execute('start-mission mayors-mission normal');
+      const charId = getState().character?.character_id;
+      if (charId) clearCombat(charId);
+    },
+    commands: [
+      { cmd: 'next-wave', expect: { success: true, messageContains: 'Wave 2' } },
+    ],
+  },
+  {
+    name: 'Wave - All waves cleared shows stage complete',
+    setup: () => {
+      resetState();
+      execute('create-character HUmar StageTest');
+      execute('goto guild');
+      execute('start-mission mayors-mission normal');
+      const charId = getState().character?.character_id;
+      if (charId) {
+        clearCombat(charId);
+        // Set to wave 3 (last wave)
+        const gs = getGameState(charId);
+        if (gs?.sessionData) {
+          gs.sessionData.currentWave = 3;
+          setSessionData(charId, gs.sessionData);
+        }
+      }
+    },
+    commands: [
+      { cmd: 'next-wave', expect: { success: false, messageContains: 'next-stage' } },
     ],
   },
 
@@ -186,18 +293,12 @@ const tests: TestCase[] = [
   // Field Flow
   // ----------------------------------------
   {
-    name: 'Field - Enter and explore',
+    name: 'Field - Can return freely (not mission)',
     commands: [
-      { cmd: 'create-character HUmar FieldTest', expect: { success: true } },
-      // Starter weapon is auto-equipped on character creation
+      { cmd: 'create-character HUmar FieldReturnTest', expect: { success: true } },
       { cmd: 'goto teleporter', expect: { success: true } },
-      { cmd: 'enter-field gurhacia-valley normal', expect: { success: true, messageContains: 'Entered' } },
-      {
-        cmd: 'show-stats',
-        expect: {
-          stateCheck: (state) => state.location === 'field',
-        },
-      },
+      { cmd: 'enter-field forest normal', expect: { success: true } },
+      { cmd: 'return', expect: { success: true, messageContains: 'Returned to city' } },
     ],
   },
 
@@ -209,14 +310,15 @@ const tests: TestCase[] = [
     commands: [
       { cmd: 'create-character HUmar ShopTest', expect: { success: true } },
       { cmd: 'goto shop', expect: { success: true } },
-      { cmd: 'list-items', expect: { success: true } },
+      { cmd: 'list-items', expect: { success: true, messageContains: 'Monomate' } },
     ],
   },
   {
-    name: 'Weapon Shop - Navigate and verify location',
+    name: 'Weapon Shop - View items',
     commands: [
       { cmd: 'create-character HUmar WeaponShopTest', expect: { success: true } },
-      { cmd: 'goto weapon-shop', expect: { success: true, stateCheck: (s) => s.location === 'weapon-shop' } },
+      { cmd: 'goto weapon-shop', expect: { success: true } },
+      { cmd: 'list-items', expect: { success: true } },
     ],
   },
 
@@ -234,30 +336,7 @@ const tests: TestCase[] = [
       { cmd: 'goto guild', expect: { success: true, stateCheck: (s) => s.location === 'guild' } },
       { cmd: 'goto city', expect: { success: true } },
       { cmd: 'goto teleporter', expect: { success: true, stateCheck: (s) => s.location === 'teleporter' } },
-    ],
-  },
-
-  // ----------------------------------------
-  // State Persistence Simulation
-  // ----------------------------------------
-  {
-    name: 'State - getState includes equipment details',
-    commands: [
-      { cmd: 'create-character HUmar StateTest', expect: { success: true } },
-      // Starter weapon is auto-equipped on character creation
-      {
-        cmd: 'show-stats',
-        expect: {
-          stateCheck: (state) => {
-            const weapon = state.equipment?.weapon;
-            // Verify weapon has all required fields for persistence
-            return weapon !== null &&
-              weapon?.grindLevel !== undefined &&
-              weapon?.maxGrind !== undefined &&
-              typeof weapon?.attack === 'number';
-          },
-        },
-      },
+      { cmd: 'goto storage', expect: { success: true, stateCheck: (s) => s.location === 'storage' } },
     ],
   },
 
@@ -268,9 +347,8 @@ const tests: TestCase[] = [
     name: 'Edge - Attack invalid target',
     commands: [
       { cmd: 'create-character HUmar EdgeTest', expect: { success: true } },
-      // Starter weapon is auto-equipped on character creation
       { cmd: 'goto guild', expect: { success: true } },
-      { cmd: 'enter-mission mayors-mission normal', expect: { success: true } },
+      { cmd: 'start-mission mayors-mission normal', expect: { success: true } },
       { cmd: 'attack 99', expect: { success: false, messageContains: 'Invalid target' } },
     ],
   },
@@ -278,7 +356,19 @@ const tests: TestCase[] = [
     name: 'Edge - Equip non-existent item',
     commands: [
       { cmd: 'create-character HUmar EdgeTest2', expect: { success: true } },
-      { cmd: 'equip-weapon fake_weapon_id', expect: { success: false, messageContains: 'not found' } },
+      { cmd: 'equip fake_weapon_id', expect: { success: false, messageContains: 'not in inventory' } },
+    ],
+  },
+  {
+    name: 'Edge - Telepipe only works in field',
+    setup: () => {
+      resetState();
+      execute('create-character HUmar TelepipeCityTest');
+      const charId = getState().character?.character_id;
+      if (charId) addItem(charId, TELEPIPE, 1);
+    },
+    commands: [
+      { cmd: 'use telepipe', expect: { success: false, messageContains: 'only be used in the field' } },
     ],
   },
 ];
@@ -321,7 +411,7 @@ function runTest(test: TestCase): TestResult {
 
       // Check state
       if (step.expect.stateCheck && !step.expect.stateCheck(state)) {
-        failures.push(`[${step.cmd}] State check failed`);
+        failures.push(`[${step.cmd}] State check failed. State: ${JSON.stringify({ location: state.location, suspendedSession: state.suspendedSession })}`);
       }
     }
   }

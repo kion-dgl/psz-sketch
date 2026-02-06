@@ -38,10 +38,18 @@ import {
   getLocation,
   goto as dbGoto,
   getGameState,
+  setSessionData,
+  getPendingMission,
+  setPendingMission,
+  suspendSession,
+  resumeSession,
+  getSuspendedSession,
   enterMission,
   enterField,
   returnToCity,
   nextStage,
+  addExperience as dbAddExperience,
+  updateMeseta as dbUpdateMeseta,
   initCombat,
   getEnemies,
   getPlayerState,
@@ -65,7 +73,10 @@ import {
 } from '../api';
 
 // Import mission data
-import { getAllMissions } from '../systems/mission';
+import { getAllMissions, initializeDefaultMissions } from '../systems/mission';
+
+// Initialize missions on module load
+initializeDefaultMissions();
 
 const MAX_INVENTORY_SLOTS = 30;
 
@@ -271,6 +282,14 @@ export function getState(): GameState {
       })),
       meseta: storage.meseta,
     },
+    pendingMission: gameState?.pendingMission ?? null,
+    suspendedSession: gameState?.sessionData?.suspended ? {
+      type: gameState.sessionData.type,
+      areaId: gameState.sessionData.areaId,
+      currentStage: gameState.sessionData.currentStage,
+      currentWave: gameState.sessionData.currentWave,
+      totalWaves: gameState.sessionData.totalWaves,
+    } : null,
   };
 }
 
@@ -314,6 +333,12 @@ export function getAvailableCommands(): AvailableCommand[] {
       args: [
         { name: 'slot', type: 'number', required: true, description: 'Character slot (0-3)' },
       ],
+    });
+    commands.push({
+      name: 'list-characters',
+      description: 'List all character slots',
+      usage: 'list-characters',
+      args: [],
     });
   } else {
     // Navigation
@@ -404,21 +429,49 @@ export function getAvailableCommands(): AvailableCommand[] {
 
     // Guild/mission commands
     if (location === 'guild') {
-      commands.push({
-        name: 'list-missions',
-        description: 'List available missions',
-        usage: 'list-missions',
-        args: [],
-      });
-      commands.push({
-        name: 'start-mission',
-        description: 'Start a mission',
-        usage: 'start-mission <mission-id> <difficulty>',
-        args: [
-          { name: 'mission-id', type: 'string', required: true, description: 'Mission ID' },
-          { name: 'difficulty', type: 'string', required: true, description: 'normal, hard, or super' },
-        ],
-      });
+      // Check for pending mission first (completed, needs reporting)
+      const pending = getPendingMission(charId);
+      // Check for suspended mission (telepipe'd out, can resume)
+      const suspended = getSuspendedSession(charId);
+
+      if (pending) {
+        commands.push({
+          name: 'report-mission',
+          description: 'Report completed mission and claim rewards',
+          usage: 'report-mission',
+          args: [],
+        });
+      } else if (suspended) {
+        commands.push({
+          name: 'resume-mission',
+          description: `Resume suspended ${suspended.type} (Stage ${suspended.currentStage + 1})`,
+          usage: 'resume-mission',
+          args: [],
+        });
+        // Can also abandon
+        commands.push({
+          name: 'abandon-mission',
+          description: 'Abandon the suspended mission',
+          usage: 'abandon-mission',
+          args: [],
+        });
+      } else {
+        commands.push({
+          name: 'list-missions',
+          description: 'List available missions',
+          usage: 'list-missions',
+          args: [],
+        });
+        commands.push({
+          name: 'start-mission',
+          description: 'Start a mission',
+          usage: 'start-mission <mission-id> <difficulty>',
+          args: [
+            { name: 'mission-id', type: 'string', required: true, description: 'Mission ID' },
+            { name: 'difficulty', type: 'string', required: true, description: 'normal, hard, or super' },
+          ],
+        });
+      }
     }
 
     // Teleporter commands
@@ -595,6 +648,25 @@ function executeCreateCharacter(classId: string, name: string): CommandResult {
   };
 }
 
+function executeListCharacters(): CommandResult {
+  const chars = getAllCharacters();
+  const lines: string[] = [];
+
+  for (let i = 0; i < 4; i++) {
+    const char = chars[i];
+    if (char) {
+      lines.push(`  Slot ${i}: ${char.name} (Lv.${char.level} ${char.class_id})`);
+    } else {
+      lines.push(`  Slot ${i}: -- Empty --`);
+    }
+  }
+
+  return {
+    success: true,
+    message: 'Character Slots:\n' + lines.join('\n'),
+  };
+}
+
 function executeLoadCharacter(slotStr: string): CommandResult {
   const slot = parseInt(slotStr);
   if (isNaN(slot) || slot < 0 || slot > 3) {
@@ -718,18 +790,52 @@ function executeShowInventory(): CommandResult {
   }
 
   const inv = getInventory(charId);
-  if (inv.length === 0) {
+  const equip = getEquipment(charId);
+
+  const lines: string[] = [];
+
+  // Count equipped items
+  let equippedCount = 0;
+  if (equip.weapon) {
+    lines.push(`  ${equip.weapon.id.padEnd(15)} ${equip.weapon.name} [E]`);
+    equippedCount++;
+  }
+  if (equip.frame) {
+    lines.push(`  ${equip.frame.id.padEnd(15)} ${equip.frame.name} [E]`);
+    equippedCount++;
+  }
+  if (equip.unit1) {
+    lines.push(`  ${equip.unit1.id.padEnd(15)} ${equip.unit1.name} [E]`);
+    equippedCount++;
+  }
+  if (equip.unit2) {
+    lines.push(`  ${equip.unit2.id.padEnd(15)} ${equip.unit2.name} [E]`);
+    equippedCount++;
+  }
+  if (equip.unit3) {
+    lines.push(`  ${equip.unit3.id.padEnd(15)} ${equip.unit3.name} [E]`);
+    equippedCount++;
+  }
+  if (equip.unit4) {
+    lines.push(`  ${equip.unit4.id.padEnd(15)} ${equip.unit4.name} [E]`);
+    equippedCount++;
+  }
+
+  // Add unequipped items
+  for (const slot of inv) {
+    const qty = slot.quantity > 1 ? ` x${slot.quantity}` : '';
+    lines.push(`  ${slot.item.id.padEnd(15)} ${slot.item.name}${qty}`);
+  }
+
+  const totalSlots = equippedCount + inv.length;
+
+  if (totalSlots === 0) {
     return { success: true, message: 'Inventory is empty.' };
   }
 
-  const lines = inv.map(slot => {
-    const qty = slot.quantity > 1 ? ` x${slot.quantity}` : '';
-    return `  ${slot.item.id.padEnd(15)} ${slot.item.name}${qty}`;
-  });
-
   return {
     success: true,
-    message: `Inventory (${inv.length}/${MAX_INVENTORY_SLOTS}):\n` + lines.join('\n'),
+    message: `Inventory (${totalSlots}/${MAX_INVENTORY_SLOTS}):\n` + lines.join('\n'),
   };
 }
 
@@ -806,7 +912,40 @@ function executeUseItem(itemId: string): CommandResult {
     return { success: false, message: 'No character loaded.' };
   }
 
-  return useConsumable(charId, itemId);
+  // Special handling for telepipe - check if in field first
+  if (itemId === 'telepipe') {
+    const location = getLocation(charId);
+    if (location !== 'field') {
+      return { success: false, message: 'Telepipe can only be used in the field.' };
+    }
+
+    // Consume the telepipe
+    const consumeResult = useConsumable(charId, itemId);
+    if (!consumeResult.success) {
+      return consumeResult;
+    }
+
+    // Suspend the session and return to city
+    const suspendResult = suspendSession(charId);
+    return suspendResult;
+  }
+
+  const result = useConsumable(charId, itemId);
+  if (!result.success || !result.data) {
+    return result;
+  }
+
+  // Apply the effect
+  const { effect, value } = result.data;
+  if (effect === 'heal' || effect === 'heal_hp') {
+    const healResult = healPlayer(charId, value);
+    return { success: true, message: `${result.message} ${healResult.message}` };
+  } else if (effect === 'restore_tp' || effect === 'restore') {
+    const tpResult = restoreTP(charId, value);
+    return { success: true, message: `${result.message} ${tpResult.message}` };
+  }
+
+  return result;
 }
 
 function executeListMissions(): CommandResult {
@@ -820,12 +959,107 @@ function executeListMissions(): CommandResult {
     return { success: false, message: 'Must be at guild to view missions.' };
   }
 
+  // Check for pending mission
+  const pending = getPendingMission(charId);
+  if (pending) {
+    return {
+      success: true,
+      message: `You have a completed mission to report!\nUse 'report-mission' to claim your rewards.`,
+    };
+  }
+
   const missions = getAllMissions();
   const lines = missions.map(m => `  ${m.id.padEnd(20)} ${m.name}`);
   return {
     success: true,
     message: 'Available Missions:\n' + lines.join('\n'),
   };
+}
+
+function executeReportMission(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const location = getLocation(charId);
+  if (location !== 'guild') {
+    return { success: false, message: 'Must be at guild to report mission.' };
+  }
+
+  const pending = getPendingMission(charId);
+  if (!pending) {
+    return { success: false, message: 'No mission to report.' };
+  }
+
+  // Award rewards
+  const char = getCharacter(charId);
+  if (char) {
+    dbAddExperience(charId, pending.expReward);
+    dbUpdateMeseta(charId, char.meseta + pending.mesetaReward);
+  }
+
+  // Clear pending mission
+  setPendingMission(charId, null);
+
+  const lines = [
+    `Mission "${pending.missionId}" reported!`,
+    `Grade: ${pending.grade}`,
+    `EXP: +${pending.expReward}`,
+    `Meseta: +${pending.mesetaReward}`,
+  ];
+
+  return {
+    success: true,
+    message: lines.join('\n'),
+  };
+}
+
+function executeResumeMission(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const location = getLocation(charId);
+  if (location !== 'guild') {
+    return { success: false, message: 'Must be at guild to resume mission.' };
+  }
+
+  const suspended = getSuspendedSession(charId);
+  if (!suspended) {
+    return { success: false, message: 'No suspended mission to resume.' };
+  }
+
+  // Resume returns to field with saved state
+  const result = resumeSession(charId);
+  if (result.success) {
+    // Respawn enemies for current wave if needed
+    const enemies = getEnemies(charId);
+    if (enemies.length === 0) {
+      spawnEnemies(charId, suspended.areaId, suspended.difficulty as Difficulty, Date.now());
+    }
+  }
+
+  return result;
+}
+
+function executeAbandonMission(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const suspended = getSuspendedSession(charId);
+  if (!suspended) {
+    return { success: false, message: 'No suspended mission to abandon.' };
+  }
+
+  // Clear the session data
+  setSessionData(charId, null);
+  clearCombat(charId);
+
+  return { success: true, message: `Abandoned ${suspended.type}: ${suspended.areaId}` };
 }
 
 function executeStartMission(missionId: string, difficulty: string): CommandResult {
@@ -836,8 +1070,13 @@ function executeStartMission(missionId: string, difficulty: string): CommandResu
 
   const result = enterMission(charId, missionId, difficulty);
   if (result.success) {
-    // Initialize combat state
+    // Initialize combat state and spawn first wave
     initCombat(charId);
+    const spawnResult = spawnEnemies(charId, missionId, difficulty as Difficulty, Date.now());
+    return {
+      success: true,
+      message: `${result.message}\n${spawnResult.message}`,
+    };
   }
   return result;
 }
@@ -850,7 +1089,13 @@ function executeEnterField(areaId: string, difficulty: string): CommandResult {
 
   const result = enterField(charId, areaId, difficulty);
   if (result.success) {
+    // Initialize combat state and spawn first wave
     initCombat(charId);
+    const spawnResult = spawnEnemies(charId, areaId, difficulty as Difficulty, Date.now());
+    return {
+      success: true,
+      message: `${result.message}\n${spawnResult.message}`,
+    };
   }
   return result;
 }
@@ -866,15 +1111,32 @@ function executeNextWave(): CommandResult {
     return { success: false, message: 'Not in a mission or field.' };
   }
 
+  const session = gameState.sessionData;
+
   // Check if current wave is cleared
   if (!isWaveCleared(charId)) {
     return { success: false, message: 'Defeat all enemies first.' };
   }
 
-  // Spawn next wave
-  const difficulty = gameState.sessionData.difficulty as Difficulty;
-  const result = spawnEnemies(charId, gameState.sessionData.areaId, difficulty, Date.now());
-  return result;
+  // Check if all waves in this stage are done
+  if (session.currentWave >= session.totalWaves) {
+    return {
+      success: false,
+      message: `Stage ${session.currentStage + 1} complete! Use 'next-stage' to advance.`
+    };
+  }
+
+  // Increment wave and spawn enemies
+  session.currentWave++;
+  setSessionData(charId, session);
+
+  const difficulty = session.difficulty as Difficulty;
+  const result = spawnEnemies(charId, session.areaId, difficulty, Date.now());
+
+  return {
+    success: true,
+    message: `Wave ${session.currentWave}/${session.totalWaves}: ${result.message}`,
+  };
 }
 
 function executeNextStage(): CommandResult {
@@ -883,7 +1145,73 @@ function executeNextStage(): CommandResult {
     return { success: false, message: 'No character loaded.' };
   }
 
-  return nextStage(charId);
+  const gameState = getGameState(charId);
+  if (!gameState?.sessionData) {
+    return { success: false, message: 'Not in a mission or field.' };
+  }
+
+  const session = gameState.sessionData;
+
+  // Check if all waves in current stage are cleared
+  if (!isWaveCleared(charId)) {
+    return { success: false, message: 'Defeat all enemies first.' };
+  }
+
+  if (session.currentWave < session.totalWaves) {
+    return { success: false, message: `Complete all waves first (${session.currentWave}/${session.totalWaves}).` };
+  }
+
+  // Check if this is the final stage
+  if (session.currentStage >= session.totalStages - 1) {
+    // Mission/field complete!
+    if (session.type === 'mission') {
+      // Calculate rewards based on difficulty
+      const diffMultiplier = session.difficulty === 'normal' ? 1 : session.difficulty === 'hard' ? 1.5 : 2;
+      const baseExp = 500;
+      const baseMeseta = 1000;
+
+      const expReward = Math.floor(baseExp * diffMultiplier);
+      const mesetaReward = Math.floor(baseMeseta * diffMultiplier);
+
+      // Store pending mission for reporting
+      setPendingMission(charId, {
+        missionId: session.areaId,
+        difficulty: session.difficulty,
+        completed: true,
+        expReward,
+        mesetaReward,
+        grade: 'A',
+      });
+
+      returnToCity(charId);
+      return {
+        success: true,
+        message: `Mission complete! Return to the Guild to report and claim your rewards.`,
+      };
+    } else {
+      // Field complete - just return to city
+      returnToCity(charId);
+      return {
+        success: true,
+        message: `Field exploration complete! Returned to city.`,
+      };
+    }
+  }
+
+  // Advance to next stage
+  const result = nextStage(charId);
+  if (!result.success) {
+    return result;
+  }
+
+  // Spawn first wave of new stage
+  const difficulty = session.difficulty as Difficulty;
+  const spawnResult = spawnEnemies(charId, session.areaId, difficulty, Date.now());
+
+  return {
+    success: true,
+    message: `Advanced to Stage ${session.currentStage + 2}!\n${spawnResult.message}`,
+  };
 }
 
 function executeReturn(): CommandResult {
@@ -892,7 +1220,54 @@ function executeReturn(): CommandResult {
     return { success: false, message: 'No character loaded.' };
   }
 
-  return returnToCity(charId);
+  const gameState = getGameState(charId);
+  const session = gameState?.sessionData;
+
+  if (!session) {
+    return { success: false, message: 'Not in a field or mission.' };
+  }
+
+  // Check if mission is completed (all stages and waves done)
+  if (session.type === 'mission') {
+    const isFinalStage = session.currentStage >= session.totalStages - 1;
+    const allWavesCleared = session.currentWave >= session.totalWaves && isWaveCleared(charId);
+
+    if (isFinalStage && allWavesCleared) {
+      // Calculate rewards based on difficulty
+      const diffMultiplier = session.difficulty === 'normal' ? 1 : session.difficulty === 'hard' ? 1.5 : 2;
+      const baseExp = 500;
+      const baseMeseta = 1000;
+
+      const expReward = Math.floor(baseExp * diffMultiplier);
+      const mesetaReward = Math.floor(baseMeseta * diffMultiplier);
+
+      // Store pending mission for reporting
+      setPendingMission(charId, {
+        missionId: session.areaId,
+        difficulty: session.difficulty,
+        completed: true,
+        expReward,
+        mesetaReward,
+        grade: 'A', // TODO: Calculate based on time/performance
+      });
+
+      returnToCity(charId);
+      return {
+        success: true,
+        message: `Mission complete! Return to the Guild to report and claim your rewards.`,
+      };
+    }
+
+    // Mission not complete - can't just return, need telepipe
+    return {
+      success: false,
+      message: 'Cannot abandon mission in progress. Use a Telepipe to return to city.',
+    };
+  }
+
+  // Field (not mission) - can return freely
+  returnToCity(charId);
+  return { success: true, message: 'Returned to city.' };
 }
 
 function executeAttack(targetStr: string): CommandResult {
@@ -906,7 +1281,28 @@ function executeAttack(targetStr: string): CommandResult {
     return { success: false, message: 'Target must be a number.' };
   }
 
-  return dbAttack(charId, targetIndex);
+  const result = dbAttack(charId, targetIndex);
+
+  // Check if player was defeated
+  if (result.data?.playerDefeated) {
+    // Lose half meseta
+    const char = getCharacter(charId);
+    if (char) {
+      const mesetaLost = Math.floor(char.meseta / 2);
+      dbUpdateMeseta(charId, char.meseta - mesetaLost);
+
+      // Clear mission/combat and return to city
+      returnToCity(charId);
+      clearCombat(charId);
+
+      return {
+        success: false,
+        message: `${result.message}\n\nYou lost ${mesetaLost} meseta. Returned to city.`,
+      };
+    }
+  }
+
+  return result;
 }
 
 function executePickup(dropIdStr: string): CommandResult {
@@ -1036,6 +1432,9 @@ export function execute(commandLine: string): CommandResult {
     case 'load-character':
       return executeLoadCharacter(args[0]);
 
+    case 'list-characters':
+      return executeListCharacters();
+
     case 'show-stats':
       return executeShowStats();
 
@@ -1092,6 +1491,15 @@ export function execute(commandLine: string): CommandResult {
 
     case 'list-missions':
       return executeListMissions();
+
+    case 'report-mission':
+      return executeReportMission();
+
+    case 'resume-mission':
+      return executeResumeMission();
+
+    case 'abandon-mission':
+      return executeAbandonMission();
 
     case 'start-mission':
       if (!args[0] || !args[1]) {

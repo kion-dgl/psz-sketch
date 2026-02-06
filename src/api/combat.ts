@@ -3,12 +3,14 @@
  * Battle system, enemies, attacks, and combat state
  */
 import { db } from '../db';
-import { getCharacter } from './character';
+import { getCharacter, addExperience } from './character';
 import { getEquipment } from './equipment';
 import { getGameState, setCombatData, type CombatData, type EnemyData, type DroppedItem } from './location';
 import { resolveAttack, applyDamage, isDefeated } from '../systems/combat/combat';
 import { generateEnemyComposition, createSeededRandom } from '../systems/stage/enemy-pools';
 import type { CombatStats, WeaponStats, Element } from '../systems/combat/types';
+import { addItem } from './inventory';
+import { MONOMATE, MONOFLUID } from '../systems/inventory/starting-items';
 
 export type Difficulty = 'normal' | 'hard' | 'super-hard';
 
@@ -327,7 +329,14 @@ export function attack(characterId: string, targetIndex: number): ApiResult<Atta
 
     if (isDefeated(enemy.stats)) {
       enemyDefeated = true;
-      message += ` ${enemy.name} defeated!`;
+
+      // Grant EXP
+      const expResult = addExperience(characterId, enemy.expValue);
+      if (expResult.data?.leveledUp) {
+        message += ` ${enemy.name} defeated! +${enemy.expValue} EXP. LEVEL UP to ${expResult.data.level}!`;
+      } else {
+        message += ` ${enemy.name} defeated! +${enemy.expValue} EXP.`;
+      }
 
       // Generate drops
       generateDrops(characterId, enemy);
@@ -344,22 +353,25 @@ export function attack(characterId: string, targetIndex: number): ApiResult<Atta
   let playerDefeated = false;
 
   if (state.enemies.length > 0 && result.hit) {
-    // Random enemy counter-attacks
-    const attacker = state.enemies[Math.floor(Math.random() * state.enemies.length)];
-    const counterResult = resolveAttack({
-      attacker: attacker.stats,
-      weapon: { attack: attacker.stats.attack, accuracy: 60, element: null, elementPercent: 0, grindBonus: 0 },
-      defender: playerStats,
-    });
+    // Random enemy counter-attacks (50% chance)
+    if (Math.random() < 0.5) {
+      const attacker = state.enemies[Math.floor(Math.random() * state.enemies.length)];
+      const counterResult = resolveAttack({
+        attacker: attacker.stats,
+        // Enemy attack stat is their total power - no weapon bonus
+        weapon: { attack: 0, accuracy: 60, element: attacker.element, elementPercent: 0, grindBonus: 0 },
+        defender: playerStats,
+      });
 
-    if (counterResult.hit) {
-      playerDamage = counterResult.totalDamage;
-      state.player.hp = Math.max(0, state.player.hp - playerDamage);
-      message += ` ${attacker.name} counter-attacks for ${playerDamage} damage!`;
+      if (counterResult.hit) {
+        playerDamage = counterResult.totalDamage;
+        state.player.hp = Math.max(0, state.player.hp - playerDamage);
+        message += ` ${attacker.name} counter-attacks for ${playerDamage} damage!`;
 
-      if (state.player.hp <= 0) {
-        playerDefeated = true;
-        message += ' You have been defeated!';
+        if (state.player.hp <= 0) {
+          playerDefeated = true;
+          message += ' You have been defeated!';
+        }
       }
     }
   }
@@ -436,10 +448,7 @@ export function pickupItem(characterId: string, dropId: number): ApiResult {
   }
 
   if (drop.type === 'item' && drop.itemId) {
-    // Add item to inventory (simplified - should use inventory API with full item data)
-    const { addItem } = require('./inventory');
-    const { MONOMATE, MONOFLUID } = require('../systems/inventory/starting-items');
-
+    // Add item to inventory
     const items: Record<string, any> = { monomate: MONOMATE, monofluid: MONOFLUID };
     const item = items[drop.itemId];
 

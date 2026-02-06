@@ -121,6 +121,21 @@ export interface GameState {
   totalWaves?: number;
   sessionType?: 'field' | 'mission' | null;
   storage?: StorageInfo;
+  pendingMission?: {
+    missionId: string;
+    difficulty: string;
+    completed: boolean;
+    expReward: number;
+    mesetaReward: number;
+    grade: string;
+  } | null;
+  suspendedSession?: {
+    type: 'mission' | 'field';
+    areaId: string;
+    currentStage: number;
+    currentWave: number;
+    totalWaves: number;
+  } | null;
 }
 
 export interface CommandResult {

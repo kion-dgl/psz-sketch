@@ -65,6 +65,11 @@ export {
   goto,
   setSessionData,
   setCombatData,
+  getPendingMission,
+  setPendingMission,
+  suspendSession,
+  resumeSession,
+  getSuspendedSession,
   enterField,
   enterMission,
   returnToCity,
@@ -75,6 +80,7 @@ export {
   type CombatData,
   type EnemyData,
   type DroppedItem,
+  type PendingMission,
 } from './location';
 
 // Combat API
