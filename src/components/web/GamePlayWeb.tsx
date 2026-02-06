@@ -1000,13 +1000,13 @@ export default function GamePlayWeb() {
           <div style={styles.storageGrid}>
             {storageItems.length > 0 ? (
               storageItems.map((slot, idx) => (
-                <div key={`storage-${slot.item.id}-${idx}`} style={styles.storageCard}>
-                  <div style={styles.invItemName}>{slot.item.name}</div>
+                <div key={`storage-${slot.id}-${idx}`} style={styles.storageCard}>
+                  <div style={styles.invItemName}>{slot.name}</div>
                   <div style={styles.invItemQty}>x{slot.quantity}</div>
                   <button
                     style={styles.withdrawBtn}
-                    onClick={() => { executeCommand(`withdraw-item ${slot.item.id}`); refreshState(); }}
-                    data-testid={`withdraw-${slot.item.id}`}
+                    onClick={() => { executeCommand(`withdraw ${slot.id}`); refreshState(); }}
+                    data-testid={`withdraw-${slot.id}`}
                   >
                     ← Withdraw
                   </button>
