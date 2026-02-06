@@ -5,6 +5,7 @@
 import { db } from '../db';
 import { getStartingItems } from '../systems/inventory/starting-items';
 import { v4 as uuid } from 'uuid';
+import { calculateLevelFromExp, getExpToNextLevel, getTotalExpForLevel } from '../data/content-loader';
 
 // Types
 export interface Character {
@@ -186,17 +187,19 @@ export function updateMeseta(id: string, amount: number): ApiResult {
 
 /**
  * Update character experience and level
+ * Uses experience table from content/experience/experience-table.json
  */
-export function addExperience(id: string, exp: number): ApiResult<{ level: number; experience: number; leveledUp: boolean }> {
+export function addExperience(id: string, exp: number): ApiResult<{ level: number; experience: number; leveledUp: boolean; expToNext: number | null }> {
   const char = getCharacter(id);
   if (!char) {
     return { success: false, message: 'Character not found.' };
   }
 
   const newExp = char.experience + exp;
-  // Simple leveling formula: level = floor(sqrt(exp / 100)) + 1, max 200
-  const newLevel = Math.min(200, Math.floor(Math.sqrt(newExp / 100)) + 1);
+  // Use content-based experience table (max level 100)
+  const newLevel = calculateLevelFromExp(newExp);
   const leveledUp = newLevel > char.level;
+  const expToNext = getExpToNextLevel(newLevel);
 
   db.prepare("UPDATE characters SET experience = ?, level = ?, updated_at = datetime('now') WHERE id = ?")
     .run(newExp, newLevel, id);
@@ -204,6 +207,27 @@ export function addExperience(id: string, exp: number): ApiResult<{ level: numbe
   return {
     success: true,
     message: leveledUp ? `Level up! Now level ${newLevel}.` : `Gained ${exp} EXP.`,
-    data: { level: newLevel, experience: newExp, leveledUp },
+    data: { level: newLevel, experience: newExp, leveledUp, expToNext },
   };
+}
+
+/**
+ * Get experience progress for current level
+ */
+export function getExpProgress(id: string): { current: number; needed: number; percent: number } | null {
+  const char = getCharacter(id);
+  if (!char) return null;
+
+  const levelStart = getTotalExpForLevel(char.level);
+  const expToNext = getExpToNextLevel(char.level);
+
+  if (expToNext === null) {
+    // Max level
+    return { current: 0, needed: 0, percent: 100 };
+  }
+
+  const currentProgress = char.experience - levelStart;
+  const percent = Math.floor((currentProgress / expToNext) * 100);
+
+  return { current: currentProgress, needed: expToNext, percent };
 }
