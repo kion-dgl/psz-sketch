@@ -178,7 +178,7 @@ export function updateMeseta(id: string, amount: number): ApiResult {
     return { success: false, message: 'Insufficient meseta.' };
   }
 
-  db.prepare('UPDATE characters SET meseta = ?, updated_at = datetime("now") WHERE id = ?')
+  db.prepare("UPDATE characters SET meseta = ?, updated_at = datetime('now') WHERE id = ?")
     .run(newAmount, id);
 
   return { success: true, message: `Meseta updated. New balance: ${newAmount}` };
@@ -198,7 +198,7 @@ export function addExperience(id: string, exp: number): ApiResult<{ level: numbe
   const newLevel = Math.min(200, Math.floor(Math.sqrt(newExp / 100)) + 1);
   const leveledUp = newLevel > char.level;
 
-  db.prepare('UPDATE characters SET experience = ?, level = ?, updated_at = datetime("now") WHERE id = ?')
+  db.prepare("UPDATE characters SET experience = ?, level = ?, updated_at = datetime('now') WHERE id = ?")
     .run(newExp, newLevel, id);
 
   return {

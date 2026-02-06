@@ -77,6 +77,36 @@ export {
   type DroppedItem,
 } from './location';
 
+// Combat API
+export {
+  initCombat,
+  getEnemies,
+  getPlayerState,
+  getDroppedItems,
+  spawnEnemies,
+  attack,
+  pickupItem,
+  pickupAll,
+  healPlayer,
+  restoreTP,
+  clearCombat,
+  isWaveCleared,
+  type EnemyInstance,
+  type PlayerCombatState,
+  type AttackResultData,
+  type Difficulty,
+} from './combat';
+
+// Shop API
+export {
+  getItemShopInventory,
+  getWeaponShopInventory,
+  refreshWeaponShopInventory,
+  buyItem,
+  buyEquipment,
+  sellItem,
+} from './shop';
+
 // Common types
 export interface ApiResult<T = unknown> {
   success: boolean;
