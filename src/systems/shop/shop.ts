@@ -11,9 +11,10 @@ import type {
   ShopCategory,
   ShopId,
   EquipmentShopItem,
+  TechDiskShopItem,
 } from './types';
 import { SELL_MULTIPLIER, SHOP_IDS } from './types';
-import { getWeapons, getArmors, getUnits, type WeaponData, type ArmorData, type UnitData } from '../../data/content-loader';
+import { getWeapons, getArmors, getUnits, getTechniques, type WeaponData, type ArmorData, type UnitData, type TechniqueData } from '../../data/content-loader';
 
 // Elements available for weapons
 const WEAPON_ELEMENTS = ['Fire', 'Ice', 'Thunder', 'Light', 'Dark', 'None'];
@@ -459,6 +460,103 @@ export function refreshWeaponShop(): void {
   });
 }
 
+// Techniques available in shop (excludes grants, megid, ryuker)
+const SHOP_TECHNIQUES = [
+  // Basic attack techs
+  'foie', 'barta', 'zonde',
+  // Mid-tier attack techs (less common in shop)
+  'gifoie', 'gibarta', 'gizonde',
+  // Support
+  'resta', 'anti', 'reverser',
+  // Buffs/Debuffs
+  'shifta', 'deband', 'jellen', 'zalure',
+];
+
+// Weights for technique selection (basic more common than advanced)
+const TECH_WEIGHTS: Record<string, number> = {
+  foie: 10, barta: 10, zonde: 10,      // Basic attack - very common
+  resta: 8, anti: 6,                    // Healing - common
+  shifta: 5, deband: 5,                 // Buffs - moderate
+  jellen: 4, zalure: 4,                 // Debuffs - moderate
+  gifoie: 3, gibarta: 3, gizonde: 3,   // Mid-tier attack - uncommon
+  reverser: 2,                          // Revive - rare
+};
+
+/**
+ * Generate randomized technique disk shop inventory
+ */
+function generateTechShopInventory(): TechDiskShopItem[] {
+  const random = seededRandom(shopSeed + 2000);
+  const items: TechDiskShopItem[] = [];
+  const allTechniques = getTechniques();
+
+  // Build weighted pool
+  const weightedPool: string[] = [];
+  for (const techId of SHOP_TECHNIQUES) {
+    const weight = TECH_WEIGHTS[techId] ?? 1;
+    for (let i = 0; i < weight; i++) {
+      weightedPool.push(techId);
+    }
+  }
+
+  // Select 6-10 random techniques for today's shop
+  const numItems = Math.floor(random() * 5) + 6; // 6-10 items
+  const selectedTechs = new Set<string>();
+
+  for (let i = 0; i < numItems && selectedTechs.size < SHOP_TECHNIQUES.length; i++) {
+    const idx = Math.floor(random() * weightedPool.length);
+    const techId = weightedPool[idx];
+
+    // Avoid duplicates of same technique (different levels are OK)
+    if (selectedTechs.has(techId) && selectedTechs.size < SHOP_TECHNIQUES.length) {
+      i--; // Try again
+      continue;
+    }
+    selectedTechs.add(techId);
+
+    const technique = allTechniques.get(techId);
+    if (!technique) continue;
+
+    // Random level 1-5
+    const level = Math.floor(random() * 5) + 1;
+
+    // Price based on technique tier and level
+    const isAdvanced = ['gifoie', 'gibarta', 'gizonde', 'reverser'].includes(techId);
+    const basePrice = isAdvanced ? 400 : 100;
+    const levelMultiplier = 1 + (level - 1) * 0.5; // 1.0, 1.5, 2.0, 2.5, 3.0
+    const price = Math.floor(basePrice * levelMultiplier);
+
+    items.push({
+      id: `disk_${techId}_${level}_shop`,
+      name: `Disk: ${technique.name} Lv.${level}`,
+      description: technique.description,
+      price,
+      sellPrice: Math.floor(price * 0.25),
+      rarity: isAdvanced ? 2 : 1,
+      category: 'tech',
+      techniqueId: techId,
+      level,
+    });
+  }
+
+  // Sort by name for consistent display
+  items.sort((a, b) => a.name.localeCompare(b.name));
+
+  return items;
+}
+
+/**
+ * Refresh technique shop with new random disks
+ */
+export function refreshTechShop(): void {
+  shopSeed = Date.now();
+
+  registerShopInventory({
+    shopId: SHOP_IDS.TECH_SHOP,
+    items: generateTechShopInventory(),
+  });
+}
+
 /**
  * Initialize default shops
  */
@@ -481,6 +579,9 @@ export function initializeDefaultShops(): void {
 
   // Weapon/Armor Shop (randomized inventory)
   refreshWeaponShop();
+
+  // Technique Disk Shop (randomized inventory)
+  refreshTechShop();
 }
 
 export { SHOP_IDS };
