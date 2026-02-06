@@ -289,6 +289,29 @@ function runAutomatedTests() {
       const r = execute('available-arts');
       return r.success;
     }},
+    // Rare spawn tests
+    { name: 'Rare field requires teleporter', fn: () => {
+      resetState();
+      execute('create-character HUmar Test');
+      const r = execute('enter-rare-field gurhacia normal');
+      return !r.success && r.message.includes('teleporter');
+    }},
+    { name: 'Rare field spawns rare enemies', fn: () => {
+      resetState();
+      execute('create-character HUmar Test');
+      execute('goto teleporter');
+      const r = execute('enter-rare-field gurhacia normal');
+      return r.success && r.message.includes('RARE SPAWN');
+    }},
+    { name: 'Rare field can fight and return', fn: () => {
+      resetState();
+      execute('create-character HUmar Test');
+      execute('goto teleporter');
+      execute('enter-rare-field gurhacia normal');
+      const atk = execute('attack 0');
+      execute('return');
+      return atk.success && !atk.message.includes('NaN');
+    }},
   ];
 
   for (const test of tests) {

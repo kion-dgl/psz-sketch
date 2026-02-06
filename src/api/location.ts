@@ -23,7 +23,7 @@ export interface PendingMission {
 }
 
 export interface SessionData {
-  type: 'mission' | 'field';
+  type: 'mission' | 'field' | 'rare-field';
   areaId: string;
   difficulty: string;
   currentStage: number;
@@ -31,6 +31,7 @@ export interface SessionData {
   currentWave: number;
   totalWaves: number;
   suspended?: boolean;  // True when player used telepipe
+  isRareSpawn?: boolean;  // True for rare enemy spawn stages
 }
 
 export interface CombatData {
@@ -226,6 +227,34 @@ export function enterField(characterId: string, areaId: string, difficulty: stri
   `).run(JSON.stringify(sessionData), characterId);
 
   return { success: true, message: `Entered ${areaId} on ${difficulty}.`, data: sessionData };
+}
+
+/**
+ * Enter rare enemy field (special rare spawn stage)
+ * Only 1-2 waves of rare enemies with better rewards
+ */
+export function enterRareField(characterId: string, areaId: string, difficulty: string): ApiResult {
+  const currentLocation = getLocation(characterId);
+  if (currentLocation !== 'teleporter') {
+    return { success: false, message: 'Must be at teleporter to enter rare field.' };
+  }
+
+  const sessionData: SessionData = {
+    type: 'rare-field',
+    areaId,
+    difficulty,
+    currentStage: 0,
+    totalStages: 1, // Rare fields are single stage
+    currentWave: 1,
+    totalWaves: 2, // 2 waves of rare enemies
+    isRareSpawn: true,
+  };
+
+  db.prepare(`
+    UPDATE game_state SET location = 'field', session_data = ? WHERE character_id = ?
+  `).run(JSON.stringify(sessionData), characterId);
+
+  return { success: true, message: `RARE SPAWN DETECTED! Entered ${areaId} rare field on ${difficulty}.`, data: sessionData };
 }
 
 /**

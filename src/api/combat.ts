@@ -7,7 +7,8 @@ import { getCharacter, addExperience } from './character';
 import { getEquipment } from './equipment';
 import { getGameState, setCombatData, type CombatData, type EnemyData, type DroppedItem } from './location';
 import { resolveAttack, applyDamage, isDefeated } from '../systems/combat/combat';
-import { generateEnemyComposition, createSeededRandom } from '../systems/stage/enemy-pools';
+import { generateEnemyComposition, createSeededRandom, getRareEnemies } from '../systems/stage/enemy-pools';
+import type { EnemyArea } from '../systems/stage/types';
 import type { CombatStats, WeaponStats, Element } from '../systems/combat/types';
 import { addItem } from './inventory';
 import { MONOMATE, MONOFLUID } from '../systems/inventory/starting-items';
@@ -274,6 +275,88 @@ export function spawnEnemies(
   return {
     success: true,
     message: `Wave ${wave}: ${state.enemies.length} enemies spawned!`,
+    data: { enemies: state.enemies, wave },
+  };
+}
+
+/**
+ * Spawn rare enemies only (for rare spawn stages)
+ * Rare enemies give 3x EXP and better drops
+ */
+export function spawnRareEnemies(
+  characterId: string,
+  areaId: string,
+  difficulty: Difficulty,
+  seed?: number
+): ApiResult<{ enemies: EnemyInstance[]; wave: number }> {
+  const char = getCharacter(characterId);
+  if (!char) {
+    return { success: false, message: 'Character not found.' };
+  }
+
+  const gameState = getGameState(characterId);
+  if (!gameState || gameState.location !== 'field') {
+    return { success: false, message: 'Must be in field.' };
+  }
+
+  const state = getCombatState(characterId);
+  const random = createSeededRandom(seed ?? Date.now());
+
+  // Map areaId to enemy pool area
+  const areaMapping: Record<string, EnemyArea> = {
+    'gurhacia-valley': 'gurhacia',
+    'gurhacia': 'gurhacia',
+    'rioh-snowfield': 'rioh',
+    'rioh': 'rioh',
+    'ozette-wetland': 'ozette',
+    'ozette': 'ozette',
+    'paru-ruins': 'paru',
+    'paru': 'paru',
+    'arca-plant': 'arca',
+    'arca': 'arca',
+    'dark-shrine': 'dark',
+    'dark': 'dark',
+    'makara-ruins': 'makara',
+    'makara': 'makara',
+  };
+  const enemyArea = areaMapping[areaId] || 'gurhacia';
+
+  // Get rare enemies for this area
+  const rareEnemies = getRareEnemies(enemyArea);
+
+  if (rareEnemies.length === 0) {
+    return { success: false, message: 'No rare enemies available for this area.' };
+  }
+
+  // Spawn 2-4 rare enemies (fewer than normal but all rare)
+  const enemyCount = 2 + Math.floor(random() * 3); // 2-4 enemies
+
+  state.enemies = [];
+  for (let i = 0; i < enemyCount; i++) {
+    const enemyId = rareEnemies[Math.floor(random() * rareEnemies.length)];
+    const stats = generateEnemyStats(enemyId, difficulty, char.level);
+
+    // Rare enemies give 3x EXP and meseta
+    const expMultiplier = 3;
+    const mesetaMultiplier = 3;
+
+    state.enemies.push({
+      id: state.enemyIdCounter++,
+      enemyId,
+      name: formatEnemyName(enemyId),
+      stats,
+      element: getEnemyElement(enemyId),
+      expValue: Math.floor(stats.maxHp * 0.5 * expMultiplier),
+      mesetaValue: Math.floor(stats.maxHp * 0.3 * mesetaMultiplier),
+    });
+  }
+
+  syncCombatToDb(characterId);
+
+  const wave = gameState.sessionData?.currentWave ?? 1;
+  return {
+    success: true,
+    message: `RARE SPAWN! Wave ${wave}: ${state.enemies.length} rare enemies appeared!`,
     data: { enemies: state.enemies, wave },
   };
 }

@@ -651,6 +651,51 @@ const tests: TestCase[] = [
       { cmd: 'photon-art rising-strike 0', expect: { success: false, messageContains: 'field' } },
     ],
   },
+
+  // ----------------------------------------
+  // Rare Enemy Spawns
+  // ----------------------------------------
+  {
+    name: 'Rare field - requires teleporter',
+    commands: [
+      { cmd: 'create-character HUmar RareLocTest', expect: { success: true } },
+      { cmd: 'enter-rare-field gurhacia normal', expect: { success: false, messageContains: 'teleporter' } },
+    ],
+  },
+  {
+    name: 'Rare field - can enter from teleporter',
+    commands: [
+      { cmd: 'create-character HUmar RareEnterTest', expect: { success: true } },
+      { cmd: 'goto teleporter', expect: { success: true } },
+      { cmd: 'enter-rare-field gurhacia normal', expect: { success: true, messageContains: 'RARE SPAWN' } },
+    ],
+  },
+  {
+    name: 'Rare field - spawns rare enemies',
+    commands: [
+      { cmd: 'create-character HUmar RareSpawnTest', expect: { success: true } },
+      { cmd: 'goto teleporter', expect: { success: true } },
+      { cmd: 'enter-rare-field gurhacia normal', expect: { success: true, messageContains: 'rare enemies' } },
+    ],
+  },
+  {
+    name: 'Rare field - can return freely',
+    commands: [
+      { cmd: 'create-character HUmar RareReturnTest', expect: { success: true } },
+      { cmd: 'goto teleporter', expect: { success: true } },
+      { cmd: 'enter-rare-field gurhacia normal', expect: { success: true } },
+      { cmd: 'return', expect: { success: true, messageContains: 'Returned' } },
+    ],
+  },
+  {
+    name: 'Rare field - can fight and gain EXP',
+    commands: [
+      { cmd: 'create-character HUmar RareFightTest', expect: { success: true } },
+      { cmd: 'goto teleporter', expect: { success: true } },
+      { cmd: 'enter-rare-field gurhacia normal', expect: { success: true } },
+      { cmd: 'attack 0', expect: { success: true, messageNotContains: 'NaN' } },
+    ],
+  },
 ];
 
 // ============================================

@@ -46,6 +46,7 @@ import {
   getSuspendedSession,
   enterMission,
   enterField,
+  enterRareField,
   returnToCity,
   nextStage,
   addExperience as dbAddExperience,
@@ -55,6 +56,7 @@ import {
   getPlayerState,
   getDroppedItems,
   spawnEnemies,
+  spawnRareEnemies,
   attack as dbAttack,
   pickupItem,
   pickupAll,
@@ -1175,6 +1177,25 @@ function executeEnterField(areaId: string, difficulty: string): CommandResult {
   return result;
 }
 
+function executeEnterRareField(areaId: string, difficulty: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const result = enterRareField(charId, areaId, difficulty);
+  if (result.success) {
+    // Initialize combat state and spawn rare enemies
+    initCombat(charId);
+    const spawnResult = spawnRareEnemies(charId, areaId, difficulty as Difficulty, Date.now());
+    return {
+      success: true,
+      message: `${result.message}\n${spawnResult.message}`,
+    };
+  }
+  return result;
+}
+
 function executeNextWave(): CommandResult {
   const charId = getCurrentCharacterId();
   if (!charId) {
@@ -1206,7 +1227,10 @@ function executeNextWave(): CommandResult {
   setSessionData(charId, session);
 
   const difficulty = session.difficulty as Difficulty;
-  const result = spawnEnemies(charId, session.areaId, difficulty, Date.now());
+  // Use rare spawns for rare fields
+  const result = session.isRareSpawn
+    ? spawnRareEnemies(charId, session.areaId, difficulty, Date.now())
+    : spawnEnemies(charId, session.areaId, difficulty, Date.now());
 
   return {
     success: true,
@@ -1587,6 +1611,12 @@ export function execute(commandLine: string): CommandResult {
         return { success: false, message: 'Usage: enter-field <area-id> <difficulty>' };
       }
       return executeEnterField(args[0], args[1].toLowerCase());
+
+    case 'enter-rare-field':
+      if (!args[0] || !args[1]) {
+        return { success: false, message: 'Usage: enter-rare-field <area-id> <difficulty>' };
+      }
+      return executeEnterRareField(args[0], args[1].toLowerCase());
 
     case 'next-wave':
       return executeNextWave();

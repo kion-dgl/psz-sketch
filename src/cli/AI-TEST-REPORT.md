@@ -1,11 +1,11 @@
 # AI Test Report
 
-Generated: 2026-02-06 07:27:12
+Generated: 2026-02-06 08:00:39
 
 ## Test Suite Summary
 
 ### Automated Tests
-**38/38 tests passed**
+**41/41 tests passed**
 
 - ✓ Character Creation - Hunter
 - ✓ Character Creation - Ranger
@@ -45,10 +45,13 @@ Generated: 2026-02-06 07:27:12
 - ✓ My techniques shows learned
 - ✓ List photon arts works
 - ✓ Available arts for weapon
+- ✓ Rare field requires teleporter
+- ✓ Rare field spawns rare enemies
+- ✓ Rare field can fight and return
 
 
 ### Integration Tests
-- ✓ Level progression: Reached level 6 in 3 missions
+- ✓ Level progression: Reached level 6 in 2 missions
 - ✓ Equipment cycle: Unequip -> Equip -> Verify
 - ✓ Shop economy: Meseta: 500 -> 350 -> 375
 - ✓ Storage round-trip: Deposit -> Check -> Withdraw
@@ -77,9 +80,9 @@ Generated: 2026-02-06 07:27:12
 3. Go to guild and start mission...
    ✓ Started mayors-mission on normal.
 4. Fight enemies...
-   ✓ Defeated 6 enemies
+   ✓ Defeated 4 enemies
 5. Check EXP gained...
-   ✓ EXP: 175, Level: 3
+   ✓ EXP: 150, Level: 2
 6. Return to city (abandon mission)...
 
 Game flow test complete!
@@ -129,10 +132,10 @@ Item Shop: 9 items available
 Weapon Shop: 18 items available
 
 Sample weapon shop items:
-  saber-1770384431166 Saber [Ice 14%]      666 meseta
-  blade-1770384431166 Blade                600 meseta
-  daggers-1770384431166 Daggers              465 meseta
-  handgun-1770384431166 Handgun [Fire 5%]    425 meseta
+  saber-1770386438523 Saber [Light 5%]     614 meseta
+  blade-1770386438523 Blade                600 meseta
+  daggers-1770386438523 Daggers [Light 14%]  530 meseta
+  handgun-1770386438523 Handgun [Dark 14%]   461 meseta
 ```
 
 ---
