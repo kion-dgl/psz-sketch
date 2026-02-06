@@ -3,5 +3,6 @@
   "japaneseName": "ヒールトラップ",
   "details": "Revives incapacitated teammates and restores 50% of HP.",
   "rarity": 1,
+  "maxStack": 10,
   "psoWorldId": 314
 }

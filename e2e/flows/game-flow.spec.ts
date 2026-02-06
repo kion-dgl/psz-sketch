@@ -216,28 +216,14 @@ test.describe('Shop Flow', () => {
     const initialMeseta = await shopPage.getMeseta();
     expect(initialMeseta).toBe(5000);
 
-    // Wait for shop items to load and select monomate (costs 50)
-    await page.waitForSelector('[data-testid="shop-item-monomate"]');
-    await shopPage.selectItem('monomate');
-
-    // Wait for purchase section to appear
-    await page.waitForSelector('[data-testid="quantity-input"]');
-
-    // Buy 2 items
-    await shopPage.setQuantity(2);
-
-    // Wait for total to update
-    await page.waitForSelector('[data-testid="total-cost"]');
-    const total = await shopPage.getTotalCost();
-    expect(total).toBe(100);
-
-    // Complete purchase
-    await shopPage.clickBuy();
+    // Wait for monomate item (costs 50) and buy it
+    await shopPage.waitForItem('monomate');
+    await shopPage.buyItem('monomate');
 
     // Wait for meseta to update
     await page.waitForTimeout(500);
     const newMeseta = await shopPage.getMeseta();
-    expect(newMeseta).toBe(4900);
+    expect(newMeseta).toBe(4950);
   });
 
   test('shop: cannot buy when insufficient funds', async ({ page }) => {
@@ -250,21 +236,18 @@ test.describe('Shop Flow', () => {
     // Select weapons tab
     await shopPage.selectShopTab('weapons');
 
-    // Wait for weapon items to load and select buster (costs 5000 - exactly our meseta)
-    await page.waitForSelector('[data-testid="shop-item-buster"]');
-    await shopPage.selectItem('buster');
+    // Wait for buster weapon (costs 5000)
+    await shopPage.waitForItem('buster');
 
-    // Wait for purchase section
-    await page.waitForSelector('[data-testid="buy-button"]');
+    // With exactly 5000 meseta, buster should be enabled
+    expect(await shopPage.isBuyButtonEnabled('buster')).toBe(true);
 
-    // With exactly 5000 meseta and item costing 5000, buy should be enabled
-    // But if we try to buy 2, it should be disabled
-    await shopPage.setQuantity(2);
-    await page.waitForTimeout(100);
+    // Buy it to use all meseta
+    await shopPage.buyItem('buster');
+    await page.waitForTimeout(500);
 
-    // Check buy button is disabled for qty 2 (10000 meseta needed)
-    const canBuy = await shopPage.isBuyButtonEnabled();
-    expect(canBuy).toBe(false);
+    // Now buster button should be disabled (no meseta left)
+    expect(await shopPage.isBuyButtonEnabled('buster')).toBe(false);
   });
 });
 
@@ -393,9 +376,9 @@ test.describe('Navigation', () => {
     await shopPage.clickBack();
     await expect(page).toHaveURL(/\/web\/city-hub/);
 
-    // Navigate to missions
+    // Navigate to missions (guild counter)
     await cityHubPage.clickMissions();
-    await expect(page).toHaveURL(/\/web\/mission-select/);
+    await expect(page).toHaveURL(/\/web\/guild-counter/);
   });
 
   test('logout returns to character select', async ({ page }) => {

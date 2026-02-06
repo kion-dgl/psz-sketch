@@ -15,18 +15,22 @@
     "test:e2e:ui": "playwright test --ui",
     "test:all": "vitest run && playwright test",
     "cli": "npx tsx src/cli/game.ts",
-    "cli:api": "npx tsx src/cli/game.ts --api"
+    "cli:api": "npx tsx src/cli/game.ts --api",
+    "tui": "npx tsx src/cli/tui.ts",
+    "ai-test": "npx tsx src/cli/ai-test.ts"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.0",
     "@astrojs/react": "^4.4.1",
     "@astrojs/starlight": "^0.36.1",
     "@astrojs/vercel": "^9.0.0",
+    "@inquirer/prompts": "^8.2.0",
     "@react-three/drei": "^10.7.6",
     "@react-three/fiber": "^9.4.0",
     "@tailwindcss/vite": "^4.1.17",
     "@types/jsonwebtoken": "^9.0.10",
     "astro": "^5.6.1",
+    "better-sqlite3": "^12.6.2",
     "daisyui": "^5.5.8",
     "ioredis": "^5.8.2",
     "jsonwebtoken": "^9.0.2",
@@ -39,11 +43,14 @@
     "tailwindcss": "^4.1.17",
     "three": "^0.181.1",
     "unstorage": "^1.17.2",
+    "uuid": "^13.0.0",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^24.10.0",
+    "@types/uuid": "^10.0.0",
     "playwright": "^1.57.0",
     "vitest": "^4.0.16"
   }

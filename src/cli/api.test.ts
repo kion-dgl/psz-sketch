@@ -62,8 +62,8 @@ describe('CLI API', () => {
       execute('create-character HUmar TestHero');
 
       const state = getState();
-      expect(state.inventory.find(i => i.itemId === 'monomate')).toBeDefined();
-      expect(state.inventory.find(i => i.itemId === 'monofluid')).toBeDefined();
+      expect(state.inventory.find(i => i.id === 'monomate')).toBeDefined();
+      expect(state.inventory.find(i => i.id === 'monofluid')).toBeDefined();
     });
 
     it('fails with invalid class', () => {
@@ -120,10 +120,10 @@ describe('CLI API', () => {
       expect(getState().location).toBe('missions');
     });
 
-    it('moves to inventory', () => {
+    it('inventory is no longer a valid location (use overlay instead)', () => {
       const result = execute('goto inventory');
-      expect(result.success).toBe(true);
-      expect(getState().location).toBe('inventory');
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Invalid location');
     });
 
     it('fails for invalid location', () => {
@@ -153,7 +153,7 @@ describe('CLI API', () => {
 
       const state = getState();
       expect(state.meseta).toBeLessThan(initialMeseta);
-      expect(state.inventory.find(i => i.itemId === 'monomate')).toBeDefined();
+      expect(state.inventory.find(i => i.id === 'monomate')).toBeDefined();
     });
 
     it('fails to buy non-existent item', () => {
@@ -163,8 +163,8 @@ describe('CLI API', () => {
     });
 
     it('fails to buy without enough meseta', () => {
-      // Buy something expensive
-      const result = execute('buy trimate 100');
+      // Buy something expensive (trimate costs 600, starting meseta is 500)
+      const result = execute('buy trimate 1');
       expect(result.success).toBe(false);
       expect(result.message).toContain('Not enough meseta');
     });
@@ -238,8 +238,8 @@ describe('CLI API', () => {
       execute('goto inventory');
       const result = execute('show-inventory');
       expect(result.success).toBe(true);
-      expect(result.message).toContain('monomate');
-      expect(result.message).toContain('monofluid');
+      expect(result.message).toContain('Monomate');
+      expect(result.message).toContain('Monofluid');
     });
 
     it('shows updated quantity after buying more', () => {
@@ -249,7 +249,7 @@ describe('CLI API', () => {
 
       const result = execute('show-inventory');
       expect(result.success).toBe(true);
-      expect(result.message).toContain('monomate');
+      expect(result.message).toContain('Monomate');
       // Started with 5, bought 3 more = 8
       expect(result.message).toContain('x8');
     });
@@ -396,14 +396,14 @@ describe('CLI API', () => {
   describe('Combat Commands', () => {
     beforeEach(() => {
       execute('create-character HUmar TestHero');
-      execute('goto guild');
+      execute('goto teleporter');
       execute('enter-field gurhacia-valley normal');
     });
 
     it('spawns enemies in field', () => {
       const result = execute('spawn-enemies');
       expect(result.success).toBe(true);
-      expect(result.message).toContain('Enemies spawned');
+      expect(result.message).toContain('Wave');
       expect(result.message).toContain('gurhacia');
     });
 
@@ -423,10 +423,11 @@ describe('CLI API', () => {
       expect(result.message).toMatch(/Hit|Attack missed/);
     });
 
-    it('fails to attack without enemies', () => {
-      const result = execute('attack 0');
-      expect(result.success).toBe(false);
-      expect(result.message).toContain('No enemies');
+    it('enemies auto-spawn when entering field', () => {
+      // Enemies should already be spawned after entering field
+      const state = getState();
+      expect(state.enemies).toBeDefined();
+      expect(state.enemies!.length).toBeGreaterThan(0);
     });
 
     it('fails to attack invalid index', () => {
@@ -473,26 +474,27 @@ describe('CLI API', () => {
       const result = execute('complete-field');
       expect(result.success).toBe(true);
       expect(result.message).toContain('complete');
-      expect(getState().location).toBe('guild');
+      expect(getState().location).toBe('city');
     });
 
     it('can use telepipe to retreat', () => {
       const result = execute('use-telepipe');
       expect(result.success).toBe(true);
       expect(result.message).toContain('Telepipe');
-      expect(getState().location).toBe('guild');
+      expect(getState().location).toBe('city');
     });
 
     it('can abandon session', () => {
       const result = execute('abandon-session');
       expect(result.success).toBe(true);
       expect(result.message).toContain('abandoned');
-      expect(getState().location).toBe('guild');
+      expect(getState().location).toBe('city');
     });
 
     it('advances to next stage when enemies cleared', () => {
       // Complete the field immediately to avoid fighting
       execute('complete-field');
+      execute('goto teleporter');
       execute('enter-field gurhacia-valley normal');
 
       // Try to advance (should fail without clearing enemies first)
@@ -505,7 +507,7 @@ describe('CLI API', () => {
   describe('Item Drops', () => {
     beforeEach(() => {
       execute('create-character HUmar TestHero');
-      execute('goto guild');
+      execute('goto teleporter');
       execute('enter-field gurhacia-valley normal');
       execute('spawn-enemies');
     });
@@ -530,7 +532,7 @@ describe('CLI API', () => {
   describe('Player Death', () => {
     beforeEach(() => {
       execute('create-character HUmar TestHero');
-      execute('goto guild');
+      execute('goto teleporter');
       execute('enter-field gurhacia-valley normal');
     });
 

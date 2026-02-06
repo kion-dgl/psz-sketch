@@ -113,6 +113,19 @@ export const MONOFLUID: ConsumableItem = {
   maxStack: 10,
 };
 
+export const TELEPIPE: ConsumableItem = {
+  id: 'telepipe',
+  name: 'Telepipe',
+  description: 'Creates a portal back to the city. Use at guild to return to mission.',
+  type: 'consumable',
+  effect: 'telepipe',
+  effectValue: 0,
+  rarity: 1,
+  sellPrice: 150,
+  stackable: true,
+  maxStack: 10,
+};
+
 // ============================================
 // HELPER FUNCTIONS
 // ============================================

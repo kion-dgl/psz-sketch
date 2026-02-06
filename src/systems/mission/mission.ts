@@ -11,12 +11,15 @@ import type {
   Difficulty,
   RewardItem,
   ObjectiveProgress,
+  MissionObjective,
+  UnlockRequirement,
 } from './types';
 import {
   DIFFICULTY_EXP_MULTIPLIERS,
   DIFFICULTY_MESETA_MULTIPLIERS,
   GRADE_THRESHOLDS,
 } from './types';
+import { getQuestDefinitions, type QuestDefinitionData } from '../../data/content-loader';
 
 // Mission database (would be loaded from JSON in production)
 const missions = new Map<string, Mission>();
@@ -315,6 +318,28 @@ export function getCompletionCount(characterId: string): number {
 }
 
 /**
+ * Get all completed mission IDs for a character (for persistence)
+ */
+export function getCompletedMissions(characterId: string): string[] {
+  const completed = completedMissions.get(characterId);
+  return completed ? Array.from(completed) : [];
+}
+
+/**
+ * Restore completed missions for a character (from persistence)
+ */
+export function restoreCompletedMissions(characterId: string, missionIds: string[]): void {
+  if (!missionIds || missionIds.length === 0) return;
+  if (!completedMissions.has(characterId)) {
+    completedMissions.set(characterId, new Set());
+  }
+  const completed = completedMissions.get(characterId)!;
+  for (const id of missionIds) {
+    completed.add(id);
+  }
+}
+
+/**
  * Get recommended difficulty based on level
  */
 export function getRecommendedDifficulty(
@@ -357,81 +382,117 @@ export function clearMissions(): void {
 }
 
 /**
- * Initialize default missions
+ * Convert area name to area ID
+ */
+function areaNameToId(areaName: string): string {
+  return areaName.toLowerCase().replace(/\s+/g, '-');
+}
+
+/**
+ * Convert objective type from quest definition to mission objective type
+ */
+function convertObjectiveType(type: string): 'defeat' | 'collect' | 'reach' | 'protect' {
+  switch (type) {
+    case 'defeat_enemies':
+    case 'defeat_boss':
+      return 'defeat';
+    case 'collect_items':
+      return 'collect';
+    case 'reach_location':
+      return 'reach';
+    case 'escort_npc':
+      return 'protect';
+    default:
+      return 'defeat';
+  }
+}
+
+/**
+ * Convert quest definition to Mission type
+ */
+function questDefinitionToMission(quest: QuestDefinitionData): Mission {
+  // Get normal difficulty rewards as base
+  const normalDiff = quest.difficulties.find(d => d.difficulty === 'Normal');
+
+  // Convert objectives
+  const objectives: MissionObjective[] = quest.objectives.map((obj, i) => ({
+    id: `obj${i + 1}`,
+    type: convertObjectiveType(obj.type),
+    target: obj.target ?? 'any',
+    count: obj.required,
+    description: obj.description,
+  }));
+
+  // Convert unlock requirements
+  const unlockRequirements: UnlockRequirement[] = [];
+  if (quest.requirements?.prerequisiteQuests) {
+    for (const prereq of quest.requirements.prerequisiteQuests) {
+      unlockRequirements.push({ type: 'mission', id: prereq });
+    }
+  }
+  if (quest.requirements?.minLevel && quest.requirements.minLevel > 1) {
+    unlockRequirements.push({ type: 'level', value: quest.requirements.minLevel });
+  }
+
+  // Convert reward items (guaranteed drops from quest rewards)
+  const rewardItems: RewardItem[] = [];
+  if (normalDiff?.rewards?.items) {
+    for (const item of normalDiff.rewards.items) {
+      rewardItems.push({
+        itemId: item.itemId,
+        quantity: item.quantity,
+        chance: 1.0, // Quest rewards are guaranteed
+      });
+    }
+  }
+
+  return {
+    id: quest.questId,
+    name: quest.questName,
+    description: quest.description,
+    areaId: areaNameToId(quest.area),
+    requiredLevel: quest.requirements?.minLevel ?? 1,
+    recommendedLevel: normalDiff?.recommendedLevel ?? quest.requirements?.minLevel ?? 1,
+    partySize: 4, // Default party size
+    objectives,
+    rewards: {
+      baseExp: normalDiff?.rewards?.experience ?? 500,
+      baseMeseta: normalDiff?.rewards?.meseta ?? 500,
+      items: rewardItems.length > 0 ? rewardItems : undefined,
+    },
+    unlockRequirements: unlockRequirements.length > 0 ? unlockRequirements : undefined,
+    missionType: quest.questType === 'story' ? 'story' : 'side',
+  };
+}
+
+/**
+ * Initialize missions from quest definitions
  */
 export function initializeDefaultMissions(): void {
-  registerMission({
-    id: 'mayors-mission',
-    name: "Mayor's Mission",
-    description: 'Help the Mayor investigate strange occurrences in the forest.',
-    areaId: 'naura-bakery',
-    requiredLevel: 1,
-    recommendedLevel: 5,
-    partySize: 4,
-    objectives: [
-      { id: 'obj1', type: 'defeat', target: 'booma', count: 10, description: 'Defeat 10 Boomas' },
-      { id: 'obj2', type: 'reach', target: 'boss-area', description: 'Reach the boss area' },
-      { id: 'obj3', type: 'defeat', target: 'hildebear', count: 1, description: 'Defeat Hildebear' },
-    ],
-    rewards: {
-      baseExp: 500,
-      baseMeseta: 1000,
-      items: [
-        { itemId: 'saber', quantity: 1, chance: 0.2 },
-        { itemId: 'monomate', quantity: 5, chance: 0.8 },
-      ],
-    },
-  });
+  const questDefs = getQuestDefinitions();
 
-  registerMission({
-    id: 'third-daughter',
-    name: 'The Third Daughter',
-    description: 'Search for the missing daughter in the caves.',
-    areaId: 'oberon-caves',
-    requiredLevel: 10,
-    recommendedLevel: 15,
-    partySize: 4,
-    objectives: [
-      { id: 'obj1', type: 'collect', target: 'clue', count: 3, description: 'Find 3 clues' },
-      { id: 'obj2', type: 'defeat', target: 'boss', count: 1, description: 'Defeat the kidnapper' },
-      { id: 'obj3', type: 'protect', target: 'daughter', description: 'Protect the daughter' },
-    ],
-    rewards: {
-      baseExp: 1500,
-      baseMeseta: 3000,
-      items: [
-        { itemId: 'brand', quantity: 1, chance: 0.15 },
-        { itemId: 'dimate', quantity: 3, chance: 0.5 },
-      ],
-    },
-    unlockRequirements: [
-      { type: 'mission', id: 'mayors-mission' },
-    ],
-  });
+  for (const [_id, questDef] of questDefs) {
+    const mission = questDefinitionToMission(questDef);
+    registerMission(mission);
+  }
 
-  registerMission({
-    id: 'valley-king',
-    name: 'The Valley King',
-    description: 'Defeat the dragon terrorizing Gurhacia Valley.',
-    areaId: 'gurhacia-valley',
-    requiredLevel: 30,
-    recommendedLevel: 40,
-    partySize: 4,
-    objectives: [
-      { id: 'obj1', type: 'defeat', target: 'dragon-spawn', count: 20, description: 'Clear the path' },
-      { id: 'obj2', type: 'defeat', target: 'de-rol-le', count: 1, description: 'Defeat De Rol Le' },
-    ],
-    rewards: {
-      baseExp: 5000,
-      baseMeseta: 10000,
-      items: [
-        { itemId: 'buster', quantity: 1, chance: 0.1 },
-        { itemId: 'trimate', quantity: 5, chance: 0.6 },
-      ],
-    },
-    unlockRequirements: [
-      { type: 'mission', id: 'third-daughter' },
-      { type: 'level', value: 30 },
-    ],
-  });
+  // Log loaded missions count
+  console.log(`Loaded ${missions.size} missions from quest definitions`);
+}
+
+/**
+ * Get story missions in order
+ */
+export function getStoryMissions(): Mission[] {
+  return getAllMissions()
+    .filter(m => m.missionType === 'story')
+    .sort((a, b) => a.requiredLevel - b.requiredLevel);
+}
+
+/**
+ * Get side missions
+ */
+export function getSideMissions(): Mission[] {
+  return getAllMissions()
+    .filter(m => m.missionType !== 'story');
 }

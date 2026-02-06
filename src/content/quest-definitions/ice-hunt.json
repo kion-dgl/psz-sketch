@@ -1,0 +1,61 @@
+{
+  "questId": "ice_hunt",
+  "questName": "Ice Hunt",
+  "questType": "side",
+  "area": "Rioh Snowfield",
+  "description": "A rare beast has been spotted in the snowfield. Hunters are offering a bounty for proof of its defeat.",
+  "difficulties": [
+    {
+      "difficulty": "Normal",
+      "recommendedLevel": 10,
+      "rewards": {
+        "meseta": 2500,
+        "experience": 1200,
+        "items": [
+          { "itemId": "antifreeze", "itemName": "Antifreeze", "quantity": 3 }
+        ]
+      }
+    },
+    {
+      "difficulty": "Hard",
+      "recommendedLevel": 28,
+      "rewards": {
+        "meseta": 6000,
+        "experience": 3000,
+        "items": [
+          { "itemId": "antiparalysis", "itemName": "Antiparalysis", "quantity": 5 }
+        ]
+      }
+    },
+    {
+      "difficulty": "Super Hard",
+      "recommendedLevel": 58,
+      "rewards": {
+        "meseta": 12000,
+        "experience": 6000,
+        "items": [
+          { "itemId": "sol_atomizer", "itemName": "Sol Atomizer", "quantity": 3 }
+        ]
+      }
+    }
+  ],
+  "requirements": {
+    "minLevel": 10,
+    "prerequisiteQuests": ["the_valley_king"]
+  },
+  "objectives": [
+    {
+      "type": "defeat_enemies",
+      "description": "Track the beast through the snow",
+      "target": "snowfield_creature",
+      "required": 15
+    },
+    {
+      "type": "defeat_boss",
+      "description": "Defeat the Frost Fang",
+      "target": "frost_fang"
+    }
+  ],
+  "isRepeatable": true,
+  "isSecret": false
+}

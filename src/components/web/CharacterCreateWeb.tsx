@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CHARACTER_RACES, type CharacterClass } from '../../config/characterConfig';
-import { createAndSaveCharacter, validateCharacterName, validateClassId } from '../../systems/character';
+import { validateCharacterName, validateClassId } from '../../systems/character';
 
 interface CharacterCreateWebProps {
   slot: number;
@@ -58,7 +58,7 @@ export default function CharacterCreateWeb({ slot, onCreated }: CharacterCreateW
     }
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     setError('');
 
     // Validate name
@@ -78,18 +78,27 @@ export default function CharacterCreateWeb({ slot, onCreated }: CharacterCreateW
     setSubmitting(true);
 
     try {
-      const character = createAndSaveCharacter({
-        name: characterName,
-        classId,
-        slot,
-        variationIndex,
-        bodyColorIndex,
-        hairColorIndex,
-        skinToneIndex,
+      const response = await fetch('/api/characters', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slot,
+          classId,
+          name: characterName,
+        }),
       });
 
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create character');
+      }
+
+      // Store selected character ID
+      localStorage.setItem('selectedCharacterId', data.character_id);
+
       if (onCreated) {
-        onCreated(character.character_id);
+        onCreated(data.character_id);
       } else {
         window.location.href = '/web/city-hub';
       }

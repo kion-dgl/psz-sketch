@@ -1,0 +1,9 @@
+{
+  "areaId": "oblivion-city-paru",
+  "areaName": "Oblivion City Paru",
+  "description": "An ancient underwater city filled with mysterious artifacts and dangerous aquatic creatures.",
+  "unlockCondition": "Complete 'Clockworks' story quest",
+  "recommendedLevel": 25,
+  "environment": "underwater ruins",
+  "questCount": 4
+}

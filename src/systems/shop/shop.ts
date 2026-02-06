@@ -10,8 +10,16 @@ import type {
   SellResult,
   ShopCategory,
   ShopId,
+  EquipmentShopItem,
 } from './types';
 import { SELL_MULTIPLIER, SHOP_IDS } from './types';
+import { getWeapons, getArmors, getUnits, type WeaponData, type ArmorData, type UnitData } from '../../data/content-loader';
+
+// Elements available for weapons
+const WEAPON_ELEMENTS = ['Fire', 'Ice', 'Thunder', 'Light', 'Dark', 'None'];
+
+// Seed for consistent randomization per session
+let shopSeed = Date.now();
 
 // Shop inventories (would be loaded from JSON in production)
 const shopInventories = new Map<string, ShopInventory>();
@@ -131,6 +139,20 @@ export function purchaseItem(
 }
 
 /**
+ * Remove an item from a shop's inventory (for one-time purchases like equipment)
+ */
+export function removeShopItem(shopId: ShopId | string, itemId: string): boolean {
+  const inventory = getShopInventory(shopId);
+  if (!inventory) return false;
+
+  const index = inventory.items.findIndex(item => item.id === itemId);
+  if (index === -1) return false;
+
+  inventory.items.splice(index, 1);
+  return true;
+}
+
+/**
  * Sell an item
  */
 export function sellItem(
@@ -232,6 +254,212 @@ export function clearShopInventories(): void {
 }
 
 /**
+ * Simple seeded random number generator
+ */
+function seededRandom(seed: number): () => number {
+  let state = seed;
+  return () => {
+    state = (state * 1103515245 + 12345) & 0x7fffffff;
+    return state / 0x7fffffff;
+  };
+}
+
+/**
+ * Roll for armor slots (0 common, 1 rare, 2 very rare, 3 extremely rare)
+ */
+function rollArmorSlots(random: () => number): number {
+  const roll = random();
+  if (roll < 0.70) return 0;      // 70% chance: 0 slots
+  if (roll < 0.90) return 1;      // 20% chance: 1 slot
+  if (roll < 0.98) return 2;      // 8% chance: 2 slots
+  return 3;                        // 2% chance: 3 slots
+}
+
+/**
+ * Roll for weapon element
+ */
+function rollWeaponElement(random: () => number): { element: string; percent: number } {
+  const roll = random();
+  if (roll < 0.40) {
+    return { element: 'None', percent: 0 };
+  }
+  const element = WEAPON_ELEMENTS[Math.floor(random() * (WEAPON_ELEMENTS.length - 1))];
+  const percent = Math.floor(random() * 15) + 5; // 5-20%
+  return { element, percent };
+}
+
+/**
+ * Generate randomized weapon shop inventory from content files
+ */
+function generateWeaponShopInventory(): EquipmentShopItem[] {
+  const random = seededRandom(shopSeed);
+  const items: EquipmentShopItem[] = [];
+
+  // Get weapons from content
+  const allWeapons = getWeapons();
+
+  // Select basic weapons for shop (rarity 1-2, low level requirement)
+  const shopWeaponIds = [
+    'saber', 'blade', 'daggers', 'handgun', 'cane', 'rod', 'wand',
+    'clear-saber', 'chrome-cutlass', 'ein-blade', 'red-saber'
+  ];
+
+  for (const weaponId of shopWeaponIds) {
+    const weapon = allWeapons.get(weaponId);
+    if (!weapon) continue;
+
+    // Roll for random element
+    const { element, percent } = rollWeaponElement(random);
+    const elementSuffix = element !== 'None' ? ` [${element} ${percent}%]` : '';
+
+    // Calculate price based on attack and rarity
+    const basePrice = (weapon.attackBase ?? 30) * 15 + (weapon.rarity - 1) * 500;
+    const priceBonus = element !== 'None' ? Math.floor(basePrice * (percent / 100)) : 0;
+
+    items.push({
+      id: `${weaponId}-${shopSeed}`,
+      name: `${weapon.name}${elementSuffix}`,
+      description: `${weapon.weaponType} - ATK ${weapon.attackBase ?? 0}`,
+      price: basePrice + priceBonus,
+      sellPrice: Math.floor((basePrice + priceBonus) * 0.25),
+      rarity: weapon.rarity,
+      category: 'weapon',
+      requiredLevel: weapon.level,
+      element: element,
+      elementPercent: percent,
+      attack: weapon.attackBase ?? 30,
+      accuracy: weapon.accuracyBase,
+      weaponType: weapon.weaponType,
+    });
+  }
+
+  return items;
+}
+
+/**
+ * Generate randomized armor shop inventory from content files
+ */
+function generateArmorShopInventory(): EquipmentShopItem[] {
+  const random = seededRandom(shopSeed + 1000);
+  const items: EquipmentShopItem[] = [];
+
+  // Get armors from content
+  const allArmors = getArmors();
+
+  // Select basic armors for shop (rarity 1-2, low level requirement)
+  const shopArmorIds = [
+    'common-armor', 'battle-armor', 'brigandine-armor', 'asgard-frame'
+  ];
+
+  for (const armorId of shopArmorIds) {
+    const armor = allArmors.get(armorId);
+    if (!armor) continue;
+
+    // Roll for unit slots (max from content, but random distribution)
+    const maxSlots = armor.maxSlots ?? 0;
+    const slots = maxSlots > 0 ? Math.min(rollArmorSlots(random), maxSlots) : 0;
+    const slotSuffix = slots > 0 ? ` [${slots}S]` : '';
+
+    // Calculate price based on defense and rarity
+    const basePrice = (armor.defenseBase ?? 10) * 12 + (armor.rarity - 1) * 400;
+    const priceBonus = slots * 500;
+
+    items.push({
+      id: `${armorId}-${shopSeed}`,
+      name: `${armor.name}${slotSuffix}`,
+      description: `${armor.type} - DEF ${armor.defenseBase ?? 0} EVA ${armor.evasionBase ?? 0}`,
+      price: basePrice + priceBonus,
+      sellPrice: Math.floor((basePrice + priceBonus) * 0.25),
+      rarity: armor.rarity,
+      category: 'armor',
+      requiredLevel: armor.level,
+      slots: slots,
+      defense: armor.defenseBase,
+      evasion: armor.evasionBase,
+    });
+  }
+
+  // Add some fallback items if content loading failed
+  if (items.length === 0) {
+    items.push({
+      id: `frame-${shopSeed}`,
+      name: 'Frame',
+      description: 'Basic armor',
+      price: 400,
+      sellPrice: 100,
+      rarity: 1,
+      category: 'armor',
+      slots: 0,
+      defense: 10,
+      evasion: 5,
+    });
+  }
+
+  return items;
+}
+
+/**
+ * Generate unit shop inventory from content files
+ */
+function generateUnitShopInventory(): EquipmentShopItem[] {
+  const items: EquipmentShopItem[] = [];
+
+  // Get units from content
+  const allUnits = getUnits();
+
+  // Select basic units for shop (rarity 1-2)
+  const shopUnitIds = [
+    'knight-power', 'knight-guard', 'knight-hp', 'knight-pp', 'knight-mind',
+    'resist-fire', 'resist-ice', 'resist-thunder'
+  ];
+
+  for (const unitId of shopUnitIds) {
+    const unit = allUnits.get(unitId);
+    if (!unit) continue;
+
+    // Calculate price based on effect value and rarity
+    const basePrice = (unit.effectValue ?? 5) * 100 + (unit.rarity - 1) * 300;
+
+    items.push({
+      id: unitId,
+      name: unit.name,
+      description: unit.effect,
+      price: basePrice,
+      sellPrice: Math.floor(basePrice * 0.25),
+      rarity: unit.rarity,
+      category: 'unit',
+    });
+  }
+
+  // Fallback if content loading failed
+  if (items.length === 0) {
+    items.push(
+      { id: 'knight-power', name: 'Knight/Power', description: 'ATK +5', price: 800, sellPrice: 200, rarity: 1, category: 'unit' },
+      { id: 'knight-guard', name: 'Knight/Guard', description: 'DEF +5', price: 800, sellPrice: 200, rarity: 1, category: 'unit' },
+      { id: 'knight-hp', name: 'Knight/HP', description: 'Max HP +20', price: 600, sellPrice: 150, rarity: 1, category: 'unit' },
+    );
+  }
+
+  return items;
+}
+
+/**
+ * Refresh weapon shop with new random items
+ */
+export function refreshWeaponShop(): void {
+  shopSeed = Date.now();
+
+  registerShopInventory({
+    shopId: SHOP_IDS.WEAPON_SHOP,
+    items: [
+      ...generateWeaponShopInventory(),
+      ...generateArmorShopInventory(),
+      ...generateUnitShopInventory(),
+    ],
+  });
+}
+
+/**
  * Initialize default shops
  */
 export function initializeDefaultShops(): void {
@@ -251,20 +479,8 @@ export function initializeDefaultShops(): void {
     ],
   });
 
-  // Weapon Shop
-  registerShopInventory({
-    shopId: SHOP_IDS.WEAPON_SHOP,
-    items: [
-      { id: 'saber', name: 'Saber', description: 'Basic sword', price: 500, sellPrice: 125, rarity: 1, category: 'weapon' },
-      { id: 'brand', name: 'Brand', description: 'Stronger sword', price: 2000, sellPrice: 500, rarity: 2, category: 'weapon', requiredLevel: 10 },
-      { id: 'buster', name: 'Buster', description: 'Heavy sword', price: 5000, sellPrice: 1250, rarity: 3, category: 'weapon', requiredLevel: 20 },
-      { id: 'handgun', name: 'Handgun', description: 'Basic ranged weapon', price: 600, sellPrice: 150, rarity: 1, category: 'weapon' },
-      { id: 'autogun', name: 'Autogun', description: 'Automatic ranged', price: 2500, sellPrice: 625, rarity: 2, category: 'weapon', requiredLevel: 10 },
-      { id: 'lockgun', name: 'Lockgun', description: 'Homing ranged', price: 6000, sellPrice: 1500, rarity: 3, category: 'weapon', requiredLevel: 20 },
-      { id: 'cane', name: 'Cane', description: 'Basic rod', price: 400, sellPrice: 100, rarity: 1, category: 'weapon' },
-      { id: 'rod', name: 'Rod', description: 'Better rod', price: 1800, sellPrice: 450, rarity: 2, category: 'weapon', requiredLevel: 10 },
-    ],
-  });
+  // Weapon/Armor Shop (randomized inventory)
+  refreshWeaponShop();
 }
 
 export { SHOP_IDS };

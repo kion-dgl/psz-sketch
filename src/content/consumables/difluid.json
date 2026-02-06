@@ -1,7 +1,8 @@
 {
   "name": "Difluid",
   "japaneseName": "ディフルイド",
-  "details": "Restores 60% of PP.",
-  "rarity": 3,
+  "details": "Restores 60% of TP.",
+  "rarity": 2,
+  "maxStack": 10,
   "psoWorldId": 303
 }

@@ -382,15 +382,16 @@ describe('Mission System - Default Missions', () => {
 
   it('includes mayors mission', () => {
     initializeDefaultMissions();
-    const mission = getMission('mayors-mission');
+    const mission = getMission('mayors_mission');
     expect(mission).not.toBeNull();
     expect(mission?.name).toBe("Mayor's Mission");
   });
 
   it('sets up mission chain unlock requirements', () => {
     initializeDefaultMissions();
-    const thirdDaughter = getMission('third-daughter');
-    expect(thirdDaughter?.unlockRequirements).toBeDefined();
-    expect(thirdDaughter?.unlockRequirements?.some(r => r.id === 'mayors-mission')).toBe(true);
+    // snowbound_rescue requires the_valley_king
+    const snowboundRescue = getMission('snowbound_rescue');
+    expect(snowboundRescue?.unlockRequirements).toBeDefined();
+    expect(snowboundRescue?.unlockRequirements?.some(r => r.id === 'the_valley_king')).toBe(true);
   });
 });

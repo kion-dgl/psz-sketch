@@ -3,5 +3,6 @@
   "japaneseName": "ヒートトラップ",
   "details": "Inflicts Burn Status effect on enemies.",
   "rarity": 1,
+  "maxStack": 10,
   "psoWorldId": 311
 }

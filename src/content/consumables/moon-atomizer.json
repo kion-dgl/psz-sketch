@@ -3,5 +3,6 @@
   "japaneseName": "ムーンアトマイザー",
   "details": "Revives dead teammates.",
   "rarity": 4,
+  "maxStack": 10,
   "psoWorldId": 306
 }

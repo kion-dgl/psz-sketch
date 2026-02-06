@@ -5,7 +5,7 @@
  */
 
 import * as readline from 'readline';
-import { execute, getState, getAvailableCommands, resetState } from './api';
+import { execute, getState, getAvailableCommands, resetState } from './api-v2';
 
 const VERSION = '1.0.0';
 

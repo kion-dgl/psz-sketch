@@ -3,25 +3,43 @@
  * JSON API mode for AI testing
  */
 
-import type { GameState, CommandResult, AvailableCommand, Location } from './types';
+import type { GameState, CommandResult, AvailableCommand, Location, DetailedItem, EquipmentSlots } from './types';
 import type { Character } from '../systems/character/types';
 import type { Difficulty } from '../systems/mission/types';
 import { VALID_CLASS_IDS } from '../systems/character/types';
 
+// Import item types
+import type { WeaponItem, ArmorItem, UnitItem, ConsumableItem, GameItem } from '../systems/inventory/types';
+
 // Game state (in-memory for CLI)
 let currentCharacter: Character | null = null;
 let currentLocation: Location = 'city';
-let inventory: Map<string, { itemId: string; quantity: number }> = new Map();
+let previousLocation: Location = 'city';
+
+// Inventory now stores full item details
+interface InventoryEntry {
+  item: GameItem;
+  quantity: number;
+}
+let inventory: Map<string, InventoryEntry> = new Map();
 
 // Equipment state
 interface EquippedItems {
   weapon: WeaponItem | null;
   frame: ArmorItem | null;
+  unit1: UnitItem | null;
+  unit2: UnitItem | null;
+  unit3: UnitItem | null;
+  unit4: UnitItem | null;
 }
-let equippedItems: EquippedItems = { weapon: null, frame: null };
-
-// Import item types
-import type { WeaponItem, ArmorItem } from '../systems/inventory/types';
+let equippedItems: EquippedItems = {
+  weapon: null,
+  frame: null,
+  unit1: null,
+  unit2: null,
+  unit3: null,
+  unit4: null,
+};
 
 // Combat state
 interface EnemyInstance {
@@ -46,6 +64,10 @@ let currentEnemies: EnemyInstance[] = [];
 let combatLog: string[] = [];
 let enemyIdCounter = 0;
 let playerCombatState: PlayerCombatState | null = null;
+
+// Wave tracking for stage progression
+let currentWave = 0;
+let totalWaves = 1;
 
 // Technique definitions
 interface Technique {
@@ -91,6 +113,16 @@ let playerStatusEffects: StatusEffect[] = [];
 // Enemy status effects (by enemy id)
 let enemyStatusEffects: Map<number, StatusEffect[]> = new Map();
 
+// Dropped items on the ground (not yet picked up)
+interface DroppedItem {
+  id: number;
+  type: 'item' | 'meseta';
+  item?: ConsumableItem;
+  meseta?: number;
+}
+let droppedItems: DroppedItem[] = [];
+let droppedItemIdCounter = 0;
+
 // MAG state
 import { getLevel as getMagLevel, determineForm, type MagStats } from '../lib/mag-evolution';
 
@@ -122,15 +154,18 @@ import {
   initializeDefaultShops,
   getShopItems,
   purchaseItem,
+  removeShopItem,
   SHOP_IDS,
 } from '../systems/shop';
 import {
   initializeDefaultMissions,
   getAvailableMissions,
+  getAllMissions,
   getMission,
   startMission,
   completeMission,
   meetsLevelForDifficulty,
+  isMissionUnlocked,
 } from '../systems/mission';
 import { applyExpGain, getLevelForExp } from '../systems/leveling';
 import { getStartingItems, STARTING_MESETA, MONOMATE, MONOFLUID, getStarterWeaponForClass, STARTER_FRAME } from '../systems/inventory/starting-items';
@@ -155,7 +190,9 @@ import {
   enterField as enterFieldSession,
   enterMission as enterMissionSession,
   getSessionState,
+  getCurrentStage,
   isInSession,
+  isAtFinalStage,
   hasPendingRewards,
   getPendingResult,
   claimRewards as claimSessionRewards,
@@ -174,6 +211,7 @@ import {
   getEnemyPool,
   generateEnemyComposition,
   getEnemyCountRange,
+  getBossForArea,
 } from '../systems/stage';
 import { getEnemyDisplayName, getEnemyElement } from '../components/enemies/enemyData';
 
@@ -183,19 +221,197 @@ initializeDefaultMissions();
 initializeDefaultFields();
 
 /**
+ * Convert a GameItem to DetailedItem format for the UI
+ */
+function toDetailedItem(item: GameItem, quantity: number): DetailedItem {
+  const detailed: DetailedItem = {
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    type: item.type,
+    rarity: item.rarity,
+    quantity,
+  };
+
+  if (item.type === 'weapon') {
+    const w = item as WeaponItem;
+    detailed.attack = w.attack;
+    detailed.accuracy = w.accuracy;
+    detailed.weaponType = w.weaponType;
+    detailed.element = w.element;
+    detailed.elementPercent = w.elementPercent;
+    detailed.grindLevel = w.grindLevel;
+    detailed.maxGrind = w.maxGrind;
+    detailed.requiredLevel = w.requiredLevel;
+  } else if (item.type === 'armor') {
+    // Check for old-style unit data - multiple detection methods:
+    // 1. Has armorSlot: 'unit'
+    // 2. Has defense === 0, evasion === 0, and no unitSlots (lost armorSlot after save cycle)
+    const i = item as any;
+    const isOldUnit = i.armorSlot === 'unit' ||
+      (i.defense === 0 && i.evasion === 0 && i.unitSlots === undefined);
+    if (isOldUnit) {
+      // Convert to unit type for UI
+      detailed.type = 'unit';
+      detailed.requiredLevel = i.requiredLevel;
+    } else {
+      const a = item as ArmorItem;
+      detailed.defense = a.defense;
+      detailed.evasion = a.evasion;
+      detailed.unitSlots = a.unitSlots;
+      detailed.requiredLevel = a.requiredLevel;
+    }
+  } else if (item.type === 'unit') {
+    const u = item as UnitItem;
+    detailed.attackBonus = u.attackBonus;
+    detailed.defenseBonus = u.defenseBonus;
+    detailed.accuracyBonus = u.accuracyBonus;
+    detailed.evasionBonus = u.evasionBonus;
+    detailed.hpBonus = u.hpBonus;
+    detailed.tpBonus = u.tpBonus;
+    detailed.fireResist = u.fireResist;
+    detailed.iceResist = u.iceResist;
+    detailed.thunderResist = u.thunderResist;
+    detailed.lightResist = u.lightResist;
+    detailed.darkResist = u.darkResist;
+    detailed.requiredLevel = u.requiredLevel;
+  } else if (item.type === 'consumable') {
+    const c = item as ConsumableItem;
+    detailed.effect = c.effect;
+    detailed.effectValue = c.effectValue;
+    detailed.stackable = c.stackable;
+    detailed.maxStack = c.maxStack;
+  }
+
+  return detailed;
+}
+
+/**
  * Get current game state
  */
 export function getState(): GameState {
+  // Build equipment slots
+  const equipment: EquipmentSlots = {
+    weapon: equippedItems.weapon ? toDetailedItem(equippedItems.weapon, 1) : null,
+    frame: equippedItems.frame ? toDetailedItem(equippedItems.frame, 1) : null,
+    barrier: null,
+    unit1: equippedItems.unit1 ? toDetailedItem(equippedItems.unit1, 1) : null,
+    unit2: equippedItems.unit2 ? toDetailedItem(equippedItems.unit2, 1) : null,
+    unit3: equippedItems.unit3 ? toDetailedItem(equippedItems.unit3, 1) : null,
+    unit4: equippedItems.unit4 ? toDetailedItem(equippedItems.unit4, 1) : null,
+  };
+
+  // Build detailed inventory (including equipped items)
+  const detailedInventory = Array.from(inventory.values()).map(entry =>
+    toDetailedItem(entry.item, entry.quantity)
+  );
+
+  // Add equipped items to inventory list (marked as equipped)
+  let insertIndex = 0;
+  if (equippedItems.weapon) {
+    const weaponDetail = toDetailedItem(equippedItems.weapon, 1);
+    weaponDetail.equipped = true;
+    detailedInventory.unshift(weaponDetail); // Show at top
+    insertIndex++;
+  }
+  if (equippedItems.frame) {
+    const frameDetail = toDetailedItem(equippedItems.frame, 1);
+    frameDetail.equipped = true;
+    detailedInventory.splice(insertIndex, 0, frameDetail); // After weapon
+    insertIndex++;
+  }
+  // Add equipped units
+  const units = [equippedItems.unit1, equippedItems.unit2, equippedItems.unit3, equippedItems.unit4];
+  for (const unit of units) {
+    if (unit) {
+      const unitDetail = toDetailedItem(unit, 1);
+      unitDetail.equipped = true;
+      detailedInventory.splice(insertIndex, 0, unitDetail);
+      insertIndex++;
+    }
+  }
+
+  // Get session state for stage info
+  const session = getSessionState();
+  const stage = getCurrentStage();
+
+  // Build current stage info
+  const currentStageInfo = stage && 'variant' in stage ? {
+    stageId: stage.stageId,
+    variant: stage.variant,
+    areaId: stage.areaId,
+    areaName: formatAreaName(stage.areaId),
+    variantName: formatVariantName(stage.variant),
+  } : undefined;
+
   return {
     character: currentCharacter,
     location: currentLocation,
-    inventory: Array.from(inventory.values()).map(item => ({
-      itemId: item.itemId,
-      quantity: item.quantity,
-      equipped: false,
-    })),
+    previousLocation: previousLocation,
+    inventory: detailedInventory,
+    equipment,
     meseta: currentCharacter?.meseta ?? 0,
+    inventorySlots: getInventorySlotCount(),
+    maxInventorySlots: MAX_INVENTORY_SLOTS,
+    inCombat: currentEnemies.length > 0,
+    enemies: currentEnemies.map(e => ({
+      id: e.id,
+      name: e.name,
+      hp: e.stats.hp,
+      maxHp: e.stats.maxHp,
+    })),
+    playerCombat: playerCombatState ? {
+      hp: playerCombatState.hp,
+      maxHp: playerCombatState.maxHp,
+      tp: playerCombatState.tp,
+      maxTp: playerCombatState.maxTp,
+    } : undefined,
+    stageIndex: session.currentStageIndex,
+    isAtFinalStage: isAtFinalStage(),
+    droppedItems: droppedItems.map(d => ({
+      dropId: d.id,
+      type: d.type,
+      itemId: d.type === 'item' ? d.item?.id : undefined,
+      name: d.type === 'item' ? d.item?.name : `${d.meseta} Meseta`,
+      meseta: d.type === 'meseta' ? d.meseta : undefined,
+    })),
+    currentStage: currentStageInfo,
+    currentWave,
+    totalWaves,
+    sessionType: session.activeType,
+    storage: getSharedStorage(),
   };
+}
+
+/**
+ * Format area ID into display name
+ */
+function formatAreaName(areaId: string): string {
+  const names: Record<string, string> = {
+    'valley': 'Valley',
+    'snowfield': 'Snowfield',
+    'wetlands': 'Wetlands',
+    'makara': 'Makara',
+    'paru': 'Paru',
+    'shrine': 'Shrine',
+    'arca': 'Arca',
+    'tower': 'Tower',
+    'city': 'City',
+  };
+  return names[areaId] || areaId.charAt(0).toUpperCase() + areaId.slice(1);
+}
+
+/**
+ * Format stage variant into display name
+ */
+function formatVariantName(variant: 'a' | 'e' | 'b' | 'z'): string {
+  const names: Record<string, string> = {
+    'a': 'A',
+    'e': 'E',
+    'b': 'B',
+    'z': 'Boss',
+  };
+  return names[variant] || variant.toUpperCase();
 }
 
 /**
@@ -322,10 +538,28 @@ export function getAvailableCommands(): AvailableCommand[] {
 
       commands.push({
         name: 'unequip',
-        description: 'Unequip a slot',
+        description: 'Unequip a slot (use unequip-unit for units)',
         usage: 'unequip <slot>',
         args: [
           { name: 'slot', type: 'string', required: true, description: 'weapon or frame' },
+        ],
+      });
+
+      commands.push({
+        name: 'equip-unit',
+        description: 'Equip a unit to your frame',
+        usage: 'equip-unit <item-id>',
+        args: [
+          { name: 'item-id', type: 'string', required: true, description: 'Unit ID to equip' },
+        ],
+      });
+
+      commands.push({
+        name: 'unequip-unit',
+        description: 'Unequip a unit from a slot',
+        usage: 'unequip-unit <slot>',
+        args: [
+          { name: 'slot', type: 'number', required: true, description: 'Unit slot (1-4)' },
         ],
       });
 
@@ -588,6 +822,9 @@ export function execute(commandLine: string): CommandResult {
     case 'create-character':
       return executeCreateCharacter(args[0], args.slice(1).join(' '));
 
+    case 'load-character':
+      return executeLoadCharacter(args.join(' '));
+
     case 'show-stats':
       return executeShowStats();
 
@@ -609,6 +846,12 @@ export function execute(commandLine: string): CommandResult {
         return { success: false, message: 'Quantity must be a positive number.' };
       }
       return executeBuy(args[0], buyQty);
+
+    case 'buy-equipment':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: buy-equipment <item-id>' };
+      }
+      return executeBuyEquipment(args[0]);
 
     case 'sell':
       if (!args[0]) {
@@ -761,6 +1004,15 @@ export function execute(commandLine: string): CommandResult {
       }
       return executeUseItem(args[0]);
 
+    case 'pickup-item':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: pickup-item <drop-id>' };
+      }
+      return executePickupItem(parseInt(args[0], 10));
+
+    case 'pickup-all':
+      return executePickupAll();
+
     case 'show-player-hp':
       return executeShowPlayerHp();
 
@@ -773,6 +1025,109 @@ export function execute(commandLine: string): CommandResult {
 
     case 'list-techniques':
       return executeListTechniques();
+
+    case 'add-item': {
+      // Internal command for restoring inventory from persistence
+      if (!args[0]) {
+        return { success: false, message: 'Usage: add-item <item-json> [quantity]' };
+      }
+      // Parse the JSON item - args may have been split, so rejoin
+      const jsonStr = args.join(' ');
+      const qtyMatch = jsonStr.match(/\}\s+(\d+)$/);
+      const quantity = qtyMatch ? parseInt(qtyMatch[1], 10) : 1;
+      const itemJson = qtyMatch ? jsonStr.slice(0, jsonStr.lastIndexOf('}') + 1) : jsonStr;
+      try {
+        const item = JSON.parse(itemJson) as GameItem;
+        inventory.set(item.id, { item, quantity });
+        return { success: true, message: `Added ${item.name} x${quantity}` };
+      } catch {
+        return { success: false, message: 'Invalid item JSON' };
+      }
+    }
+
+    case 'equip-weapon': {
+      if (!args[0]) {
+        return { success: false, message: 'Usage: equip-weapon <item-id>' };
+      }
+      return executeEquipWeapon(args[0]);
+    }
+
+    case 'equip-frame': {
+      if (!args[0]) {
+        return { success: false, message: 'Usage: equip-frame <item-id>' };
+      }
+      return executeEquipFrame(args[0]);
+    }
+
+    case 'equip-unit': {
+      if (!args[0]) {
+        return { success: false, message: 'Usage: equip-unit <item-id>' };
+      }
+      return executeEquipUnit(args[0]);
+    }
+
+    case 'unequip-unit': {
+      if (!args[0]) {
+        return { success: false, message: 'Usage: unequip-unit <slot>' };
+      }
+      const slotNum = parseInt(args[0], 10);
+      if (isNaN(slotNum)) {
+        return { success: false, message: 'Invalid slot number. Use 1-4.' };
+      }
+      return executeUnequipUnit(slotNum);
+    }
+
+    case 'set-weapon': {
+      // Internal command for restoring equipped weapon from persistence
+      if (!args[0]) {
+        return { success: false, message: 'Usage: set-weapon <weapon-json>' };
+      }
+      try {
+        const weapon = JSON.parse(args.join(' ')) as WeaponItem;
+        equippedItems.weapon = weapon;
+        return { success: true, message: `Restored weapon: ${weapon.name}` };
+      } catch {
+        return { success: false, message: 'Invalid weapon JSON' };
+      }
+    }
+
+    case 'set-frame': {
+      // Internal command for restoring equipped armor from persistence
+      if (!args[0]) {
+        return { success: false, message: 'Usage: set-frame <armor-json>' };
+      }
+      try {
+        const frame = JSON.parse(args.join(' ')) as ArmorItem;
+        equippedItems.frame = frame;
+        return { success: true, message: `Restored armor: ${frame.name}` };
+      } catch {
+        return { success: false, message: 'Invalid armor JSON' };
+      }
+    }
+
+    case 'set-unit': {
+      // Internal command for restoring equipped unit from persistence
+      // Usage: set-unit <slot> <unit-json>
+      if (!args[0] || !args[1]) {
+        return { success: false, message: 'Usage: set-unit <slot> <unit-json>' };
+      }
+      const slot = parseInt(args[0], 10);
+      if (isNaN(slot) || slot < 1 || slot > 4) {
+        return { success: false, message: 'Invalid slot. Use 1-4.' };
+      }
+      try {
+        const unit = JSON.parse(args.slice(1).join(' ')) as UnitItem;
+        switch (slot) {
+          case 1: equippedItems.unit1 = unit; break;
+          case 2: equippedItems.unit2 = unit; break;
+          case 3: equippedItems.unit3 = unit; break;
+          case 4: equippedItems.unit4 = unit; break;
+        }
+        return { success: true, message: `Restored unit ${slot}: ${unit.name}` };
+      } catch {
+        return { success: false, message: 'Invalid unit JSON' };
+      }
+    }
 
     default:
       return {
@@ -845,22 +1200,95 @@ function executeCreateCharacter(classId: string, name: string): CommandResult {
   const startingItems = getStartingItems(normalizedClassId);
   inventory.clear();
 
-  // Equip starting weapon and frame
+  // Auto-equip starting weapon and frame
   equippedItems = {
     weapon: startingItems.weapon,
     frame: startingItems.frame,
+    unit1: null,
+    unit2: null,
+    unit3: null,
+    unit4: null,
   };
 
   // Add consumables to inventory
   for (const { item, quantity } of startingItems.consumables) {
-    inventory.set(item.id, { itemId: item.id, quantity });
+    inventory.set(item.id, { item, quantity });
   }
 
   return {
     success: true,
-    message: `Created ${normalizedClassId} character "${name}" with ${STARTING_MESETA} meseta.\nEquipped: ${startingItems.weapon.name}, ${startingItems.frame.name}`,
+    message: `Created ${normalizedClassId} character "${name}" with ${STARTING_MESETA} meseta.\nStarting gear equipped.`,
     data: currentCharacter,
   };
+}
+
+function executeLoadCharacter(jsonString: string): CommandResult {
+  if (!jsonString) {
+    return {
+      success: false,
+      message: 'Usage: load-character <character-json>',
+    };
+  }
+
+  try {
+    const character = JSON.parse(jsonString);
+
+    // Validate required fields
+    if (!character.character_id || !character.class_id || !character.character_name) {
+      return {
+        success: false,
+        message: 'Invalid character data: missing required fields',
+      };
+    }
+
+    // Validate class ID
+    const normalizedClassId = VALID_CLASS_IDS.find(
+      c => c.toLowerCase() === character.class_id.toLowerCase()
+    );
+    if (!normalizedClassId) {
+      return {
+        success: false,
+        message: `Invalid class: ${character.class_id}`,
+      };
+    }
+
+    // Load the character
+    currentCharacter = {
+      character_id: character.character_id,
+      character_name: character.character_name,
+      level: character.level ?? 1,
+      experience: character.experience ?? 0,
+      slot: character.slot ?? 0,
+      class_id: normalizedClassId,
+      variation_index: character.variation_index ?? 0,
+      texture_id: character.texture_id ?? '0_0',
+      created_at: character.created_at ?? new Date().toISOString(),
+      meseta: character.meseta ?? STARTING_MESETA,
+    };
+
+    // Reset game state for loaded character
+    currentLocation = 'city';
+    inventory.clear();
+    currentEnemies = [];
+    playerCombatState = null;
+
+    // Don't auto-equip starting items - let persistence layer restore actual equipment
+    equippedItems = {
+      weapon: null,
+      frame: null,
+    };
+
+    return {
+      success: true,
+      message: `Loaded character "${currentCharacter.character_name}" (${normalizedClassId} Lv.${currentCharacter.level})`,
+      data: currentCharacter,
+    };
+  } catch (e) {
+    return {
+      success: false,
+      message: `Failed to parse character data: ${e instanceof Error ? e.message : 'Unknown error'}`,
+    };
+  }
 }
 
 function executeShowStats(): CommandResult {
@@ -895,7 +1323,7 @@ function executeGoto(location: Location): CommandResult {
     };
   }
 
-  const validLocations: Location[] = ['city', 'shop', 'missions', 'inventory', 'storage', 'guild'];
+  const validLocations: Location[] = ['city', 'shop', 'weapon-shop', 'missions', 'storage', 'guild', 'teleporter'];
   if (!validLocations.includes(location)) {
     return {
       success: false,
@@ -903,11 +1331,13 @@ function executeGoto(location: Location): CommandResult {
     };
   }
 
-  // Set session config when going to guild
-  if (location === 'guild') {
+  // Set session config when going to guild or teleporter
+  if (location === 'guild' || location === 'teleporter') {
     setSessionConfig(currentCharacter.character_id, currentCharacter.level);
   }
 
+  // Track previous location for back navigation
+  previousLocation = currentLocation;
   currentLocation = location;
   return {
     success: true,
@@ -936,6 +1366,46 @@ function executeListItems(): CommandResult {
   };
 }
 
+// Stack limits for consumables (from content data)
+const CONSUMABLE_STACK_LIMITS: Record<string, number> = {
+  monomate: 10,
+  dimate: 10,
+  trimate: 10,
+  monofluid: 10,
+  difluid: 10,
+  trifluid: 10,
+  'sol-atomizer': 10,
+  'moon-atomizer': 10,
+  'star-atomizer': 5,
+  'scape-doll': 1,
+  telepipe: 10,
+  'photon-drop': 99,
+  'heal-trap': 10,
+  'heat-trap': 10,
+  'ice-trap': 10,
+  'light-trap': 10,
+  'trap-vision': 10,
+};
+
+function getMaxStack(itemId: string): number {
+  return CONSUMABLE_STACK_LIMITS[itemId] ?? 10;
+}
+
+// Maximum inventory slots (each item stack or equipment piece takes 1 slot)
+const MAX_INVENTORY_SLOTS = 40;
+
+function getInventorySlotCount(): number {
+  let count = inventory.size;
+  // Equipped items also take inventory slots
+  if (equippedItems.weapon) count++;
+  if (equippedItems.frame) count++;
+  return count;
+}
+
+function isInventoryFull(): boolean {
+  return getInventorySlotCount() >= MAX_INVENTORY_SLOTS;
+}
+
 function executeBuy(itemId: string, quantity: number): CommandResult {
   if (!currentCharacter) {
     return { success: false, message: 'No character.' };
@@ -945,22 +1415,146 @@ function executeBuy(itemId: string, quantity: number): CommandResult {
     return { success: false, message: 'You must be at the shop.' };
   }
 
+  // Check stack limit before purchase
+  const maxStack = getMaxStack(itemId);
+  const existing = inventory.get(itemId);
+  const currentQty = existing?.quantity ?? 0;
+
+  if (currentQty + quantity > maxStack) {
+    const canBuy = maxStack - currentQty;
+    if (canBuy <= 0) {
+      return { success: false, message: `Cannot carry more ${itemId}. (Max: ${maxStack})` };
+    }
+    return { success: false, message: `Can only buy ${canBuy} more ${itemId}. (Max: ${maxStack}, Have: ${currentQty})` };
+  }
+
   const meseta = currentCharacter.meseta ?? 0;
   const result = purchaseItem(SHOP_IDS.ITEM_SHOP, itemId, quantity, meseta);
 
-  if (result.success) {
+  if (result.success && result.item) {
     currentCharacter = {
       ...currentCharacter,
       meseta: result.remainingMeseta,
     };
 
-    // Add to inventory
-    const existing = inventory.get(itemId);
+    // Convert ShopItem to GameItem (consumable) and add to inventory
+    const gameItem: ConsumableItem = {
+      id: result.item.id,
+      name: result.item.name,
+      description: result.item.description,
+      type: 'consumable',
+      rarity: result.item.rarity,
+      sellPrice: result.item.sellPrice,
+      stackable: true,
+      maxStack: maxStack,
+      effect: 'heal_hp', // Default effect for shop items
+      effectValue: 100,
+    };
+
     if (existing) {
       existing.quantity += quantity;
     } else {
-      inventory.set(itemId, { itemId, quantity });
+      inventory.set(itemId, { item: gameItem, quantity });
     }
+  }
+
+  return {
+    success: result.success,
+    message: result.message,
+    data: result,
+  };
+}
+
+function executeBuyEquipment(itemId: string): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (currentLocation !== 'weapon-shop') {
+    return { success: false, message: 'You must be at the weapon shop.' };
+  }
+
+  // Check if inventory is full
+  if (isInventoryFull()) {
+    return { success: false, message: `Inventory full. (${MAX_INVENTORY_SLOTS}/${MAX_INVENTORY_SLOTS} slots)` };
+  }
+
+  const meseta = currentCharacter.meseta ?? 0;
+  const result = purchaseItem(SHOP_IDS.ARMOR_SHOP, itemId, 1, meseta);
+
+  if (result.success && result.item) {
+    currentCharacter = {
+      ...currentCharacter,
+      meseta: result.remainingMeseta,
+    };
+
+    const shopItem = result.item as any; // EquipmentShopItem
+
+    // Convert to appropriate game item type based on category
+    if (shopItem.category === 'weapon') {
+      const weaponItem: WeaponItem = {
+        id: shopItem.id,
+        name: shopItem.name,
+        description: shopItem.description,
+        type: 'weapon',
+        rarity: shopItem.rarity,
+        sellPrice: shopItem.sellPrice,
+        stackable: false,
+        maxStack: 1,
+        attack: shopItem.attack ?? 0,
+        accuracy: 90,
+        weaponType: 'sword',
+        element: shopItem.element,
+        elementPercent: shopItem.elementPercent,
+        grindLevel: 0,
+        maxGrind: 10,
+        requiredLevel: shopItem.requiredLevel ?? 1,
+      };
+      inventory.set(shopItem.id, { item: weaponItem, quantity: 1 });
+    } else if (shopItem.category === 'armor') {
+      const armorItem: ArmorItem = {
+        id: shopItem.id,
+        name: shopItem.name,
+        description: shopItem.description,
+        type: 'armor',
+        rarity: shopItem.rarity,
+        sellPrice: shopItem.sellPrice,
+        stackable: false,
+        maxStack: 1,
+        defense: shopItem.defense ?? 0,
+        evasion: shopItem.evasion ?? 0,
+        armorSlot: 'frame',
+        unitSlots: shopItem.slots ?? 0,
+        requiredLevel: shopItem.requiredLevel ?? 1,
+      };
+      inventory.set(shopItem.id, { item: armorItem, quantity: 1 });
+    } else if (shopItem.category === 'unit') {
+      // Parse unit bonuses from description (e.g., "ATK +5", "DEF +5", "Fire resist +5")
+      const desc = shopItem.description;
+      const unitItem: UnitItem = {
+        id: shopItem.id,
+        name: shopItem.name,
+        description: shopItem.description,
+        type: 'unit',
+        rarity: shopItem.rarity,
+        sellPrice: shopItem.sellPrice,
+        stackable: false,
+        maxStack: 1,
+        requiredLevel: shopItem.requiredLevel ?? 1,
+        // Parse bonuses from description
+        attackBonus: desc.includes('ATK') ? parseInt(desc.match(/\+(\d+)/)?.[1] ?? '0') : undefined,
+        defenseBonus: desc.includes('DEF') ? parseInt(desc.match(/\+(\d+)/)?.[1] ?? '0') : undefined,
+        hpBonus: desc.includes('HP') ? parseInt(desc.match(/\+(\d+)/)?.[1] ?? '0') : undefined,
+        tpBonus: desc.includes('PP') || desc.includes('TP') ? parseInt(desc.match(/\+(\d+)/)?.[1] ?? '0') : undefined,
+        fireResist: desc.toLowerCase().includes('fire') ? parseInt(desc.match(/\+(\d+)/)?.[1] ?? '0') : undefined,
+        iceResist: desc.toLowerCase().includes('ice') ? parseInt(desc.match(/\+(\d+)/)?.[1] ?? '0') : undefined,
+        thunderResist: desc.toLowerCase().includes('thunder') ? parseInt(desc.match(/\+(\d+)/)?.[1] ?? '0') : undefined,
+      };
+      inventory.set(shopItem.id, { item: unitItem, quantity: 1 });
+    }
+
+    // Remove item from shop (equipment is one-time purchase like PSO)
+    removeShopItem(SHOP_IDS.ARMOR_SHOP, itemId);
   }
 
   return {
@@ -1031,19 +1625,25 @@ function executeListMissions(): CommandResult {
     return { success: false, message: 'No character.' };
   }
 
-  if (currentLocation !== 'missions') {
-    return { success: false, message: 'You must be at missions. Use: goto missions' };
+  if (currentLocation !== 'missions' && currentLocation !== 'guild') {
+    return { success: false, message: 'You must be at the guild. Use: goto guild' };
   }
 
-  const missions = getAvailableMissions(currentCharacter.character_id, currentCharacter.level);
-  const lines = missions.map(m =>
-    `  ${m.id.padEnd(20)} ${m.name.padEnd(25)} Lv.${m.recommendedLevel}`
-  );
+  const allMissions = getAllMissions();
+  const missionsWithStatus = allMissions.map(m => ({
+    ...m,
+    unlocked: isMissionUnlocked(m.id, currentCharacter!.character_id, currentCharacter!.level),
+  }));
+
+  const lines = missionsWithStatus.map(m => {
+    const status = m.unlocked ? ' ' : '🔒';
+    return `  ${status} ${m.id.padEnd(20)} ${m.name.padEnd(25)} Lv.${m.recommendedLevel}`;
+  });
 
   return {
     success: true,
     message: `Available missions:\n${lines.join('\n')}`,
-    data: missions,
+    data: missionsWithStatus,
   };
 }
 
@@ -1111,14 +1711,14 @@ function executeShowInventory(): CommandResult {
     };
   }
 
-  const lines = items.map(item =>
-    `  ${item.itemId.padEnd(20)} x${item.quantity}`
+  const lines = items.map(entry =>
+    `  ${entry.item.name.padEnd(20)} x${entry.quantity}`
   );
 
   return {
     success: true,
     message: `Inventory:\n${lines.join('\n')}`,
-    data: items,
+    data: items.map(entry => ({ itemId: entry.item.id, quantity: entry.quantity })),
   };
 }
 
@@ -1152,13 +1752,33 @@ function executeShowEquipment(): CommandResult {
   };
 }
 
+// Helper functions for unit slot management
+function getEquippedUnitCount(): number {
+  let count = 0;
+  if (equippedItems.unit1) count++;
+  if (equippedItems.unit2) count++;
+  if (equippedItems.unit3) count++;
+  if (equippedItems.unit4) count++;
+  return count;
+}
+
+function getFrameUnitSlots(): number {
+  if (!equippedItems.frame) return 0;
+  return equippedItems.frame.unitSlots ?? 0;
+}
+
+function getNextEmptyUnitSlot(): 1 | 2 | 3 | 4 | null {
+  const maxSlots = getFrameUnitSlots();
+  if (maxSlots >= 1 && !equippedItems.unit1) return 1;
+  if (maxSlots >= 2 && !equippedItems.unit2) return 2;
+  if (maxSlots >= 3 && !equippedItems.unit3) return 3;
+  if (maxSlots >= 4 && !equippedItems.unit4) return 4;
+  return null;
+}
+
 function executeEquip(itemId: string): CommandResult {
   if (!currentCharacter) {
     return { success: false, message: 'No character.' };
-  }
-
-  if (currentLocation !== 'inventory') {
-    return { success: false, message: 'You must be in inventory. Use: goto inventory' };
   }
 
   // Check if item is in inventory (for weapons/armor that could be stored)
@@ -1176,12 +1796,8 @@ function executeUnequip(slot: string): CommandResult {
     return { success: false, message: 'No character.' };
   }
 
-  if (currentLocation !== 'inventory') {
-    return { success: false, message: 'You must be in inventory. Use: goto inventory' };
-  }
-
   if (slot !== 'weapon' && slot !== 'frame') {
-    return { success: false, message: 'Invalid slot. Choose: weapon, frame' };
+    return { success: false, message: 'Invalid slot. Choose: weapon, frame (use unequip-unit for units)' };
   }
 
   if (slot === 'weapon') {
@@ -1199,12 +1815,266 @@ function executeUnequip(slot: string): CommandResult {
       return { success: false, message: 'No frame equipped.' };
     }
     const frame = equippedItems.frame;
+
+    // Unequip all units when frame is removed
+    const unequippedUnits: string[] = [];
+    if (equippedItems.unit1) {
+      inventory.set(equippedItems.unit1.id, { item: equippedItems.unit1, quantity: 1 });
+      unequippedUnits.push(equippedItems.unit1.name);
+      equippedItems.unit1 = null;
+    }
+    if (equippedItems.unit2) {
+      inventory.set(equippedItems.unit2.id, { item: equippedItems.unit2, quantity: 1 });
+      unequippedUnits.push(equippedItems.unit2.name);
+      equippedItems.unit2 = null;
+    }
+    if (equippedItems.unit3) {
+      inventory.set(equippedItems.unit3.id, { item: equippedItems.unit3, quantity: 1 });
+      unequippedUnits.push(equippedItems.unit3.name);
+      equippedItems.unit3 = null;
+    }
+    if (equippedItems.unit4) {
+      inventory.set(equippedItems.unit4.id, { item: equippedItems.unit4, quantity: 1 });
+      unequippedUnits.push(equippedItems.unit4.name);
+      equippedItems.unit4 = null;
+    }
+
     equippedItems.frame = null;
+
+    let message = `Unequipped ${frame.name}. You have no armor!`;
+    if (unequippedUnits.length > 0) {
+      message += ` Also unequipped units: ${unequippedUnits.join(', ')}.`;
+    }
+
     return {
       success: true,
-      message: `Unequipped ${frame.name}. You have no armor!`,
+      message,
     };
   }
+}
+
+function executeEquipWeapon(itemId: string): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  // Find the weapon in inventory
+  const entry = inventory.get(itemId);
+  if (!entry) {
+    return { success: false, message: `Item "${itemId}" not found in inventory.` };
+  }
+
+  if (entry.item.type !== 'weapon') {
+    return { success: false, message: `${entry.item.name} is not a weapon.` };
+  }
+
+  const weapon = entry.item as WeaponItem;
+
+  // If there's already a weapon equipped, put it back in inventory
+  if (equippedItems.weapon) {
+    inventory.set(equippedItems.weapon.id, { item: equippedItems.weapon, quantity: 1 });
+  }
+
+  // Equip the new weapon and remove from inventory
+  equippedItems.weapon = weapon;
+  inventory.delete(itemId);
+
+  return {
+    success: true,
+    message: `Equipped ${weapon.name}.`,
+    data: { equipped: weapon },
+  };
+}
+
+function executeEquipFrame(itemId: string): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  // Find the item in inventory
+  const entry = inventory.get(itemId);
+  if (!entry) {
+    return { success: false, message: `Item "${itemId}" not found in inventory.` };
+  }
+
+  // Check if it's a unit (common mistake)
+  // Check multiple ways for backwards compatibility with old persisted data:
+  // 1. New format: type === 'unit'
+  // 2. Old format with armorSlot: type === 'armor' && armorSlot === 'unit'
+  // 3. Old format after save cycle (lost armorSlot): type === 'armor' && defense === 0 && no unitSlots
+  const item = entry.item as any;
+  const isUnit = item.type === 'unit' ||
+    (item.type === 'armor' && item.armorSlot === 'unit') ||
+    (item.type === 'armor' && item.defense === 0 && item.evasion === 0 && item.unitSlots === undefined);
+  if (isUnit) {
+    return {
+      success: false,
+      message: `${entry.item.name} is a unit, not a frame. Use equip-unit for units.`,
+    };
+  }
+
+  if (entry.item.type !== 'armor') {
+    return { success: false, message: `${entry.item.name} is not a frame.` };
+  }
+
+  const armor = entry.item as ArmorItem;
+
+  // If there's already armor equipped, put it back in inventory
+  if (equippedItems.frame) {
+    inventory.set(equippedItems.frame.id, { item: equippedItems.frame, quantity: 1 });
+  }
+
+  // Check if new frame has fewer unit slots - unequip excess units
+  const newSlots = armor.unitSlots ?? 0;
+  const unequippedUnits: string[] = [];
+
+  if (newSlots < 4 && equippedItems.unit4) {
+    inventory.set(equippedItems.unit4.id, { item: equippedItems.unit4, quantity: 1 });
+    unequippedUnits.push(equippedItems.unit4.name);
+    equippedItems.unit4 = null;
+  }
+  if (newSlots < 3 && equippedItems.unit3) {
+    inventory.set(equippedItems.unit3.id, { item: equippedItems.unit3, quantity: 1 });
+    unequippedUnits.push(equippedItems.unit3.name);
+    equippedItems.unit3 = null;
+  }
+  if (newSlots < 2 && equippedItems.unit2) {
+    inventory.set(equippedItems.unit2.id, { item: equippedItems.unit2, quantity: 1 });
+    unequippedUnits.push(equippedItems.unit2.name);
+    equippedItems.unit2 = null;
+  }
+  if (newSlots < 1 && equippedItems.unit1) {
+    inventory.set(equippedItems.unit1.id, { item: equippedItems.unit1, quantity: 1 });
+    unequippedUnits.push(equippedItems.unit1.name);
+    equippedItems.unit1 = null;
+  }
+
+  // Equip the new armor and remove from inventory
+  equippedItems.frame = armor;
+  inventory.delete(itemId);
+
+  let message = `Equipped ${armor.name}.`;
+  if (unequippedUnits.length > 0) {
+    message += ` Unequipped units (not enough slots): ${unequippedUnits.join(', ')}.`;
+  }
+
+  return {
+    success: true,
+    message,
+    data: { equipped: armor },
+  };
+}
+
+function executeEquipUnit(itemId: string): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  // Find the item in inventory
+  const entry = inventory.get(itemId);
+  if (!entry) {
+    return { success: false, message: `Item "${itemId}" not found in inventory.` };
+  }
+
+  // Check for unit type - multiple ways for backwards compatibility:
+  // 1. New format: type === 'unit'
+  // 2. Old format with armorSlot: type === 'armor' && armorSlot === 'unit'
+  // 3. Old format after save cycle (lost armorSlot): type === 'armor' && defense === 0 && no unitSlots
+  const item = entry.item as any;
+  const isUnit = item.type === 'unit' ||
+    (item.type === 'armor' && item.armorSlot === 'unit') ||
+    (item.type === 'armor' && item.defense === 0 && item.evasion === 0 && item.unitSlots === undefined);
+
+  // Check if it's a frame (common mistake) - but not an old-style unit
+  if (item.type === 'armor' && !isUnit) {
+    return {
+      success: false,
+      message: `${entry.item.name} is a frame, not a unit. Use equip-frame for frames.`,
+    };
+  }
+
+  if (!isUnit) {
+    return { success: false, message: `${entry.item.name} is not a unit.` };
+  }
+
+  const unit = entry.item as UnitItem;
+
+  // Check that a frame is equipped
+  if (!equippedItems.frame) {
+    return {
+      success: false,
+      message: 'No frame equipped. Equip a frame first.',
+    };
+  }
+
+  // Check if there's an available slot
+  const nextSlot = getNextEmptyUnitSlot();
+  if (nextSlot === null) {
+    const maxSlots = getFrameUnitSlots();
+    return {
+      success: false,
+      message: `${equippedItems.frame.name} has no available unit slots (${maxSlots}/${maxSlots} used).`,
+    };
+  }
+
+  // Equip the unit to the next available slot
+  switch (nextSlot) {
+    case 1: equippedItems.unit1 = unit; break;
+    case 2: equippedItems.unit2 = unit; break;
+    case 3: equippedItems.unit3 = unit; break;
+    case 4: equippedItems.unit4 = unit; break;
+  }
+
+  // Remove from inventory
+  inventory.delete(itemId);
+
+  return {
+    success: true,
+    message: `Equipped ${unit.name} to unit slot ${nextSlot}.`,
+    data: { equipped: unit, slot: nextSlot },
+  };
+}
+
+function executeUnequipUnit(slotNum: number): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (slotNum < 1 || slotNum > 4) {
+    return { success: false, message: 'Invalid unit slot. Choose: 1, 2, 3, or 4' };
+  }
+
+  let unit: UnitItem | null = null;
+  switch (slotNum) {
+    case 1:
+      unit = equippedItems.unit1;
+      equippedItems.unit1 = null;
+      break;
+    case 2:
+      unit = equippedItems.unit2;
+      equippedItems.unit2 = null;
+      break;
+    case 3:
+      unit = equippedItems.unit3;
+      equippedItems.unit3 = null;
+      break;
+    case 4:
+      unit = equippedItems.unit4;
+      equippedItems.unit4 = null;
+      break;
+  }
+
+  if (!unit) {
+    return { success: false, message: `No unit in slot ${slotNum}.` };
+  }
+
+  // Return to inventory
+  inventory.set(unit.id, { item: unit, quantity: 1 });
+
+  return {
+    success: true,
+    message: `Unequipped ${unit.name} from unit slot ${slotNum}.`,
+  };
 }
 
 function executeCreateMag(): CommandResult {
@@ -1460,38 +2330,30 @@ function executeDepositItem(itemId: string, quantity: number): CommandResult {
   }
 
   // Check if item is in character inventory
-  const item = inventory.get(itemId);
-  if (!item) {
+  const invEntry = inventory.get(itemId);
+  if (!invEntry) {
     return { success: false, message: `Item not found in inventory: ${itemId}` };
   }
 
-  if (item.quantity < quantity) {
-    return { success: false, message: `Only ${item.quantity} in inventory` };
+  if (invEntry.quantity < quantity) {
+    return { success: false, message: `Only ${invEntry.quantity} in inventory` };
   }
 
-  // Get the item definition from starting items (simplified for CLI)
-  const startingItems = getStartingItems(currentCharacter.class_id);
-  const itemDef = startingItems.consumables.find(c => c.item.id === itemId)?.item;
-
-  if (!itemDef) {
-    return { success: false, message: `Cannot deposit item: ${itemId}` };
-  }
-
-  // Add to shared storage
-  const result = addToSharedStorage(itemDef, quantity);
+  // Add to shared storage using the stored item definition
+  const result = addToSharedStorage(invEntry.item, quantity);
   if (!result.success) {
     return result;
   }
 
   // Remove from character inventory
-  item.quantity -= quantity;
-  if (item.quantity <= 0) {
+  invEntry.quantity -= quantity;
+  if (invEntry.quantity <= 0) {
     inventory.delete(itemId);
   }
 
   return {
     success: true,
-    message: `Deposited ${quantity}x ${itemDef.name} to storage`,
+    message: `Deposited ${quantity}x ${invEntry.item.name} to storage`,
     data: { itemId, quantity },
   };
 }
@@ -1528,7 +2390,7 @@ function executeWithdrawItem(itemId: string, quantity: number): CommandResult {
   if (existing) {
     existing.quantity += quantity;
   } else {
-    inventory.set(itemId, { itemId, quantity });
+    inventory.set(itemId, { item: storageSlot.item, quantity });
   }
 
   return {
@@ -1543,8 +2405,8 @@ function executeListFields(): CommandResult {
     return { success: false, message: 'No character.' };
   }
 
-  if (currentLocation !== 'guild') {
-    return { success: false, message: 'You must be at the guild. Use: goto guild' };
+  if (currentLocation !== 'teleporter' && currentLocation !== 'guild') {
+    return { success: false, message: 'You must be at the teleporter. Use: goto teleporter' };
   }
 
   const fields = getAllFields();
@@ -1567,8 +2429,8 @@ function executeEnterField(fieldId: string, difficulty: Difficulty): CommandResu
     return { success: false, message: 'No character.' };
   }
 
-  if (currentLocation !== 'guild') {
-    return { success: false, message: 'You must be at the guild. Use: goto guild' };
+  if (currentLocation !== 'teleporter') {
+    return { success: false, message: 'You must be at the teleporter. Use: goto teleporter' };
   }
 
   const validDifficulties: Difficulty[] = ['normal', 'hard', 'super-hard'];
@@ -1600,9 +2462,21 @@ function executeEnterField(fieldId: string, difficulty: Difficulty): CommandResu
   };
 
   currentLocation = 'field';
+
+  // Clear any previous dropped items and enemies
+  droppedItems = [];
+  currentEnemies = [];
+
+  // Reset wave tracking for new stage
+  currentWave = 0;
+  totalWaves = 1;
+
+  // Auto-spawn enemies for the first stage
+  const spawnResult = executeSpawnEnemies();
+
   return {
     success: true,
-    message: `Entered ${field.name} on ${difficulty} difficulty.\nHP: ${playerCombatState.hp}/${playerCombatState.maxHp}  TP: ${playerCombatState.tp}/${playerCombatState.maxTp}`,
+    message: `Entered ${field.name} on ${difficulty} difficulty.\nHP: ${playerCombatState.hp}/${playerCombatState.maxHp}  TP: ${playerCombatState.tp}/${playerCombatState.maxTp}\n${spawnResult.message}`,
     data: { fieldId, difficulty },
   };
 }
@@ -1645,9 +2519,21 @@ function executeEnterMission(missionId: string, difficulty: Difficulty): Command
   };
 
   currentLocation = 'field';
+
+  // Clear any previous dropped items and enemies
+  droppedItems = [];
+  currentEnemies = [];
+
+  // Reset wave tracking for new stage
+  currentWave = 0;
+  totalWaves = 1;
+
+  // Auto-spawn enemies for the first stage
+  const spawnResult = executeSpawnEnemies();
+
   return {
     success: true,
-    message: `Started ${mission.name} on ${difficulty} difficulty.\nHP: ${playerCombatState.hp}/${playerCombatState.maxHp}  TP: ${playerCombatState.tp}/${playerCombatState.maxTp}`,
+    message: `Started ${mission.name} on ${difficulty} difficulty.\nHP: ${playerCombatState.hp}/${playerCombatState.maxHp}  TP: ${playerCombatState.tp}/${playerCombatState.maxTp}\n${spawnResult.message}`,
     data: { missionId, difficulty },
   };
 }
@@ -1694,11 +2580,15 @@ function executeUseTelepipe(): CommandResult {
   }
 
   useTelepipe();
-  currentLocation = 'guild';
+  currentLocation = 'city';
+
+  // Clear dropped items when leaving field
+  droppedItems = [];
+  currentEnemies = [];
 
   return {
     success: true,
-    message: 'Used Telepipe. Returned to guild. Session paused.',
+    message: 'Used Telepipe. Returned to city. Session paused.',
   };
 }
 
@@ -1712,11 +2602,15 @@ function executeAbandonSession(): CommandResult {
   }
 
   abandonSession();
-  currentLocation = 'guild';
+  currentLocation = 'city';
+
+  // Clear dropped items and enemies when abandoning
+  droppedItems = [];
+  currentEnemies = [];
 
   return {
     success: true,
-    message: 'Session abandoned. No rewards earned.',
+    message: 'Session abandoned. Returned to city.',
   };
 }
 
@@ -1755,17 +2649,28 @@ function executeClaimRewards(): CommandResult {
   // Add items to inventory
   if (result.itemsGained && result.itemsGained.length > 0) {
     lines.push('Items:');
-    for (const item of result.itemsGained) {
-      const itemId = 'itemId' in item ? item.itemId : (item as any).itemId;
-      const quantity = 'quantity' in item ? item.quantity : 1;
+    for (const rewardItem of result.itemsGained) {
+      const itemId = 'itemId' in rewardItem ? rewardItem.itemId : (rewardItem as any).itemId;
+      const quantity = 'quantity' in rewardItem ? rewardItem.quantity : 1;
       lines.push(`  ${itemId} x${quantity}`);
 
-      // Add to inventory
+      // Add to inventory - create a consumable item for rewards
       const existing = inventory.get(itemId);
       if (existing) {
         existing.quantity += quantity;
       } else {
-        inventory.set(itemId, { itemId, quantity });
+        const gameItem: ConsumableItem = {
+          id: itemId,
+          name: itemId.charAt(0).toUpperCase() + itemId.slice(1),
+          description: `Reward item: ${itemId}`,
+          type: 'consumable',
+          rarity: 1,
+          sellPrice: 50,
+          stackable: true,
+          maxStack: 10,
+          effect: 'misc',
+        };
+        inventory.set(itemId, { item: gameItem, quantity });
       }
     }
   }
@@ -1783,6 +2688,7 @@ function executeClaimRewards(): CommandResult {
 export function resetState(): void {
   currentCharacter = null;
   currentLocation = 'city';
+  previousLocation = 'city';
   inventory.clear();
   clearSharedStorage();
   resetSession();
@@ -1790,16 +2696,71 @@ export function resetState(): void {
   combatLog = [];
   enemyIdCounter = 0;
   playerCombatState = null;
-  equippedItems = { weapon: null, frame: null };
+  equippedItems = {
+    weapon: null,
+    frame: null,
+    unit1: null,
+    unit2: null,
+    unit3: null,
+    unit4: null,
+  };
   activeBuffs = [];
   playerStatusEffects = [];
   enemyStatusEffects.clear();
   currentMag = null;
+  currentWave = 0;
+  totalWaves = 1;
 }
 
 // ============================================================================
 // Combat Commands
 // ============================================================================
+
+/**
+ * Handle player defeat - return to city, abandon session, pay rescue fee
+ */
+function handlePlayerDefeat(): string {
+  // Calculate rescue fee (half of meseta)
+  const currentMeseta = currentCharacter?.meseta ?? 0;
+  const rescueFee = Math.floor(currentMeseta / 2);
+
+  // Deduct rescue fee
+  if (currentCharacter && rescueFee > 0) {
+    currentCharacter = {
+      ...currentCharacter,
+      meseta: currentMeseta - rescueFee,
+    };
+  }
+
+  // Abandon the session
+  abandonSession();
+
+  // Return to city
+  currentLocation = 'city';
+
+  // Clear combat state
+  currentEnemies = [];
+  droppedItems = [];
+  currentWave = 0;
+  totalWaves = 1;
+  playerStatusEffects = [];
+  enemyStatusEffects.clear();
+
+  // Don't clear playerCombatState - let them see their HP was 0
+
+  const feeMessage = rescueFee > 0
+    ? `The rescue team charged ${rescueFee.toLocaleString()} Meseta for their services.`
+    : `The rescue team waived their fee since you had no Meseta.`;
+
+  return `
+*** YOU HAVE BEEN DEFEATED! ***
+
+A rescue team found you unconscious and brought you back to Dairon City.
+${feeMessage}
+Your wounds have been treated, but you lost all progress in the field.
+
+You wake up in the city, ready to try again.`;
+}
 
 /**
  * Map field area to enemy area
@@ -1888,12 +2849,15 @@ function getPlayerWeaponStats(): WeaponStats & { critBonus: number } {
     };
   }
 
+  // Default grindLevel to 0 if undefined (e.g., from old persisted data)
+  const grindLevel = weapon.grindLevel ?? 0;
+
   return {
-    attack: weapon.attack + (weapon.grindLevel * 2),
+    attack: weapon.attack + (grindLevel * 2),
     accuracy: weapon.accuracy,
     element: weapon.element as Element | null,
-    elementPercent: weapon.elementPercent || 0,
-    grindBonus: weapon.grindLevel * 2,
+    elementPercent: weapon.elementPercent ?? 0,
+    grindBonus: grindLevel * 2,
     critBonus: 5 + Math.floor(weapon.attack / 20),
   };
 }
@@ -1912,6 +2876,10 @@ function executeSpawnEnemies(): CommandResult {
     return { success: false, message: 'No active session.' };
   }
 
+  // Get current stage info
+  const stage = getCurrentStage();
+  const variant = stage && 'variant' in stage ? stage.variant : 'a';
+
   // Clear existing enemies
   currentEnemies = [];
   combatLog = [];
@@ -1919,23 +2887,64 @@ function executeSpawnEnemies(): CommandResult {
   // Get enemy area and difficulty
   const enemyArea = fieldToEnemyArea(session.activeId);
   const difficulty = session.difficulty;
-  const seed = Date.now();
+  const seed = Date.now() + currentWave; // Different seed for each wave
   const random = createSeededRandom(seed);
 
-  // Generate enemy composition
+  // Set total waves based on stage variant (only on first spawn of stage)
+  // Fields: a: 5 waves, e: 1 wave (transition), b: 5 waves, z: boss only
+  // Missions: 3 waves per stage (shorter, more focused experience)
+  if (currentWave === 0) {
+    const isMission = session.activeType === 'mission';
+    if (isMission) {
+      totalWaves = 3; // Missions have 3 waves per stage
+    } else {
+      totalWaves = variant === 'e' ? 1 : variant === 'z' ? 1 : 5;
+    }
+    currentWave = 1;
+  }
+
+  if (variant === 'z') {
+    // Boss stage - spawn the area boss
+    const bossId = getBossForArea(enemyArea);
+    if (bossId) {
+      const stats = generateBossStats(bossId, difficulty, currentCharacter.level);
+      const element = getEnemyElement(bossId);
+      const diffMult = difficulty === 'normal' ? 1 : difficulty === 'hard' ? 1.5 : 2;
+
+      currentEnemies.push({
+        id: ++enemyIdCounter,
+        enemyId: bossId,
+        name: getEnemyDisplayName(bossId),
+        stats,
+        element,
+        expValue: Math.floor(2000 * diffMult * (1 + currentCharacter.level * 0.1)),
+        mesetaValue: Math.floor(5000 * diffMult),
+      });
+    }
+
+    const enemyList = currentEnemies.map((e, i) => `  [${i}] ${e.name} - HP: ${e.stats.hp}/${e.stats.maxHp}`);
+    combatLog.push(`BOSS BATTLE! ${currentEnemies[0]?.name || 'Unknown'}`);
+
+    return {
+      success: true,
+      message: `BOSS BATTLE!\n${enemyList.join('\n')}`,
+      data: { enemies: currentEnemies.length, area: enemyArea, difficulty, isBoss: true, wave: 1, totalWaves: 1 },
+    };
+  }
+
+  // Spawn one wave of enemies (3 enemies per wave)
   const composition = generateEnemyComposition(enemyArea, difficulty, random);
 
-  // Create enemy instances
+  let enemiesThisWave = 0;
   for (const entry of composition) {
-    for (let i = 0; i < entry.count; i++) {
+    if (enemiesThisWave >= 3) break; // Max 3 enemies per wave
+    for (let i = 0; i < Math.min(entry.count, 2); i++) {
       const stats = generateEnemyStats(entry.enemyId, difficulty, currentCharacter.level);
       const element = getEnemyElement(entry.enemyId);
 
-      // Calculate exp/meseta values
       const diffMult = difficulty === 'normal' ? 1 : difficulty === 'hard' ? 1.5 : 2;
-      const isBoss = entry.enemyId.startsWith('boss_');
-      const expValue = Math.floor((isBoss ? 500 : 50) * diffMult * (1 + currentCharacter.level * 0.1));
-      const mesetaValue = Math.floor((isBoss ? 1000 : 100) * diffMult);
+      const expValue = Math.floor(50 * diffMult * (1 + currentCharacter.level * 0.1));
+      const mesetaValue = Math.floor(100 * diffMult);
 
       currentEnemies.push({
         id: ++enemyIdCounter,
@@ -1946,17 +2955,102 @@ function executeSpawnEnemies(): CommandResult {
         expValue,
         mesetaValue,
       });
+      enemiesThisWave++;
+      if (enemiesThisWave >= 3) break;
     }
   }
 
   const enemyList = currentEnemies.map((e, i) => `  [${i}] ${e.name} - HP: ${e.stats.hp}/${e.stats.maxHp}`);
-
-  combatLog.push(`Spawned ${currentEnemies.length} enemies in ${enemyArea}`);
+  combatLog.push(`Wave ${currentWave}/${totalWaves} - ${currentEnemies.length} enemies`);
 
   return {
     success: true,
-    message: `Enemies spawned (${enemyArea}, ${difficulty}):\n${enemyList.join('\n')}`,
-    data: { enemies: currentEnemies.length, area: enemyArea, difficulty },
+    message: `Wave ${currentWave}/${totalWaves} (${enemyArea}, ${difficulty}):\n${enemyList.join('\n')}`,
+    data: { enemies: currentEnemies.length, area: enemyArea, difficulty, wave: currentWave, totalWaves },
+  };
+}
+
+/**
+ * Spawn enemies for the current wave (used when auto-spawning next wave)
+ */
+function spawnWaveEnemies(): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  const session = getSessionState();
+  if (!session.activeId) {
+    return { success: false, message: 'No active session.' };
+  }
+
+  const enemyArea = fieldToEnemyArea(session.activeId);
+  const difficulty = session.difficulty;
+  const seed = Date.now() + currentWave;
+  const random = createSeededRandom(seed);
+
+  // Clear existing enemies but keep drops
+  currentEnemies = [];
+
+  // Spawn one wave of enemies (3 enemies per wave)
+  const composition = generateEnemyComposition(enemyArea, difficulty, random);
+
+  let enemiesThisWave = 0;
+  for (const entry of composition) {
+    if (enemiesThisWave >= 3) break;
+    for (let i = 0; i < Math.min(entry.count, 2); i++) {
+      const stats = generateEnemyStats(entry.enemyId, difficulty, currentCharacter.level);
+      const element = getEnemyElement(entry.enemyId);
+
+      const diffMult = difficulty === 'normal' ? 1 : difficulty === 'hard' ? 1.5 : 2;
+      const expValue = Math.floor(50 * diffMult * (1 + currentCharacter.level * 0.1));
+      const mesetaValue = Math.floor(100 * diffMult);
+
+      currentEnemies.push({
+        id: ++enemyIdCounter,
+        enemyId: entry.enemyId,
+        name: getEnemyDisplayName(entry.enemyId),
+        stats,
+        element,
+        expValue,
+        mesetaValue,
+      });
+      enemiesThisWave++;
+      if (enemiesThisWave >= 3) break;
+    }
+  }
+
+  const enemyList = currentEnemies.map((e, i) => `  [${i}] ${e.name} - HP: ${e.stats.hp}/${e.stats.maxHp}`);
+  combatLog.push(`Wave ${currentWave}/${totalWaves} spawned`);
+
+  return {
+    success: true,
+    message: `\nWave ${currentWave}/${totalWaves}:\n${enemyList.join('\n')}`,
+    data: { enemies: currentEnemies.length, area: enemyArea, difficulty, wave: currentWave, totalWaves },
+  };
+}
+
+/**
+ * Generate boss stats (stronger than regular enemies)
+ */
+function generateBossStats(bossId: string, difficulty: Difficulty, playerLevel: number): CombatStats {
+  const difficultyMult = difficulty === 'normal' ? 1 : difficulty === 'hard' ? 1.5 : 2;
+  const levelMult = 1 + (playerLevel - 1) * 0.1;
+
+  // Base boss stats (much higher than regular enemies)
+  const baseHp = 500;
+  const baseAtk = 80;
+  const baseDef = 40;
+
+  return {
+    hp: Math.floor(baseHp * difficultyMult * levelMult),
+    maxHp: Math.floor(baseHp * difficultyMult * levelMult),
+    attack: Math.floor(baseAtk * difficultyMult * levelMult),
+    defense: Math.floor(baseDef * difficultyMult * levelMult),
+    accuracy: 90,
+    evasion: 15,
+    critRate: 10,
+    critDamage: 1.5,
+    attackSpeed: 1.0,
   };
 }
 
@@ -2000,7 +3094,8 @@ function executeAttack(targetIndex: number): CommandResult {
   }
 
   if (playerCombatState.hp <= 0) {
-    return { success: false, message: 'You are defeated! Use telepipe to retreat or abandon-session.' };
+    const defeatMessage = handlePlayerDefeat();
+    return { success: true, message: defeatMessage };
   }
 
   // Process status effects at start of turn
@@ -2011,12 +3106,13 @@ function executeAttack(targetIndex: number): CommandResult {
   if (statusResult.damage > 0) {
     playerCombatState.hp = Math.max(0, playerCombatState.hp - statusResult.damage);
     if (playerCombatState.hp <= 0) {
-      statusMessages.push(`\n*** YOU HAVE BEEN DEFEATED BY STATUS EFFECTS! ***`);
       combatLog.push('PLAYER DEFEATED (status)');
+      const defeatMessage = handlePlayerDefeat();
+      statusMessages.push(defeatMessage);
       return {
         success: true,
         message: statusMessages.join('\n'),
-        data: { playerHp: 0 },
+        data: { playerHp: 0, defeated: true },
       };
     }
   }
@@ -2051,7 +3147,7 @@ function executeAttack(targetIndex: number): CommandResult {
   });
 
   const lines: string[] = [...statusMessages]; // Include status effect messages
-  let droppedItem: { itemId: string; name: string } | null = null;
+  let droppedItem: ConsumableItem | null = null;
 
   if (!result.hit) {
     lines.push(`Attack missed ${target.name}!`);
@@ -2066,7 +3162,18 @@ function executeAttack(targetIndex: number): CommandResult {
 
     if (isDefeated(target.stats)) {
       lines.push(`${target.name} defeated!`);
-      lines.push(`  +${target.expValue} EXP, +${target.mesetaValue} Meseta`);
+      lines.push(`  +${target.expValue} EXP`);
+
+      // Drop meseta on ground
+      if (target.mesetaValue > 0) {
+        droppedItems.push({
+          id: ++droppedItemIdCounter,
+          type: 'meseta',
+          meseta: target.mesetaValue,
+        });
+        lines.push(`  Dropped: ${target.mesetaValue} Meseta!`);
+        combatLog.push(`DROP: ${target.mesetaValue} Meseta`);
+      }
 
       // Roll for item drop (20% chance)
       droppedItem = rollItemDrop();
@@ -2074,22 +3181,20 @@ function executeAttack(targetIndex: number): CommandResult {
         lines.push(`  Dropped: ${droppedItem.name}!`);
         combatLog.push(`DROP: ${droppedItem.name}`);
 
-        // Add to inventory
-        const existing = inventory.get(droppedItem.itemId);
-        if (existing) {
-          existing.quantity += 1;
-        } else {
-          inventory.set(droppedItem.itemId, { itemId: droppedItem.itemId, quantity: 1 });
-        }
+        // Add to dropped items on ground (not inventory)
+        droppedItems.push({
+          id: ++droppedItemIdCounter,
+          type: 'item',
+          item: droppedItem,
+        });
       }
 
-      // Award exp and meseta
+      // Award exp only (meseta must be picked up)
       const oldLevel = currentCharacter.level;
       currentCharacter = {
         ...currentCharacter,
         experience: currentCharacter.experience + target.expValue,
         level: getLevelForExp(currentCharacter.experience + target.expValue),
-        meseta: (currentCharacter.meseta ?? 0) + target.mesetaValue,
       };
 
       if (currentCharacter.level > oldLevel) {
@@ -2109,7 +3214,16 @@ function executeAttack(targetIndex: number): CommandResult {
       currentEnemies.splice(targetIndex, 1);
 
       if (currentEnemies.length === 0) {
-        lines.push('\nAll enemies defeated! Use next-stage or complete-field.');
+        // Check if there are more waves
+        if (currentWave < totalWaves) {
+          lines.push(`\nWave ${currentWave}/${totalWaves} cleared!`);
+          // Auto-spawn next wave
+          currentWave++;
+          const spawnResult = spawnWaveEnemies();
+          lines.push(spawnResult.message);
+        } else {
+          lines.push('\nAll waves cleared! Use next-stage to continue or complete-field to finish.');
+        }
       }
     } else {
       lines.push(`  ${target.name} HP: ${target.stats.hp}/${target.stats.maxHp}`);
@@ -2139,9 +3253,9 @@ function executeAttack(targetIndex: number): CommandResult {
       }
 
       if (playerCombatState.hp <= 0) {
-        lines.push('\n*** YOU HAVE BEEN DEFEATED! ***');
-        lines.push('Use telepipe to retreat (lose progress) or abandon-session.');
         combatLog.push('PLAYER DEFEATED');
+        const defeatMessage = handlePlayerDefeat();
+        lines.push(defeatMessage);
       }
     } else {
       lines.push(`\n${attacker.name} attacks but misses!`);
@@ -2162,10 +3276,18 @@ function executeAttack(targetIndex: number): CommandResult {
   };
 }
 
+// Drop table items
+const DROP_TABLE: ConsumableItem[] = [
+  { id: 'monomate', name: 'Monomate', description: 'Restores a small amount of HP.', type: 'consumable', effect: 'heal_hp', effectValue: 100, rarity: 1, sellPrice: 25, stackable: true, maxStack: 10 },
+  { id: 'monofluid', name: 'Monofluid', description: 'Restores a small amount of TP.', type: 'consumable', effect: 'heal_tp', effectValue: 50, rarity: 1, sellPrice: 50, stackable: true, maxStack: 10 },
+  { id: 'dimate', name: 'Dimate', description: 'Restores a moderate amount of HP.', type: 'consumable', effect: 'heal_hp', effectValue: 200, rarity: 2, sellPrice: 75, stackable: true, maxStack: 10 },
+  { id: 'difluid', name: 'Difluid', description: 'Restores a moderate amount of TP.', type: 'consumable', effect: 'heal_tp', effectValue: 100, rarity: 2, sellPrice: 100, stackable: true, maxStack: 10 },
+];
+
 /**
  * Roll for item drop from defeated enemy
  */
-function rollItemDrop(): { itemId: string; name: string } | null {
+function rollItemDrop(): ConsumableItem | null {
   const roll = Math.random();
 
   // 20% drop chance
@@ -2174,13 +3296,13 @@ function rollItemDrop(): { itemId: string; name: string } | null {
   // Drop table
   const dropRoll = Math.random();
   if (dropRoll < 0.50) {
-    return { itemId: 'monomate', name: 'Monomate' };
+    return DROP_TABLE[0]; // monomate
   } else if (dropRoll < 0.75) {
-    return { itemId: 'monofluid', name: 'Monofluid' };
+    return DROP_TABLE[1]; // monofluid
   } else if (dropRoll < 0.90) {
-    return { itemId: 'dimate', name: 'Dimate' };
+    return DROP_TABLE[2]; // dimate
   } else {
-    return { itemId: 'difluid', name: 'Difluid' };
+    return DROP_TABLE[3]; // difluid
   }
 }
 
@@ -2286,17 +3408,32 @@ function executeNextStage(): CommandResult {
     return { success: false, message: `Defeat all enemies first (${currentEnemies.length} remaining).` };
   }
 
+  // Check if there are more waves in the current stage
+  if (currentWave < totalWaves) {
+    return { success: false, message: `Clear all waves first (${currentWave}/${totalWaves}).` };
+  }
+
   const advanced = advanceToNextStage();
   if (!advanced) {
     return { success: false, message: 'Cannot advance. Already at final stage or not in session.' };
   }
 
+  // Clear dropped items from previous stage
+  droppedItems = [];
+
+  // Reset wave tracking for new stage
+  currentWave = 0;
+  totalWaves = 1;
+
   const session = getSessionState();
   combatLog.push(`Advanced to stage ${session.currentStageIndex + 1}`);
 
+  // Auto-spawn enemies for the new stage
+  const spawnResult = executeSpawnEnemies();
+
   return {
     success: true,
-    message: `Advanced to stage ${session.currentStageIndex + 1}. Use spawn-enemies to generate enemies.`,
+    message: `Advanced to stage ${session.currentStageIndex + 1}.\n${spawnResult.message}`,
     data: { stage: session.currentStageIndex + 1 },
   };
 }
@@ -2314,21 +3451,37 @@ function executeCompleteField(): CommandResult {
     return { success: false, message: 'No active session.' };
   }
 
+  // Check if this is a mission or field
+  const session = getSessionState();
+  const isMission = session.activeType === 'mission';
+
   // Complete the session
   const result = completeSession(true);
   if (!result) {
     return { success: false, message: 'Failed to complete session.' };
   }
 
-  currentLocation = 'guild';
   currentEnemies = [];
-  combatLog.push('Field completed!');
 
-  return {
-    success: true,
-    message: `Field complete! Return to guild to claim rewards.\nGrade: ${result.grade}, EXP: ${result.expGained}, Meseta: ${result.mesetaGained}`,
-    data: result,
-  };
+  if (isMission) {
+    // Missions return to guild for reward claiming
+    currentLocation = 'guild';
+    combatLog.push('Mission completed!');
+    return {
+      success: true,
+      message: `═══════════════════════════════════════\n        MISSION COMPLETE!\n═══════════════════════════════════════\n\nGrade: ${result.grade}\nEXP Earned: ${result.expGained.toLocaleString()}\nMeseta Earned: ${result.mesetaGained.toLocaleString()}\n\nRewards have been added to your inventory.`,
+      data: result,
+    };
+  } else {
+    // Fields return to city
+    currentLocation = 'city';
+    combatLog.push('Field completed!');
+    return {
+      success: true,
+      message: `Field complete! Rewards collected.\nGrade: ${result.grade}, EXP: ${result.expGained}, Meseta: ${result.mesetaGained}`,
+      data: result,
+    };
+  }
 }
 
 function executeCombatLog(): CommandResult {
@@ -2409,6 +3562,144 @@ function executeUseItem(itemId: string): CommandResult {
     success: true,
     message: `Used ${effect.name}. Restored ${healed} ${statName}.\n${statName}: ${current}/${max}`,
     data: { itemId, healed, hp: playerCombatState.hp, tp: playerCombatState.tp },
+  };
+}
+
+/**
+ * Pick up a dropped item from the ground
+ */
+function executePickupItem(dropId: number): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  const dropIndex = droppedItems.findIndex(d => d.id === dropId);
+  if (dropIndex === -1) {
+    return { success: false, message: 'Item not found on ground.' };
+  }
+
+  const drop = droppedItems[dropIndex];
+
+  if (drop.type === 'meseta' && drop.meseta) {
+    // Add meseta to character
+    currentCharacter = {
+      ...currentCharacter,
+      meseta: (currentCharacter.meseta ?? 0) + drop.meseta,
+    };
+
+    // Remove from ground
+    droppedItems.splice(dropIndex, 1);
+
+    combatLog.push(`PICKUP: ${drop.meseta} Meseta`);
+
+    return {
+      success: true,
+      message: `Picked up ${drop.meseta} Meseta!`,
+      data: { meseta: drop.meseta },
+    };
+  } else if (drop.type === 'item' && drop.item) {
+    // Check stack limit for consumables
+    const existing = inventory.get(drop.item.id);
+    const isConsumable = drop.item.type === 'consumable';
+    const maxStack = getMaxStack(drop.item.id);
+
+    if (isConsumable && existing && existing.quantity >= maxStack) {
+      return {
+        success: false,
+        message: `Cannot carry more ${drop.item.name}. (Max: ${maxStack})`,
+      };
+    }
+
+    // Add to inventory
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      inventory.set(drop.item.id, { item: drop.item, quantity: 1 });
+    }
+
+    // Remove from ground
+    droppedItems.splice(dropIndex, 1);
+
+    combatLog.push(`PICKUP: ${drop.item.name}`);
+
+    return {
+      success: true,
+      message: `Picked up ${drop.item.name}!`,
+      data: { itemId: drop.item.id },
+    };
+  }
+
+  return { success: false, message: 'Invalid drop.' };
+}
+
+/**
+ * Pick up all dropped items from the ground
+ */
+function executePickupAll(): CommandResult {
+  if (!currentCharacter) {
+    return { success: false, message: 'No character.' };
+  }
+
+  if (droppedItems.length === 0) {
+    return { success: false, message: 'No items on ground.' };
+  }
+
+  const pickedUp: string[] = [];
+  const leftOnGround: typeof droppedItems = [];
+  let totalMeseta = 0;
+
+  for (const drop of droppedItems) {
+    if (drop.type === 'meseta' && drop.meseta) {
+      totalMeseta += drop.meseta;
+      combatLog.push(`PICKUP: ${drop.meseta} Meseta`);
+    } else if (drop.type === 'item' && drop.item) {
+      const existing = inventory.get(drop.item.id);
+      const isConsumable = drop.item.type === 'consumable';
+      const maxStack = getMaxStack(drop.item.id);
+
+      // Check stack limit for consumables
+      if (isConsumable && existing && existing.quantity >= maxStack) {
+        leftOnGround.push(drop);
+        continue;
+      }
+
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        inventory.set(drop.item.id, { item: drop.item, quantity: 1 });
+      }
+      pickedUp.push(drop.item.name);
+      combatLog.push(`PICKUP: ${drop.item.name}`);
+    }
+  }
+
+  // Add collected meseta
+  if (totalMeseta > 0) {
+    currentCharacter = {
+      ...currentCharacter,
+      meseta: (currentCharacter.meseta ?? 0) + totalMeseta,
+    };
+    pickedUp.push(`${totalMeseta} Meseta`);
+  }
+
+  // Keep items that couldn't be picked up on ground
+  droppedItems = leftOnGround;
+
+  if (pickedUp.length === 0) {
+    return {
+      success: false,
+      message: 'Cannot pick up any more items. Inventory full.',
+    };
+  }
+
+  const leftMessage = leftOnGround.length > 0
+    ? `\n(${leftOnGround.length} item(s) left on ground - stack full)`
+    : '';
+
+  return {
+    success: true,
+    message: `Picked up: ${pickedUp.join(', ')}${leftMessage}`,
+    data: { items: pickedUp, meseta: totalMeseta, leftOnGround: leftOnGround.length },
   };
 }
 
@@ -2579,7 +3870,16 @@ function executeCastTechnique(techId: string, targetIndex?: number): CommandResu
       currentEnemies.splice(actualTarget, 1);
 
       if (currentEnemies.length === 0) {
-        lines.push('\nAll enemies defeated!');
+        // Check if there are more waves
+        if (currentWave < totalWaves) {
+          lines.push(`\nWave ${currentWave}/${totalWaves} cleared!`);
+          // Auto-spawn next wave
+          currentWave++;
+          const spawnResult = spawnWaveEnemies();
+          lines.push(spawnResult.message);
+        } else {
+          lines.push('\nAll waves cleared! Use next-stage to continue or complete-field to finish.');
+        }
       }
     } else {
       lines.push(`  ${target.name} HP: ${target.stats.hp}/${target.stats.maxHp}`);
@@ -2644,7 +3944,9 @@ function executeCastTechnique(techId: string, targetIndex?: number): CommandResu
       lines.push(`  Your HP: ${playerCombatState.hp}/${playerCombatState.maxHp}`);
 
       if (playerCombatState.hp <= 0) {
-        lines.push('\n*** YOU HAVE BEEN DEFEATED! ***');
+        combatLog.push('PLAYER DEFEATED');
+        const defeatMessage = handlePlayerDefeat();
+        lines.push(defeatMessage);
       }
     } else {
       lines.push(`\n${attacker.name} attacks but misses!`);
@@ -2654,6 +3956,6 @@ function executeCastTechnique(techId: string, targetIndex?: number): CommandResu
   return {
     success: true,
     message: lines.join('\n'),
-    data: { techId, tp: playerCombatState.tp },
+    data: { techId, tp: playerCombatState.tp, defeated: playerCombatState.hp <= 0 },
   };
 }

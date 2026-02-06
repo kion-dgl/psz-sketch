@@ -1,0 +1,9 @@
+{
+  "areaId": "makara-ruins",
+  "areaName": "Makara Ruins",
+  "description": "Desert ruins hiding ancient technology. The harsh environment tests even veteran hunters.",
+  "unlockCondition": "Complete 'Artifacts' story quest",
+  "recommendedLevel": 35,
+  "environment": "desert",
+  "questCount": 3
+}

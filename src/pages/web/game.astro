@@ -1,0 +1,30 @@
+---
+/**
+ * 3D Game Page
+ * Main gameplay screen with Three.js rendering
+ */
+import Game3D from '../../components/game/Game3D';
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Field - Phantasy Star Zero</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <Game3D client:only="react" />
+</body>
+</html>

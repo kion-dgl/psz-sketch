@@ -3,5 +3,6 @@
   "japaneseName": "テレパイプ",
   "details": "Creates a temporary portal to the city.",
   "rarity": 2,
+  "maxStack": 10,
   "psoWorldId": 310
 }

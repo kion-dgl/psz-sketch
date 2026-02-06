@@ -14,7 +14,17 @@ export interface ShopItem {
   requiredLevel?: number;
 }
 
-export type ShopCategory = 'consumable' | 'weapon' | 'armor' | 'material' | 'tech';
+export type ShopCategory = 'consumable' | 'weapon' | 'armor' | 'unit' | 'material' | 'tech';
+
+// Extended shop item for equipment with randomized attributes
+export interface EquipmentShopItem extends ShopItem {
+  slots?: number;           // For armor: 0-3 slots
+  element?: string;         // For weapons: element type
+  elementPercent?: number;  // For weapons: element percentage
+  attack?: number;          // For weapons: attack power
+  defense?: number;         // For armor: defense value
+  evasion?: number;         // For armor: evasion value
+}
 
 export interface ShopInventory {
   shopId: string;

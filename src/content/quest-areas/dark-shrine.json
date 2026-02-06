@@ -1,0 +1,9 @@
+{
+  "areaId": "dark-shrine",
+  "areaName": "Dark Shrine",
+  "description": "A corrupted dimension where darkness takes physical form. Only the strongest survive.",
+  "unlockCondition": "Complete 'Truth Revealed' story quest",
+  "recommendedLevel": 55,
+  "environment": "dark dimension",
+  "questCount": 2
+}

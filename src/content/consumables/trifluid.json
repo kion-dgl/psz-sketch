@@ -1,7 +1,8 @@
 {
   "name": "Trifluid",
   "japaneseName": "トリフルイド",
-  "details": "Restores 100% of PP.",
-  "rarity": 4,
+  "details": "Restores 100% of TP.",
+  "rarity": 3,
+  "maxStack": 10,
   "psoWorldId": 304
 }

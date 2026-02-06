@@ -1,0 +1,9 @@
+{
+  "areaId": "arca-plant",
+  "areaName": "Arca Plant",
+  "description": "A massive orbital facility overrun by rogue machines. The truth awaits at the core.",
+  "unlockCondition": "Complete 'A Far Journey' story quest",
+  "recommendedLevel": 45,
+  "environment": "space station",
+  "questCount": 3
+}

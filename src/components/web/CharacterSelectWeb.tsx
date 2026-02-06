@@ -1,3 +1,8 @@
+/**
+ * CharacterSelectWeb - Simple character select UI mirroring CLI
+ * Shows 4 slots with select/new/delete actions
+ */
+
 import { useState, useEffect } from 'react';
 import type { Character, CharacterSlots } from '../../systems/character/types';
 
@@ -12,24 +17,28 @@ export default function CharacterSelectWeb({
 }: CharacterSelectWebProps) {
   const [characters, setCharacters] = useState<CharacterSlots>([null, null, null, null]);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadCharacters();
   }, []);
 
-  const loadCharacters = () => {
-    const stored = localStorage.getItem('characters');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
+  const loadCharacters = async () => {
+    try {
+      const response = await fetch('/api/characters');
+      if (response.ok) {
+        const data = await response.json();
+        // data is an array of 4 slots (null or character)
         const slots: CharacterSlots = [null, null, null, null];
-        for (let i = 0; i < Math.min(parsed.length, 4); i++) {
-          slots[i] = parsed[i];
+        for (let i = 0; i < 4; i++) {
+          slots[i] = data[i] || null;
         }
         setCharacters(slots);
-      } catch {
-        setCharacters([null, null, null, null]);
       }
+    } catch (error) {
+      console.error('Failed to load characters:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,70 +63,74 @@ export default function CharacterSelectWeb({
     setDeleteConfirm(slot);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (deleteConfirm !== null) {
-      const newCharacters = [...characters];
-      newCharacters[deleteConfirm] = null;
-      localStorage.setItem('characters', JSON.stringify(newCharacters));
-      setCharacters(newCharacters);
+      const character = characters[deleteConfirm];
+      if (character) {
+        try {
+          const response = await fetch(`/api/characters/${character.character_id}`, {
+            method: 'DELETE',
+          });
+          if (response.ok) {
+            // Reload characters from server
+            await loadCharacters();
+          }
+        } catch (error) {
+          console.error('Failed to delete character:', error);
+        }
+      }
       setDeleteConfirm(null);
     }
   };
 
-  const handleCancelDelete = () => {
-    setDeleteConfirm(null);
-  };
+  if (loading) {
+    return (
+      <div style={styles.container}>
+        <h1 style={styles.title}>Loading...</h1>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>SELECT CHARACTER</h1>
 
-      <div style={styles.grid}>
-        {characters.map((character, index) => (
-          <div
-            key={index}
-            style={styles.slot}
-            data-testid={`character-slot-${index}`}
-          >
-            {character ? (
-              <div style={styles.characterCard}>
-                <div style={styles.characterInfo}>
-                  <span style={styles.characterName} data-testid="character-name">
-                    {character.character_name}
-                  </span>
-                  <span style={styles.characterClass} data-testid="character-class">
-                    {character.class_id}
-                  </span>
-                  <span style={styles.characterLevel} data-testid="character-level">
-                    Lv. {character.level}
-                  </span>
+      <div style={styles.slots}>
+        {characters.map((char, idx) => (
+          <div key={idx} style={styles.slot} data-testid={`character-slot-${idx}`}>
+            {char ? (
+              <>
+                <div style={styles.charInfo}>
+                  <span style={styles.charName}>{char.character_name}</span>
+                  <span style={styles.charClass}>{char.class_id}</span>
+                  <span style={styles.charLevel}>Lv. {char.level}</span>
                 </div>
-                <div style={styles.buttonGroup}>
+                <div style={styles.actions}>
                   <button
-                    style={styles.selectButton}
-                    onClick={() => handleSelectCharacter(character)}
-                    data-testid={`select-character-${index}`}
+                    style={styles.selectBtn}
+                    onClick={() => handleSelectCharacter(char)}
+                    data-testid={`select-character-${idx}`}
                   >
-                    SELECT
+                    Select
                   </button>
                   <button
-                    style={styles.deleteButton}
-                    onClick={() => handleDeleteClick(index)}
-                    data-testid={`delete-character-${index}`}
+                    style={styles.deleteBtn}
+                    onClick={() => handleDeleteClick(idx)}
+                    data-testid={`delete-character-${idx}`}
                   >
-                    DELETE
+                    Delete
                   </button>
                 </div>
-              </div>
+              </>
             ) : (
               <div style={styles.emptySlot} data-testid="empty-slot">
-                <span style={styles.emptyText}>Empty Slot</span>
+                <span style={styles.emptyText}>-- Empty --</span>
                 <button
-                  style={styles.newGameButton}
-                  onClick={() => handleNewGame(index)}
-                  data-testid={`new-game-${index}`}
+                  style={styles.newBtn}
+                  onClick={() => handleNewGame(idx)}
+                  data-testid={`new-game-${idx}`}
                 >
-                  NEW GAME
+                  New Game
                 </button>
               </div>
             )}
@@ -125,32 +138,25 @@ export default function CharacterSelectWeb({
         ))}
       </div>
 
-      <a href="/web/title" style={styles.backLink}>← Back to Title</a>
-
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation */}
       {deleteConfirm !== null && (
         <div style={styles.modal}>
           <div style={styles.modalContent}>
-            <p style={styles.modalText}>
-              Delete {characters[deleteConfirm]?.character_name}?
-            </p>
-            <p style={styles.modalSubtext}>
-              This action cannot be undone.
-            </p>
-            <div style={styles.modalButtons}>
+            <p>Delete {characters[deleteConfirm]?.character_name}?</p>
+            <div style={styles.modalActions}>
               <button
-                style={styles.confirmButton}
+                style={styles.confirmBtn}
                 onClick={handleConfirmDelete}
                 data-testid="confirm-delete"
               >
-                DELETE
+                Yes, Delete
               </button>
               <button
-                style={styles.cancelButton}
-                onClick={handleCancelDelete}
+                style={styles.cancelBtn}
+                onClick={() => setDeleteConfirm(null)}
                 data-testid="cancel-delete"
               >
-                CANCEL
+                Cancel
               </button>
             </div>
           </div>
@@ -163,167 +169,124 @@ export default function CharacterSelectWeb({
 const styles: Record<string, React.CSSProperties> = {
   container: {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #0a1628 0%, #1a2a4a 50%, #0a1628 100%)',
-    padding: '2rem',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    fontFamily: "'Press Start 2P', system-ui, sans-serif",
-    color: 'white',
+    background: '#1a1a2e',
+    fontFamily: 'monospace',
+    color: '#ccc',
+    padding: '24px',
   },
   title: {
-    fontSize: '1.2rem',
-    marginBottom: '2rem',
-    color: '#6bb8ff',
-    letterSpacing: '4px',
+    color: '#a78bfa',
+    fontSize: '18px',
+    marginBottom: '24px',
+    textAlign: 'center',
   },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '1.5rem',
-    maxWidth: '800px',
-    width: '100%',
+  slots: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    maxWidth: '400px',
+    margin: '0 auto',
   },
   slot: {
-    background: 'rgba(255, 255, 255, 0.05)',
-    border: '2px solid #3a5a8a',
-    borderRadius: '8px',
-    padding: '1.5rem',
-    minHeight: '200px',
+    padding: '16px',
+    border: '1px solid #333',
+    borderRadius: '4px',
+    background: '#252540',
+  },
+  charInfo: {
     display: 'flex',
-    flexDirection: 'column',
+    gap: '16px',
+    marginBottom: '12px',
+    alignItems: 'baseline',
   },
-  characterCard: {
+  charName: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  charClass: {
+    color: '#6bf',
+    fontSize: '12px',
+  },
+  charLevel: {
+    color: '#888',
+    fontSize: '12px',
+  },
+  actions: {
     display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    justifyContent: 'space-between',
+    gap: '8px',
   },
-  characterInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem',
-  },
-  characterName: {
-    fontSize: '0.9rem',
-    color: '#ffffff',
-    marginBottom: '0.5rem',
-  },
-  characterClass: {
-    fontSize: '0.7rem',
-    color: '#6bb8ff',
-  },
-  characterLevel: {
-    fontSize: '0.7rem',
-    color: '#a6c9ff',
-  },
-  buttonGroup: {
-    display: 'flex',
-    gap: '0.5rem',
-    marginTop: '1rem',
-  },
-  selectButton: {
-    flex: 1,
-    padding: '0.75rem',
-    background: 'linear-gradient(135deg, #2d6a4a 0%, #1a5a3a 100%)',
-    border: '2px solid #4ade80',
-    color: 'white',
-    fontFamily: 'inherit',
-    fontSize: '0.6rem',
+  selectBtn: {
+    padding: '6px 16px',
+    background: '#2d6a4a',
+    border: '1px solid #4ade80',
+    color: '#4ade80',
+    fontFamily: 'monospace',
     cursor: 'pointer',
-    letterSpacing: '1px',
+    borderRadius: '2px',
   },
-  deleteButton: {
-    padding: '0.75rem 1rem',
-    background: 'linear-gradient(135deg, #6a2d2d 0%, #5a1a1a 100%)',
-    border: '2px solid #f87171',
-    color: 'white',
-    fontFamily: 'inherit',
-    fontSize: '0.6rem',
+  deleteBtn: {
+    padding: '6px 16px',
+    background: 'transparent',
+    border: '1px solid #f87171',
+    color: '#f87171',
+    fontFamily: 'monospace',
     cursor: 'pointer',
-    letterSpacing: '1px',
+    borderRadius: '2px',
   },
   emptySlot: {
     display: 'flex',
-    flexDirection: 'column',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'center',
-    height: '100%',
-    gap: '1rem',
   },
   emptyText: {
-    fontSize: '0.7rem',
-    color: '#4a6a8a',
+    color: '#555',
   },
-  newGameButton: {
-    padding: '1rem 2rem',
-    background: 'linear-gradient(135deg, #2d4a6a 0%, #1a3a5a 100%)',
-    border: '2px solid #6bb8ff',
-    color: 'white',
-    fontFamily: 'inherit',
-    fontSize: '0.7rem',
+  newBtn: {
+    padding: '6px 16px',
+    background: '#333',
+    border: '1px solid #6bf',
+    color: '#6bf',
+    fontFamily: 'monospace',
     cursor: 'pointer',
-    letterSpacing: '2px',
-  },
-  backLink: {
-    marginTop: '2rem',
-    color: '#6bb8ff',
-    textDecoration: 'none',
-    fontSize: '0.7rem',
-    letterSpacing: '1px',
+    borderRadius: '2px',
   },
   modal: {
     position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'rgba(0, 0, 0, 0.8)',
+    inset: 0,
+    background: 'rgba(0,0,0,0.7)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 1000,
   },
   modalContent: {
-    background: 'linear-gradient(135deg, #1a2a4a 0%, #0a1628 100%)',
-    border: '2px solid #6bb8ff',
-    borderRadius: '8px',
-    padding: '2rem',
+    background: '#252540',
+    padding: '24px',
+    borderRadius: '4px',
+    border: '1px solid #f87171',
     textAlign: 'center',
-    maxWidth: '400px',
   },
-  modalText: {
-    fontSize: '0.8rem',
-    marginBottom: '0.5rem',
-  },
-  modalSubtext: {
-    fontSize: '0.6rem',
-    color: '#f87171',
-    marginBottom: '1.5rem',
-  },
-  modalButtons: {
+  modalActions: {
     display: 'flex',
-    gap: '1rem',
+    gap: '12px',
     justifyContent: 'center',
+    marginTop: '16px',
   },
-  confirmButton: {
-    padding: '0.75rem 1.5rem',
-    background: 'linear-gradient(135deg, #6a2d2d 0%, #5a1a1a 100%)',
-    border: '2px solid #f87171',
-    color: 'white',
-    fontFamily: 'inherit',
-    fontSize: '0.6rem',
+  confirmBtn: {
+    padding: '8px 16px',
+    background: '#7f1d1d',
+    border: '1px solid #f87171',
+    color: '#f87171',
+    fontFamily: 'monospace',
     cursor: 'pointer',
-    letterSpacing: '1px',
+    borderRadius: '2px',
   },
-  cancelButton: {
-    padding: '0.75rem 1.5rem',
-    background: 'linear-gradient(135deg, #2d4a6a 0%, #1a3a5a 100%)',
-    border: '2px solid #6bb8ff',
-    color: 'white',
-    fontFamily: 'inherit',
-    fontSize: '0.6rem',
+  cancelBtn: {
+    padding: '8px 16px',
+    background: 'transparent',
+    border: '1px solid #888',
+    color: '#888',
+    fontFamily: 'monospace',
     cursor: 'pointer',
-    letterSpacing: '1px',
+    borderRadius: '2px',
   },
 };
