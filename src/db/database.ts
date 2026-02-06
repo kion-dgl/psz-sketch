@@ -115,6 +115,13 @@ export function initializeDatabase(): void {
   } catch {
     // Column already exists, ignore error
   }
+
+  // Migration: Add technique_levels column if it doesn't exist
+  try {
+    db.exec(`ALTER TABLE game_state ADD COLUMN technique_levels TEXT`);
+  } catch {
+    // Column already exists, ignore error
+  }
 }
 
 /**

@@ -88,6 +88,17 @@ import {
   getGrindInfo,
 } from '../api/progression';
 
+// Import skills systems
+import {
+  getKnownTechniques,
+  learnTechnique,
+  castTechnique,
+  getAvailablePhotonArts,
+  usePhotonArt,
+  listAllTechniques,
+  listAllPhotonArts,
+} from '../api/skills';
+
 // Initialize missions on module load
 initializeDefaultMissions();
 
@@ -1656,6 +1667,37 @@ export function execute(commandLine: string): CommandResult {
     case 'weapon-types':
       return executeWeaponTypes();
 
+    // Skills commands
+    case 'list-techniques':
+      return executeListTechniques();
+
+    case 'list-photon-arts':
+      return executeListPhotonArts();
+
+    case 'my-techniques':
+      return executeMyTechniques();
+
+    case 'learn-technique':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: learn-technique <technique-id>' };
+      }
+      return executeLearnTechnique(args[0]);
+
+    case 'cast':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: cast <technique-id> [target]' };
+      }
+      return executeCast(args[0], args[1] ? parseInt(args[1]) : undefined);
+
+    case 'photon-art':
+      if (!args[0] || !args[1]) {
+        return { success: false, message: 'Usage: photon-art <art-id> <target>' };
+      }
+      return executePhotonArt(args[0], parseInt(args[1]));
+
+    case 'available-arts':
+      return executeAvailableArts();
+
     default:
       return { success: false, message: `Unknown command: ${command}. Type 'help' for available commands.` };
   }
@@ -1772,6 +1814,120 @@ function executeWeaponTypes(): CommandResult {
   return {
     success: true,
     message: `Usable weapon types:\n  ${types.join(', ')}`,
+  };
+}
+
+// ============================================================================
+// SKILLS COMMANDS
+// ============================================================================
+
+function executeListTechniques(): CommandResult {
+  const result = listAllTechniques();
+  if (!result.success || !result.data) {
+    return result;
+  }
+
+  const lines = result.data.map(t =>
+    `  ${t.id.padEnd(12)} ${t.name.padEnd(10)} (${t.element}) - ${t.type}, ${t.ppCost} PP`
+  );
+
+  return {
+    success: true,
+    message: `Available Techniques:\n${lines.join('\n')}`,
+  };
+}
+
+function executeListPhotonArts(): CommandResult {
+  const result = listAllPhotonArts();
+  if (!result.success || !result.data) {
+    return result;
+  }
+
+  const lines = result.data.map(a =>
+    `  ${a.id.padEnd(15)} ${a.name.padEnd(15)} (${a.weaponType}) - ${a.ppCost} PP`
+  );
+
+  return {
+    success: true,
+    message: `Available Photon Arts:\n${lines.join('\n')}`,
+  };
+}
+
+function executeMyTechniques(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const result = getKnownTechniques(charId);
+  if (!result.success || !result.data) {
+    return result;
+  }
+
+  if (result.data.length === 0) {
+    return { success: true, message: 'No techniques learned yet.' };
+  }
+
+  const lines = result.data.map(t =>
+    `  ${t.technique.name} Lv.${t.level} (${t.technique.element})`
+  );
+
+  return {
+    success: true,
+    message: `Known Techniques:\n${lines.join('\n')}`,
+  };
+}
+
+function executeLearnTechnique(techniqueId: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  return learnTechnique(charId, techniqueId);
+}
+
+function executeCast(techniqueId: string, target?: number): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const result = castTechnique(charId, techniqueId, target);
+  return result;
+}
+
+function executePhotonArt(artId: string, target: number): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  return usePhotonArt(charId, artId, target);
+}
+
+function executeAvailableArts(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const result = getAvailablePhotonArts(charId);
+  if (!result.success || !result.data) {
+    return result;
+  }
+
+  if (result.data.length === 0) {
+    return { success: true, message: 'No photon arts available for your weapon.' };
+  }
+
+  const lines = result.data.map(a =>
+    `  ${a.id.padEnd(15)} ${a.name} - ${a.ppCost} PP`
+  );
+
+  return {
+    success: true,
+    message: `Available Photon Arts:\n${lines.join('\n')}`,
   };
 }
 

@@ -5,7 +5,7 @@
  */
 
 import { execute, getState, resetState } from './api-v2';
-import { getClassStatsAtLevel, getEnemies, getWeapons, getArmors, getMissions, getDropTables, getMaterials, getSetBonuses, getWeaponRestrictions } from '../data/content-loader';
+import { getClassStatsAtLevel, getEnemies, getWeapons, getArmors, getMissions, getDropTables, getMaterials, getSetBonuses, getWeaponRestrictions, getTechniques, getPhotonArts } from '../data/content-loader';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -251,6 +251,44 @@ function runAutomatedTests() {
       const r = execute('grind starter_saber');
       return r.success && r.message.includes('+1');
     }},
+    // Skills tests
+    { name: 'List techniques shows Foie', fn: () => {
+      resetState();
+      execute('create-character FOmarl Test');
+      const r = execute('list-techniques');
+      return r.success && r.message.includes('Foie');
+    }},
+    { name: 'Force can learn techniques', fn: () => {
+      resetState();
+      execute('create-character FOmarl Test');
+      const r = execute('learn-technique foie');
+      return r.success && r.message.includes('Learned');
+    }},
+    { name: 'Hunter cannot learn techniques', fn: () => {
+      resetState();
+      execute('create-character HUmar Test');
+      const r = execute('learn-technique foie');
+      return !r.success && r.message.includes('Force');
+    }},
+    { name: 'My techniques shows learned', fn: () => {
+      resetState();
+      execute('create-character FOmarl Test');
+      execute('learn-technique foie');
+      const r = execute('my-techniques');
+      return r.success && r.message.includes('Foie');
+    }},
+    { name: 'List photon arts works', fn: () => {
+      resetState();
+      execute('create-character HUmar Test');
+      const r = execute('list-photon-arts');
+      return r.success && r.message.includes('Photon Arts');
+    }},
+    { name: 'Available arts for weapon', fn: () => {
+      resetState();
+      execute('create-character HUmar Test');
+      const r = execute('available-arts');
+      return r.success;
+    }},
   ];
 
   for (const test of tests) {
@@ -419,6 +457,22 @@ function runContentTests() {
     name: 'Weapon restrictions loaded',
     passed: restrictions !== null,
     details: restrictions ? `${Object.keys(restrictions.weaponTypes).length} weapon types` : 'Failed'
+  });
+
+  // Techniques loaded
+  const techniques = getTechniques();
+  results.content.push({
+    name: 'Techniques loaded',
+    passed: techniques.size >= 10,
+    details: `${techniques.size} techniques`
+  });
+
+  // Photon arts loaded
+  const photonArts = getPhotonArts();
+  results.content.push({
+    name: 'Photon arts loaded',
+    passed: photonArts.size >= 20,
+    details: `${photonArts.size} photon arts`
   });
 }
 

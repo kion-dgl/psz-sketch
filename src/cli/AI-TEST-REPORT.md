@@ -1,11 +1,11 @@
 # AI Test Report
 
-Generated: 2026-02-06 07:05:44
+Generated: 2026-02-06 07:27:12
 
 ## Test Suite Summary
 
 ### Automated Tests
-**32/32 tests passed**
+**38/38 tests passed**
 
 - ✓ Character Creation - Hunter
 - ✓ Character Creation - Ranger
@@ -39,10 +39,16 @@ Generated: 2026-02-06 07:05:44
 - ✓ Grind info works
 - ✓ Grind requires weapon shop
 - ✓ Grind works at weapon shop
+- ✓ List techniques shows Foie
+- ✓ Force can learn techniques
+- ✓ Hunter cannot learn techniques
+- ✓ My techniques shows learned
+- ✓ List photon arts works
+- ✓ Available arts for weapon
 
 
 ### Integration Tests
-- ✓ Level progression: Reached level 5 in 2 missions
+- ✓ Level progression: Reached level 6 in 3 missions
 - ✓ Equipment cycle: Unequip -> Equip -> Verify
 - ✓ Shop economy: Meseta: 500 -> 350 -> 375
 - ✓ Storage round-trip: Deposit -> Check -> Withdraw
@@ -58,6 +64,8 @@ Generated: 2026-02-06 07:05:44
 - ✓ Materials loaded: 8 materials
 - ✓ Set bonuses loaded: 21 set bonuses
 - ✓ Weapon restrictions loaded: 13 weapon types
+- ✓ Techniques loaded: 19 techniques
+- ✓ Photon arts loaded: 49 photon arts
 
 
 ### Manual Game Flow Test
@@ -69,7 +77,7 @@ Generated: 2026-02-06 07:05:44
 3. Go to guild and start mission...
    ✓ Started mayors-mission on normal.
 4. Fight enemies...
-   ✓ Defeated 5 enemies
+   ✓ Defeated 6 enemies
 5. Check EXP gained...
    ✓ EXP: 175, Level: 3
 6. Return to city (abandon mission)...
@@ -121,10 +129,10 @@ Item Shop: 9 items available
 Weapon Shop: 18 items available
 
 Sample weapon shop items:
-  saber-1770383143947 Saber [Dark 6%]      620 meseta
-  blade-1770383143947 Blade [Thunder 15%]  690 meseta
-  daggers-1770383143947 Daggers [Fire 17%]   544 meseta
-  handgun-1770383143947 Handgun              405 meseta
+  saber-1770384431166 Saber [Ice 14%]      666 meseta
+  blade-1770384431166 Blade                600 meseta
+  daggers-1770384431166 Daggers              465 meseta
+  handgun-1770384431166 Handgun [Fire 5%]    425 meseta
 ```
 
 ---

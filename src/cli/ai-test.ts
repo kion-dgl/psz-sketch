@@ -582,6 +582,75 @@ const tests: TestCase[] = [
       { cmd: 'grind starter_saber', expect: { success: true, messageContains: '+1' } },
     ],
   },
+
+  // ----------------------------------------
+  // Skills - Techniques
+  // ----------------------------------------
+  {
+    name: 'List all techniques',
+    commands: [
+      { cmd: 'create-character FOmarl TechListTest', expect: { success: true } },
+      { cmd: 'list-techniques', expect: { success: true, messageContains: 'Foie' } },
+    ],
+  },
+  {
+    name: 'Force can learn techniques',
+    commands: [
+      { cmd: 'create-character FOmarl TechLearnTest', expect: { success: true } },
+      { cmd: 'learn-technique foie', expect: { success: true, messageContains: 'Learned' } },
+    ],
+  },
+  {
+    name: 'Hunter cannot learn techniques',
+    commands: [
+      { cmd: 'create-character HUmar TechNoLearnTest', expect: { success: true } },
+      { cmd: 'learn-technique foie', expect: { success: false, messageContains: 'Force' } },
+    ],
+  },
+  {
+    name: 'My techniques shows learned',
+    setup: () => {
+      resetState();
+      execute('create-character FOmarl MyTechTest');
+      execute('learn-technique foie');
+    },
+    commands: [
+      { cmd: 'my-techniques', expect: { success: true, messageContains: 'Foie' } },
+    ],
+  },
+  {
+    name: 'Cast technique requires field',
+    commands: [
+      { cmd: 'create-character FOmarl CastCityTest', expect: { success: true } },
+      { cmd: 'learn-technique foie', expect: { success: true } },
+      { cmd: 'cast foie', expect: { success: false, messageContains: 'field' } },
+    ],
+  },
+
+  // ----------------------------------------
+  // Skills - Photon Arts
+  // ----------------------------------------
+  {
+    name: 'List all photon arts',
+    commands: [
+      { cmd: 'create-character HUmar PAListTest', expect: { success: true } },
+      { cmd: 'list-photon-arts', expect: { success: true, messageContains: 'Photon Arts' } },
+    ],
+  },
+  {
+    name: 'Available arts shows weapon-specific',
+    commands: [
+      { cmd: 'create-character HUmar PAAvailTest', expect: { success: true } },
+      { cmd: 'available-arts', expect: { success: true } },
+    ],
+  },
+  {
+    name: 'Photon art requires field',
+    commands: [
+      { cmd: 'create-character HUmar PACityTest', expect: { success: true } },
+      { cmd: 'photon-art rising-strike 0', expect: { success: false, messageContains: 'field' } },
+    ],
+  },
 ];
 
 // ============================================

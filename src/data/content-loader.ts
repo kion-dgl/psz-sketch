@@ -694,6 +694,142 @@ export function getUsableWeaponTypes(classId: string): string[] {
   return usable;
 }
 
+// ============================================================================
+// PHOTON ARTS
+// ============================================================================
+
+export interface PhotonArtData {
+  id: string;
+  name: string;
+  weaponType: string;
+  classType: 'Hunter' | 'Ranger' | 'Force';
+  attackMod: number | null;
+  accuracyMod?: number;
+  ppCost: number;
+  targets?: number;
+  range?: string;
+  area?: number;
+  hits?: number;
+  notes?: string;
+}
+
+let photonArtsCache: Map<string, PhotonArtData> | null = null;
+
+/**
+ * Get all photon arts
+ */
+export function getPhotonArts(): Map<string, PhotonArtData> {
+  if (!photonArtsCache) {
+    photonArtsCache = loadJsonDir<PhotonArtData>('photon-arts');
+  }
+  return photonArtsCache;
+}
+
+/**
+ * Get a specific photon art
+ */
+export function getPhotonArt(id: string): PhotonArtData | undefined {
+  return getPhotonArts().get(id);
+}
+
+/**
+ * Get photon arts for a weapon type
+ */
+export function getPhotonArtsForWeapon(weaponType: string): PhotonArtData[] {
+  return Array.from(getPhotonArts().values())
+    .filter(pa => pa.weaponType.toLowerCase() === weaponType.toLowerCase());
+}
+
+/**
+ * Get photon arts for a class type
+ */
+export function getPhotonArtsForClass(classType: string): PhotonArtData[] {
+  const type = classType.toLowerCase();
+  let category: string;
+  if (type.startsWith('hu')) category = 'Hunter';
+  else if (type.startsWith('ra')) category = 'Ranger';
+  else if (type.startsWith('fo')) category = 'Force';
+  else return [];
+
+  return Array.from(getPhotonArts().values())
+    .filter(pa => pa.classType === category);
+}
+
+// ============================================================================
+// TECHNIQUES (Spells)
+// ============================================================================
+
+export interface TechniqueData {
+  id: string;
+  name: string;
+  element: 'fire' | 'ice' | 'lightning' | 'light' | 'dark' | 'support';
+  type: 'attack' | 'heal' | 'buff' | 'debuff';
+  basePower: number;
+  ppCost: number;
+  range: 'single' | 'area' | 'self' | 'party';
+  description: string;
+  maxLevel: number;
+}
+
+// Hardcoded techniques (classic PSO spells)
+const TECHNIQUES: TechniqueData[] = [
+  // Fire
+  { id: 'foie', name: 'Foie', element: 'fire', type: 'attack', basePower: 50, ppCost: 5, range: 'single', description: 'Fire attack', maxLevel: 30 },
+  { id: 'gifoie', name: 'Gifoie', element: 'fire', type: 'attack', basePower: 120, ppCost: 20, range: 'area', description: 'Fire explosion', maxLevel: 30 },
+  { id: 'rafoie', name: 'Rafoie', element: 'fire', type: 'attack', basePower: 200, ppCost: 30, range: 'area', description: 'Fire storm', maxLevel: 30 },
+  // Ice
+  { id: 'barta', name: 'Barta', element: 'ice', type: 'attack', basePower: 55, ppCost: 6, range: 'single', description: 'Ice attack', maxLevel: 30 },
+  { id: 'gibarta', name: 'Gibarta', element: 'ice', type: 'attack', basePower: 130, ppCost: 22, range: 'area', description: 'Ice wave', maxLevel: 30 },
+  { id: 'rabarta', name: 'Rabarta', element: 'ice', type: 'attack', basePower: 220, ppCost: 35, range: 'area', description: 'Blizzard', maxLevel: 30 },
+  // Lightning
+  { id: 'zonde', name: 'Zonde', element: 'lightning', type: 'attack', basePower: 45, ppCost: 4, range: 'single', description: 'Lightning bolt', maxLevel: 30 },
+  { id: 'gizonde', name: 'Gizonde', element: 'lightning', type: 'attack', basePower: 110, ppCost: 18, range: 'area', description: 'Chain lightning', maxLevel: 30 },
+  { id: 'razonde', name: 'Razonde', element: 'lightning', type: 'attack', basePower: 180, ppCost: 28, range: 'area', description: 'Thunder storm', maxLevel: 30 },
+  // Light
+  { id: 'grants', name: 'Grants', element: 'light', type: 'attack', basePower: 300, ppCost: 50, range: 'single', description: 'Holy light', maxLevel: 30 },
+  // Dark
+  { id: 'megid', name: 'Megid', element: 'dark', type: 'attack', basePower: 0, ppCost: 40, range: 'single', description: 'Instant death (30% chance)', maxLevel: 30 },
+  // Support
+  { id: 'resta', name: 'Resta', element: 'support', type: 'heal', basePower: 100, ppCost: 10, range: 'party', description: 'Heal HP', maxLevel: 30 },
+  { id: 'anti', name: 'Anti', element: 'support', type: 'heal', basePower: 0, ppCost: 8, range: 'single', description: 'Cure status', maxLevel: 30 },
+  { id: 'reverser', name: 'Reverser', element: 'support', type: 'heal', basePower: 0, ppCost: 20, range: 'single', description: 'Revive ally', maxLevel: 30 },
+  { id: 'shifta', name: 'Shifta', element: 'support', type: 'buff', basePower: 10, ppCost: 15, range: 'party', description: 'Boost ATK', maxLevel: 30 },
+  { id: 'deband', name: 'Deband', element: 'support', type: 'buff', basePower: 10, ppCost: 15, range: 'party', description: 'Boost DEF', maxLevel: 30 },
+  { id: 'jellen', name: 'Jellen', element: 'support', type: 'debuff', basePower: 10, ppCost: 12, range: 'area', description: 'Lower enemy ATK', maxLevel: 30 },
+  { id: 'zalure', name: 'Zalure', element: 'support', type: 'debuff', basePower: 10, ppCost: 12, range: 'area', description: 'Lower enemy DEF', maxLevel: 30 },
+  { id: 'ryuker', name: 'Ryuker', element: 'support', type: 'buff', basePower: 0, ppCost: 30, range: 'self', description: 'Create telepipe', maxLevel: 1 },
+];
+
+let techniquesCache: Map<string, TechniqueData> | null = null;
+
+/**
+ * Get all techniques
+ */
+export function getTechniques(): Map<string, TechniqueData> {
+  if (!techniquesCache) {
+    techniquesCache = new Map();
+    for (const tech of TECHNIQUES) {
+      techniquesCache.set(tech.id, tech);
+    }
+  }
+  return techniquesCache;
+}
+
+/**
+ * Get a specific technique
+ */
+export function getTechnique(id: string): TechniqueData | undefined {
+  return getTechniques().get(id);
+}
+
+/**
+ * Get techniques by element
+ */
+export function getTechniquesByElement(element: string): TechniqueData[] {
+  return Array.from(getTechniques().values())
+    .filter(t => t.element === element.toLowerCase());
+}
+
 /**
  * Clear all caches (for testing)
  */
@@ -710,6 +846,8 @@ export function clearContentCaches(): void {
   materialsCache = null;
   setBonusesCache = null;
   weaponRestrictionsCache = null;
+  photonArtsCache = null;
+  techniquesCache = null;
 }
 
 /**
