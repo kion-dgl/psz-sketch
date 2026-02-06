@@ -34,6 +34,9 @@ import {
   type EnemyPartDrop,
 } from '../systems/drops/enemy-parts';
 import { generateRandomDisk } from './skills';
+import { MONOGRINDER, DIGRINDER, TRIGRINDER, createUnidentifiedWeapon } from './tekker';
+import { getWeapons, type WeaponData } from '../data/content-loader';
+import type { WeaponItem } from '../systems/inventory/types';
 
 export type Difficulty = 'normal' | 'hard' | 'super-hard';
 
@@ -830,6 +833,115 @@ function generateDrops(characterId: string, enemy: EnemyInstance): void {
       type: 'item',
       itemId,
     });
+  }
+
+  // Grinder drops
+  // Normal enemies: 5% monogrinder
+  // Rare enemies: 10% monogrinder, 5% digrinder
+  // Bosses: 15% monogrinder, 10% digrinder, 5% trigrinder
+  const grinderRoll = Math.random();
+  let grinder = null;
+
+  if (isBoss) {
+    if (grinderRoll < 0.05) {
+      grinder = TRIGRINDER;
+    } else if (grinderRoll < 0.15) {
+      grinder = DIGRINDER;
+    } else if (grinderRoll < 0.30) {
+      grinder = MONOGRINDER;
+    }
+  } else if (isRare) {
+    if (grinderRoll < 0.05) {
+      grinder = DIGRINDER;
+    } else if (grinderRoll < 0.15) {
+      grinder = MONOGRINDER;
+    }
+  } else {
+    if (grinderRoll < 0.05) {
+      grinder = MONOGRINDER;
+    }
+  }
+
+  if (grinder) {
+    state.droppedItems.push({
+      id: dropId++,
+      type: 'item',
+      itemId: grinder.id,
+      itemData: JSON.stringify(grinder),
+    });
+  }
+
+  // Weapon drops
+  // Normal enemies: 1% any weapon (rarity 1-3)
+  // Rare enemies: 5% weapon (rarity 2-5)
+  // Bosses: 15% weapon (rarity 3-7)
+  const weaponRoll = Math.random();
+  let weaponDropChance = 0.01;
+  let minRarity = 1;
+  let maxRarity = 3;
+
+  if (isBoss) {
+    weaponDropChance = 0.15;
+    minRarity = 3;
+    maxRarity = 7;
+  } else if (isRare) {
+    weaponDropChance = 0.05;
+    minRarity = 2;
+    maxRarity = 5;
+  }
+
+  // Difficulty affects rarity range
+  const difficulty = gameState?.sessionData?.difficulty ?? 'normal';
+  if (difficulty === 'hard') {
+    minRarity = Math.min(minRarity + 1, 4);
+    maxRarity = Math.min(maxRarity + 1, 7);
+  } else if (difficulty === 'super-hard') {
+    minRarity = Math.min(minRarity + 2, 5);
+    maxRarity = 7;
+  }
+
+  if (weaponRoll < weaponDropChance) {
+    const allWeapons = Array.from(getWeapons().values());
+    const eligibleWeapons = allWeapons.filter(
+      w => w.rarity >= minRarity && w.rarity <= maxRarity
+    );
+
+    if (eligibleWeapons.length > 0) {
+      const weaponData = eligibleWeapons[Math.floor(Math.random() * eligibleWeapons.length)];
+
+      // Convert to WeaponItem
+      let droppedWeapon: WeaponItem = {
+        id: `${weaponData.name.toLowerCase().replace(/\s+/g, '-')}_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+        name: weaponData.name,
+        description: `${weaponData.weaponType} - ATK ${weaponData.attackBase}`,
+        type: 'weapon',
+        weaponType: weaponData.weaponType,
+        attack: weaponData.attackBase ?? 30,
+        accuracy: weaponData.accuracyBase ?? 50,
+        element: weaponData.element?.toLowerCase(),
+        elementPercent: weaponData.elementLevel ? weaponData.elementLevel * 10 : undefined,
+        grindLevel: 0,
+        maxGrind: weaponData.maxGrind ?? 10,
+        rarity: weaponData.rarity,
+        sellPrice: weaponData.resaleValue ?? (weaponData.rarity * 100),
+        requiredLevel: weaponData.level ?? 1,
+        stackable: false,
+        maxStack: 1,
+        identified: true, // Will be overridden for 5-7★
+      };
+
+      // Make 5-7★ weapons unidentified (SPECIAL WEAPON)
+      if (weaponData.rarity >= 5) {
+        droppedWeapon = createUnidentifiedWeapon(droppedWeapon);
+      }
+
+      state.droppedItems.push({
+        id: dropId++,
+        type: 'item',
+        itemId: droppedWeapon.id,
+        itemData: JSON.stringify(droppedWeapon),
+      });
+    }
   }
 }
 

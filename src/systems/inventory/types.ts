@@ -23,6 +23,20 @@ export interface WeaponItem extends ItemBase {
   maxGrind: number;
   requiredLevel: number;
   classRestrictions?: string[];
+  /** For 5-7★ weapons: false until appraised by Tekker */
+  identified?: boolean;
+  /** Original name/stats hidden until identified */
+  hiddenName?: string;
+  hiddenAttack?: number;
+  hiddenAccuracy?: number;
+  hiddenElement?: string;
+  hiddenElementPercent?: number;
+}
+
+export interface GrinderItem extends ItemBase {
+  type: 'grinder';
+  /** How much grind level this adds (+1, +2, or +3) */
+  grindBonus: number;
 }
 
 export interface ArmorItem extends ItemBase {
@@ -65,7 +79,7 @@ export interface MaterialItem extends ItemBase {
   materialType: string;
 }
 
-export type GameItem = WeaponItem | ArmorItem | UnitItem | ConsumableItem | MaterialItem;
+export type GameItem = WeaponItem | ArmorItem | UnitItem | ConsumableItem | MaterialItem | GrinderItem;
 
 export interface InventorySlot {
   item: GameItem;

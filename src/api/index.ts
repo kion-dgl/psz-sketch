@@ -111,11 +111,31 @@ export {
 export {
   getItemShopInventory,
   getWeaponShopInventory,
+  getTechShopInventory,
   refreshWeaponShopInventory,
+  refreshTechShopInventory,
   buyItem,
   buyEquipment,
+  buyTechDisk,
   sellItem,
 } from './shop';
+
+// Tekker API
+export {
+  applyGrinder,
+  identifyWeapon,
+  getGrindInfo,
+  getIdentifyCostInfo,
+  getUnidentifiedWeapons,
+  createUnidentifiedWeapon,
+  MONOGRINDER,
+  DIGRINDER,
+  TRIGRINDER,
+  GRINDERS,
+} from './tekker';
+
+// Grinder item type
+export type { GrinderItem } from '../systems/inventory/types';
 
 // Common types
 export interface ApiResult<T = unknown> {
