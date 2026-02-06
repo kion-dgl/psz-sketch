@@ -4,5 +4,7 @@
   "element": "Beast",
   "locations": ["Rioh Snowfield", "Eternal Tower"],
   "isRare": false,
+  "isBoss": true,
+  "bossType": "wave",
   "modelId": "gorilla"
 }
