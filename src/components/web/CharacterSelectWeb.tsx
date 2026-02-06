@@ -17,24 +17,28 @@ export default function CharacterSelectWeb({
 }: CharacterSelectWebProps) {
   const [characters, setCharacters] = useState<CharacterSlots>([null, null, null, null]);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadCharacters();
   }, []);
 
-  const loadCharacters = () => {
-    const stored = localStorage.getItem('characters');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
+  const loadCharacters = async () => {
+    try {
+      const response = await fetch('/api/characters');
+      if (response.ok) {
+        const data = await response.json();
+        // data is an array of 4 slots (null or character)
         const slots: CharacterSlots = [null, null, null, null];
-        for (let i = 0; i < Math.min(parsed.length, 4); i++) {
-          slots[i] = parsed[i];
+        for (let i = 0; i < 4; i++) {
+          slots[i] = data[i] || null;
         }
         setCharacters(slots);
-      } catch {
-        setCharacters([null, null, null, null]);
       }
+    } catch (error) {
+      console.error('Failed to load characters:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -59,15 +63,33 @@ export default function CharacterSelectWeb({
     setDeleteConfirm(slot);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (deleteConfirm !== null) {
-      const newCharacters = [...characters];
-      newCharacters[deleteConfirm] = null;
-      localStorage.setItem('characters', JSON.stringify(newCharacters));
-      setCharacters(newCharacters);
+      const character = characters[deleteConfirm];
+      if (character) {
+        try {
+          const response = await fetch(`/api/characters/${character.character_id}`, {
+            method: 'DELETE',
+          });
+          if (response.ok) {
+            // Reload characters from server
+            await loadCharacters();
+          }
+        } catch (error) {
+          console.error('Failed to delete character:', error);
+        }
+      }
       setDeleteConfirm(null);
     }
   };
+
+  if (loading) {
+    return (
+      <div style={styles.container}>
+        <h1 style={styles.title}>Loading...</h1>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
