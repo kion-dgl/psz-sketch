@@ -101,6 +101,8 @@ import {
   usePhotonArt,
   listAllTechniques,
   listAllPhotonArts,
+  useDisk,
+  type TechniqueDisk,
 } from '../api/skills';
 
 // Import mag system
@@ -1083,6 +1085,21 @@ function executeUseItem(itemId: string): CommandResult {
   const charId = getCurrentCharacterId();
   if (!charId) {
     return { success: false, message: 'No character loaded.' };
+  }
+
+  // Check if item is a technique disk
+  const inventoryItem = getItem(charId, itemId);
+  if (inventoryItem?.item) {
+    const item = inventoryItem.item as any;
+    if (item.type === 'disk' && item.techniqueId && item.level) {
+      // Use technique disk
+      const diskResult = useDisk(charId, item as TechniqueDisk);
+      if (diskResult.success) {
+        // Remove disk from inventory
+        removeItem(charId, itemId, 1);
+      }
+      return diskResult;
+    }
   }
 
   // Special handling for telepipe - check if in field first

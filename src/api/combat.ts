@@ -33,6 +33,7 @@ import {
   createPhotonDrop,
   type EnemyPartDrop,
 } from '../systems/drops/enemy-parts';
+import { generateRandomDisk } from './skills';
 
 export type Difficulty = 'normal' | 'hard' | 'super-hard';
 
@@ -762,6 +763,7 @@ export function processEnemyStatusEffects(characterId: string): ApiResult<{ mess
  */
 function generateDrops(characterId: string, enemy: EnemyInstance): void {
   const state = getCombatState(characterId);
+  const gameState = getGameState(characterId);
   let dropId = state.droppedItems.length;
 
   // Always drop meseta
@@ -797,6 +799,25 @@ function generateDrops(characterId: string, enemy: EnemyInstance): void {
       type: 'item',
       itemId: part.id,
       itemData: JSON.stringify(part),
+    });
+  }
+
+  // Technique Disk drops
+  // Drop rates: Normal enemies 3%, Rare 10%, Boss 25%
+  // Higher difficulties have better rates
+  const diskDropChance = isBoss ? 0.25 : isRare ? 0.10 : 0.03;
+  const difficultyBonus = gameState?.sessionData?.difficulty === 'super-hard' ? 0.05 :
+                          gameState?.sessionData?.difficulty === 'hard' ? 0.02 : 0;
+
+  if (Math.random() < diskDropChance + difficultyBonus) {
+    const areaId = gameState?.sessionData?.areaId ?? 'gurhacia';
+    const difficulty = (gameState?.sessionData?.difficulty as Difficulty) ?? 'normal';
+    const disk = generateRandomDisk(areaId, difficulty, isBoss, isRare);
+    state.droppedItems.push({
+      id: dropId++,
+      type: 'item',
+      itemId: disk.id,
+      itemData: JSON.stringify(disk),
     });
   }
 
