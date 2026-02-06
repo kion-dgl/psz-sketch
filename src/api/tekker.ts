@@ -75,19 +75,11 @@ function getGrindCost(weapon: WeaponItem, currentGrind: number): number {
 }
 
 /**
- * Grind success rate - higher grind levels have lower success
- * Failure doesn't consume the grinder but still costs meseta
+ * Grind success rate - always 100%
+ * Finding grinders + paying meseta is limitation enough
  */
-function getGrindSuccessRate(currentGrind: number, grindBonus: number): number {
-  // Base rates for different grind ranges
-  if (currentGrind < 3) return 100;
-  if (currentGrind < 5) return 95;
-  if (currentGrind < 7) return 85;
-  if (currentGrind < 9) return 70;
-
-  // Higher grinders have slightly better rates at high levels
-  const bonusRate = (grindBonus - 1) * 5;
-  return Math.min(60 + bonusRate, 75);
+function getGrindSuccessRate(_currentGrind: number, _grindBonus: number): number {
+  return 100;
 }
 
 // ============================================================================
@@ -166,24 +158,8 @@ export function applyGrinder(
     return { success: false, message: `Not enough meseta. Need ${cost}, have ${char.meseta}.` };
   }
 
-  // Deduct meseta first (always costs meseta whether success or fail)
+  // Deduct meseta and consume grinder
   updateMeseta(characterId, -cost);
-
-  // Check success rate
-  const successRate = getGrindSuccessRate(currentGrind, grinder.grindBonus);
-  const roll = Math.random() * 100;
-  const succeeded = roll < successRate;
-
-  if (!succeeded) {
-    // Failure - grinder is NOT consumed, only meseta lost
-    return {
-      success: false,
-      message: `Grinding failed! (${successRate}% chance) Lost ${cost} meseta. Grinder preserved.`,
-      data: { success: false, grindConsumed: false },
-    };
-  }
-
-  // Success - consume grinder
   removeItem(characterId, grinderItemId, 1);
 
   // Calculate new grind (capped at max)
