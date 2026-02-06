@@ -90,6 +90,20 @@ export function initializeDatabase(): void {
       FOREIGN KEY (character_id) REFERENCES characters(id) ON DELETE CASCADE
     );
 
+    -- Material bonuses (permanent stat increases from materials)
+    CREATE TABLE IF NOT EXISTS material_bonuses (
+      character_id TEXT PRIMARY KEY,
+      attack_bonus INTEGER NOT NULL DEFAULT 0,
+      defense_bonus INTEGER NOT NULL DEFAULT 0,
+      accuracy_bonus INTEGER NOT NULL DEFAULT 0,
+      evasion_bonus INTEGER NOT NULL DEFAULT 0,
+      hp_bonus INTEGER NOT NULL DEFAULT 0,
+      pp_bonus INTEGER NOT NULL DEFAULT 0,
+      technique_bonus INTEGER NOT NULL DEFAULT 0,
+      materials_used INTEGER NOT NULL DEFAULT 0,
+      FOREIGN KEY (character_id) REFERENCES characters(id) ON DELETE CASCADE
+    );
+
     -- Create indexes for common queries
     CREATE INDEX IF NOT EXISTS idx_inventory_character ON inventory(character_id);
     CREATE INDEX IF NOT EXISTS idx_equipment_character ON equipment(character_id);

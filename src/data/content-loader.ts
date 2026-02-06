@@ -522,6 +522,178 @@ export function getMissionsForArea(area: string): MissionData[] {
     .filter(m => m.area.toLowerCase().includes(area.toLowerCase()));
 }
 
+// ============================================================================
+// MATERIALS
+// ============================================================================
+
+export interface MaterialData {
+  id: string;
+  name: string;
+  japaneseName?: string;
+  details: string;
+  rarity: number;
+  stat?: 'attack' | 'defense' | 'accuracy' | 'evasion' | 'hp' | 'pp' | 'technique';
+  psoWorldId?: number;
+}
+
+let materialsCache: Map<string, MaterialData> | null = null;
+
+/**
+ * Get all materials
+ */
+export function getMaterials(): Map<string, MaterialData> {
+  if (!materialsCache) {
+    materialsCache = loadJsonDir<MaterialData>('materials');
+    // Add stat mapping based on material name
+    for (const [id, mat] of materialsCache) {
+      if (id.includes('power')) mat.stat = 'attack';
+      else if (id.includes('guard')) mat.stat = 'defense';
+      else if (id.includes('hit')) mat.stat = 'accuracy';
+      else if (id.includes('swift')) mat.stat = 'evasion';
+      else if (id.includes('hp')) mat.stat = 'hp';
+      else if (id.includes('pp')) mat.stat = 'pp';
+      else if (id.includes('mind')) mat.stat = 'technique';
+    }
+  }
+  return materialsCache;
+}
+
+/**
+ * Get a specific material by ID
+ */
+export function getMaterial(id: string): MaterialData | undefined {
+  return getMaterials().get(id);
+}
+
+// ============================================================================
+// SET BONUSES
+// ============================================================================
+
+export interface SetBonusData {
+  id: string;
+  armor: string;
+  weapons: string[];
+  bonuses: {
+    attack: number;
+    mental: number;
+    accuracy: number;
+    defense: number;
+    evasion: number;
+  };
+}
+
+let setBonusesCache: Map<string, SetBonusData> | null = null;
+
+/**
+ * Get all set bonuses
+ */
+export function getSetBonuses(): Map<string, SetBonusData> {
+  if (!setBonusesCache) {
+    setBonusesCache = loadJsonDir<SetBonusData>('set-bonuses');
+  }
+  return setBonusesCache;
+}
+
+/**
+ * Get set bonus for an armor
+ */
+export function getSetBonusForArmor(armorName: string): SetBonusData | undefined {
+  for (const [id, bonus] of getSetBonuses()) {
+    if (bonus.armor.toLowerCase() === armorName.toLowerCase()) {
+      return bonus;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Check if weapon completes a set with armor
+ */
+export function checkSetBonus(armorName: string, weaponName: string): SetBonusData | null {
+  const setBonus = getSetBonusForArmor(armorName);
+  if (!setBonus) return null;
+
+  const hasWeapon = setBonus.weapons.some(w =>
+    w.toLowerCase() === weaponName.toLowerCase()
+  );
+
+  return hasWeapon ? setBonus : null;
+}
+
+// ============================================================================
+// WEAPON RESTRICTIONS
+// ============================================================================
+
+export interface WeaponRestrictionsData {
+  classMapping: Record<string, string[]>;
+  weaponTypes: Record<string, {
+    label: string;
+    usableBy: string[];
+  }>;
+}
+
+let weaponRestrictionsCache: WeaponRestrictionsData | null = null;
+
+/**
+ * Get weapon restrictions data
+ */
+export function getWeaponRestrictions(): WeaponRestrictionsData | null {
+  if (!weaponRestrictionsCache) {
+    weaponRestrictionsCache = loadJsonFile<WeaponRestrictionsData>('class-weapon-restrictions.json');
+  }
+  return weaponRestrictionsCache;
+}
+
+/**
+ * Check if a class can use a weapon type
+ */
+export function canClassUseWeaponType(classId: string, weaponType: string): boolean {
+  const restrictions = getWeaponRestrictions();
+  if (!restrictions) return true; // Allow if no restrictions loaded
+
+  const weaponData = restrictions.weaponTypes[weaponType.toLowerCase()];
+  if (!weaponData) return true; // Allow unknown weapon types
+
+  // Find which class group this class belongs to
+  const classLower = classId.toLowerCase();
+  for (const [groupName, classes] of Object.entries(restrictions.classMapping)) {
+    if (classes.includes(classLower)) {
+      return weaponData.usableBy.includes(groupName);
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Get all weapon types usable by a class
+ */
+export function getUsableWeaponTypes(classId: string): string[] {
+  const restrictions = getWeaponRestrictions();
+  if (!restrictions) return [];
+
+  const classLower = classId.toLowerCase();
+  let classGroup: string | null = null;
+
+  for (const [groupName, classes] of Object.entries(restrictions.classMapping)) {
+    if (classes.includes(classLower)) {
+      classGroup = groupName;
+      break;
+    }
+  }
+
+  if (!classGroup) return [];
+
+  const usable: string[] = [];
+  for (const [type, data] of Object.entries(restrictions.weaponTypes)) {
+    if (data.usableBy.includes(classGroup)) {
+      usable.push(type);
+    }
+  }
+
+  return usable;
+}
+
 /**
  * Clear all caches (for testing)
  */
@@ -535,6 +707,9 @@ export function clearContentCaches(): void {
   shopsCache = null;
   dropTablesCache = null;
   missionsCache = null;
+  materialsCache = null;
+  setBonusesCache = null;
+  weaponRestrictionsCache = null;
 }
 
 /**

@@ -74,7 +74,19 @@ import {
 
 // Import mission data
 import { getAllMissions, initializeDefaultMissions } from '../systems/mission';
-import { getClassStatsAtLevel } from '../data/content-loader';
+import { getClassStatsAtLevel, canClassUseWeaponType } from '../data/content-loader';
+
+// Import progression systems
+import {
+  getMaterialBonuses,
+  getMaterialLimit,
+  useMaterial,
+  getActiveSetBonus,
+  getSetBonusInfo,
+  getEquippableWeaponTypes,
+  grindWeapon,
+  getGrindInfo,
+} from '../api/progression';
 
 // Initialize missions on module load
 initializeDefaultMissions();
@@ -714,13 +726,27 @@ function executeShowStats(): CommandResult {
     armorEva = (equipment.frame as ArmorItem).evasion ?? 0;
   }
 
-  const hp = classStats?.hp ?? (100 + char.level * 20);
-  const tp = classStats?.pp ?? (50 + char.level * 10);
-  const atk = (classStats?.attack ?? (15 + char.level * 3)) + weaponAtk;
-  const def = (classStats?.defense ?? (10 + char.level * 2)) + armorDef;
-  const acc = classStats?.accuracy ?? (100 + char.level * 2);
-  const eva = (classStats?.evasion ?? (50 + char.level)) + armorEva;
-  const mst = classStats?.technique ?? (10 + char.level);
+  // Get material bonuses
+  const matBonuses = getMaterialBonuses(charId);
+
+  // Get set bonus
+  const setBonus = getActiveSetBonus(charId);
+  let setAtk = 0, setDef = 0, setAcc = 0, setEva = 0, setMst = 0;
+  if (setBonus) {
+    setAtk = setBonus.bonuses.attack;
+    setDef = setBonus.bonuses.defense;
+    setAcc = setBonus.bonuses.accuracy;
+    setEva = setBonus.bonuses.evasion;
+    setMst = setBonus.bonuses.mental;
+  }
+
+  const hp = (classStats?.hp ?? (100 + char.level * 20)) + matBonuses.hp;
+  const tp = (classStats?.pp ?? (50 + char.level * 10)) + matBonuses.pp;
+  const atk = (classStats?.attack ?? (15 + char.level * 3)) + weaponAtk + matBonuses.attack + setAtk;
+  const def = (classStats?.defense ?? (10 + char.level * 2)) + armorDef + matBonuses.defense + setDef;
+  const acc = (classStats?.accuracy ?? (100 + char.level * 2)) + matBonuses.accuracy + setAcc;
+  const eva = (classStats?.evasion ?? (50 + char.level)) + armorEva + matBonuses.evasion + setEva;
+  const mst = (classStats?.technique ?? (10 + char.level)) + matBonuses.technique + setMst;
 
   const lines = [
     `Name: ${char.name}`,
@@ -733,6 +759,10 @@ function executeShowStats(): CommandResult {
     `ACC: ${acc} | EVA: ${eva}`,
     `MST: ${mst}`,
   ];
+
+  if (setBonus) {
+    lines.push(`[Set Bonus: ${setBonus.armor}]`);
+  }
 
   return {
     success: true,
@@ -891,6 +921,11 @@ function executeEquip(itemId: string): CommandResult {
     return { success: false, message: 'No character loaded.' };
   }
 
+  const char = getCharacter(charId);
+  if (!char) {
+    return { success: false, message: 'Character not found.' };
+  }
+
   const item = getItem(charId, itemId);
   if (!item) {
     return { success: false, message: 'Item not in inventory.' };
@@ -899,6 +934,12 @@ function executeEquip(itemId: string): CommandResult {
   const itemType = item.item.type;
 
   if (itemType === 'weapon') {
+    // Check weapon restriction
+    const weapon = item.item as WeaponItem;
+    const weaponType = weapon.weaponType?.toLowerCase() ?? 'saber';
+    if (!canClassUseWeaponType(char.class_id, weaponType)) {
+      return { success: false, message: `${char.class_id} cannot equip ${weaponType} weapons.` };
+    }
     return equipWeapon(charId, itemId);
   } else if (itemType === 'armor') {
     return equipFrame(charId, itemId);
@@ -1587,9 +1628,151 @@ export function execute(commandLine: string): CommandResult {
       }
       return executeWithdrawMeseta(args[0]);
 
+    // Progression commands
+    case 'use-material':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: use-material <material-id>' };
+      }
+      return executeUseMaterial(args[0]);
+
+    case 'show-bonuses':
+      return executeShowBonuses();
+
+    case 'show-set-bonus':
+      return executeShowSetBonus();
+
+    case 'grind':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: grind <weapon-id>' };
+      }
+      return executeGrind(args[0]);
+
+    case 'grind-info':
+      if (!args[0]) {
+        return { success: false, message: 'Usage: grind-info <weapon-id>' };
+      }
+      return executeGrindInfo(args[0]);
+
+    case 'weapon-types':
+      return executeWeaponTypes();
+
     default:
       return { success: false, message: `Unknown command: ${command}. Type 'help' for available commands.` };
   }
+}
+
+// ============================================================================
+// PROGRESSION COMMANDS
+// ============================================================================
+
+function executeUseMaterial(materialId: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  return useMaterial(charId, materialId);
+}
+
+function executeShowBonuses(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const char = getCharacter(charId);
+  if (!char) {
+    return { success: false, message: 'Character not found.' };
+  }
+
+  const bonuses = getMaterialBonuses(charId);
+  const limit = getMaterialLimit(char.class_id);
+
+  const lines = [
+    `Material Bonuses (${bonuses.materialsUsed}/${limit} used):`,
+    `  ATK: +${bonuses.attack}`,
+    `  DEF: +${bonuses.defense}`,
+    `  ACC: +${bonuses.accuracy}`,
+    `  EVA: +${bonuses.evasion}`,
+    `  HP:  +${bonuses.hp}`,
+    `  PP:  +${bonuses.pp}`,
+    `  MST: +${bonuses.technique}`,
+  ];
+
+  return { success: true, message: lines.join('\n') };
+}
+
+function executeShowSetBonus(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const result = getSetBonusInfo(charId);
+  if (!result.success) {
+    return result;
+  }
+
+  const data = result.data!;
+  if (data.active && data.bonuses) {
+    const lines = [
+      `Set Bonus Active: ${data.armorName} + ${data.weaponName}`,
+      `  ATK: +${data.bonuses.attack}`,
+      `  DEF: +${data.bonuses.defense}`,
+      `  ACC: +${data.bonuses.accuracy}`,
+      `  EVA: +${data.bonuses.evasion}`,
+      `  MST: +${data.bonuses.mental}`,
+    ];
+    return { success: true, message: lines.join('\n') };
+  } else if (data.matchingWeapons) {
+    return {
+      success: true,
+      message: `${data.armorName} can form a set with:\n  ${data.matchingWeapons.join('\n  ')}`,
+    };
+  }
+
+  return { success: true, message: 'No set bonus available for current equipment.' };
+}
+
+function executeGrind(weaponId: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const location = getLocation(charId);
+  if (location !== 'weapon-shop') {
+    return { success: false, message: 'Must be at weapon shop to grind weapons.' };
+  }
+
+  return grindWeapon(charId, weaponId);
+}
+
+function executeGrindInfo(weaponId: string): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  return getGrindInfo(charId, weaponId);
+}
+
+function executeWeaponTypes(): CommandResult {
+  const charId = getCurrentCharacterId();
+  if (!charId) {
+    return { success: false, message: 'No character loaded.' };
+  }
+
+  const result = getEquippableWeaponTypes(charId);
+  if (!result.success) {
+    return result;
+  }
+
+  const types = result.data!;
+  return {
+    success: true,
+    message: `Usable weapon types:\n  ${types.join(', ')}`,
+  };
 }
 
 /**
