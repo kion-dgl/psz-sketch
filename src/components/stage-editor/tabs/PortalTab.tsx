@@ -1,4 +1,4 @@
-import type { UnifiedStageConfig, PortalData, GateDirection, PreviewModel } from '../types';
+import type { UnifiedStageConfig, PortalData, GateDirection, PreviewModel, SpawnPointData } from '../types';
 import { DIRECTION_ROTATIONS } from '../types';
 
 interface PortalTabProps {
@@ -13,6 +13,8 @@ interface PortalTabProps {
   setPreviewModel: (model: PreviewModel) => void;
   selectedPortalId: string | null;
   setSelectedPortalId: (id: string | null) => void;
+  spawnPlacementMode: boolean;
+  setSpawnPlacementMode: (mode: boolean) => void;
 }
 
 const DIRECTIONS: GateDirection[] = ['north', 'south', 'east', 'west'];
@@ -29,6 +31,8 @@ export default function PortalTab({
   setPreviewModel,
   selectedPortalId,
   setSelectedPortalId,
+  spawnPlacementMode,
+  setSpawnPlacementMode,
 }: PortalTabProps) {
   // Get selected portal
   const selectedPortal = config.portals.find((p) => p.id === selectedPortalId);
@@ -344,6 +348,164 @@ export default function PortalTab({
         <p style={{ margin: '4px 0' }}>• <b>Click in the scene</b> where you want to place the portal</p>
         <p style={{ margin: '4px 0' }}>• Click an existing portal to select and adjust its position</p>
       </div>
+
+      {/* Default Spawn Point */}
+      <h3 style={{ margin: '16px 0 0 0', borderBottom: '1px solid #444', paddingBottom: '8px' }}>
+        Default Spawn Point
+      </h3>
+
+      <div style={{ fontSize: '11px', color: '#666', marginBottom: '8px' }}>
+        For boss rooms and areas without gate portals. Exported as <code>spawn_default</code>.
+      </div>
+
+      <div>
+        <button
+          onClick={() => {
+            const next = !spawnPlacementMode;
+            setSpawnPlacementMode(next);
+            if (next) setPlacementMode(false);
+          }}
+          style={{
+            width: '100%',
+            padding: '12px',
+            background: spawnPlacementMode ? '#ccaa00' : '#333',
+            color: spawnPlacementMode ? 'black' : 'white',
+            border: spawnPlacementMode ? '2px solid #ffdd00' : '2px solid transparent',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            fontSize: '14px',
+          }}
+        >
+          {spawnPlacementMode ? '✓ Click in scene to place spawn' : 'Place Default Spawn'}
+        </button>
+      </div>
+
+      {config.defaultSpawn ? (
+        <div
+          style={{
+            padding: '12px',
+            background: '#1a1a2e',
+            borderRadius: '4px',
+          }}
+        >
+          <h4 style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#888' }}>
+            Edit Default Spawn
+          </h4>
+
+          {/* Direction */}
+          <div style={{ marginBottom: '12px' }}>
+            <label style={{ display: 'block', marginBottom: '4px', fontSize: '11px', color: '#666' }}>
+              Direction:
+            </label>
+            <div style={{ display: 'flex', gap: '4px' }}>
+              {DIRECTIONS.map((dir) => (
+                <button
+                  key={dir}
+                  onClick={() =>
+                    updateConfig((prev) => ({
+                      ...prev,
+                      defaultSpawn: { ...prev.defaultSpawn!, direction: dir },
+                    }))
+                  }
+                  style={{
+                    flex: 1,
+                    padding: '6px',
+                    background: config.defaultSpawn!.direction === dir ? '#ccaa00' : '#333',
+                    color: config.defaultSpawn!.direction === dir ? 'black' : 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    textTransform: 'uppercase',
+                    fontSize: '11px',
+                  }}
+                >
+                  {dir.charAt(0)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Position X/Z */}
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '11px', color: '#666' }}>
+                X Position:
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                value={config.defaultSpawn.position[0]}
+                onChange={(e) =>
+                  updateConfig((prev) => {
+                    const pos: [number, number, number] = [...prev.defaultSpawn!.position];
+                    pos[0] = parseFloat(e.target.value) || 0;
+                    return { ...prev, defaultSpawn: { ...prev.defaultSpawn!, position: pos } };
+                  })
+                }
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  background: '#252540',
+                  color: 'white',
+                  border: '1px solid #444',
+                  borderRadius: '4px',
+                }}
+              />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '11px', color: '#666' }}>
+                Z Position:
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                value={config.defaultSpawn.position[2]}
+                onChange={(e) =>
+                  updateConfig((prev) => {
+                    const pos: [number, number, number] = [...prev.defaultSpawn!.position];
+                    pos[2] = parseFloat(e.target.value) || 0;
+                    return { ...prev, defaultSpawn: { ...prev.defaultSpawn!, position: pos } };
+                  })
+                }
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  background: '#252540',
+                  color: 'white',
+                  border: '1px solid #444',
+                  borderRadius: '4px',
+                }}
+              />
+            </div>
+          </div>
+
+          <button
+            onClick={() =>
+              updateConfig((prev) => {
+                const { defaultSpawn: _, ...rest } = prev;
+                return rest as UnifiedStageConfig;
+              })
+            }
+            style={{
+              width: '100%',
+              padding: '8px',
+              background: '#a44',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '12px',
+            }}
+          >
+            Clear Default Spawn
+          </button>
+        </div>
+      ) : (
+        <div style={{ fontSize: '11px', color: '#666', fontStyle: 'italic' }}>
+          No default spawn set.
+        </div>
+      )}
     </div>
   );
 }
