@@ -236,7 +236,7 @@ export default function ObstacleTab({
               <label style={{ fontSize: '10px', color: '#666' }}>Rotation Y:</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
                 <button
-                  onClick={() => setPlacementDimensions({ ...placementDimensions, rotationY: placementDimensions.rotationY - 15 })}
+                  onClick={() => setPlacementDimensions({ ...placementDimensions, rotationY: placementDimensions.rotationY - 5 })}
                   style={{
                     padding: '6px 12px',
                     background: '#444',
@@ -246,13 +246,13 @@ export default function ObstacleTab({
                     cursor: 'pointer',
                   }}
                 >
-                  -15°
+                  -5°
                 </button>
                 <span style={{ flex: 1, textAlign: 'center', fontSize: '14px' }}>
                   {placementDimensions.rotationY}°
                 </span>
                 <button
-                  onClick={() => setPlacementDimensions({ ...placementDimensions, rotationY: placementDimensions.rotationY + 15 })}
+                  onClick={() => setPlacementDimensions({ ...placementDimensions, rotationY: placementDimensions.rotationY + 5 })}
                   style={{
                     padding: '6px 12px',
                     background: '#444',
@@ -262,7 +262,7 @@ export default function ObstacleTab({
                     cursor: 'pointer',
                   }}
                 >
-                  +15°
+                  +5°
                 </button>
               </div>
             </div>

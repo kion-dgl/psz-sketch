@@ -9,6 +9,8 @@ interface PortalTabProps {
   setPlacementMode: (mode: boolean) => void;
   placementDirection: GateDirection;
   setPlacementDirection: (dir: GateDirection) => void;
+  placementRotationOffset: number;
+  setPlacementRotationOffset: (offset: number) => void;
   previewModel: PreviewModel;
   setPreviewModel: (model: PreviewModel) => void;
   selectedPortalId: string | null;
@@ -27,6 +29,8 @@ export default function PortalTab({
   setPlacementMode,
   placementDirection,
   setPlacementDirection,
+  placementRotationOffset,
+  setPlacementRotationOffset,
   previewModel,
   setPreviewModel,
   selectedPortalId,
@@ -64,6 +68,16 @@ export default function PortalTab({
       ...prev,
       portals: prev.portals.map((p) =>
         p.id === id ? { ...p, direction } : p
+      ),
+    }));
+  };
+
+  // Update portal rotation offset
+  const updatePortalRotationOffset = (id: string, offset: number) => {
+    updateConfig((prev) => ({
+      ...prev,
+      portals: prev.portals.map((p) =>
+        p.id === id ? { ...p, rotationOffset: offset || undefined } : p
       ),
     }));
   };
@@ -135,8 +149,32 @@ export default function PortalTab({
             </button>
           ))}
         </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+          <label style={{ fontSize: '11px', color: '#666', whiteSpace: 'nowrap' }}>Offset:</label>
+          <div style={{ display: 'flex', gap: '4px', flex: 1 }}>
+            {[-45, 0, 45].map((offset) => (
+              <button
+                key={offset}
+                onClick={() => setPlacementRotationOffset(offset)}
+                style={{
+                  flex: 1,
+                  padding: '6px 0',
+                  background: placementRotationOffset === offset ? '#4a9eff' : '#333',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '11px',
+                  fontWeight: placementRotationOffset === offset ? 'bold' : 'normal',
+                }}
+              >
+                {offset === 0 ? '0°' : `${offset > 0 ? '+' : ''}${offset}°`}
+              </button>
+            ))}
+          </div>
+        </div>
         <div style={{ fontSize: '10px', color: '#666', marginTop: '4px', textAlign: 'center' }}>
-          Rotation: {((DIRECTION_ROTATIONS[placementDirection] * 180) / Math.PI).toFixed(0)}°
+          Rotation: {((DIRECTION_ROTATIONS[placementDirection] * 180) / Math.PI + placementRotationOffset).toFixed(0)}°
         </div>
       </div>
 
@@ -205,7 +243,7 @@ export default function PortalTab({
                       {portal.label || portal.direction}
                     </span>
                     <span style={{ marginLeft: '8px', fontSize: '11px', color: '#888' }}>
-                      {portal.direction.toUpperCase()}
+                      {portal.direction.toUpperCase()}{portal.rotationOffset ? ` ${portal.rotationOffset > 0 ? '+' : ''}${portal.rotationOffset}°` : ''}
                     </span>
                   </div>
                   <button
@@ -295,6 +333,29 @@ export default function PortalTab({
                 </button>
               ))}
             </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
+              <label style={{ fontSize: '10px', color: '#666', whiteSpace: 'nowrap' }}>Offset:</label>
+              <div style={{ display: 'flex', gap: '3px', flex: 1 }}>
+                {[-45, 0, 45].map((offset) => (
+                  <button
+                    key={offset}
+                    onClick={() => updatePortalRotationOffset(selectedPortal.id, offset)}
+                    style={{
+                      flex: 1,
+                      padding: '5px 0',
+                      background: (selectedPortal.rotationOffset || 0) === offset ? '#4a9eff' : '#333',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '10px',
+                    }}
+                  >
+                    {offset === 0 ? '0°' : `${offset > 0 ? '+' : ''}${offset}°`}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Position X */}
@@ -343,7 +404,7 @@ export default function PortalTab({
 
       {/* Instructions */}
       <div style={{ fontSize: '11px', color: '#666', marginTop: '8px' }}>
-        <p style={{ margin: '4px 0' }}>• Select a <b>Direction</b> (N/S/E/W) to set the portal rotation</p>
+        <p style={{ margin: '4px 0' }}>• Select a <b>Direction</b> (N/S/E/W) and optional <b>Offset</b> to set the portal rotation</p>
         <p style={{ margin: '4px 0' }}>• Click <b>Start Placement Mode</b> to enable click-to-place</p>
         <p style={{ margin: '4px 0' }}>• <b>Click in the scene</b> where you want to place the portal</p>
         <p style={{ margin: '4px 0' }}>• Click an existing portal to select and adjust its position</p>
@@ -424,6 +485,38 @@ export default function PortalTab({
                 </button>
               ))}
             </div>
+            <button
+              onClick={() =>
+                updateConfig((prev) => {
+                  const flip: Record<GateDirection, GateDirection> = {
+                    north: 'south',
+                    south: 'north',
+                    east: 'west',
+                    west: 'east',
+                  };
+                  return {
+                    ...prev,
+                    defaultSpawn: {
+                      ...prev.defaultSpawn!,
+                      direction: flip[prev.defaultSpawn!.direction],
+                    },
+                  };
+                })
+              }
+              style={{
+                width: '100%',
+                marginTop: '4px',
+                padding: '6px',
+                background: '#444',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '11px',
+              }}
+            >
+              Rotate 180°
+            </button>
           </div>
 
           {/* Position X/Z */}

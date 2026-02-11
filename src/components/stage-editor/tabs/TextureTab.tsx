@@ -405,15 +405,11 @@ export default function TextureTab({
                 <span>Repeat X</span>
                 <span style={{ color: '#4a9eff' }}>{repeatX.toFixed(1)}</span>
               </label>
-              <input
-                type="range"
-                min="0.1"
-                max="10"
-                step="0.1"
-                value={repeatX}
-                onChange={(e) => setRepeatX(Number(e.target.value))}
-                style={{ width: '100%' }}
-              />
+              <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                <button onClick={() => setRepeatX(Math.max(0.1, +(repeatX - 0.1).toFixed(1)))} style={{ padding: '4px 8px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>-</button>
+                <input type="range" min="0.1" max="10" step="0.1" value={repeatX} onChange={(e) => setRepeatX(Number(e.target.value))} style={{ flex: 1 }} />
+                <button onClick={() => setRepeatX(Math.min(10, +(repeatX + 0.1).toFixed(1)))} style={{ padding: '4px 8px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>+</button>
+              </div>
             </div>
 
             <div style={{ marginBottom: '16px' }}>
@@ -421,15 +417,11 @@ export default function TextureTab({
                 <span>Repeat Y</span>
                 <span style={{ color: '#4a9eff' }}>{repeatY.toFixed(1)}</span>
               </label>
-              <input
-                type="range"
-                min="0.1"
-                max="10"
-                step="0.1"
-                value={repeatY}
-                onChange={(e) => setRepeatY(Number(e.target.value))}
-                style={{ width: '100%' }}
-              />
+              <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                <button onClick={() => setRepeatY(Math.max(0.1, +(repeatY - 0.1).toFixed(1)))} style={{ padding: '4px 8px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>-</button>
+                <input type="range" min="0.1" max="10" step="0.1" value={repeatY} onChange={(e) => setRepeatY(Number(e.target.value))} style={{ flex: 1 }} />
+                <button onClick={() => setRepeatY(Math.min(10, +(repeatY + 0.1).toFixed(1)))} style={{ padding: '4px 8px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>+</button>
+              </div>
             </div>
 
             <div style={{ marginBottom: '16px' }}>
@@ -437,15 +429,11 @@ export default function TextureTab({
                 <span>Offset X</span>
                 <span style={{ color: '#4a9eff' }}>{offsetX.toFixed(2)}</span>
               </label>
-              <input
-                type="range"
-                min="-5"
-                max="5"
-                step="0.01"
-                value={offsetX}
-                onChange={(e) => setOffsetX(Number(e.target.value))}
-                style={{ width: '100%' }}
-              />
+              <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                <button onClick={() => setOffsetX(Math.max(-5, +(offsetX - 0.01).toFixed(2)))} style={{ padding: '4px 8px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>-</button>
+                <input type="range" min="-5" max="5" step="0.01" value={offsetX} onChange={(e) => setOffsetX(Number(e.target.value))} style={{ flex: 1 }} />
+                <button onClick={() => setOffsetX(Math.min(5, +(offsetX + 0.01).toFixed(2)))} style={{ padding: '4px 8px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>+</button>
+              </div>
             </div>
 
             <div style={{ marginBottom: '16px' }}>
@@ -453,15 +441,11 @@ export default function TextureTab({
                 <span>Offset Y</span>
                 <span style={{ color: '#4a9eff' }}>{offsetY.toFixed(2)}</span>
               </label>
-              <input
-                type="range"
-                min="-5"
-                max="5"
-                step="0.01"
-                value={offsetY}
-                onChange={(e) => setOffsetY(Number(e.target.value))}
-                style={{ width: '100%' }}
-              />
+              <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                <button onClick={() => setOffsetY(Math.max(-5, +(offsetY - 0.01).toFixed(2)))} style={{ padding: '4px 8px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>-</button>
+                <input type="range" min="-5" max="5" step="0.01" value={offsetY} onChange={(e) => setOffsetY(Number(e.target.value))} style={{ flex: 1 }} />
+                <button onClick={() => setOffsetY(Math.min(5, +(offsetY + 0.01).toFixed(2)))} style={{ padding: '4px 8px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>+</button>
+              </div>
             </div>
 
             {/* Wrap mode controls */}

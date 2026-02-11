@@ -3,9 +3,10 @@ import * as THREE from 'three';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import JSZip from 'jszip';
-import type { UnifiedStageConfig, FloorTriangle, PortalData, SpawnPointData } from '../types';
+import type { UnifiedStageConfig, FloorTriangle, PortalData, SpawnPointData, TextureFix } from '../types';
 import { STAGE_AREAS, getGlbPath, getAreaFromMapId } from '../constants';
-import { DIRECTION_ROTATIONS } from '../types';
+import { DIRECTION_ROTATIONS, getPortalRotation } from '../types';
+import { loadGlobalFixes } from './TextureTab';
 
 // Helper to compute spawn and trigger positions from portal position and direction
 // Matches PortalEditor's calculatePortalPositions offsets
@@ -16,7 +17,7 @@ function computePortalPositions(portal: PortalData): {
   rotation: number;
 } {
   const [x, , z] = portal.position;
-  const rotation = DIRECTION_ROTATIONS[portal.direction];
+  const rotation = getPortalRotation(portal);
 
   // Match PortalOverlay's offsets:
   // Order from outside to inside: trigger → spawn → gate
@@ -112,6 +113,73 @@ function extractFloorTriangles(scene: THREE.Object3D, yTolerance: number): Floor
   });
 
   return triangles;
+}
+
+// Build textureFixes array from scene meshes + global fixes in localStorage
+function buildTextureFixes(scene: THREE.Object3D): TextureFix[] {
+  const globalFixes = loadGlobalFixes();
+  if (Object.keys(globalFixes).length === 0) return [];
+
+  // Scan scene for texture→mesh mappings, same pattern as TextureTab's extractTextures
+  const textureInstanceCounts: Record<string, number> = {};
+  const keyToMeshNames: Record<string, string[]> = {};
+  const keyToFilename: Record<string, string> = {};
+
+  scene.traverse((object) => {
+    if (!(object as THREE.Mesh).isMesh) return;
+    const mesh = object as THREE.Mesh;
+    const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+
+    materials.forEach((mat) => {
+      const m = mat as any;
+      if (m.map && m.map instanceof THREE.Texture) {
+        let filename = 'unknown';
+        if (m.map.name) {
+          const parts = m.map.name.split('/');
+          filename = parts[parts.length - 1];
+        } else if (m.map.image?.src) {
+          const parts = m.map.image.src.split('/');
+          filename = parts[parts.length - 1];
+        }
+
+        textureInstanceCounts[filename] = (textureInstanceCounts[filename] || 0) + 1;
+        const instanceNum = textureInstanceCounts[filename];
+        const key = `${filename}#${instanceNum}`;
+
+        keyToFilename[key] = filename;
+        if (!keyToMeshNames[key]) keyToMeshNames[key] = [];
+        keyToMeshNames[key].push(mesh.name);
+      }
+    });
+  });
+
+  // Match each texture key against global fixes
+  const fixes: TextureFix[] = [];
+  for (const [key, fix] of Object.entries(globalFixes)) {
+    if (!keyToFilename[key]) continue;
+
+    // Skip entries that are all defaults
+    const isDefault =
+      fix.repeatX === 1 && fix.repeatY === 1 &&
+      fix.offsetX === 0 && fix.offsetY === 0 &&
+      (!fix.wrapS || fix.wrapS === 'repeat') &&
+      (!fix.wrapT || fix.wrapT === 'repeat');
+    if (isDefault) continue;
+
+    const entry: TextureFix = {
+      textureFile: keyToFilename[key],
+      meshNames: keyToMeshNames[key] || [],
+      repeatX: fix.repeatX,
+      repeatY: fix.repeatY,
+      offsetX: fix.offsetX,
+      offsetY: fix.offsetY,
+    };
+    if (fix.wrapS && fix.wrapS !== 'repeat') entry.wrapS = fix.wrapS;
+    if (fix.wrapT && fix.wrapT !== 'repeat') entry.wrapT = fix.wrapT;
+    fixes.push(entry);
+  }
+
+  return fixes;
 }
 
 // Convert MeshBasicMaterial to MeshLambertMaterial
@@ -719,8 +787,10 @@ export default function ExportTab({ config, stageScene, mapId }: ExportTabProps)
 
   // Export config JSON
   const exportConfig = () => {
+    const textureFixes = stageScene ? buildTextureFixes(stageScene) : config.textureFixes;
     const exportData = {
       ...config,
+      textureFixes,
       exportedAt: new Date().toISOString(),
     };
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
@@ -791,8 +861,9 @@ export default function ExportTab({ config, stageScene, mapId }: ExportTabProps)
           // Generate SVG
           const svg = generateSvgMinimap(tris, stageConfig);
 
-          // Generate config JSON
-          const configJson = JSON.stringify({ ...stageConfig, exportedAt: new Date().toISOString() }, null, 2);
+          // Generate config JSON (populate textureFixes from scene + global fixes)
+          const textureFixes = buildTextureFixes(scene);
+          const configJson = JSON.stringify({ ...stageConfig, textureFixes, exportedAt: new Date().toISOString() }, null, 2);
 
           // Add to zip (organized by area)
           const folder = zip.folder(areaKey) || zip;
