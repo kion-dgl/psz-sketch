@@ -123,6 +123,7 @@ export default function UnifiedStageEditor() {
   // Portal placement state
   const [portalPlacementMode, setPortalPlacementMode] = useState(false);
   const [portalPlacementDirection, setPortalPlacementDirection] = useState<GateDirection>('north');
+  const [portalPlacementRotationOffset, setPortalPlacementRotationOffset] = useState(0);
   const [portalPreviewModel, setPortalPreviewModel] = useState<PreviewModel>('Gate');
   const [selectedPortalId, setSelectedPortalId] = useState<string | null>(null);
 
@@ -244,6 +245,7 @@ export default function UnifiedStageEditor() {
         direction: portalPlacementDirection,
         position,
         label: portalPlacementDirection, // Default label to direction
+        ...(portalPlacementRotationOffset ? { rotationOffset: portalPlacementRotationOffset } : {}),
       };
 
       updateConfig((prev) => ({
@@ -255,7 +257,7 @@ export default function UnifiedStageEditor() {
       setSelectedPortalId(id);
       setPortalPlacementMode(false);
     },
-    [portalPlacementDirection, updateConfig]
+    [portalPlacementDirection, portalPlacementRotationOffset, updateConfig]
   );
 
   // Handle default spawn placement
@@ -362,6 +364,8 @@ export default function UnifiedStageEditor() {
             setPlacementMode={setPortalPlacementModeExclusive}
             placementDirection={portalPlacementDirection}
             setPlacementDirection={setPortalPlacementDirection}
+            placementRotationOffset={portalPlacementRotationOffset}
+            setPlacementRotationOffset={setPortalPlacementRotationOffset}
             previewModel={portalPreviewModel}
             setPreviewModel={setPortalPreviewModel}
             selectedPortalId={selectedPortalId}
@@ -457,6 +461,7 @@ export default function UnifiedStageEditor() {
             selectedPortalId={selectedPortalId}
             placementMode={portalPlacementMode}
             placementDirection={portalPlacementDirection}
+            placementRotationOffset={portalPlacementRotationOffset}
             previewModel={portalPreviewModel}
             onPortalClick={handlePortalClick}
             onPlacePortal={handlePlacePortal}

@@ -4,7 +4,7 @@ import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 import type { PortalData, GateDirection, PreviewModel, SpawnPointData } from '../types';
-import { DIRECTION_ROTATIONS } from '../types';
+import { DIRECTION_ROTATIONS, getPortalRotation } from '../types';
 
 // Model paths
 const GATE_MODEL_PATH = '/objects/01_o01a/o0c_gate.imd/o0c_gate.glb';
@@ -12,7 +12,7 @@ const WARP_MODEL_PATH = '/objects/special_z/o0s_warpm.imd/o0s_warpm.glb';
 
 interface PortalModelProps {
   position: [number, number, number];
-  direction: GateDirection;
+  rotation: number; // effective rotation in radians
   modelType: PreviewModel;
   opacity?: number;
   selected?: boolean;
@@ -25,10 +25,9 @@ const SPAWN_OUTSET = 3;   // Spawn behind the gate (outside)
 const TRIGGER_OUTSET = 7; // Trigger further out, player hits it first
 const GATE_WIDTH = 6.0;
 
-// Compute spawn and trigger positions from gate position and direction
-function computeMarkerPositions(position: [number, number, number], direction: GateDirection) {
+// Compute spawn and trigger positions from gate position and rotation (radians)
+function computeMarkerPositions(position: [number, number, number], rotation: number) {
   const [x, , z] = position;
-  const rotation = DIRECTION_ROTATIONS[direction];
   const cos = Math.cos(rotation);
   const sin = Math.sin(rotation);
 
@@ -107,9 +106,8 @@ function GateBoundingBox({ position, rotation }: { position: [number, number, nu
   );
 }
 
-function GatePreview({ position, direction, opacity = 1, selected, onClick }: Omit<PortalModelProps, 'modelType'>) {
+function GatePreview({ position, rotation, opacity = 1, selected, onClick }: Omit<PortalModelProps, 'modelType'>) {
   const { scene } = useGLTF(GATE_MODEL_PATH);
-  const rotation = DIRECTION_ROTATIONS[direction];
 
   const clonedScene = useMemo(() => {
     const clone = SkeletonUtils.clone(scene);
@@ -130,7 +128,7 @@ function GatePreview({ position, direction, opacity = 1, selected, onClick }: Om
   }, [scene, opacity]);
 
   // Compute spawn/trigger positions
-  const markers = useMemo(() => computeMarkerPositions(position, direction), [position, direction]);
+  const markers = useMemo(() => computeMarkerPositions(position, rotation), [position, rotation]);
 
   return (
     <group>
@@ -161,9 +159,8 @@ function GatePreview({ position, direction, opacity = 1, selected, onClick }: Om
   );
 }
 
-function WarpPreview({ position, direction, opacity = 1, selected, onClick }: Omit<PortalModelProps, 'modelType'>) {
+function WarpPreview({ position, rotation, opacity = 1, selected, onClick }: Omit<PortalModelProps, 'modelType'>) {
   const { scene } = useGLTF(WARP_MODEL_PATH);
-  const rotation = DIRECTION_ROTATIONS[direction];
 
   const clonedScene = useMemo(() => {
     const clone = SkeletonUtils.clone(scene);
@@ -184,7 +181,7 @@ function WarpPreview({ position, direction, opacity = 1, selected, onClick }: Om
   }, [scene, opacity]);
 
   // Compute spawn/trigger positions
-  const markers = useMemo(() => computeMarkerPositions(position, direction), [position, direction]);
+  const markers = useMemo(() => computeMarkerPositions(position, rotation), [position, rotation]);
 
   return (
     <group>
@@ -227,6 +224,7 @@ interface PortalOverlayProps {
   selectedPortalId: string | null;
   placementMode: boolean;
   placementDirection: GateDirection;
+  placementRotationOffset: number; // degrees
   previewModel: PreviewModel;
   onPortalClick: (id: string) => void;
   onPlacePortal: (position: [number, number, number]) => void;
@@ -299,10 +297,10 @@ function GateBoundingBoxPreview() {
 
 // Separate component for the preview that follows the mouse
 function PlacementPreview({
-  direction,
+  rotation,
   modelType
 }: {
-  direction: GateDirection;
+  rotation: number; // effective rotation in radians
   modelType: PreviewModel;
 }) {
   const { camera, raycaster, pointer } = useThree();
@@ -321,8 +319,6 @@ function PlacementPreview({
       positionRef.current = [intersection.x, 0, intersection.z];
     }
   });
-
-  const rotation = DIRECTION_ROTATIONS[direction];
 
   // Local space offsets for spawn/trigger (in the direction the gate faces)
   // Order from outside to inside: trigger → spawn → gate
@@ -424,6 +420,7 @@ export default function PortalOverlay({
   selectedPortalId,
   placementMode,
   placementDirection,
+  placementRotationOffset,
   previewModel,
   onPortalClick,
   onPlacePortal,
@@ -469,7 +466,7 @@ export default function PortalOverlay({
         <PortalModel
           key={portal.id}
           position={portal.position}
-          direction={portal.direction}
+          rotation={getPortalRotation(portal)}
           modelType={previewModel}
           opacity={1}
           selected={portal.id === selectedPortalId}
@@ -485,7 +482,7 @@ export default function PortalOverlay({
       {/* Preview portal when in placement mode - follows mouse */}
       {placementMode && (
         <PlacementPreview
-          direction={placementDirection}
+          rotation={DIRECTION_ROTATIONS[placementDirection] + (placementRotationOffset * Math.PI) / 180}
           modelType={previewModel}
         />
       )}

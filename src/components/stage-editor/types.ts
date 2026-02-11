@@ -33,6 +33,7 @@ export interface PortalData {
   direction: GateDirection; // Label (north/south/east/west) AND determines rotation
   position: [number, number, number]; // x, y, z position in world space
   label: string;
+  rotationOffset?: number; // Additional rotation in degrees (e.g. 45, -45)
 }
 
 export interface SpawnPointData {
@@ -48,15 +49,24 @@ export const DIRECTION_ROTATIONS: Record<GateDirection, number> = {
   west: -Math.PI / 2,
 };
 
+// Get effective rotation for a portal (base direction + optional offset)
+export function getPortalRotation(portal: PortalData): number {
+  return DIRECTION_ROTATIONS[portal.direction] + ((portal.rotationOffset || 0) * Math.PI) / 180;
+}
+
 // =============== Texture Fixes ===============
 
+export type WrapMode = 'repeat' | 'mirror' | 'clamp';
+
 export interface TextureFix {
-  id: string;
-  meshPattern: string;
+  textureFile: string;
+  meshNames: string[];
   repeatX: number;
   repeatY: number;
   offsetX: number;
   offsetY: number;
+  wrapS?: WrapMode;
+  wrapT?: WrapMode;
 }
 
 // =============== Collision Obstacles ===============
