@@ -3,7 +3,7 @@ import { useGLTF } from '@react-three/drei';
 import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
-import type { PortalData, GateDirection, PreviewModel } from '../types';
+import type { PortalData, GateDirection, PreviewModel, SpawnPointData } from '../types';
 import { DIRECTION_ROTATIONS } from '../types';
 
 // Model paths
@@ -41,29 +41,28 @@ function computeMarkerPositions(position: [number, number, number], direction: G
   };
 }
 
-// Spawn point marker (green sphere with ring and arrow)
-function SpawnMarker({ position, rotation }: { position: [number, number, number]; rotation: number }) {
+// Spawn point marker (sphere with ring and arrow)
+function SpawnMarker({ position, rotation, color = "#00ff00" }: { position: [number, number, number]; rotation: number; color?: string }) {
   return (
     <group position={position}>
-      {/* Green sphere */}
       <mesh>
         <sphereGeometry args={[0.8, 16, 16]} />
-        <meshBasicMaterial color="#00ff00" transparent opacity={0.7} />
+        <meshBasicMaterial color={color} transparent opacity={0.7} />
       </mesh>
       {/* Ring on ground */}
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[1, 1.3, 32]} />
-        <meshBasicMaterial color="#00ff00" side={THREE.DoubleSide} />
+        <meshBasicMaterial color={color} side={THREE.DoubleSide} />
       </mesh>
       {/* Direction arrow */}
       <group rotation={[0, rotation, 0]}>
         <mesh position={[0, 0.3, 1]}>
           <boxGeometry args={[0.2, 0.2, 1.5]} />
-          <meshBasicMaterial color="#00ff00" />
+          <meshBasicMaterial color={color} />
         </mesh>
         <mesh position={[0, 0.3, 2]} rotation={[Math.PI / 2, 0, 0]}>
           <coneGeometry args={[0.4, 0.6, 8]} />
-          <meshBasicMaterial color="#00ff00" />
+          <meshBasicMaterial color={color} />
         </mesh>
       </group>
     </group>
@@ -232,6 +231,9 @@ interface PortalOverlayProps {
   onPortalClick: (id: string) => void;
   onPlacePortal: (position: [number, number, number]) => void;
   onUpdatePortalPosition?: (id: string, position: [number, number, number]) => void;
+  defaultSpawn?: SpawnPointData;
+  spawnPlacementMode?: boolean;
+  onPlaceDefaultSpawn?: (position: [number, number, number]) => void;
 }
 
 // Spawn marker for placement preview (semi-transparent)
@@ -346,6 +348,30 @@ function PlacementPreview({
   );
 }
 
+// Spawn-only placement preview (follows mouse, shows just the spawn marker)
+function SpawnPlacementPreview({ direction }: { direction: GateDirection }) {
+  const { camera, raycaster, pointer } = useThree();
+  const groupRef = useRef<THREE.Group>(null);
+  const groundPlane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
+  const intersection = useMemo(() => new THREE.Vector3(), []);
+
+  useFrame(() => {
+    if (!groupRef.current) return;
+    raycaster.setFromCamera(pointer, camera);
+    if (raycaster.ray.intersectPlane(groundPlane, intersection)) {
+      groupRef.current.position.set(intersection.x, 0, intersection.z);
+    }
+  });
+
+  const rotation = DIRECTION_ROTATIONS[direction];
+
+  return (
+    <group ref={groupRef}>
+      <SpawnMarker position={[0, 1, 0]} rotation={rotation} color="#ffff00" />
+    </group>
+  );
+}
+
 // Static preview components that don't need position (position is on parent group)
 function GatePreviewStatic({ opacity }: { opacity: number }) {
   const { scene } = useGLTF(GATE_MODEL_PATH);
@@ -402,25 +428,32 @@ export default function PortalOverlay({
   onPortalClick,
   onPlacePortal,
   onUpdatePortalPosition,
+  defaultSpawn,
+  spawnPlacementMode,
+  onPlaceDefaultSpawn,
 }: PortalOverlayProps) {
   const { camera, raycaster, pointer } = useThree();
   const groundPlane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
   const intersection = useMemo(() => new THREE.Vector3(), []);
 
+  const anyPlacementMode = placementMode || spawnPlacementMode;
+
   // Handle click to place - get position from raycaster at click time
   const handleCanvasClick = useCallback(() => {
-    if (!placementMode) return;
-
     raycaster.setFromCamera(pointer, camera);
-    if (raycaster.ray.intersectPlane(groundPlane, intersection)) {
+    if (!raycaster.ray.intersectPlane(groundPlane, intersection)) return;
+
+    if (placementMode) {
       onPlacePortal([intersection.x, 0, intersection.z]);
+    } else if (spawnPlacementMode && onPlaceDefaultSpawn) {
+      onPlaceDefaultSpawn([intersection.x, 0, intersection.z]);
     }
-  }, [placementMode, raycaster, pointer, camera, groundPlane, intersection, onPlacePortal]);
+  }, [placementMode, spawnPlacementMode, raycaster, pointer, camera, groundPlane, intersection, onPlacePortal, onPlaceDefaultSpawn]);
 
   return (
     <group>
       {/* Ground plane for click detection in placement mode */}
-      {placementMode && (
+      {anyPlacementMode && (
         <mesh
           rotation={[-Math.PI / 2, 0, 0]}
           position={[0, 0.01, 0]}
@@ -444,12 +477,22 @@ export default function PortalOverlay({
         />
       ))}
 
+      {/* Default spawn marker (yellow) */}
+      {defaultSpawn && (
+        <SpawnMarker position={defaultSpawn.position} rotation={DIRECTION_ROTATIONS[defaultSpawn.direction]} color="#ffff00" />
+      )}
+
       {/* Preview portal when in placement mode - follows mouse */}
       {placementMode && (
         <PlacementPreview
           direction={placementDirection}
           modelType={previewModel}
         />
+      )}
+
+      {/* Preview spawn marker when in spawn placement mode */}
+      {spawnPlacementMode && (
+        <SpawnPlacementPreview direction={placementDirection} />
       )}
     </group>
   );

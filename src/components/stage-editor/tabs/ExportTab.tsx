@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import JSZip from 'jszip';
-import type { UnifiedStageConfig, FloorTriangle, PortalData } from '../types';
+import type { UnifiedStageConfig, FloorTriangle, PortalData, SpawnPointData } from '../types';
 import { STAGE_AREAS, getGlbPath, getAreaFromMapId } from '../constants';
 import { DIRECTION_ROTATIONS } from '../types';
 
@@ -260,19 +260,20 @@ function createTriggerMarker(
 
   // Trigger box (matches gate width, 3 units tall, 2 units deep)
   const boxGeometry = new THREE.BoxGeometry(GATE_WIDTH, 3, 2);
-  const boxMaterial = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.3 });
-  const box = new THREE.Mesh(boxGeometry, boxMaterial);
-  box.position.y = 1.5; // Center is 1.5 units up
-  box.name = `${name}_box-colonly`;
-  group.add(box);
 
-  // Trigger wireframe
-  const wireGeometry = new THREE.EdgesGeometry(boxGeometry);
-  const wireMaterial = new THREE.LineBasicMaterial({ color });
-  const wireframe = new THREE.LineSegments(wireGeometry, wireMaterial);
-  wireframe.position.y = 1.5;
-  wireframe.name = `${name}_wire`;
-  group.add(wireframe);
+  // Visible mesh (Godot strips -colonly meshes visually, and LINES aren't supported)
+  const visMaterial = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.3 });
+  const visMesh = new THREE.Mesh(boxGeometry, visMaterial);
+  visMesh.position.y = 1.5;
+  visMesh.name = `${name}_vis`;
+  group.add(visMesh);
+
+  // Collision mesh (Godot auto-imports as StaticBody3D)
+  const colMaterial = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.0 });
+  const colMesh = new THREE.Mesh(boxGeometry, colMaterial);
+  colMesh.position.y = 1.5;
+  colMesh.name = `${name}_box-colonly`;
+  group.add(colMesh);
 
   return group;
 }
@@ -488,6 +489,23 @@ async function buildExportScene(
       portalsGroup.add(triggerMarker);
     });
 
+    // Export default spawn point (for boss rooms / gateless areas)
+    if (stageConfig.defaultSpawn) {
+      const rotation = DIRECTION_ROTATIONS[stageConfig.defaultSpawn.direction];
+      const pos: [number, number, number] = [
+        stageConfig.defaultSpawn.position[0],
+        1, // Match portal spawn height so marker is above ground
+        stageConfig.defaultSpawn.position[2],
+      ];
+      const spawnMarker = createSpawnMarker(
+        'spawn_default',
+        pos,
+        rotation,
+        0xffff00 // Yellow to distinguish from portal spawns
+      );
+      portalsGroup.add(spawnMarker);
+    }
+
     exportScene.add(portalsGroup);
   }
 
@@ -639,6 +657,23 @@ export default function ExportTab({ config, stageScene, mapId }: ExportTabProps)
           );
           portalsGroup.add(triggerMarker);
         });
+
+        // Export default spawn point (for boss rooms / gateless areas)
+        if (config.defaultSpawn) {
+          const rotation = DIRECTION_ROTATIONS[config.defaultSpawn.direction];
+          const pos: [number, number, number] = [
+            config.defaultSpawn.position[0],
+            1, // Match portal spawn height so marker is above ground
+            config.defaultSpawn.position[2],
+          ];
+          const spawnMarker = createSpawnMarker(
+            'spawn_default',
+            pos,
+            rotation,
+            0xffff00 // Yellow to distinguish from portal spawns
+          );
+          portalsGroup.add(spawnMarker);
+        }
 
         exportScene.add(portalsGroup);
       }

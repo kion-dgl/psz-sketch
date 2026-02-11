@@ -126,6 +126,9 @@ export default function UnifiedStageEditor() {
   const [portalPreviewModel, setPortalPreviewModel] = useState<PreviewModel>('Gate');
   const [selectedPortalId, setSelectedPortalId] = useState<string | null>(null);
 
+  // Default spawn placement state
+  const [spawnPlacementMode, setSpawnPlacementMode] = useState(false);
+
   // Obstacle placement state
   const [obstaclePlacementMode, setObstaclePlacementMode] = useState(false);
   const [obstaclePlacementType, setObstaclePlacementType] = useState<ObstacleType>('box');
@@ -255,6 +258,29 @@ export default function UnifiedStageEditor() {
     [portalPlacementDirection, updateConfig]
   );
 
+  // Handle default spawn placement
+  const handlePlaceDefaultSpawn = useCallback(
+    (position: [number, number, number]) => {
+      updateConfig((prev) => ({
+        ...prev,
+        defaultSpawn: { position, direction: portalPlacementDirection },
+      }));
+      setSpawnPlacementMode(false);
+    },
+    [portalPlacementDirection, updateConfig]
+  );
+
+  // Mutual exclusion wrappers for placement modes
+  const setPortalPlacementModeExclusive = useCallback((mode: boolean) => {
+    setPortalPlacementMode(mode);
+    if (mode) setSpawnPlacementMode(false);
+  }, []);
+
+  const setSpawnPlacementModeExclusive = useCallback((mode: boolean) => {
+    setSpawnPlacementMode(mode);
+    if (mode) setPortalPlacementMode(false);
+  }, []);
+
   // Handle portal click in canvas
   const handlePortalClick = useCallback((id: string) => {
     setSelectedPortalId(id);
@@ -333,13 +359,15 @@ export default function UnifiedStageEditor() {
             config={config}
             updateConfig={updateConfig}
             placementMode={portalPlacementMode}
-            setPlacementMode={setPortalPlacementMode}
+            setPlacementMode={setPortalPlacementModeExclusive}
             placementDirection={portalPlacementDirection}
             setPlacementDirection={setPortalPlacementDirection}
             previewModel={portalPreviewModel}
             setPreviewModel={setPortalPreviewModel}
             selectedPortalId={selectedPortalId}
             setSelectedPortalId={setSelectedPortalId}
+            spawnPlacementMode={spawnPlacementMode}
+            setSpawnPlacementMode={setSpawnPlacementModeExclusive}
           />
         );
       case 'textures':
@@ -433,6 +461,9 @@ export default function UnifiedStageEditor() {
             onPortalClick={handlePortalClick}
             onPlacePortal={handlePlacePortal}
             onUpdatePortalPosition={handleUpdatePortalPosition}
+            defaultSpawn={config.defaultSpawn}
+            spawnPlacementMode={spawnPlacementMode}
+            onPlaceDefaultSpawn={handlePlaceDefaultSpawn}
           />
         );
       case 'obstacles':

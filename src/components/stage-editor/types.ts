@@ -35,6 +35,11 @@ export interface PortalData {
   label: string;
 }
 
+export interface SpawnPointData {
+  position: [number, number, number];
+  direction: GateDirection;
+}
+
 // Rotation values for each direction (radians, Y-axis rotation)
 export const DIRECTION_ROTATIONS: Record<GateDirection, number> = {
   north: 0,
@@ -79,6 +84,7 @@ export interface UnifiedStageConfig {
   // gridSize and gridOffset removed - they're visual helpers only, not saved config
   floorCollision: FloorCollisionConfig;
   portals: PortalData[];
+  defaultSpawn?: SpawnPointData;
   textureFixes: TextureFix[];
   obstacles: ObstacleData[];
   svgSettings?: SvgSettings;
