@@ -10,8 +10,8 @@
  */
 
 import { useState, useCallback, useMemo, useRef } from 'react';
-import type { QuestProject, ValidationIssue, Direction, EditorGridCell, CellObject } from '../types';
-import { EDITOR_AREAS } from '../types';
+import type { QuestProject, QuestSection, ValidationIssue, Direction, EditorGridCell, CellObject, SectionType } from '../types';
+import { EDITOR_AREAS, getProjectSections } from '../types';
 import type { MissionLayout, GridCell, StageArea, MissionContent } from '../../../systems/stage/types';
 import { generateMissionContent } from '../../../systems/stage/content-generator';
 import {
@@ -52,40 +52,43 @@ const AREA_ID_TO_KEY: Record<string, string> = Object.fromEntries(
 // Export: QuestProject → Godot Quest JSON
 // ============================================================================
 
-function projectToGodotQuest(project: QuestProject): object {
+/** Export a single section's cells to Godot format */
+function exportSectionCells(
+  sectionCells: Record<string, EditorGridCell>,
+  sectionStartPos: string | null,
+  sectionEndPos: string | null,
+  sectionKeyLinks: Record<string, string>,
+  sectionGridSize: number,
+): object[] {
   const cells: object[] = [];
-  // Build path_order from BFS starting at startPos
-  const pathOrder = buildPathOrder(project);
+  const pathOrder = buildSectionPathOrder(sectionCells, sectionStartPos, sectionGridSize);
 
-  for (const [pos, cell] of Object.entries(project.cells)) {
+  for (const [pos, cell] of Object.entries(sectionCells)) {
     const [row, col] = pos.split(',').map(Number);
     const gates = getRotatedGates(cell.stageName, cell.rotation ?? 0);
 
-    // Build connections
     const connections: Record<string, string> = {};
     for (const worldDir of gates) {
       const [nr, nc] = getNeighbor(row, col, worldDir);
       const nk = `${nr},${nc}`;
-      if (project.cells[nk]) {
+      if (sectionCells[nk]) {
         connections[worldDir] = nk;
       }
     }
 
-    // Find warp edge for end cell
     let warpEdge = '';
-    if (project.endPos === pos) {
+    if (sectionEndPos === pos) {
       for (const worldDir of gates) {
         const [nr, nc] = getNeighbor(row, col, worldDir);
-        if (!isValidPos(nr, nc, project.gridSize) || !project.cells[`${nr},${nc}`]) {
+        if (!isValidPos(nr, nc, sectionGridSize) || !sectionCells[`${nr},${nc}`]) {
           warpEdge = worldDir;
           break;
         }
       }
     }
 
-    // Key gate direction: which specific gate is locked
     let keyGateDirection = '';
-    if (pos in project.keyLinks && cell.lockedGate) {
+    if (pos in sectionKeyLinks && cell.lockedGate) {
       keyGateDirection = cell.lockedGate;
     }
 
@@ -94,23 +97,21 @@ function projectToGodotQuest(project: QuestProject): object {
       stage_id: cell.stageName,
       rotation: cell.rotation ?? 0,
       connections,
-      is_start: project.startPos === pos,
-      is_end: project.endPos === pos,
+      is_start: sectionStartPos === pos,
+      is_end: sectionEndPos === pos,
       is_branch: Object.keys(connections).length > 2,
-      has_key: Object.values(project.keyLinks).includes(pos),
-      key_for_cell: Object.entries(project.keyLinks).find(([_, v]) => v === pos)?.[0] || '',
-      is_key_gate: pos in project.keyLinks,
+      has_key: Object.values(sectionKeyLinks).includes(pos),
+      key_for_cell: Object.entries(sectionKeyLinks).find(([_, v]) => v === pos)?.[0] || '',
+      is_key_gate: pos in sectionKeyLinks,
       key_gate_direction: keyGateDirection,
       warp_edge: warpEdge,
       path_order: pathOrder.get(pos) ?? -1,
     };
 
-    // Include authored key position if set
     if (cell.keyPosition) {
       cellData.key_position = cell.keyPosition;
     }
 
-    // Include placed objects
     if (cell.objects && cell.objects.length > 0) {
       cellData.objects = cell.objects.map(obj => {
         const exported: Record<string, unknown> = {
@@ -120,6 +121,8 @@ function projectToGodotQuest(project: QuestProject): object {
         if (obj.rotation) exported.rotation = obj.rotation;
         if (obj.enemy_id) exported.enemy_id = obj.enemy_id;
         if (obj.link_id) exported.link_id = obj.link_id;
+        if (obj.wave && obj.wave > 1) exported.wave = obj.wave;
+        if (obj.text !== undefined && obj.text !== '') exported.text = obj.text;
         return exported;
       });
     }
@@ -127,39 +130,59 @@ function projectToGodotQuest(project: QuestProject): object {
     cells.push(cellData);
   }
 
-  // Sort cells by path_order for readability
   cells.sort((a: any, b: any) => (a.path_order ?? 999) - (b.path_order ?? 999));
+  return cells;
+}
+
+function projectToGodotQuest(project: QuestProject): object {
+  const projectSections = getProjectSections(project);
+
+  const godotSections = projectSections.map(sec => {
+    const cells = exportSectionCells(
+      sec.cells, sec.startPos, sec.endPos, sec.keyLinks, sec.gridSize
+    );
+    return {
+      type: sec.type,
+      area: sec.variant,
+      start_pos: sec.startPos || '',
+      end_pos: sec.endPos || '',
+      cells,
+    };
+  });
 
   return {
     id: project.id,
     name: project.name,
     description: project.metadata?.description || '',
     area_id: AREA_KEY_TO_ID[project.areaKey] || project.areaKey,
-    sections: [{
-      type: 'grid',
-      area: project.variant,
-      start_pos: project.startPos || '',
-      end_pos: project.endPos || '',
-      cells,
-    }],
+    sections: godotSections,
   };
 }
 
-/** BFS from startPos to assign path_order */
+/** BFS from startPos to assign path_order (legacy, wraps section version) */
 function buildPathOrder(project: QuestProject): Map<string, number> {
+  return buildSectionPathOrder(project.cells, project.startPos, project.gridSize);
+}
+
+/** BFS from startPos to assign path_order within a section */
+function buildSectionPathOrder(
+  cells: Record<string, EditorGridCell>,
+  startPos: string | null,
+  _gridSize: number,
+): Map<string, number> {
   const order = new Map<string, number>();
-  if (!project.startPos || !project.cells[project.startPos]) return order;
+  if (!startPos || !cells[startPos]) return order;
 
   const visited = new Set<string>();
-  const queue: string[] = [project.startPos];
-  visited.add(project.startPos);
+  const queue: string[] = [startPos];
+  visited.add(startPos);
   let idx = 0;
 
   while (queue.length > 0) {
     const pos = queue.shift()!;
     order.set(pos, idx++);
 
-    const cell = project.cells[pos];
+    const cell = cells[pos];
     if (!cell) continue;
 
     const [row, col] = pos.split(',').map(Number);
@@ -168,7 +191,7 @@ function buildPathOrder(project: QuestProject): Map<string, number> {
     for (const dir of gates) {
       const [nr, nc] = getNeighbor(row, col, dir);
       const nk = `${nr},${nc}`;
-      if (!visited.has(nk) && project.cells[nk]) {
+      if (!visited.has(nk) && cells[nk]) {
         visited.add(nk);
         queue.push(nk);
       }
@@ -182,8 +205,7 @@ function buildPathOrder(project: QuestProject): Map<string, number> {
 // Import: Godot Quest JSON → QuestProject
 // ============================================================================
 
-function godotQuestToProject(quest: any): QuestProject {
-  const section = quest.sections?.[0] || {};
+function importGodotSection(section: any): QuestSection {
   const cells: Record<string, EditorGridCell> = {};
   let startPos: string | null = null;
   let endPos: string | null = null;
@@ -201,11 +223,9 @@ function godotQuestToProject(quest: any): QuestProject {
       role: cell.is_end ? 'boss' : cell.is_start ? 'transit' : 'guard',
       manual: true,
     };
-    // Round-trip authored key position
     if (cell.key_position && Array.isArray(cell.key_position)) {
       editorCell.keyPosition = cell.key_position as [number, number, number];
     }
-    // Round-trip placed objects
     if (cell.objects && Array.isArray(cell.objects)) {
       editorCell.objects = cell.objects.map((obj: any, idx: number) => ({
         id: obj.id || `${obj.type}_${idx}`,
@@ -214,6 +234,8 @@ function godotQuestToProject(quest: any): QuestProject {
         rotation: obj.rotation,
         enemy_id: obj.enemy_id,
         link_id: obj.link_id,
+        wave: obj.wave,
+        text: obj.text,
       } as CellObject));
     }
     cells[cell.pos] = editorCell;
@@ -224,18 +246,37 @@ function godotQuestToProject(quest: any): QuestProject {
     }
   }
 
-  const areaKey = AREA_ID_TO_KEY[quest.area_id] || 'valley';
+  const sectionType: SectionType = section.type === 'transition' ? 'transition'
+    : section.type === 'boss' ? 'boss' : 'grid';
 
   return {
-    id: quest.id || crypto.randomUUID(),
-    name: quest.name || 'Imported Quest',
-    areaKey,
+    type: sectionType,
     variant: section.area || 'a',
     gridSize: Math.max(3, Math.max(maxRow, maxCol) + 1),
     cells,
     startPos,
     endPos,
     keyLinks,
+  };
+}
+
+function godotQuestToProject(quest: any): QuestProject {
+  const rawSections = quest.sections || [];
+  const importedSections: QuestSection[] = rawSections.map(importGodotSection);
+  const firstSection = importedSections[0] || { variant: 'a', gridSize: 5, cells: {}, startPos: null, endPos: null, keyLinks: {} };
+
+  const areaKey = AREA_ID_TO_KEY[quest.area_id] || 'valley';
+
+  const result: QuestProject = {
+    id: quest.id || crypto.randomUUID(),
+    name: quest.name || 'Imported Quest',
+    areaKey,
+    variant: firstSection.variant,
+    gridSize: firstSection.gridSize,
+    cells: firstSection.cells,
+    startPos: firstSection.startPos,
+    endPos: firstSection.endPos,
+    keyLinks: firstSection.keyLinks,
     metadata: {
       questName: quest.name || '',
       description: quest.description || '',
@@ -247,6 +288,13 @@ function godotQuestToProject(quest: any): QuestProject {
     lastModified: new Date().toISOString(),
     version: 1,
   };
+
+  // Only set sections[] if there are multiple sections
+  if (importedSections.length > 1) {
+    result.sections = importedSections;
+  }
+
+  return result;
 }
 
 // ============================================================================
@@ -333,37 +381,56 @@ function projectToMissionLayout(project: QuestProject): MissionLayout | null {
 // Validation
 // ============================================================================
 
-/** Validate for export */
-function validateForExport(project: QuestProject): ValidationIssue[] {
+/** Validate a single section */
+function validateSection(
+  cells: Record<string, EditorGridCell>,
+  startPos: string | null,
+  endPos: string | null,
+  gridSize: number,
+  sectionLabel: string,
+): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
 
-  if (!project.startPos) issues.push({ severity: 'error', message: 'No start cell' });
-  if (!project.endPos) issues.push({ severity: 'error', message: 'No end cell' });
-  if (Object.keys(project.cells).length === 0) issues.push({ severity: 'error', message: 'No cells' });
+  if (!startPos) issues.push({ severity: 'error', message: `${sectionLabel}: No start cell` });
+  if (!endPos) issues.push({ severity: 'error', message: `${sectionLabel}: No end cell` });
+  if (Object.keys(cells).length === 0) issues.push({ severity: 'error', message: `${sectionLabel}: No cells` });
 
-  // Check orphan gates
-  for (const [pos, cell] of Object.entries(project.cells)) {
+  for (const [pos, cell] of Object.entries(cells)) {
     const [row, col] = pos.split(',').map(Number);
     const gates = getRotatedGates(cell.stageName, cell.rotation ?? 0);
 
     for (const dir of gates) {
       const [nr, nc] = getNeighbor(row, col, dir);
-      if (!isValidPos(nr, nc, project.gridSize)) continue;
+      if (!isValidPos(nr, nc, gridSize)) continue;
 
       const neighborKey = `${nr},${nc}`;
-      const neighbor = project.cells[neighborKey];
+      const neighbor = cells[neighborKey];
 
       if (neighbor) {
         const neighborGates = getRotatedGates(neighbor.stageName, neighbor.rotation ?? 0);
         if (!neighborGates.has(oppositeDirection(dir))) {
           issues.push({
             severity: 'error',
-            message: `Orphan gate: ${pos} (${dir}) → ${neighborKey}`,
+            message: `${sectionLabel}: Orphan gate: ${pos} (${dir}) → ${neighborKey}`,
             cellPos: pos,
           });
         }
       }
     }
+  }
+
+  return issues;
+}
+
+/** Validate for export */
+function validateForExport(project: QuestProject): ValidationIssue[] {
+  const sections = getProjectSections(project);
+  const issues: ValidationIssue[] = [];
+
+  for (let i = 0; i < sections.length; i++) {
+    const sec = sections[i];
+    const label = sections.length > 1 ? `Section ${i + 1} (${sec.variant.toUpperCase()})` : '';
+    issues.push(...validateSection(sec.cells, sec.startPos, sec.endPos, sec.gridSize, label));
   }
 
   return issues;

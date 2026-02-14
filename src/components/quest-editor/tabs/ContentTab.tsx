@@ -6,7 +6,7 @@
  * Right: Cell content inspector (key position, gate info)
  */
 
-import { useState, useCallback, useMemo, useRef, Suspense } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect, Suspense } from 'react';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Grid } from '@react-three/drei';
 import * as THREE from 'three';
@@ -15,6 +15,53 @@ import { ROLE_COLORS, CELL_OBJECT_COLORS, CELL_OBJECT_LABELS } from '../types';
 import { getRotatedGates, getStageConfig, getStageSuffix } from '../hooks/useStageConfigs';
 import { getGlbPath, getAreaFromMapId } from '../../stage-editor/constants';
 import type { GateConfig } from '../../../systems/stage/types';
+
+// ============================================================================
+// Enemy Data (loaded from /data/enemies.json)
+// ============================================================================
+
+interface EnemyInfo {
+  id: string;
+  name: string;
+  model_id: string;
+  element: string;
+  locations: string[];
+  is_rare: boolean;
+  is_boss: boolean;
+}
+
+/** Map editor areaKey to enemy locations key */
+const AREA_TO_LOCATION: Record<string, string> = {
+  valley: 'valley',
+  wetlands: 'wetlands',
+  snowfield: 'snowfield',
+  makara: 'makara',
+  paru: 'paru',
+  arca: 'arca',
+  shrine: 'shrine',
+  tower: 'tower',
+};
+
+let _enemyListCache: EnemyInfo[] | null = null;
+
+function useEnemyList(): EnemyInfo[] {
+  const [enemies, setEnemies] = useState<EnemyInfo[]>(_enemyListCache || []);
+
+  useEffect(() => {
+    if (_enemyListCache) return;
+    fetch('/data/enemies.json')
+      .then(r => r.json())
+      .then((data: EnemyInfo[]) => {
+        _enemyListCache = data;
+        setEnemies(data);
+      })
+      .catch(() => {
+        console.warn('Failed to load enemies.json');
+      });
+  }, []);
+
+  return enemies;
+}
 
 // ============================================================================
 // Types
@@ -186,6 +233,29 @@ function SwitchMarker({ obj, selected, onClick }: { obj: CellObject; selected: b
   );
 }
 
+/** Message marker — purple cylinder */
+function MessageMarker({ obj, selected, onClick }: { obj: CellObject; selected: boolean; onClick: () => void }) {
+  return (
+    <group position={obj.position} onClick={(e) => { e.stopPropagation(); onClick(); }}>
+      <mesh position={[0, 0.6, 0]}>
+        <cylinderGeometry args={[0.5, 0.5, 1.2, 8]} />
+        <meshBasicMaterial color="#cc66ff" transparent opacity={selected ? 0.9 : 0.5} />
+      </mesh>
+      {/* Top cap */}
+      <mesh position={[0, 1.3, 0]}>
+        <sphereGeometry args={[0.3, 8, 8]} />
+        <meshBasicMaterial color="#cc66ff" transparent opacity={selected ? 0.9 : 0.5} />
+      </mesh>
+      {selected && (
+        <mesh position={[0, 0.6, 0]}>
+          <cylinderGeometry args={[0.6, 0.6, 1.4, 8]} />
+          <meshBasicMaterial color="#ffffff" wireframe transparent opacity={0.4} />
+        </mesh>
+      )}
+    </group>
+  );
+}
+
 /** Renders the appropriate marker for a CellObject */
 function ObjectMarker({ obj, selected, onClick }: { obj: CellObject; selected: boolean; onClick: () => void }) {
   switch (obj.type) {
@@ -198,6 +268,8 @@ function ObjectMarker({ obj, selected, onClick }: { obj: CellObject; selected: b
       return <FenceMarker obj={obj} selected={selected} onClick={onClick} />;
     case 'step_switch':
       return <SwitchMarker obj={obj} selected={selected} onClick={onClick} />;
+    case 'message':
+      return <MessageMarker obj={obj} selected={selected} onClick={onClick} />;
     default:
       return null;
   }
@@ -242,6 +314,12 @@ function ObjectPlacementCursor({ objectType }: { objectType: CellObjectType }) {
       {objectType === 'step_switch' && (
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
           <cylinderGeometry args={[0.8, 0.8, 0.1, 16]} />
+          <meshBasicMaterial color={color} transparent opacity={0.3} />
+        </mesh>
+      )}
+      {objectType === 'message' && (
+        <mesh position={[0, 0.6, 0]}>
+          <cylinderGeometry args={[0.5, 0.5, 1.2, 8]} />
           <meshBasicMaterial color={color} transparent opacity={0.3} />
         </mesh>
       )}
@@ -425,6 +503,78 @@ function MiniGrid({
           })}
         </div>
       ))}
+    </div>
+  );
+}
+
+// ============================================================================
+// Enemy ID Picker (dropdown filtered by area)
+// ============================================================================
+
+function EnemyIdPicker({ value, areaKey, onChange }: {
+  value: string;
+  areaKey: string;
+  onChange: (id: string) => void;
+}) {
+  const allEnemies = useEnemyList();
+  const [showAll, setShowAll] = useState(false);
+  const locationKey = AREA_TO_LOCATION[areaKey] || areaKey;
+
+  const filtered = useMemo(() => {
+    if (showAll || !locationKey) return allEnemies;
+    return allEnemies.filter(e => e.locations.includes(locationKey));
+  }, [allEnemies, locationKey, showAll]);
+
+  if (allEnemies.length === 0) {
+    // Fallback to text input while loading
+    return (
+      <div style={{ marginTop: '4px' }}>
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="enemy_id (e.g. ghowl)"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            width: '100%', padding: '4px', background: '#111',
+            border: '1px solid #444', borderRadius: '3px',
+            color: '#fff', fontSize: '11px', fontFamily: 'monospace',
+          }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: '4px' }}>
+      <select
+        value={value}
+        onChange={(e) => { e.stopPropagation(); onChange(e.target.value); }}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: '100%', padding: '4px', background: '#111',
+          border: '1px solid #444', borderRadius: '3px',
+          color: '#fff', fontSize: '11px', fontFamily: 'monospace',
+        }}
+      >
+        <option value="">-- select enemy --</option>
+        {filtered.map(e => (
+          <option key={e.id} value={e.id}>
+            {e.name} ({e.id}) [{e.element}]{e.is_boss ? ' BOSS' : ''}{e.is_rare ? ' RARE' : ''}
+          </option>
+        ))}
+      </select>
+      <div style={{ marginTop: '2px' }}>
+        <label style={{ fontSize: '9px', color: '#666', cursor: 'pointer' }} onClick={(e) => e.stopPropagation()}>
+          <input
+            type="checkbox"
+            checked={showAll}
+            onChange={(e) => { e.stopPropagation(); setShowAll(e.target.checked); }}
+            style={{ marginRight: '4px' }}
+          />
+          Show all enemies ({allEnemies.length})
+        </label>
+      </div>
     </div>
   );
 }
@@ -675,17 +825,46 @@ function CellContentInspector({
 
                   {/* Enemy ID picker */}
                   {isSel && obj.type === 'enemy' && (
+                    <EnemyIdPicker
+                      value={obj.enemy_id || ''}
+                      areaKey={project.areaKey}
+                      onChange={(val) => onUpdateObject(obj.id, { enemy_id: val || undefined })}
+                    />
+                  )}
+
+                  {/* Wave number for enemies */}
+                  {isSel && obj.type === 'enemy' && (
+                    <div style={{ marginTop: '4px', display: 'flex', gap: '4px', alignItems: 'center' }}>
+                      <span style={{ fontSize: '10px', color: '#888' }}>Wave:</span>
+                      {[1, 2, 3].map(w => (
+                        <button
+                          key={w}
+                          onClick={(e) => { e.stopPropagation(); onUpdateObject(obj.id, { wave: w === 1 ? undefined : w }); }}
+                          style={{
+                            ...btnStyle, padding: '2px 6px', fontSize: '9px',
+                            background: (obj.wave || 1) === w ? '#cc4444' : '#333',
+                          }}
+                        >
+                          {w}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Message text */}
+                  {isSel && obj.type === 'message' && (
                     <div style={{ marginTop: '4px' }}>
-                      <input
-                        type="text"
-                        value={obj.enemy_id || ''}
-                        onChange={(e) => onUpdateObject(obj.id, { enemy_id: e.target.value || undefined })}
-                        placeholder="enemy_id (e.g. lizard)"
+                      <textarea
+                        value={obj.text || ''}
+                        onChange={(e) => onUpdateObject(obj.id, { text: e.target.value || undefined })}
+                        placeholder="Message text..."
                         onClick={(e) => e.stopPropagation()}
+                        rows={3}
                         style={{
                           width: '100%', padding: '4px', background: '#111',
                           border: '1px solid #444', borderRadius: '3px',
                           color: '#fff', fontSize: '11px', fontFamily: 'monospace',
+                          resize: 'vertical',
                         }}
                       />
                     </div>
@@ -840,6 +1019,7 @@ export default function ContentTab({ project, onUpdateProject }: ContentTabProps
         position: pos,
       };
       if (placingObject === 'enemy') newObj.enemy_id = 'lizard';
+      if (placingObject === 'message') newObj.text = '';
       return {
         ...prev,
         cells: {

@@ -9,6 +9,7 @@ import {
   Fence, fenceMeta,
   Fence4, fence4Meta,
   Key, keyMeta,
+  MessagePack, messagePackMeta,
   InteractSwitch, interactSwitchMeta,
   StepSwitch, stepSwitchMeta,
   RemoteSwitch, remoteSwitchMeta,
@@ -65,6 +66,7 @@ const CATEGORIES: CategoryEntry[] = [
     name: 'Pickups',
     elements: [
       { id: 'key', Component: Key as React.ComponentType<{ state?: string }>, meta: keyMeta },
+      { id: 'message-pack', Component: MessagePack as React.ComponentType<{ state?: string }>, meta: messagePackMeta },
     ],
   },
   {

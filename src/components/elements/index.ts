@@ -15,6 +15,7 @@ export { default as RemoteSwitch, remoteSwitchMeta, type RemoteSwitchState } fro
 
 // Pickups
 export { default as Key, keyMeta, type KeyState } from './Key';
+export { default as MessagePack, messagePackMeta, type MessagePackState } from './MessagePack';
 
 // Drops
 export { default as DropMeseta, dropMesetaMeta, type DropMesetaState } from './DropMeseta';

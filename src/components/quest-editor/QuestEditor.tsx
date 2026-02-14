@@ -4,9 +4,12 @@
  * Milestone 1: Grid Layout Editor
  */
 
-import { useState, useCallback } from 'react';
-import type { QuestProject } from './types';
-import { EDITOR_AREAS } from './types';
+import { useState, useCallback, useMemo } from 'react';
+import type { QuestProject, QuestSection, SectionType } from './types';
+import {
+  EDITOR_AREAS, getProjectSections, createSection,
+  SECTION_TYPE_LABELS, SECTION_VARIANT_SUGGESTIONS,
+} from './types';
 import { useQuestProject } from './hooks/useQuestProject';
 import LayoutTab from './tabs/LayoutTab';
 import ContentTab from './tabs/ContentTab';
@@ -40,8 +43,96 @@ export default function QuestEditor() {
 
   const [activeTab, setActiveTab] = useState<TabId>('layout');
   const [showProjectMenu, setShowProjectMenu] = useState(false);
+  const [currentSectionIdx, setCurrentSectionIdx] = useState(0);
 
   const availableAreas = EDITOR_AREAS.filter(a => a.available);
+
+  const sections = useMemo(() => getProjectSections(project), [project]);
+  const hasMultipleSections = !!(project.sections && project.sections.length > 0);
+
+  // Clamp section index
+  const sectionIdx = Math.min(currentSectionIdx, sections.length - 1);
+  const activeSection = sections[sectionIdx];
+
+  // Build a "virtual project" that maps the active section's fields to top-level
+  const sectionProject = useMemo<QuestProject>(() => {
+    if (!hasMultipleSections) return project;
+    return {
+      ...project,
+      variant: activeSection.variant,
+      gridSize: activeSection.gridSize,
+      cells: activeSection.cells,
+      startPos: activeSection.startPos,
+      endPos: activeSection.endPos,
+      keyLinks: activeSection.keyLinks,
+    };
+  }, [project, activeSection, hasMultipleSections]);
+
+  // Route updates to the correct section
+  const updateSectionProject = useCallback((updater: (prev: QuestProject) => QuestProject) => {
+    if (!hasMultipleSections) {
+      updateProject(updater);
+      return;
+    }
+    updateProject(prev => {
+      // Create a virtual project from the active section
+      const sec = prev.sections![sectionIdx];
+      const virtualPrev: QuestProject = {
+        ...prev,
+        variant: sec.variant,
+        gridSize: sec.gridSize,
+        cells: sec.cells,
+        startPos: sec.startPos,
+        endPos: sec.endPos,
+        keyLinks: sec.keyLinks,
+      };
+      const virtualNext = updater(virtualPrev);
+      // Write section fields back
+      const newSections = [...prev.sections!];
+      newSections[sectionIdx] = {
+        ...newSections[sectionIdx],
+        variant: virtualNext.variant,
+        gridSize: virtualNext.gridSize,
+        cells: virtualNext.cells,
+        startPos: virtualNext.startPos,
+        endPos: virtualNext.endPos,
+        keyLinks: virtualNext.keyLinks,
+      };
+      return { ...virtualNext, sections: newSections, variant: prev.variant, gridSize: prev.gridSize, cells: prev.cells, startPos: prev.startPos, endPos: prev.endPos, keyLinks: prev.keyLinks };
+    });
+  }, [updateProject, hasMultipleSections, sectionIdx]);
+
+  const handleAddSection = useCallback((type: SectionType) => {
+    const variant = SECTION_VARIANT_SUGGESTIONS[type];
+    const newSec = createSection(type, variant);
+    updateProject(prev => {
+      const existingSections = getProjectSections(prev);
+      return {
+        ...prev,
+        sections: [...existingSections, newSec],
+      };
+    });
+    setCurrentSectionIdx(sections.length);
+  }, [updateProject, sections.length]);
+
+  const handleDeleteSection = useCallback((idx: number) => {
+    updateProject(prev => {
+      const secs = getProjectSections(prev);
+      if (secs.length <= 1) return prev; // Don't delete last section
+      const newSections = secs.filter((_, i) => i !== idx);
+      return { ...prev, sections: newSections };
+    });
+    if (currentSectionIdx >= sections.length - 1) {
+      setCurrentSectionIdx(Math.max(0, sections.length - 2));
+    }
+  }, [updateProject, currentSectionIdx, sections.length]);
+
+  const handleEnableMultiSection = useCallback(() => {
+    updateProject(prev => ({
+      ...prev,
+      sections: getProjectSections(prev),
+    }));
+  }, [updateProject]);
 
   const handleAreaChange = useCallback((areaKey: string) => {
     updateProject(prev => ({
@@ -51,30 +142,53 @@ export default function QuestEditor() {
       startPos: null,
       endPos: null,
       keyLinks: {},
+      sections: prev.sections ? prev.sections.map(s => ({ ...s, cells: {}, startPos: null, endPos: null, keyLinks: {} })) : undefined,
     }));
   }, [updateProject]);
 
   const handleVariantChange = useCallback((variant: string) => {
-    updateProject(prev => ({
-      ...prev,
-      variant,
-      cells: {},
-      startPos: null,
-      endPos: null,
-      keyLinks: {},
-    }));
-  }, [updateProject]);
+    if (hasMultipleSections) {
+      updateSectionProject(prev => ({
+        ...prev,
+        variant,
+        cells: {},
+        startPos: null,
+        endPos: null,
+        keyLinks: {},
+      }));
+    } else {
+      updateProject(prev => ({
+        ...prev,
+        variant,
+        cells: {},
+        startPos: null,
+        endPos: null,
+        keyLinks: {},
+      }));
+    }
+  }, [updateProject, updateSectionProject, hasMultipleSections]);
 
   const handleGridSizeChange = useCallback((gridSize: number) => {
-    updateProject(prev => ({
-      ...prev,
-      gridSize,
-      cells: {},
-      startPos: null,
-      endPos: null,
-      keyLinks: {},
-    }));
-  }, [updateProject]);
+    if (hasMultipleSections) {
+      updateSectionProject(prev => ({
+        ...prev,
+        gridSize,
+        cells: {},
+        startPos: null,
+        endPos: null,
+        keyLinks: {},
+      }));
+    } else {
+      updateProject(prev => ({
+        ...prev,
+        gridSize,
+        cells: {},
+        startPos: null,
+        endPos: null,
+        keyLinks: {},
+      }));
+    }
+  }, [updateProject, updateSectionProject, hasMultipleSections]);
 
   const handleNameChange = useCallback((name: string) => {
     updateProject(prev => ({ ...prev, name }));
@@ -353,12 +467,107 @@ export default function QuestEditor() {
         ))}
       </div>
 
+      {/* Section bar (multi-section mode) */}
+      {(activeTab === 'layout' || activeTab === 'content') && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          padding: '6px 16px',
+          background: '#1a1a30',
+          borderBottom: '1px solid #333',
+          fontSize: '11px',
+        }}>
+          <span style={{ color: '#888', marginRight: '4px' }}>Sections:</span>
+          {sections.map((sec, idx) => (
+            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0' }}>
+              <button
+                onClick={() => setCurrentSectionIdx(idx)}
+                style={{
+                  padding: '4px 10px',
+                  background: idx === sectionIdx ? '#3a3a6a' : '#222',
+                  border: `1px solid ${idx === sectionIdx ? '#5588ff' : '#444'}`,
+                  borderRadius: hasMultipleSections ? '4px 0 0 4px' : '4px',
+                  color: idx === sectionIdx ? '#fff' : '#888',
+                  fontSize: '11px',
+                  fontWeight: idx === sectionIdx ? 600 : 400,
+                  cursor: 'pointer',
+                }}
+              >
+                {hasMultipleSections
+                  ? `${SECTION_TYPE_LABELS[sec.type]} ${sec.variant.toUpperCase()}`
+                  : `Section ${sec.variant.toUpperCase()}`
+                }
+                {sec.type === 'grid' && ` (${sec.gridSize}x${sec.gridSize})`}
+              </button>
+              {hasMultipleSections && sections.length > 1 && (
+                <button
+                  onClick={() => handleDeleteSection(idx)}
+                  title="Remove section"
+                  style={{
+                    padding: '4px 6px',
+                    background: '#442222',
+                    border: '1px solid #444',
+                    borderLeft: 'none',
+                    borderRadius: '0 4px 4px 0',
+                    color: '#aa6666',
+                    fontSize: '10px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  X
+                </button>
+              )}
+            </div>
+          ))}
+
+          {/* Add section buttons */}
+          {hasMultipleSections ? (
+            <div style={{ display: 'flex', gap: '2px', marginLeft: '8px' }}>
+              {(['grid', 'transition', 'boss'] as SectionType[]).map(type => (
+                <button
+                  key={type}
+                  onClick={() => handleAddSection(type)}
+                  style={{
+                    padding: '3px 8px',
+                    background: '#224422',
+                    border: '1px solid #446644',
+                    borderRadius: '4px',
+                    color: '#88cc88',
+                    fontSize: '10px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  + {SECTION_TYPE_LABELS[type]}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <button
+              onClick={handleEnableMultiSection}
+              style={{
+                padding: '3px 8px',
+                background: '#2a2a4a',
+                border: '1px solid #444',
+                borderRadius: '4px',
+                color: '#888',
+                fontSize: '10px',
+                cursor: 'pointer',
+                marginLeft: '8px',
+              }}
+            >
+              Enable Multi-Section
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Active tab content */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {activeTab === 'layout' && (
-          <LayoutTab project={project} onUpdateProject={updateProject} />
+          <LayoutTab project={sectionProject} onUpdateProject={updateSectionProject} />
         )}
-        {activeTab === 'content' && <ContentTab project={project} onUpdateProject={updateProject} />}
+        {activeTab === 'content' && <ContentTab project={sectionProject} onUpdateProject={updateSectionProject} />}
         {activeTab === 'metadata' && <MetadataTab project={project} onUpdateProject={updateProject} />}
         {activeTab === 'export' && <ExportTab project={project} setProject={setProject} />}
       </div>

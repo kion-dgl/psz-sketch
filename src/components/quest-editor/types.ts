@@ -39,7 +39,7 @@ export const ROLE_LABELS: Record<CellRole, string> = {
 // Cell Objects (placed in 3D stage)
 // ============================================================================
 
-export type CellObjectType = 'box' | 'rare_box' | 'enemy' | 'fence' | 'step_switch';
+export type CellObjectType = 'box' | 'rare_box' | 'enemy' | 'fence' | 'step_switch' | 'message';
 
 export interface CellObject {
   /** Unique ID within cell (e.g., "box_0", "enemy_1") */
@@ -54,6 +54,10 @@ export interface CellObject {
   enemy_id?: string;
   /** Links switch↔fence pairs with matching link_id */
   link_id?: string;
+  /** Spawn wave number for type='enemy' (default 1) */
+  wave?: number;
+  /** Message text for type='message' */
+  text?: string;
 }
 
 export const CELL_OBJECT_COLORS: Record<CellObjectType, string> = {
@@ -62,6 +66,7 @@ export const CELL_OBJECT_COLORS: Record<CellObjectType, string> = {
   enemy: '#cc4444',
   fence: '#4488cc',
   step_switch: '#44cc66',
+  message: '#cc66ff',
 };
 
 export const CELL_OBJECT_LABELS: Record<CellObjectType, string> = {
@@ -70,6 +75,7 @@ export const CELL_OBJECT_LABELS: Record<CellObjectType, string> = {
   enemy: 'Enemy',
   fence: 'Fence',
   step_switch: 'Switch',
+  message: 'Message',
 };
 
 // ============================================================================
@@ -96,6 +102,29 @@ export interface EditorGridCell {
 }
 
 // ============================================================================
+// Quest Section (one section of a multi-section quest)
+// ============================================================================
+
+export type SectionType = 'grid' | 'transition' | 'boss';
+
+export interface QuestSection {
+  /** Section type: grid (NxN), transition (1 cell), boss (1 cell) */
+  type: SectionType;
+  /** Area variant for this section ("a", "b", "e", "z") */
+  variant: string;
+  /** Grid dimension (NxN) — only meaningful for grid sections */
+  gridSize: number;
+  /** Sparse cell map, keyed by "row,col" */
+  cells: Record<string, EditorGridCell>;
+  /** Start cell position "row,col" or null */
+  startPos: string | null;
+  /** End cell position "row,col" or null */
+  endPos: string | null;
+  /** Key-gate links: gateCell "row,col" → keyCell "row,col" */
+  keyLinks: Record<string, string>;
+}
+
+// ============================================================================
 // Quest Project (top-level save state)
 // ============================================================================
 
@@ -106,18 +135,20 @@ export interface QuestProject {
   name: string;
   /** Area key from STAGE_AREAS (e.g., "valley", "wetlands") */
   areaKey: string;
-  /** Area variant ("a" or "b") */
+  /** Area variant ("a" or "b") — used for single-section compat */
   variant: string;
-  /** Grid dimension (NxN) */
+  /** Grid dimension (NxN) — used for single-section compat */
   gridSize: number;
-  /** Sparse cell map, keyed by "row,col" */
+  /** Sparse cell map, keyed by "row,col" — used for single-section compat */
   cells: Record<string, EditorGridCell>;
-  /** Start cell position "row,col" or null */
+  /** Start cell position "row,col" or null — used for single-section compat */
   startPos: string | null;
-  /** End cell position "row,col" or null */
+  /** End cell position "row,col" or null — used for single-section compat */
   endPos: string | null;
-  /** Key-gate links: gateCell "row,col" → keyCell "row,col" */
+  /** Key-gate links — used for single-section compat */
   keyLinks: Record<string, string>;
+  /** Multi-section support. If present, overrides single-section fields. */
+  sections?: QuestSection[];
   /** Quest metadata */
   metadata: QuestMetadata;
   /** Per-cell content (Milestone 2 placeholder) */
@@ -196,3 +227,55 @@ export function createDefaultProject(id?: string): QuestProject {
     version: 1,
   };
 }
+
+/** Get the active section list from a project.
+ *  If sections[] is present, returns it. Otherwise wraps legacy single-section fields. */
+export function getProjectSections(project: QuestProject): QuestSection[] {
+  if (project.sections && project.sections.length > 0) {
+    return project.sections;
+  }
+  // Wrap legacy single-section as sections[0]
+  return [{
+    type: 'grid',
+    variant: project.variant,
+    gridSize: project.gridSize,
+    cells: project.cells,
+    startPos: project.startPos,
+    endPos: project.endPos,
+    keyLinks: project.keyLinks,
+  }];
+}
+
+/** Get the active section data for a given section index.
+ *  Returns the section fields to use for editing (cells, startPos, etc.) */
+export function getActiveSection(project: QuestProject, sectionIdx: number): QuestSection {
+  const sections = getProjectSections(project);
+  return sections[sectionIdx] || sections[0];
+}
+
+/** Create a new empty section */
+export function createSection(type: SectionType, variant: string, gridSize?: number): QuestSection {
+  return {
+    type,
+    variant,
+    gridSize: type === 'grid' ? (gridSize || 5) : 1,
+    cells: {},
+    startPos: null,
+    endPos: null,
+    keyLinks: {},
+  };
+}
+
+/** Section labels for UI */
+export const SECTION_TYPE_LABELS: Record<SectionType, string> = {
+  grid: 'Grid',
+  transition: 'Transition',
+  boss: 'Boss',
+};
+
+/** Default variant suggestions per section type */
+export const SECTION_VARIANT_SUGGESTIONS: Record<SectionType, string> = {
+  grid: 'a',
+  transition: 'e',
+  boss: 'z',
+};
