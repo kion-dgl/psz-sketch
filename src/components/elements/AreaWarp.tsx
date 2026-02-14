@@ -1,5 +1,6 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import { useGLTF } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { ElementProps, StoryMeta } from './types';
 
@@ -20,6 +21,10 @@ export const areaWarpMeta: StoryMeta = {
   defaultState: 'active',
 };
 
+// Animated warp surface texture
+const WARP_TEXTURE_NAME = 'o0s_1_fwarp2';
+const WARP_SCROLL_SPEED = 1.35;
+
 export default function AreaWarp({
   position = [0, 0, 0],
   rotation = [0, 0, 0],
@@ -28,9 +33,11 @@ export default function AreaWarp({
 }: AreaWarpProps) {
   const { scene } = useGLTF('/objects/special_z/o0s_warpm.imd/o0s_warpm.glb');
   const clonedScene = useMemo(() => scene.clone(), [scene]);
+  const warpTexturesRef = useRef<THREE.Texture[]>([]);
 
   // Apply texture settings and state-based effects
   useEffect(() => {
+    const warpTextures: THREE.Texture[] = [];
     clonedScene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         const materials = Array.isArray(child.material) ? child.material : [child.material];
@@ -39,7 +46,15 @@ export default function AreaWarp({
             if (mat.map) {
               mat.map.wrapS = THREE.MirroredRepeatWrapping;
               mat.map.wrapT = THREE.MirroredRepeatWrapping;
-              mat.map.needsUpdate = true;
+
+              if (mat.map.name?.includes(WARP_TEXTURE_NAME)) {
+                // Animated warp surface — offsetY depends on state
+                mat.map.offset.set(0, state === 'active' ? 1.34 : 0);
+                mat.map.needsUpdate = true;
+                warpTextures.push(mat.map);
+              } else {
+                mat.map.needsUpdate = true;
+              }
             }
             // Dim the material when inactive
             if (state === 'inactive') {
@@ -54,7 +69,16 @@ export default function AreaWarp({
         });
       }
     });
+    warpTexturesRef.current = warpTextures;
   }, [clonedScene, state]);
+
+  // Animate warp texture scroll on offset.x
+  useFrame((_, delta) => {
+    warpTexturesRef.current.forEach((tex) => {
+      tex.offset.x -= WARP_SCROLL_SPEED * delta;
+      if (tex.offset.x < -10) tex.offset.x += 10;
+    });
+  });
 
   return (
     <group position={position} rotation={rotation} scale={scale}>
