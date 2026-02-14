@@ -767,7 +767,7 @@ function CellContentInspector({
 
         {/* Object palette */}
         <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '8px' }}>
-          {(['box', 'rare_box', 'enemy', 'fence', 'step_switch'] as CellObjectType[]).map(type => (
+          {(['box', 'rare_box', 'enemy', 'fence', 'step_switch', 'message'] as CellObjectType[]).map(type => (
             <button
               key={type}
               onClick={() => onSetPlacingObject(placingObject === type ? null : type)}
