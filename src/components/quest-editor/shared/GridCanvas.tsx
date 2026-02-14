@@ -5,6 +5,7 @@
  * Click occupied cell → onCellSelect (for CellInspector)
  */
 
+import { useMemo } from 'react';
 import type { QuestProject, EditorGridCell, Direction } from '../types';
 import { ROLE_COLORS } from '../types';
 import { getRotatedGates, oppositeDirection, getNeighbor, isValidPos } from '../hooks/useStageConfigs';
@@ -54,17 +55,57 @@ function getGateColor(
   return '#88ff88'; // Normal connected gate
 }
 
+/** BFS from startPos to determine entry direction for each cell */
+function computeEntryDirections(project: QuestProject): Map<string, Direction> {
+  const entries = new Map<string, Direction>();
+  if (!project.startPos || !project.cells[project.startPos]) return entries;
+
+  const visited = new Set<string>();
+  const queue: string[] = [project.startPos];
+  visited.add(project.startPos);
+
+  while (queue.length > 0) {
+    const pos = queue.shift()!;
+    const cell = project.cells[pos];
+    if (!cell) continue;
+
+    const [row, col] = pos.split(',').map(Number);
+    const gates = getRotatedGates(cell.stageName, cell.rotation ?? 0);
+
+    for (const dir of gates) {
+      const [nr, nc] = getNeighbor(row, col, dir);
+      const nk = `${nr},${nc}`;
+      if (visited.has(nk)) continue;
+      if (!isValidPos(nr, nc, project.gridSize)) continue;
+
+      const neighbor = project.cells[nk];
+      if (!neighbor) continue;
+
+      const neighborGates = getRotatedGates(neighbor.stageName, neighbor.rotation ?? 0);
+      if (!neighborGates.has(oppositeDirection(dir))) continue;
+
+      visited.add(nk);
+      entries.set(nk, oppositeDirection(dir));
+      queue.push(nk);
+    }
+  }
+
+  return entries;
+}
+
 function CellDisplay({
   pos,
   cell,
   project,
   isSelected,
+  entryDir,
   onClick,
 }: {
   pos: string;
   cell: EditorGridCell | null;
   project: QuestProject;
   isSelected: boolean;
+  entryDir: Direction | null;
   onClick: () => void;
 }) {
   const [row, col] = pos.split(',').map(Number);
@@ -172,33 +213,37 @@ function CellDisplay({
         {cell.role}
       </div>
 
-      {/* Gate bars: N/S/E/W */}
+      {/* Gate bars: N/S/E/W — entry gate shown at 50% opacity */}
       {gates.has('north') && (
         <div style={{
           position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
           width: '22px', height: '5px', borderRadius: '0 0 3px 3px',
-          background: getGateColor(project, pos, cell, 'north', project.gridSize),
+          background: entryDir === 'north' ? '#88ff88' : getGateColor(project, pos, cell, 'north', project.gridSize),
+          opacity: entryDir === 'north' ? 0.5 : 1,
         }} />
       )}
       {gates.has('south') && (
         <div style={{
           position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)',
           width: '22px', height: '5px', borderRadius: '3px 3px 0 0',
-          background: getGateColor(project, pos, cell, 'south', project.gridSize),
+          background: entryDir === 'south' ? '#88ff88' : getGateColor(project, pos, cell, 'south', project.gridSize),
+          opacity: entryDir === 'south' ? 0.5 : 1,
         }} />
       )}
       {gates.has('east') && (
         <div style={{
           position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
           width: '5px', height: '22px', borderRadius: '3px 0 0 3px',
-          background: getGateColor(project, pos, cell, 'east', project.gridSize),
+          background: entryDir === 'east' ? '#88ff88' : getGateColor(project, pos, cell, 'east', project.gridSize),
+          opacity: entryDir === 'east' ? 0.5 : 1,
         }} />
       )}
       {gates.has('west') && (
         <div style={{
           position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
           width: '5px', height: '22px', borderRadius: '0 3px 3px 0',
-          background: getGateColor(project, pos, cell, 'west', project.gridSize),
+          background: entryDir === 'west' ? '#88ff88' : getGateColor(project, pos, cell, 'west', project.gridSize),
+          opacity: entryDir === 'west' ? 0.5 : 1,
         }} />
       )}
 
@@ -212,6 +257,7 @@ function CellDisplay({
 
 export default function GridCanvas({ project, selectedCell, onCellClick, onCellSelect }: GridCanvasProps) {
   const { gridSize, cells } = project;
+  const entryDirs = useMemo(() => computeEntryDirections(project), [project]);
 
   return (
     <div style={{
@@ -236,6 +282,7 @@ export default function GridCanvas({ project, selectedCell, onCellClick, onCellS
                 cell={cell}
                 project={project}
                 isSelected={isSelected}
+                entryDir={entryDirs.get(pos) ?? null}
                 onClick={() => cell ? onCellSelect(pos) : onCellClick(pos)}
               />
             );
