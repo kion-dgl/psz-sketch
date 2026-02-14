@@ -10,8 +10,8 @@ import { useState, useCallback, useMemo, useRef, Suspense } from 'react';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Grid } from '@react-three/drei';
 import * as THREE from 'three';
-import type { QuestProject, Direction } from '../types';
-import { ROLE_COLORS } from '../types';
+import type { QuestProject, Direction, CellObject, CellObjectType } from '../types';
+import { ROLE_COLORS, CELL_OBJECT_COLORS, CELL_OBJECT_LABELS } from '../types';
 import { getRotatedGates, getStageConfig, getStageSuffix } from '../hooks/useStageConfigs';
 import { getGlbPath, getAreaFromMapId } from '../../stage-editor/constants';
 import type { GateConfig } from '../../../systems/stage/types';
@@ -109,6 +109,173 @@ function SpawnMarker({ position, edge }: { position: [number, number, number]; e
         </mesh>
       </group>
     </group>
+  );
+}
+
+// ============================================================================
+// Object Markers (3D representations of placed objects)
+// ============================================================================
+
+/** Box marker — brown/gold cube */
+function BoxMarker({ obj, selected, onClick }: { obj: CellObject; selected: boolean; onClick: () => void }) {
+  const color = obj.type === 'rare_box' ? '#ddaa33' : '#aa6633';
+  return (
+    <group position={obj.position} onClick={(e) => { e.stopPropagation(); onClick(); }}>
+      <mesh position={[0, 0.5, 0]}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshBasicMaterial color={color} transparent opacity={selected ? 0.9 : 0.6} />
+      </mesh>
+      <lineSegments position={[0, 0.5, 0]}>
+        <edgesGeometry args={[new THREE.BoxGeometry(1, 1, 1)]} />
+        <lineBasicMaterial color={selected ? '#ffffff' : color} />
+      </lineSegments>
+    </group>
+  );
+}
+
+/** Enemy marker — red sphere with label */
+function EnemyMarker({ obj, selected, onClick }: { obj: CellObject; selected: boolean; onClick: () => void }) {
+  return (
+    <group position={obj.position} onClick={(e) => { e.stopPropagation(); onClick(); }}>
+      <mesh position={[0, 0.8, 0]}>
+        <sphereGeometry args={[0.8, 16, 16]} />
+        <meshBasicMaterial color="#cc4444" transparent opacity={selected ? 0.9 : 0.5} />
+      </mesh>
+      {selected && (
+        <mesh position={[0, 0.8, 0]}>
+          <sphereGeometry args={[0.9, 16, 16]} />
+          <meshBasicMaterial color="#ffffff" wireframe transparent opacity={0.4} />
+        </mesh>
+      )}
+    </group>
+  );
+}
+
+/** Fence marker — blue horizontal bar */
+function FenceMarker({ obj, selected, onClick }: { obj: CellObject; selected: boolean; onClick: () => void }) {
+  const yRot = ((obj.rotation || 0) * Math.PI) / 180;
+  return (
+    <group position={obj.position} rotation={[0, yRot, 0]} onClick={(e) => { e.stopPropagation(); onClick(); }}>
+      <mesh position={[0, 1, 0]}>
+        <boxGeometry args={[3, 2, 0.3]} />
+        <meshBasicMaterial color="#4488cc" transparent opacity={selected ? 0.7 : 0.4} />
+      </mesh>
+      <lineSegments position={[0, 1, 0]}>
+        <edgesGeometry args={[new THREE.BoxGeometry(3, 2, 0.3)]} />
+        <lineBasicMaterial color={selected ? '#ffffff' : '#4488cc'} />
+      </lineSegments>
+    </group>
+  );
+}
+
+/** Switch marker — green flat disc */
+function SwitchMarker({ obj, selected, onClick }: { obj: CellObject; selected: boolean; onClick: () => void }) {
+  return (
+    <group position={obj.position} onClick={(e) => { e.stopPropagation(); onClick(); }}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
+        <cylinderGeometry args={[0.8, 0.8, 0.1, 16]} />
+        <meshBasicMaterial color="#44cc66" transparent opacity={selected ? 0.9 : 0.5} />
+      </mesh>
+      {selected && (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, 0]}>
+          <ringGeometry args={[0.9, 1.1, 16]} />
+          <meshBasicMaterial color="#ffffff" side={THREE.DoubleSide} transparent opacity={0.5} />
+        </mesh>
+      )}
+    </group>
+  );
+}
+
+/** Renders the appropriate marker for a CellObject */
+function ObjectMarker({ obj, selected, onClick }: { obj: CellObject; selected: boolean; onClick: () => void }) {
+  switch (obj.type) {
+    case 'box':
+    case 'rare_box':
+      return <BoxMarker obj={obj} selected={selected} onClick={onClick} />;
+    case 'enemy':
+      return <EnemyMarker obj={obj} selected={selected} onClick={onClick} />;
+    case 'fence':
+      return <FenceMarker obj={obj} selected={selected} onClick={onClick} />;
+    case 'step_switch':
+      return <SwitchMarker obj={obj} selected={selected} onClick={onClick} />;
+    default:
+      return null;
+  }
+}
+
+/** Object placement cursor — follows mouse on ground plane */
+function ObjectPlacementCursor({ objectType }: { objectType: CellObjectType }) {
+  const { camera, raycaster, pointer } = useThree();
+  const groupRef = useRef<THREE.Group>(null);
+  const groundPlane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
+  const intersection = useMemo(() => new THREE.Vector3(), []);
+  const color = CELL_OBJECT_COLORS[objectType];
+
+  useFrame(() => {
+    if (!groupRef.current) return;
+    raycaster.setFromCamera(pointer, camera);
+    if (raycaster.ray.intersectPlane(groundPlane, intersection)) {
+      groupRef.current.position.set(intersection.x, 0, intersection.z);
+    }
+  });
+
+  return (
+    <group ref={groupRef}>
+      {(objectType === 'box' || objectType === 'rare_box') && (
+        <mesh position={[0, 0.5, 0]}>
+          <boxGeometry args={[1, 1, 1]} />
+          <meshBasicMaterial color={color} transparent opacity={0.3} />
+        </mesh>
+      )}
+      {objectType === 'enemy' && (
+        <mesh position={[0, 0.8, 0]}>
+          <sphereGeometry args={[0.8, 16, 16]} />
+          <meshBasicMaterial color={color} transparent opacity={0.3} />
+        </mesh>
+      )}
+      {objectType === 'fence' && (
+        <mesh position={[0, 1, 0]}>
+          <boxGeometry args={[3, 2, 0.3]} />
+          <meshBasicMaterial color={color} transparent opacity={0.3} />
+        </mesh>
+      )}
+      {objectType === 'step_switch' && (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
+          <cylinderGeometry args={[0.8, 0.8, 0.1, 16]} />
+          <meshBasicMaterial color={color} transparent opacity={0.3} />
+        </mesh>
+      )}
+      {/* Ground ring */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
+        <ringGeometry args={[1.2, 1.5, 32]} />
+        <meshBasicMaterial color={color} side={THREE.DoubleSide} transparent opacity={0.3} />
+      </mesh>
+    </group>
+  );
+}
+
+/** Ground click handler for object placement */
+function ObjectClickPlane({ onPlace }: { onPlace: (pos: [number, number, number]) => void }) {
+  const { camera, raycaster, pointer } = useThree();
+  const groundPlane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
+  const intersection = useMemo(() => new THREE.Vector3(), []);
+
+  const handleClick = useCallback(() => {
+    raycaster.setFromCamera(pointer, camera);
+    if (raycaster.ray.intersectPlane(groundPlane, intersection)) {
+      onPlace([
+        Math.round(intersection.x * 10) / 10,
+        0,
+        Math.round(intersection.z * 10) / 10,
+      ]);
+    }
+  }, [raycaster, pointer, camera, groundPlane, intersection, onPlace]);
+
+  return (
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} onClick={handleClick}>
+      <planeGeometry args={[200, 200]} />
+      <meshBasicMaterial transparent opacity={0} side={THREE.DoubleSide} />
+    </mesh>
   );
 }
 
@@ -213,6 +380,7 @@ function MiniGrid({
             const hasKey = Object.values(project.keyLinks).includes(pos);
             const isKeyGate = pos in project.keyLinks;
             const hasKeyPosition = cell?.keyPosition != null;
+            const hasObjects = (cell?.objects?.length || 0) > 0;
 
             if (!cell) {
               return (
@@ -251,6 +419,7 @@ function MiniGrid({
                 {isEnd && <div style={{ position: 'absolute', top: 1, left: 1, width: 6, height: 6, background: '#ffaa66', borderRadius: '50%' }} />}
                 {hasKey && <div style={{ position: 'absolute', top: 1, right: 1, width: 6, height: 6, background: hasKeyPosition ? '#88ff88' : '#ff66aa', borderRadius: '50%' }} />}
                 {isKeyGate && <div style={{ position: 'absolute', bottom: 1, right: 1, width: 6, height: 6, background: '#ff66ff', borderRadius: 1 }} />}
+                {hasObjects && <div style={{ position: 'absolute', bottom: 1, left: 1, width: 6, height: 6, background: '#ffaa33', borderRadius: '50%' }} />}
               </div>
             );
           })}
@@ -271,6 +440,12 @@ function CellContentInspector({
   onTogglePlaceKey,
   onClearKeyPosition,
   onSetKeyPosition,
+  placingObject,
+  onSetPlacingObject,
+  selectedObjectId,
+  onSelectObject,
+  onDeleteObject,
+  onUpdateObject,
 }: {
   project: QuestProject;
   selectedCell: string;
@@ -278,6 +453,12 @@ function CellContentInspector({
   onTogglePlaceKey: () => void;
   onClearKeyPosition: () => void;
   onSetKeyPosition: (pos: [number, number, number]) => void;
+  placingObject: CellObjectType | null;
+  onSetPlacingObject: (type: CellObjectType | null) => void;
+  selectedObjectId: string | null;
+  onSelectObject: (id: string | null) => void;
+  onDeleteObject: (id: string) => void;
+  onUpdateObject: (id: string, updates: Partial<CellObject>) => void;
 }) {
   const cell = project.cells[selectedCell];
   if (!cell) {
@@ -430,6 +611,129 @@ function CellContentInspector({
         </div>
       )}
 
+      {/* Objects */}
+      <div style={sectionStyle}>
+        <div style={labelStyle}>Objects ({cell.objects?.length || 0})</div>
+
+        {/* Object palette */}
+        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '8px' }}>
+          {(['box', 'rare_box', 'enemy', 'fence', 'step_switch'] as CellObjectType[]).map(type => (
+            <button
+              key={type}
+              onClick={() => onSetPlacingObject(placingObject === type ? null : type)}
+              style={{
+                ...btnStyle,
+                padding: '4px 8px',
+                fontSize: '10px',
+                background: placingObject === type ? CELL_OBJECT_COLORS[type] : '#2a2a4a',
+                border: `1px solid ${CELL_OBJECT_COLORS[type]}`,
+                color: placingObject === type ? '#fff' : CELL_OBJECT_COLORS[type],
+              }}
+            >
+              + {CELL_OBJECT_LABELS[type]}
+            </button>
+          ))}
+        </div>
+
+        {placingObject && (
+          <div style={{ fontSize: '11px', color: CELL_OBJECT_COLORS[placingObject], marginBottom: '8px' }}>
+            Click in 3D view to place {CELL_OBJECT_LABELS[placingObject]}
+          </div>
+        )}
+
+        {/* Object list */}
+        {cell.objects && cell.objects.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {cell.objects.map(obj => {
+              const isSel = selectedObjectId === obj.id;
+              return (
+                <div
+                  key={obj.id}
+                  onClick={() => onSelectObject(isSel ? null : obj.id)}
+                  style={{
+                    padding: '6px 8px',
+                    background: isSel ? '#3a3a6a' : '#222',
+                    border: `1px solid ${isSel ? '#88aaff' : CELL_OBJECT_COLORS[obj.type]}`,
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '11px', color: CELL_OBJECT_COLORS[obj.type], fontWeight: 600 }}>
+                      {CELL_OBJECT_LABELS[obj.type]}
+                    </span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onDeleteObject(obj.id); }}
+                      style={{ ...btnStyle, padding: '2px 6px', fontSize: '9px', background: '#884444' }}
+                    >
+                      DEL
+                    </button>
+                  </div>
+                  <div style={{ fontSize: '10px', color: '#888', fontFamily: 'monospace', marginTop: '2px' }}>
+                    [{obj.position[0]}, {obj.position[1]}, {obj.position[2]}]
+                  </div>
+
+                  {/* Enemy ID picker */}
+                  {isSel && obj.type === 'enemy' && (
+                    <div style={{ marginTop: '4px' }}>
+                      <input
+                        type="text"
+                        value={obj.enemy_id || ''}
+                        onChange={(e) => onUpdateObject(obj.id, { enemy_id: e.target.value || undefined })}
+                        placeholder="enemy_id (e.g. lizard)"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          width: '100%', padding: '4px', background: '#111',
+                          border: '1px solid #444', borderRadius: '3px',
+                          color: '#fff', fontSize: '11px', fontFamily: 'monospace',
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Link ID for fences and switches */}
+                  {isSel && (obj.type === 'fence' || obj.type === 'step_switch') && (
+                    <div style={{ marginTop: '4px' }}>
+                      <input
+                        type="text"
+                        value={obj.link_id || ''}
+                        onChange={(e) => onUpdateObject(obj.id, { link_id: e.target.value || undefined })}
+                        placeholder="link_id (e.g. a)"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          width: '100%', padding: '4px', background: '#111',
+                          border: '1px solid #444', borderRadius: '3px',
+                          color: '#fff', fontSize: '11px', fontFamily: 'monospace',
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Rotation for fences */}
+                  {isSel && obj.type === 'fence' && (
+                    <div style={{ marginTop: '4px', display: 'flex', gap: '4px', alignItems: 'center' }}>
+                      <span style={{ fontSize: '10px', color: '#888' }}>Rot:</span>
+                      {[0, 90].map(deg => (
+                        <button
+                          key={deg}
+                          onClick={(e) => { e.stopPropagation(); onUpdateObject(obj.id, { rotation: deg || undefined }); }}
+                          style={{
+                            ...btnStyle, padding: '2px 6px', fontSize: '9px',
+                            background: (obj.rotation || 0) === deg ? '#4488cc' : '#333',
+                          }}
+                        >
+                          {deg}&deg;
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       {/* Notes */}
       {cell.notes && (
         <div style={sectionStyle}>
@@ -483,6 +787,8 @@ function badgeStyle(color: string): React.CSSProperties {
 export default function ContentTab({ project, onUpdateProject }: ContentTabProps) {
   const [selectedCell, setSelectedCell] = useState<string | null>(null);
   const [placingKey, setPlacingKey] = useState(false);
+  const [placingObject, setPlacingObject] = useState<CellObjectType | null>(null);
+  const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
 
   const cell = selectedCell ? project.cells[selectedCell] : null;
   const config = cell ? getStageConfig(cell.stageName) : null;
@@ -514,12 +820,79 @@ export default function ContentTab({ project, onUpdateProject }: ContentTabProps
 
   const handleTogglePlaceKey = useCallback(() => {
     setPlacingKey(p => !p);
+    setPlacingObject(null);
   }, []);
+
+  const handleSetPlacingObject = useCallback((type: CellObjectType | null) => {
+    setPlacingObject(type);
+    setPlacingKey(false);
+  }, []);
+
+  const handlePlaceObject = useCallback((pos: [number, number, number]) => {
+    if (!selectedCell || !placingObject) return;
+    onUpdateProject(prev => {
+      const cellData = prev.cells[selectedCell];
+      const objects = [...(cellData.objects || [])];
+      const typeCount = objects.filter(o => o.type === placingObject).length;
+      const newObj: CellObject = {
+        id: `${placingObject}_${typeCount}`,
+        type: placingObject,
+        position: pos,
+      };
+      if (placingObject === 'enemy') newObj.enemy_id = 'lizard';
+      return {
+        ...prev,
+        cells: {
+          ...prev.cells,
+          [selectedCell]: { ...cellData, objects: [...objects, newObj] },
+        },
+      };
+    });
+  }, [selectedCell, placingObject, onUpdateProject]);
+
+  const handleDeleteObject = useCallback((objId: string) => {
+    if (!selectedCell) return;
+    onUpdateProject(prev => {
+      const cellData = prev.cells[selectedCell];
+      return {
+        ...prev,
+        cells: {
+          ...prev.cells,
+          [selectedCell]: {
+            ...cellData,
+            objects: (cellData.objects || []).filter(o => o.id !== objId),
+          },
+        },
+      };
+    });
+    if (selectedObjectId === objId) setSelectedObjectId(null);
+  }, [selectedCell, selectedObjectId, onUpdateProject]);
+
+  const handleUpdateObject = useCallback((objId: string, updates: Partial<CellObject>) => {
+    if (!selectedCell) return;
+    onUpdateProject(prev => {
+      const cellData = prev.cells[selectedCell];
+      return {
+        ...prev,
+        cells: {
+          ...prev.cells,
+          [selectedCell]: {
+            ...cellData,
+            objects: (cellData.objects || []).map(o =>
+              o.id === objId ? { ...o, ...updates } : o
+            ),
+          },
+        },
+      };
+    });
+  }, [selectedCell, onUpdateProject]);
 
   // Select first cell with a key if none selected
   const handleCellSelect = useCallback((pos: string) => {
     setSelectedCell(pos);
     setPlacingKey(false);
+    setPlacingObject(null);
+    setSelectedObjectId(null);
   }, []);
 
   return (
@@ -602,11 +975,29 @@ export default function ContentTab({ project, onUpdateProject }: ContentTabProps
                 <KeyMarker position={cell.keyPosition} />
               )}
 
+              {/* Object markers */}
+              {cell.objects?.map(obj => (
+                <ObjectMarker
+                  key={obj.id}
+                  obj={obj}
+                  selected={selectedObjectId === obj.id}
+                  onClick={() => setSelectedObjectId(prev => prev === obj.id ? null : obj.id)}
+                />
+              ))}
+
               {/* Key placement mode */}
               {placingKey && (
                 <>
                   <KeyPlacementCursor />
                   <GroundClickPlane onPlace={handlePlaceKey} />
+                </>
+              )}
+
+              {/* Object placement mode */}
+              {placingObject && (
+                <>
+                  <ObjectPlacementCursor objectType={placingObject} />
+                  <ObjectClickPlane onPlace={handlePlaceObject} />
                 </>
               )}
 
@@ -633,6 +1024,19 @@ export default function ContentTab({ project, onUpdateProject }: ContentTabProps
               onClick={() => setPlacingKey(false)}
               >
                 Click in 3D view to place key | ESC to cancel
+              </div>
+            )}
+
+            {placingObject && (
+              <div style={{
+                position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)',
+                background: CELL_OBJECT_COLORS[placingObject], padding: '8px 20px',
+                borderRadius: '20px', fontSize: '13px', color: '#fff', fontWeight: 600,
+                cursor: 'pointer',
+              }}
+              onClick={() => setPlacingObject(null)}
+              >
+                Click to place {CELL_OBJECT_LABELS[placingObject]} | Click here to cancel
               </div>
             )}
           </>
@@ -663,6 +1067,12 @@ export default function ContentTab({ project, onUpdateProject }: ContentTabProps
             onTogglePlaceKey={handleTogglePlaceKey}
             onClearKeyPosition={handleClearKeyPosition}
             onSetKeyPosition={handlePlaceKey}
+            placingObject={placingObject}
+            onSetPlacingObject={handleSetPlacingObject}
+            selectedObjectId={selectedObjectId}
+            onSelectObject={setSelectedObjectId}
+            onDeleteObject={handleDeleteObject}
+            onUpdateObject={handleUpdateObject}
           />
         ) : (
           <div style={{ padding: '1rem', color: '#888', fontSize: '13px' }}>

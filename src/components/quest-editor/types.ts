@@ -36,6 +36,43 @@ export const ROLE_LABELS: Record<CellRole, string> = {
 };
 
 // ============================================================================
+// Cell Objects (placed in 3D stage)
+// ============================================================================
+
+export type CellObjectType = 'box' | 'rare_box' | 'enemy' | 'fence' | 'step_switch';
+
+export interface CellObject {
+  /** Unique ID within cell (e.g., "box_0", "enemy_1") */
+  id: string;
+  /** Object type */
+  type: CellObjectType;
+  /** Stage-local position [x, y, z] */
+  position: [number, number, number];
+  /** Y-axis rotation in degrees */
+  rotation?: number;
+  /** Enemy ID for type='enemy' */
+  enemy_id?: string;
+  /** Links switch↔fence pairs with matching link_id */
+  link_id?: string;
+}
+
+export const CELL_OBJECT_COLORS: Record<CellObjectType, string> = {
+  box: '#aa6633',
+  rare_box: '#ddaa33',
+  enemy: '#cc4444',
+  fence: '#4488cc',
+  step_switch: '#44cc66',
+};
+
+export const CELL_OBJECT_LABELS: Record<CellObjectType, string> = {
+  box: 'Box',
+  rare_box: 'Rare Box',
+  enemy: 'Enemy',
+  fence: 'Fence',
+  step_switch: 'Switch',
+};
+
+// ============================================================================
 // Editor Grid Cell
 // ============================================================================
 
@@ -54,6 +91,8 @@ export interface EditorGridCell {
   notes?: string;
   /** Authored 3D position for key pickup [x, y, z] in stage-local coords */
   keyPosition?: [number, number, number];
+  /** Placed objects (boxes, enemies, fences, switches) */
+  objects?: CellObject[];
 }
 
 // ============================================================================

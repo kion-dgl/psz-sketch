@@ -18,7 +18,7 @@ type TabId = 'layout' | 'content' | 'metadata' | 'export';
 const TABS: { id: TabId; label: string; disabled?: boolean }[] = [
   { id: 'layout', label: 'Layout' },
   { id: 'content', label: 'Content' },
-  { id: 'metadata', label: 'Metadata', disabled: true },
+  { id: 'metadata', label: 'Metadata' },
   { id: 'export', label: 'Export' },
 ];
 
@@ -359,7 +359,7 @@ export default function QuestEditor() {
           <LayoutTab project={project} onUpdateProject={updateProject} />
         )}
         {activeTab === 'content' && <ContentTab project={project} onUpdateProject={updateProject} />}
-        {activeTab === 'metadata' && <MetadataTab />}
+        {activeTab === 'metadata' && <MetadataTab project={project} onUpdateProject={updateProject} />}
         {activeTab === 'export' && <ExportTab project={project} setProject={setProject} />}
       </div>
     </div>

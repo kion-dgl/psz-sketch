@@ -10,7 +10,7 @@
  */
 
 import { useState, useCallback, useMemo, useRef } from 'react';
-import type { QuestProject, ValidationIssue, Direction, EditorGridCell } from '../types';
+import type { QuestProject, ValidationIssue, Direction, EditorGridCell, CellObject } from '../types';
 import { EDITOR_AREAS } from '../types';
 import type { MissionLayout, GridCell, StageArea, MissionContent } from '../../../systems/stage/types';
 import { generateMissionContent } from '../../../systems/stage/content-generator';
@@ -110,6 +110,20 @@ function projectToGodotQuest(project: QuestProject): object {
       cellData.key_position = cell.keyPosition;
     }
 
+    // Include placed objects
+    if (cell.objects && cell.objects.length > 0) {
+      cellData.objects = cell.objects.map(obj => {
+        const exported: Record<string, unknown> = {
+          type: obj.type,
+          position: obj.position,
+        };
+        if (obj.rotation) exported.rotation = obj.rotation;
+        if (obj.enemy_id) exported.enemy_id = obj.enemy_id;
+        if (obj.link_id) exported.link_id = obj.link_id;
+        return exported;
+      });
+    }
+
     cells.push(cellData);
   }
 
@@ -190,6 +204,17 @@ function godotQuestToProject(quest: any): QuestProject {
     // Round-trip authored key position
     if (cell.key_position && Array.isArray(cell.key_position)) {
       editorCell.keyPosition = cell.key_position as [number, number, number];
+    }
+    // Round-trip placed objects
+    if (cell.objects && Array.isArray(cell.objects)) {
+      editorCell.objects = cell.objects.map((obj: any, idx: number) => ({
+        id: obj.id || `${obj.type}_${idx}`,
+        type: obj.type,
+        position: obj.position as [number, number, number],
+        rotation: obj.rotation,
+        enemy_id: obj.enemy_id,
+        link_id: obj.link_id,
+      } as CellObject));
     }
     cells[cell.pos] = editorCell;
     if (cell.is_start) startPos = cell.pos;
