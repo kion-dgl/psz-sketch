@@ -83,17 +83,10 @@ function projectToGodotQuest(project: QuestProject): object {
       }
     }
 
-    // Key gate direction: which gate is locked?
+    // Key gate direction: which specific gate is locked
     let keyGateDirection = '';
-    if (pos in project.keyLinks) {
-      const keyCell = project.keyLinks[pos];
-      // Find direction from gate cell to key cell
-      for (const [dir, neighbor] of Object.entries(connections)) {
-        // The locked direction is the one that needs the key to pass
-        // It's any connected direction (convention: first connection)
-      }
-      // Actually the key_gate_direction is the direction that is locked
-      // For simplicity, we leave it empty if not determinable
+    if (pos in project.keyLinks && cell.lockedGate) {
+      keyGateDirection = cell.lockedGate;
     }
 
     cells.push({
@@ -182,6 +175,7 @@ function godotQuestToProject(quest: any): QuestProject {
     cells[cell.pos] = {
       stageName: cell.stage_id,
       rotation: cell.rotation || undefined,
+      lockedGate: cell.key_gate_direction || undefined,
       role: cell.is_end ? 'boss' : cell.is_start ? 'transit' : 'guard',
       manual: true,
     };

@@ -17,6 +17,7 @@ interface CellInspectorProps {
   onSetEnd: (pos: string) => void;
   onToggleKey: (pos: string) => void;
   onToggleKeyGate: (pos: string) => void;
+  onSetLockedGate: (pos: string, dir: Direction | undefined) => void;
   onClearCell: (pos: string) => void;
   onChangeStage: (pos: string) => void;
 }
@@ -43,6 +44,7 @@ export default function CellInspector({
   onSetEnd,
   onToggleKey,
   onToggleKeyGate,
+  onSetLockedGate,
   onClearCell,
   onChangeStage,
 }: CellInspectorProps) {
@@ -88,9 +90,9 @@ export default function CellInspector({
         )}
       </div>
 
-      {/* Gates visualization */}
+      {/* Gates visualization — click a gate to toggle key-lock */}
       <div style={sectionStyle}>
-        <div style={labelStyle}>Gates</div>
+        <div style={labelStyle}>Gates {isKeyGate && '(click gate to lock)'}</div>
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr 1fr',
@@ -100,40 +102,35 @@ export default function CellInspector({
           gap: '2px',
           margin: '0 auto',
         }}>
-          <div />
+          {(['north', 'west', 'east', 'south'] as Direction[]).map(dir => {
+            const hasGate = gates.has(dir);
+            const isLocked = cell.lockedGate === dir;
+            const bg = isLocked ? '#ff66ff' : hasGate ? '#88ff88' : '#333';
+            const clickable = isKeyGate && hasGate;
+            const gridArea = dir === 'north' ? '1/2' : dir === 'west' ? '2/1' : dir === 'east' ? '2/3' : '3/2';
+            return (
+              <div
+                key={dir}
+                onClick={clickable ? () => onSetLockedGate(selectedCell, isLocked ? undefined : dir) : undefined}
+                style={{
+                  gridArea,
+                  background: bg,
+                  borderRadius: '2px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '8px', color: '#fff',
+                  cursor: clickable ? 'pointer' : 'default',
+                  border: isLocked ? '2px solid #ff88ff' : '2px solid transparent',
+                }}
+              >{dir[0].toUpperCase()}</div>
+            );
+          })}
           <div style={{
-            background: gates.has('north') ? '#88ff88' : '#333',
-            borderRadius: '2px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '8px', color: '#fff',
-          }}>N</div>
-          <div />
-          <div style={{
-            background: gates.has('west') ? '#88ff88' : '#333',
-            borderRadius: '2px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '8px', color: '#fff',
-          }}>W</div>
-          <div style={{
+            gridArea: '2/2',
             background: ROLE_COLORS[cell.role],
             borderRadius: '2px',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '9px', color: '#fff', fontWeight: 600,
           }}>{suffix}</div>
-          <div style={{
-            background: gates.has('east') ? '#88ff88' : '#333',
-            borderRadius: '2px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '8px', color: '#fff',
-          }}>E</div>
-          <div />
-          <div style={{
-            background: gates.has('south') ? '#88ff88' : '#333',
-            borderRadius: '2px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '8px', color: '#fff',
-          }}>S</div>
-          <div />
         </div>
       </div>
 
@@ -236,9 +233,14 @@ export default function CellInspector({
           </button>
         </div>
         {isKeyGate && (
-          <div style={{ fontSize: '11px', color: '#cc88ff', marginTop: '4px' }}>
-            Key at: {project.keyLinks[selectedCell] || 'unlinked'}
-          </div>
+          <>
+            <div style={{ fontSize: '11px', color: '#cc88ff', marginTop: '4px' }}>
+              Locked: {cell.lockedGate ? `${cell.lockedGate} gate` : 'click a gate above to lock'}
+            </div>
+            <div style={{ fontSize: '11px', color: '#cc88ff', marginTop: '2px' }}>
+              Key at: {project.keyLinks[selectedCell] || 'unlinked'}
+            </div>
+          </>
         )}
         {hasKey && (
           <div style={{ fontSize: '11px', color: '#ff88aa', marginTop: '4px' }}>

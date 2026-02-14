@@ -33,11 +33,9 @@ function getGateColor(
   const [row, col] = pos.split(',').map(Number);
   const [nr, nc] = getNeighbor(row, col, direction);
 
-  // Key-gate?
+  // Key-locked gate? Only color the specific locked direction
   const isKeyGate = Object.keys(project.keyLinks).includes(pos);
-  if (isKeyGate) {
-    // Check if this specific direction has the key-gate
-    // For simplicity, color all gates on key-gate cells
+  if (isKeyGate && cell.lockedGate === direction) {
     return '#ff66ff';
   }
 

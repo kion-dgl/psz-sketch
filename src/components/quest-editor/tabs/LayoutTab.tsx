@@ -3,7 +3,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import type { QuestProject, EditorGridCell, ValidationIssue } from '../types';
+import type { QuestProject, EditorGridCell, ValidationIssue, Direction } from '../types';
 import { generateGrid, type GenParams } from '../shared/grid-generation';
 import GridCanvas from '../shared/GridCanvas';
 import CellInspector from '../shared/CellInspector';
@@ -157,7 +157,7 @@ export default function LayoutTab({ project, onUpdateProject }: LayoutTabProps) 
     }));
   }, [onUpdateProject]);
 
-  // Toggle key on cell
+  // Toggle key on cell — links this cell as key holder for an unlinked gate
   const handleToggleKey = useCallback((pos: string) => {
     onUpdateProject(prev => {
       const newLinks = { ...prev.keyLinks };
@@ -168,8 +168,13 @@ export default function LayoutTab({ project, onUpdateProject }: LayoutTabProps) 
           return { ...prev, keyLinks: newLinks };
         }
       }
-      // Otherwise, mark as key — user will need to link to a gate
-      // For now, just add an unlinked key placeholder
+      // Find first unlinked key-gate and assign this cell as its key
+      for (const [gate, key] of Object.entries(newLinks)) {
+        if (!key) {
+          newLinks[gate] = pos;
+          return { ...prev, keyLinks: newLinks };
+        }
+      }
       return prev;
     });
   }, [onUpdateProject]);
@@ -179,14 +184,29 @@ export default function LayoutTab({ project, onUpdateProject }: LayoutTabProps) 
     onUpdateProject(prev => {
       const newLinks = { ...prev.keyLinks };
       if (pos in newLinks) {
+        // Remove key-gate and clear lockedGate
         delete newLinks[pos];
+        const newCells = { ...prev.cells };
+        if (newCells[pos]) {
+          newCells[pos] = { ...newCells[pos], lockedGate: undefined };
+        }
+        return { ...prev, cells: newCells, keyLinks: newLinks };
       } else {
-        // Create key-gate with no key assigned yet
-        // Will need the user to click a cell to assign the key
         newLinks[pos] = '';
       }
       return { ...prev, keyLinks: newLinks };
     });
+  }, [onUpdateProject]);
+
+  // Set which gate direction is locked on a key-gate cell
+  const handleSetLockedGate = useCallback((pos: string, dir: Direction | undefined) => {
+    onUpdateProject(prev => ({
+      ...prev,
+      cells: {
+        ...prev.cells,
+        [pos]: { ...prev.cells[pos], lockedGate: dir },
+      },
+    }));
   }, [onUpdateProject]);
 
   // Clear a cell
@@ -376,6 +396,7 @@ export default function LayoutTab({ project, onUpdateProject }: LayoutTabProps) 
             onSetEnd={handleSetEnd}
             onToggleKey={handleToggleKey}
             onToggleKeyGate={handleToggleKeyGate}
+            onSetLockedGate={handleSetLockedGate}
             onClearCell={handleClearCell}
             onChangeStage={handleChangeStage}
           />
