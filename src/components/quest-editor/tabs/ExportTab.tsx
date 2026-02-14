@@ -89,7 +89,7 @@ function projectToGodotQuest(project: QuestProject): object {
       keyGateDirection = cell.lockedGate;
     }
 
-    cells.push({
+    const cellData: Record<string, unknown> = {
       pos,
       stage_id: cell.stageName,
       rotation: cell.rotation ?? 0,
@@ -103,7 +103,14 @@ function projectToGodotQuest(project: QuestProject): object {
       key_gate_direction: keyGateDirection,
       warp_edge: warpEdge,
       path_order: pathOrder.get(pos) ?? -1,
-    });
+    };
+
+    // Include authored key position if set
+    if (cell.keyPosition) {
+      cellData.key_position = cell.keyPosition;
+    }
+
+    cells.push(cellData);
   }
 
   // Sort cells by path_order for readability
@@ -172,13 +179,18 @@ function godotQuestToProject(quest: any): QuestProject {
     const [r, c] = cell.pos.split(',').map(Number);
     maxRow = Math.max(maxRow, r);
     maxCol = Math.max(maxCol, c);
-    cells[cell.pos] = {
+    const editorCell: EditorGridCell = {
       stageName: cell.stage_id,
       rotation: cell.rotation || undefined,
       lockedGate: cell.key_gate_direction || undefined,
       role: cell.is_end ? 'boss' : cell.is_start ? 'transit' : 'guard',
       manual: true,
     };
+    // Round-trip authored key position
+    if (cell.key_position && Array.isArray(cell.key_position)) {
+      editorCell.keyPosition = cell.key_position as [number, number, number];
+    }
+    cells[cell.pos] = editorCell;
     if (cell.is_start) startPos = cell.pos;
     if (cell.is_end) endPos = cell.pos;
     if (cell.is_key_gate && cell.key_for_cell) {

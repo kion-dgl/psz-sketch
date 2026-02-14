@@ -52,6 +52,8 @@ export interface EditorGridCell {
   manual: boolean;
   /** Optional designer notes */
   notes?: string;
+  /** Authored 3D position for key pickup [x, y, z] in stage-local coords */
+  keyPosition?: [number, number, number];
 }
 
 // ============================================================================

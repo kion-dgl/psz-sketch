@@ -1,5 +1,6 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import { useGLTF, Box } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { ElementProps, StoryMeta } from './types';
 
@@ -23,15 +24,9 @@ export const keyGateMeta: StoryMeta = {
 // The laser/beam mesh that gets hidden when open
 const LASER_MESH_NAME = 'o0c_gatet_3';
 
-// Texture config for proper display
-const TEXTURE_CONFIG = {
-  'o0c_0_gatet.png': {
-    offsetX: 0.56,
-    offsetY: 0.8,
-    repeatX: 1,
-    repeatY: 2,
-  },
-};
+// Laser scroll speed (units/sec on offset.x)
+const LASER_SCROLL_SPEED = 0.40;
+
 
 export default function KeyGate({
   position = [0, 0, 0],
@@ -41,34 +36,47 @@ export default function KeyGate({
 }: KeyGateProps) {
   const { scene } = useGLTF('/objects/01_o01a/o0c_gatet.imd/o0c_gatet.glb');
   const clonedScene = useMemo(() => scene.clone(), [scene]);
+  const laserTexturesRef = useRef<THREE.Texture[]>([]);
 
-  // Toggle laser mesh visibility and apply texture settings
+  // Toggle laser visibility, make frame gray, keep terminal texture
   useEffect(() => {
+    const laserTextures: THREE.Texture[] = [];
+
     clonedScene.traverse((child) => {
-      // Hide/show laser mesh based on state
       if (child.name === LASER_MESH_NAME) {
         child.visible = state === 'closed';
       }
 
-      // Apply texture settings
       if (child instanceof THREE.Mesh) {
+        const isLaser = child.name === LASER_MESH_NAME;
         const materials = Array.isArray(child.material) ? child.material : [child.material];
         materials.forEach((mat) => {
-          if ((mat instanceof THREE.MeshStandardMaterial || mat instanceof THREE.MeshBasicMaterial) && mat.map) {
-            const texName = mat.map.name || '';
-            const config = TEXTURE_CONFIG[texName as keyof typeof TEXTURE_CONFIG];
-            if (config) {
-              mat.map.offset.set(config.offsetX, config.offsetY);
-              mat.map.repeat.set(config.repeatX, config.repeatY);
-              mat.map.wrapS = THREE.RepeatWrapping;
-              mat.map.wrapT = THREE.RepeatWrapping;
-              mat.map.needsUpdate = true;
-            }
+          if (!(mat instanceof THREE.MeshStandardMaterial || mat instanceof THREE.MeshBasicMaterial)) return;
+          if (!mat.map) return;
+
+          if (!isLaser) {
+            // Non-laser meshes → solid gray
+            mat.map = null;
+            (mat as THREE.MeshStandardMaterial).color = new THREE.Color(0.5, 0.5, 0.5);
+            mat.needsUpdate = true;
+          }
+
+          if (isLaser && mat.map) {
+            laserTextures.push(mat.map);
           }
         });
       }
     });
+    laserTexturesRef.current = laserTextures;
   }, [clonedScene, state]);
+
+  // Animate laser texture scroll on offset.x
+  useFrame((_, delta) => {
+    laserTexturesRef.current.forEach((tex) => {
+      tex.offset.x -= LASER_SCROLL_SPEED * delta;
+      if (tex.offset.x < -10) tex.offset.x += 10;
+    });
+  });
 
   // Calculate bounding box for collision indicator
   const bounds = useMemo(() => {

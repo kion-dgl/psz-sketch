@@ -1,5 +1,6 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import { useGLTF, Box } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { ElementProps, StoryMeta } from './types';
 
@@ -23,6 +24,7 @@ export const fenceMeta: StoryMeta = {
 
 // The laser texture - meshes with this texture are hidden when disabled
 const LASER_TEXTURE_NAME = 'o0c_1_fence2';
+const LASER_SCROLL_SPEED = 0.70;
 
 const FENCE_MODELS: Record<string, string> = {
   default: '/objects/01_o01a/o0c_fence.imd/o0c_fence.glb',
@@ -40,9 +42,11 @@ export default function Fence({
   const modelPath = FENCE_MODELS[variant] || FENCE_MODELS.default;
   const { scene } = useGLTF(modelPath);
   const clonedScene = useMemo(() => scene.clone(), [scene]);
+  const laserTexturesRef = useRef<THREE.Texture[]>([]);
 
-  // Hide laser mesh when disabled, keep poles visible
+  // Hide laser mesh when disabled, keep poles visible, collect laser textures
   useEffect(() => {
+    const laserTextures: THREE.Texture[] = [];
     clonedScene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         const materials = Array.isArray(child.material) ? child.material : [child.material];
@@ -55,13 +59,29 @@ export default function Fence({
           return false;
         });
 
-        // Hide laser meshes when disabled
+        // Hide laser meshes when disabled, collect textures for scroll
         if (hasLaserTexture) {
           child.visible = state === 'active';
+          materials.forEach((mat) => {
+            if ((mat instanceof THREE.MeshStandardMaterial || mat instanceof THREE.MeshBasicMaterial) && mat.map) {
+              if (mat.map.name?.includes(LASER_TEXTURE_NAME)) {
+                laserTextures.push(mat.map);
+              }
+            }
+          });
         }
       }
     });
+    laserTexturesRef.current = laserTextures;
   }, [clonedScene, state]);
+
+  // Animate laser texture scroll on offset.x
+  useFrame((_, delta) => {
+    laserTexturesRef.current.forEach((tex) => {
+      tex.offset.x -= LASER_SCROLL_SPEED * delta;
+      if (tex.offset.x < -10) tex.offset.x += 10;
+    });
+  });
 
   // Calculate bounding box for collision indicator
   const bounds = useMemo(() => {
