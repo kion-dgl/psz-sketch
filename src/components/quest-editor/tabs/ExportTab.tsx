@@ -119,6 +119,7 @@ function projectToGodotQuest(project: QuestProject): object {
   return {
     id: project.id,
     name: project.name,
+    description: project.metadata?.description || '',
     area_id: AREA_KEY_TO_ID[project.areaKey] || project.areaKey,
     sections: [{
       type: 'grid',
@@ -212,7 +213,7 @@ function godotQuestToProject(quest: any): QuestProject {
     keyLinks,
     metadata: {
       questName: quest.name || '',
-      description: '',
+      description: quest.description || '',
       questType: 'exploration',
       difficulty: 'normal',
       recommendedLevel: 1,
