@@ -38,4 +38,11 @@ export { default as Wall, wallMeta, type WallState } from './Wall';
 export { default as StartWarp, startWarpMeta, type StartWarpState } from './StartWarp';
 export { default as AreaWarp, areaWarpMeta, type AreaWarpState } from './AreaWarp';
 
+// NPCs
+export { default as NpcSarisa, npcSarisaMeta, type NpcSarisaState } from './NpcSarisa';
+export { default as NpcKai, npcKaiMeta, type NpcKaiState } from './NpcKai';
+
+// Story Objects
+export { default as DropshipCrash, dropshipCrashMeta, type DropshipCrashState } from './DropshipCrash';
+
 export type { ElementProps, StoryMeta } from './types';

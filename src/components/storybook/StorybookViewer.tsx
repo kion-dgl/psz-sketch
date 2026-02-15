@@ -24,6 +24,9 @@ import {
   Wall, wallMeta,
   StartWarp, startWarpMeta,
   AreaWarp, areaWarpMeta,
+  NpcSarisa, npcSarisaMeta,
+  NpcKai, npcKaiMeta,
+  DropshipCrash, dropshipCrashMeta,
   type StoryMeta,
 } from '../elements';
 
@@ -103,6 +106,19 @@ const CATEGORIES: CategoryEntry[] = [
     elements: [
       { id: 'start-warp', Component: StartWarp as React.ComponentType<{ state?: string }>, meta: startWarpMeta },
       { id: 'area-warp', Component: AreaWarp as React.ComponentType<{ state?: string }>, meta: areaWarpMeta },
+    ],
+  },
+  {
+    name: 'NPCs',
+    elements: [
+      { id: 'npc-sarisa', Component: NpcSarisa as React.ComponentType<{ state?: string }>, meta: npcSarisaMeta },
+      { id: 'npc-kai', Component: NpcKai as React.ComponentType<{ state?: string }>, meta: npcKaiMeta },
+    ],
+  },
+  {
+    name: 'Story Objects',
+    elements: [
+      { id: 'dropship-crash', Component: DropshipCrash as React.ComponentType<{ state?: string }>, meta: dropshipCrashMeta },
     ],
   },
 ];
