@@ -584,7 +584,7 @@ export default function ExportTab({ config, stageScene, mapId }: ExportTabProps)
   const [exportStatus, setExportStatus] = useState<string>('');
   const [useLambert, setUseLambert] = useState(true);
   const [includeCollision, setIncludeCollision] = useState(true);
-  const [includeMarkers, setIncludeMarkers] = useState(true);
+  const [includeMarkers, setIncludeMarkers] = useState(false);
   const [includeObstacles, setIncludeObstacles] = useState(true);
   const [isExportingAll, setIsExportingAll] = useState(false);
   const [exportAllProgress, setExportAllProgress] = useState<{ current: number; total: number; mapId: string } | null>(null);
